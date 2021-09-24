@@ -1,36 +1,53 @@
 package main
 
 import (
+	"crypto/md5"
+	"encoding/hex"
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
 	"path/filepath"
-	"text/template"
 	"time"
 
 	"github.com/gorilla/mux"
 )
 
-// type User struct {
-// 	ID          int
-// 	Name        string
-// 	Age         int
-// 	Description string
-// 	Img         string
-// 	Tags        []string
-// }
+type User struct {
+	ID          uint64
+	Name        string
+	Email       string
+	Password    string
+	Age         uint64
+	Description string
+	ImgSrc      string
+	Tags        []string
+}
 
 var (
-	users   = make(map[string]string)
-	cookies = make(map[string]string)
+	users   = make(map[uint64]User)
+	cookies = make(map[string]uint64)
 )
 
-type StatusLogedInJSON struct {
-	Status string `json:"status"` // status 400 200
-	// Body   interface{}
+const (
+	StatusBadRequest = 400
+	StatusNotFound   = 404
+	StatusOk         = 200
+)
+
+type JSON struct {
+	Status uint64      `json:"status"`
+	Body   interface{} `json:"body"`
+}
+
+type CurrentUserBody struct {
+	Name        string   `json:"name"`
+	Email       string   `json:"email"`
+	Age         uint64   `json:"age"`
+	Description string   `json:"description"`
+	ImgSrc      string   `json:"imgSrc"`
+	Tags        []string `json:"tags"`
 }
 
 type LoginUser struct {
@@ -38,122 +55,99 @@ type LoginUser struct {
 	Password string `json:"password"`
 }
 
-func (statusJSON *StatusLogedInJSON) ChangeStatus() {
-	// 200 404 not found
-	if statusJSON.Status == "error" {
-		statusJSON.Status = "ok"
-	} else {
-		statusJSON.Status = "error"
+func cookieHandler(w http.ResponseWriter, r *http.Request) {
+	var currentStatus uint64
+	currentStatus = StatusNotFound
+	var resp JSON
+
+	session, err := r.Cookie("sessionId")
+	if err == http.ErrNoCookie {
+		currentStatus = StatusNotFound
 	}
+	if len(cookies) == 0 {
+		currentStatus = StatusNotFound
+	} else {
+		currentUserId, okCookie := cookies[session.Value]
+		if okCookie {
+			currentUser, okUser := users[currentUserId]
+			if !okUser {
+				currentStatus = StatusNotFound
+			}
+
+			userBody := CurrentUserBody{
+				currentUser.Name,
+				currentUser.Email,
+				currentUser.Age,
+				currentUser.Description,
+				currentUser.ImgSrc,
+				currentUser.Tags,
+			}
+
+			currentStatus = StatusOk
+			resp.Body = userBody
+		}
+	}
+
+	resp.Status = currentStatus
+
+	byteResp, err := json.Marshal(resp)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+	w.WriteHeader(http.StatusOK)
+	w.Write(byteResp)
 }
-
-func homePageHandler(rw http.ResponseWriter, r *http.Request) {
-	// _, err := r.Cookie("session_id")
-	// loggedIn := (err != http.ErrNoCookie)
-
-	t, _ := template.ParseFiles("static/main.html")
-	_ = t.Execute(rw, nil)
-}
-
-// func cookieHandler(w http.ResponseWriter, r *http.Request) {
-// 	if r.Method != "GET" {
-// 		w.WriteHeader(http.StatusBadRequest)
-// 		return
-// 	}
-
-// }
 
 func loginHandler(w http.ResponseWriter, r *http.Request) {
-	// перенести в роутер
-	// if r.Method != "POST" {
-	// 	w.WriteHeader(http.StatusBadRequest)
-	// 	return
-	// }
-	fmt.Println(cookies["session_id"])
+	var currentStatus uint64
+	currentStatus = StatusNotFound
+	var resp JSON
 
-	session, err := r.Cookie("session_id")
-	if err == http.ErrNoCookie {
-		fmt.Println(11111)
-		return
+	byteReq, _ := ioutil.ReadAll(r.Body)
+	strReq := string(byteReq)
+
+	var logUserData LoginUser
+	err := json.Unmarshal([]byte(strReq), &logUserData)
+	if err != nil {
+		// no valid json data
+		currentStatus = StatusBadRequest
 	}
-	if cookies[session.Name] == session.Value {
-		m := StatusLogedInJSON{"ok"}
-		b, err := json.Marshal(m)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-		}
-		w.WriteHeader(http.StatusOK)
-		w.Write(b)
-	} else if r.Method == "POST" {
-		b, _ := ioutil.ReadAll(r.Body)
-		jsn := string(b)
-		var logUserData LoginUser
-		err = json.Unmarshal([]byte(jsn), &logUserData)
-		if err != nil {
-			// error 400 in json
-			fmt.Println(12494)
-			fmt.Println(err)
-		}
-		m := StatusLogedInJSON{"error"}
-		for key, value := range users {
-			if key == logUserData.Email && value == logUserData.Password {
-				m.ChangeStatus()
-			}
-		}
-		b, err = json.Marshal(m)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-		}
 
-		if m.Status == "ok" {
-			// cookie
+	for _, value := range users {
+		if value.Email == logUserData.Email && value.Password == logUserData.Password {
+			currentStatus = StatusOk
+
+			// create cookie
 			expiration := time.Now().Add(10 * time.Hour)
+			md5CookieValue := md5.Sum([]byte(logUserData.Email))
 			cookie := http.Cookie{
-				Name:     "session_id",
-				Value:    logUserData.Email,
+				Name:     "sessionId",
+				Value:    hex.EncodeToString(md5CookieValue[:]),
 				Expires:  expiration,
 				Secure:   true,
 				HttpOnly: true,
 			}
-			// r.Cookie()
-			// fmt.Println(r.Cookie("session_id"))
-			cookies["session_id"] = logUserData.Email
+
+			cookies[hex.EncodeToString(md5CookieValue[:])] = value.ID
 
 			http.SetCookie(w, &cookie)
 		}
-
-		w.WriteHeader(http.StatusOK)
-		w.Write(b)
 	}
 
-}
-
-func logoutHandler(w http.ResponseWriter, r *http.Request) {
-	session, err := r.Cookie("session_id")
-	if err == http.ErrNoCookie {
-		http.Redirect(w, r, "/", http.StatusFound)
-		return
+	resp.Status = currentStatus
+	byteResp, err := json.Marshal(resp)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
-
-	session.Expires = time.Now().AddDate(0, 0, -1)
-	http.SetCookie(w, session)
-
-	http.Redirect(w, r, "/", http.StatusFound)
+	w.WriteHeader(http.StatusOK)
+	w.Write(byteResp)
 }
 
-// spaHandler implements the http.Handler interface, so we can use it
-// to respond to HTTP requests. The path to the static directory and
-// path to the index file within that static directory are used to
-// serve the SPA in the given static directory.
 type spaHandler struct {
 	staticPath string
 	indexPath  string
 }
 
-// ServeHTTP inspects the URL path to locate a file within the static dir
-// on the SPA handler. If a file is found, it will be served. If not, the
-// file located at the index path on the SPA handler will be served. This
-// is suitable behavior for serving an SPA (single page application).
 func (h spaHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// get the absolute path to prevent directory traversal
 	path, err := filepath.Abs(r.URL.Path)
@@ -184,12 +178,22 @@ func (h spaHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	users["mumeu222@mail.ru"] = "VBif222!"
+	marvin := User{
+		ID:          1,
+		Name:        "Mikhail",
+		Email:       "mumeu222@mail.ru",
+		Password:    "VBif222!",
+		Age:         20,
+		Description: "Hahahahaha",
+		ImgSrc:      "/static/users/user1",
+		Tags:        []string{"haha", "hihi"},
+	}
+	users[1] = marvin
 
 	mux := mux.NewRouter()
 
-	mux.HandleFunc("/api/v1/login", loginHandler)
-	// mux.HandleFunc("/logout", logoutHandler)
+	mux.HandleFunc("/api/v1/cookie", cookieHandler).Methods("GET")
+	mux.HandleFunc("/api/v1/login", loginHandler).Methods("POST")
 
 	spa := spaHandler{staticPath: "static", indexPath: "index.html"}
 	mux.PathPrefix("/").Handler(spa)
