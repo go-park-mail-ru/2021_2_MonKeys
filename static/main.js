@@ -73,25 +73,21 @@ function loginPage() {
             method: 'GET',
             headers: { 'Content-Type': 'application/json'},
         };
-        fetch("http://127.0.0.1:8080/api/v1/login", requestOptions)
+        fetch("http://127.0.0.1:8080/api/v1/cookie", requestOptions)
         .then(response => 
                 response.json().then(data => ({
                     data: data,
                     status: response.status
                 })
             ).then(res => {
-                if (res.status === 200 && res.data.status === 'ok') {
-                    profilePage();
-                } else if (res.data.status === 'error') {
-                    const userNotFound = document.createElement('span')
-                    userNotFound.textContent = 'Вы не зарегестрированы'
-                    form.appendChild(userNotFound)
-                }
-                console.log(res.status);
-                if (res.data.status === 'ok') {
+                if (res.status === 200 && res.data.status === 200) {
                     profilePage();
                 }
-                console.log(res.data.status)
+                console.log(res.data);
+                // if (res.data.status === 'ok') {
+                //     profilePage();
+                // }
+                // console.log(res.data.status)
             })).catch((error) => console.log(error));
     })
     // --------------------------------------------------------
@@ -147,7 +143,7 @@ function loginPage() {
     buttonText.textContent = 'Войти';
     buttonText.classList.add('login-button-text');
     const buttonIcon = document.createElement('img');
-    buttonIcon.src = './data/svg/next.svg';
+    buttonIcon.src = './svg/next.svg';
     buttonIcon.classList.add('svg-next');
 
     buttonFilling.appendChild(buttonText);
@@ -156,10 +152,10 @@ function loginPage() {
     submitButton.appendChild(buttonFilling);
 
     const emailIcon = document.createElement('img');
-    emailIcon.src = './data/svg/email.svg'
+    emailIcon.src = './svg/email.svg'
     emailIcon.classList.add('input-icon');
     const passwordIcon = document.createElement('img');
-    passwordIcon.src = './data/svg/password.svg';
+    passwordIcon.src = './svg/password.svg';
     passwordIcon.classList.add('input-icon');
 
     const emailFieldWithIcon = document.createElement('div');
@@ -224,34 +220,14 @@ function loginPage() {
                     status: response.status
                 })
             ).then(res => {
-                if (res.status === 200 && res.data.status === 'ok') {
+                if (res.status === 200 && res.data.status === 200) {
                     profilePage();
-                } else if (res.data.status === 'error') {
+                } else if (res.data.status === 404) {
                     const userNotFound = document.createElement('span')
                     userNotFound.textContent = 'Вы не зарегестрированы'
                     form.appendChild(userNotFound)
                 }
-                console.log(res.status);
-                if (res.data.status === 'ok') {
-                    profilePage();
-                }
-                console.log(res.data.status)
             })).catch((error) => console.log(error));
-
-
-        // ajax(
-        //     'POST',
-        //     'http://172.0.0.1:8080/api/login',
-        //     {email, password},
-        //     (status) => {
-        //         if (status === 200) {
-        //             alert('хуй');
-        //             profilePage();
-        //             return;
-        //         }
-        //         alert('Authorized error');
-        //     }
-        // );
     })
 
     root.appendChild(formContainer);
@@ -287,7 +263,7 @@ function signupPage() {
     buttonText.textContent = 'Зарегистрироваться';
     buttonText.classList.add('login-button-text');
     const buttonIcon = document.createElement('img');
-    buttonIcon.src = './data/svg/next.svg';
+    buttonIcon.src = './svg/next.svg';
     buttonIcon.classList.add('svg-next');
 
     buttonFilling.appendChild(buttonText);
@@ -296,13 +272,13 @@ function signupPage() {
     submitButton.appendChild(buttonFilling);
 
     const emailIcon = document.createElement('img');
-    emailIcon.src = './data/svg/email.svg'
+    emailIcon.src = './svg/email.svg'
     emailIcon.classList.add('input-icon');
     const passwordIcon = document.createElement('img');
-    passwordIcon.src = './data/svg/password.svg';
+    passwordIcon.src = './svg/password.svg';
     passwordIcon.classList.add('input-icon');
     const repeatPasswordIcon = document.createElement('img');
-    repeatPasswordIcon.src = './data/svg/password.svg';
+    repeatPasswordIcon.src = './svg/password.svg';
     repeatPasswordIcon.classList.add('input-icon');
 
     const emailFieldWithIcon = document.createElement('div');
