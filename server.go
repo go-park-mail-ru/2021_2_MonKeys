@@ -39,19 +39,29 @@ type LoginUser struct {
 	Password string `json:"password"`
 }
 
+func sendResp(resp JSON, w *http.ResponseWriter) {
+	byteResp, err := json.Marshal(resp)
+	if err != nil {
+		http.Error(*w, err.Error(), http.StatusInternalServerError)
+	}
+	(*w).WriteHeader(http.StatusOK)
+	(*w).Write(byteResp)
+}
+
 func (env *Env) cookieHandler(w http.ResponseWriter, r *http.Request) {
-	currentStatus := StatusNotFound
 	var resp JSON
 
 	session, err := r.Cookie("sessionId")
 	if err == http.ErrNoCookie {
-		currentStatus = StatusNotFound
+		resp.Status = StatusNotFound
+		sendResp(resp, &w)
 		return
 	}
 
 	currentUser, err := env.sessionDB.getUserByCookie(session.Value)
 	if err != nil {
-		currentStatus = StatusNotFound
+		resp.Status = StatusNotFound
+		sendResp(resp, &w)
 		return
 	}
 
@@ -64,17 +74,10 @@ func (env *Env) cookieHandler(w http.ResponseWriter, r *http.Request) {
 		currentUser.Tags,
 	}
 
-	currentStatus = StatusOk
+	resp.Status = StatusOk
 	resp.Body = userBody
 
-	resp.Status = currentStatus
-
-	byteResp, err := json.Marshal(resp)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-	}
-	w.WriteHeader(http.StatusOK)
-	w.Write(byteResp)
+	sendResp(resp, &w)
 }
 
 func (env *Env) loginHandler(w http.ResponseWriter, r *http.Request) {
@@ -98,7 +101,6 @@ func (env *Env) loginHandler(w http.ResponseWriter, r *http.Request) {
 
 		// create cookie
 		expiration := time.Now().Add(10 * time.Hour)
-		//md5CookieValue := md5.Sum([]byte(logUserData.Email))
 		md5CookieValue := fmt.Sprintf("%x", md5.Sum([]byte(logUserData.Email+logUserData.Password)))
 		cookie := http.Cookie{
 			Name:     "sessionId",
@@ -108,7 +110,7 @@ func (env *Env) loginHandler(w http.ResponseWriter, r *http.Request) {
 			HttpOnly: true,
 		}
 
-		env.sessionDB.newSessionCookie(identifiableUser.ID, md5CookieValue)
+		env.sessionDB.newSessionCookie(md5CookieValue, identifiableUser.ID)
 
 		http.SetCookie(w, &cookie)
 	}
@@ -162,11 +164,23 @@ type Env struct {
 	}
 	sessionDB interface {
 		getUserByCookie(string) (User, error)
-		newSessionCookie(uint64, string) error
+		newSessionCookie(string, uint64) error
 	}
 }
 
 func main() {
+	marvin := User{
+		ID:          1,
+		Name:        "Mikhail",
+		Email:       "mumeu222@mail.ru",
+		Password:    "VBif222!",
+		Age:         20,
+		Description: "Hahahahaha",
+		ImgSrc:      "/img/Yachty-tout.jpg",
+		Tags:        []string{"haha", "hihi"},
+	}
+	users[1] = marvin
+
 	/*db, err := sql.Open("postgres", "postgres://user:pass@localhost/bookstore")
 	if err != nil {
 		log.Fatal(err)
