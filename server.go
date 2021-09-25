@@ -109,6 +109,23 @@ func (env *Env) loginHandler(w http.ResponseWriter, r *http.Request) {
 	sendResp(resp, &w)
 }
 
+func (env *Env) logoutHandler(w http.ResponseWriter, r *http.Request) {
+	session, err := r.Cookie("sessionId")
+	if err == http.ErrNoCookie {
+		sendResp(JSON{Status: StatusNotFound}, &w)
+		return
+	}
+
+	err = env.sessionDB.deleteSessionCookie(session.Value)
+	if err != nil {
+		sendResp(JSON{Status: StatusInternalServerError}, &w)
+		return
+	}
+
+	session.Expires = time.Now().AddDate(0, 0, -1)
+	http.SetCookie(w, session)
+}
+
 type spaHandler struct {
 	staticPath string
 	indexPath  string
@@ -148,8 +165,9 @@ type Env struct {
 		getUserModel(string) (User, error)
 	}
 	sessionDB interface {
-		getUserByCookie(string) (User, error)
-		newSessionCookie(string, uint64) error
+		getUserByCookie(sessionCookie string) (User, error)
+		newSessionCookie(sessionCookie string, userId uint64) error
+		deleteSessionCookie(sessionCookie string) error
 	}
 }
 
@@ -187,6 +205,7 @@ func main() {
 
 	mux.HandleFunc("/api/v1/cookie", env.cookieHandler).Methods("GET")
 	mux.HandleFunc("/api/v1/login", env.loginHandler).Methods("POST")
+	mux.HandleFunc("/api/v1/logout", env.logoutHandler).Methods("GET")
 
 	spa := spaHandler{staticPath: "static", indexPath: "index.html"}
 	mux.PathPrefix("/").Handler(spa)
