@@ -2,8 +2,8 @@ package main
 
 import (
 	"crypto/md5"
-	"encoding/hex"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -14,22 +14,6 @@ import (
 	"github.com/gorilla/mux"
 )
 
-type User struct {
-	ID          uint64
-	Name        string
-	Email       string
-	Password    string
-	Age         uint64
-	Description string
-	ImgSrc      string
-	Tags        []string
-}
-
-var (
-	users   = make(map[uint64]User)
-	cookies = make(map[string]uint64)
-)
-
 const (
 	StatusBadRequest = 400
 	StatusNotFound   = 404
@@ -37,14 +21,14 @@ const (
 )
 
 type JSON struct {
-	Status uint64      `json:"status"`
+	Status int         `json:"status"`
 	Body   interface{} `json:"body"`
 }
 
 type CurrentUserBody struct {
 	Name        string   `json:"name"`
 	Email       string   `json:"email"`
-	Age         uint64   `json:"age"`
+	Age         uint      `json:"age"`
 	Description string   `json:"description"`
 	ImgSrc      string   `json:"imgSrc"`
 	Tags        []string `json:"tags"`
@@ -55,38 +39,33 @@ type LoginUser struct {
 	Password string `json:"password"`
 }
 
-func cookieHandler(w http.ResponseWriter, r *http.Request) {
-	var currentStatus uint64
-	currentStatus = StatusNotFound
+func (env *Env) cookieHandler(w http.ResponseWriter, r *http.Request) {
+	currentStatus := StatusNotFound
 	var resp JSON
 
 	session, err := r.Cookie("sessionId")
 	if err == http.ErrNoCookie {
 		currentStatus = StatusNotFound
+		return
 	}
-	if len(cookies) == 0 {
+
+	currentUser, err := env.sessionDB.getUserByCookie(session.Value)
+	if err != nil {
 		currentStatus = StatusNotFound
-	} else {
-		currentUserId, okCookie := cookies[session.Value]
-		if okCookie {
-			currentUser, okUser := users[currentUserId]
-			if !okUser {
-				currentStatus = StatusNotFound
-			}
-
-			userBody := CurrentUserBody{
-				currentUser.Name,
-				currentUser.Email,
-				currentUser.Age,
-				currentUser.Description,
-				currentUser.ImgSrc,
-				currentUser.Tags,
-			}
-
-			currentStatus = StatusOk
-			resp.Body = userBody
-		}
+		return
 	}
+
+	userBody := CurrentUserBody{
+		currentUser.Name,
+		currentUser.Email,
+		currentUser.Age,
+		currentUser.Description,
+		currentUser.ImgSrc,
+		currentUser.Tags,
+	}
+
+	currentStatus = StatusOk
+	resp.Body = userBody
 
 	resp.Status = currentStatus
 
@@ -98,9 +77,8 @@ func cookieHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write(byteResp)
 }
 
-func loginHandler(w http.ResponseWriter, r *http.Request) {
-	var currentStatus uint64
-	currentStatus = StatusNotFound
+func (env *Env) loginHandler(w http.ResponseWriter, r *http.Request) {
+	currentStatus := StatusNotFound
 	var resp JSON
 
 	byteReq, _ := ioutil.ReadAll(r.Body)
@@ -113,25 +91,26 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 		currentStatus = StatusBadRequest
 	}
 
-	for _, value := range users {
-		if value.Email == logUserData.Email && value.Password == logUserData.Password {
-			currentStatus = StatusOk
+	identifiableUser, _ := env.db.getUserModel(logUserData.Email)
 
-			// create cookie
-			expiration := time.Now().Add(10 * time.Hour)
-			md5CookieValue := md5.Sum([]byte(logUserData.Email))
-			cookie := http.Cookie{
-				Name:     "sessionId",
-				Value:    hex.EncodeToString(md5CookieValue[:]),
-				Expires:  expiration,
-				Secure:   true,
-				HttpOnly: true,
-			}
+	if identifiableUser.Password == logUserData.Password {
+		currentStatus = StatusOk
 
-			cookies[hex.EncodeToString(md5CookieValue[:])] = value.ID
-
-			http.SetCookie(w, &cookie)
+		// create cookie
+		expiration := time.Now().Add(10 * time.Hour)
+		//md5CookieValue := md5.Sum([]byte(logUserData.Email))
+		md5CookieValue := fmt.Sprintf("%x", md5.Sum([]byte(logUserData.Email + logUserData.Password)))
+		cookie := http.Cookie{
+			Name:     "sessionId",
+			Value:    md5CookieValue,
+			Expires:  expiration,
+			Secure:   true,
+			HttpOnly: true,
 		}
+
+		env.sessionDB.newSessionCookie(identifiableUser.ID, md5CookieValue)
+
+		http.SetCookie(w, &cookie)
 	}
 
 	resp.Status = currentStatus
@@ -177,30 +156,43 @@ func (h spaHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	http.FileServer(http.Dir(h.staticPath)).ServeHTTP(w, r)
 }
 
-func main() {
-	marvin := User{
-		ID:          1,
-		Name:        "Mikhail",
-		Email:       "mumeu222@mail.ru",
-		Password:    "VBif222!",
-		Age:         20,
-		Description: "Hahahahaha",
-		ImgSrc:      "/static/users/user1",
-		Tags:        []string{"haha", "hihi"},
+type Env struct {
+	db interface {
+		getUserModel(string) (User, error)
 	}
-	users[1] = marvin
+	sessionDB interface {
+		getUserByCookie(string) (User, error)
+		newSessionCookie(uint64, string) error
+	}
+}
+
+func main() {
+	/*db, err := sql.Open("postgres", "postgres://user:pass@localhost/bookstore")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	env := &Env{
+		db: ModelsDB{DB: db},
+	}
+	*/
+
+	env := &Env{
+		db:        MockDB{},
+		sessionDB: MockSessionDB{},
+	}
 
 	mux := mux.NewRouter()
 
-	mux.HandleFunc("/api/v1/cookie", cookieHandler).Methods("GET")
-	mux.HandleFunc("/api/v1/login", loginHandler).Methods("POST")
+	mux.HandleFunc("/api/v1/cookie", env.cookieHandler).Methods("GET")
+	mux.HandleFunc("/api/v1/login", env.loginHandler).Methods("POST")
 
 	spa := spaHandler{staticPath: "static", indexPath: "index.html"}
 	mux.PathPrefix("/").Handler(spa)
 
 	srv := &http.Server{
 		Handler:      mux,
-		Addr:         "127.0.0.1:8080",
+		Addr:         ":8080",
 		WriteTimeout: http.DefaultClient.Timeout,
 		ReadTimeout:  http.DefaultClient.Timeout,
 	}
