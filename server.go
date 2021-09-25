@@ -15,9 +15,10 @@ import (
 )
 
 const (
+	StatusOK         = 200
 	StatusBadRequest = 400
 	StatusNotFound   = 404
-	StatusOk         = 200
+	StatusInternalServerError = 500
 )
 
 func (env *Env) cookieHandler(w http.ResponseWriter, r *http.Request) {
@@ -36,7 +37,7 @@ func (env *Env) cookieHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	currentStatus = StatusOk
+	currentStatus = StatusOK
 	resp.Body = currentUser
 
 	resp.Status = currentStatus
@@ -50,28 +51,48 @@ func (env *Env) cookieHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (env *Env) loginHandler(w http.ResponseWriter, r *http.Request) {
-	currentStatus := StatusNotFound
 	var resp JSON
 
-	byteReq, _ := ioutil.ReadAll(r.Body)
-	strReq := string(byteReq)
-
-	var logUserData LoginUser
-	err := json.Unmarshal([]byte(strReq), &logUserData)
+	byteReq, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		// no valid json data
-		currentStatus = StatusBadRequest
+		resp.Status = StatusBadRequest
+		byteResp, err := json.Marshal(resp)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
+		w.Write(byteResp)
+		return
 	}
 
-	identifiableUser, _ := env.db.getUserModel(logUserData.Email)
+	var logUserData LoginUser
+	err = json.Unmarshal(byteReq, &logUserData)
+	if err != nil {
+		resp.Status = StatusBadRequest
+		byteResp, err := json.Marshal(resp)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
+		w.Write(byteResp)
+		return
+	}
 
-	if identifiableUser.Password == logUserData.Password {
-		currentStatus = StatusOk
+	identifiableUser, err := env.db.getUserModel(logUserData.Email)
+	if err != nil {
+		resp.Status = StatusInternalServerError
+		byteResp, err := json.Marshal(resp)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
+		w.Write(byteResp)
+		return
+	}
 
+	status := StatusOK
+	if identifiableUser.isCorrectPassword(logUserData.Password) {
 		// create cookie
 		expiration := time.Now().Add(10 * time.Hour)
-		//md5CookieValue := md5.Sum([]byte(logUserData.Email))
-		md5CookieValue := fmt.Sprintf("%x", md5.Sum([]byte(logUserData.Email+logUserData.Password)))
+		data := logUserData.Password + time.Now().String()
+		md5CookieValue := fmt.Sprintf("%x", md5.Sum([]byte(data)))
 		cookie := http.Cookie{
 			Name:     "sessionId",
 			Value:    md5CookieValue,
@@ -80,17 +101,27 @@ func (env *Env) loginHandler(w http.ResponseWriter, r *http.Request) {
 			HttpOnly: true,
 		}
 
-		env.sessionDB.newSessionCookie(identifiableUser.ID, md5CookieValue)
+		err = env.sessionDB.newSessionCookie(identifiableUser.ID, md5CookieValue)
+		if err != nil {
+			resp.Status = StatusInternalServerError
+			byteResp, err := json.Marshal(resp)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+			}
+			w.Write(byteResp)
+			return
+		}
 
 		http.SetCookie(w, &cookie)
+	} else {
+		status = StatusNotFound
 	}
 
-	resp.Status = currentStatus
+	resp.Status = status
 	byteResp, err := json.Marshal(resp)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
-	w.WriteHeader(http.StatusOK)
 	w.Write(byteResp)
 }
 

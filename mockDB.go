@@ -14,8 +14,8 @@ func (MockDB) getUserModel(email string) (User, error) {
 	return User{
 		ID:          1,
 		Name:        "Mikhail",
-		Email:       "mumeu222@mail.ru",
-		Password:    "VBif222!",
+		Email:       "test@mail.ru",
+		Password:    "123456qQ",
 		Age:         20,
 		Description: "Hahahahaha",
 		ImgSrc:      "/static/users/user1",

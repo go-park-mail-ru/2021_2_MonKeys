@@ -16,6 +16,14 @@ type User struct {
 	Tags        []string `json:"tags"`
 }
 
+func (user User) isEmpty() bool {
+	return len(user.Email) == 0
+}
+
+func (user User) isCorrectPassword(password string) bool {
+	return user.Password == password // TODO вызов хэш функции
+}
+
 type LoginUser struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
