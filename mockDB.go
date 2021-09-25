@@ -1,10 +1,16 @@
 package main
 
+var (
+	users   = make(map[uint64]User)
+	cookies = make(map[string]uint64)
+)
+
 type MockDB struct {
 	//DB int
 }
 
-func (MockDB) getUserModel(string) (User, error) {
+func (MockDB) getUserModel(email string) (User, error) {
+
 	return User{
 		ID:          1,
 		Name:        "Mikhail",
@@ -17,12 +23,11 @@ func (MockDB) getUserModel(string) (User, error) {
 	}, nil
 }
 
-
 type MockSessionDB struct {
-
 }
 
-func (MockSessionDB) getUserByCookie(string) (User, error) {
+func (MockSessionDB) getUserByCookie(email string) (User, error) {
+
 	return User{
 		ID:          1,
 		Name:        "Mikhail",

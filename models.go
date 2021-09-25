@@ -10,8 +10,3 @@ type User struct {
 	ImgSrc      string
 	Tags        []string
 }
-
-var (
-	users   = make(map[uint64]User)
-	cookies = make(map[string]uint64)
-)

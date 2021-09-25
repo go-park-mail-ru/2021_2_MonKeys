@@ -28,7 +28,7 @@ type JSON struct {
 type CurrentUserBody struct {
 	Name        string   `json:"name"`
 	Email       string   `json:"email"`
-	Age         uint      `json:"age"`
+	Age         uint     `json:"age"`
 	Description string   `json:"description"`
 	ImgSrc      string   `json:"imgSrc"`
 	Tags        []string `json:"tags"`
@@ -99,7 +99,7 @@ func (env *Env) loginHandler(w http.ResponseWriter, r *http.Request) {
 		// create cookie
 		expiration := time.Now().Add(10 * time.Hour)
 		//md5CookieValue := md5.Sum([]byte(logUserData.Email))
-		md5CookieValue := fmt.Sprintf("%x", md5.Sum([]byte(logUserData.Email + logUserData.Password)))
+		md5CookieValue := fmt.Sprintf("%x", md5.Sum([]byte(logUserData.Email+logUserData.Password)))
 		cookie := http.Cookie{
 			Name:     "sessionId",
 			Value:    md5CookieValue,
