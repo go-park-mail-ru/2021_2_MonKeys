@@ -1,5 +1,7 @@
 package main
 
+import "errors"
+
 var (
 	users   = make(map[uint64]User)
 	cookies = make(map[string]uint64)
@@ -10,36 +12,47 @@ type MockDB struct {
 }
 
 func (MockDB) getUserModel(email string) (User, error) {
+	if len(users) == 0 {
+		return User{}, errors.New("users is empty map")
+	}
 
-	return User{
-		ID:          1,
-		Name:        "Mikhail",
-		Email:       "mumeu222@mail.ru",
-		Password:    "VBif222!",
-		Age:         20,
-		Description: "Hahahahaha",
-		ImgSrc:      "/static/users/user1",
-		Tags:        []string{"haha", "hihi"},
-	}, nil
+	currentUser := User{}
+	okUser := false
+	for _, value := range users {
+		if value.Email == email {
+			currentUser = value
+			okUser = true
+		}
+	}
+	if !okUser {
+		return User{}, errors.New("User not found")
+	}
+
+	return currentUser, nil
 }
 
 type MockSessionDB struct {
 }
 
-func (MockSessionDB) getUserByCookie(email string) (User, error) {
+func (MockSessionDB) getUserByCookie(sessionCookie string) (User, error) {
+	if len(cookies) == 0 {
+		return User{}, errors.New("cookies is empty map")
+	}
 
-	return User{
-		ID:          1,
-		Name:        "Mikhail",
-		Email:       "mumeu222@mail.ru",
-		Password:    "VBif222!",
-		Age:         20,
-		Description: "Hahahahaha",
-		ImgSrc:      "/static/users/user1",
-		Tags:        []string{"haha", "hihi"},
-	}, nil
+	currentUserId, okCookie := cookies[sessionCookie]
+	if !okCookie {
+		return User{}, errors.New("cookie not found")
+	}
+
+	currentUser, okUser := users[currentUserId]
+	if !okUser {
+		return User{}, errors.New("user not found")
+	}
+
+	return currentUser, nil
 }
 
-func (MockSessionDB) newSessionCookie(uint64, string) error {
+func (MockSessionDB) newSessionCookie(hashedCookie string, userId uint64) error {
+	cookies[hashedCookie] = userId
 	return nil
 }
