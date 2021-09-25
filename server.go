@@ -22,32 +22,26 @@ const (
 )
 
 func (env *Env) cookieHandler(w http.ResponseWriter, r *http.Request) {
-	currentStatus := StatusNotFound
 	var resp JSON
 
 	session, err := r.Cookie("sessionId")
 	if err == http.ErrNoCookie {
-		currentStatus = StatusNotFound
+		resp.Status = StatusNotFound
+		sendResp(resp, &w)
 		return
 	}
 
 	currentUser, err := env.sessionDB.getUserByCookie(session.Value)
 	if err != nil {
-		currentStatus = StatusNotFound
+		resp.Status = StatusNotFound
+		sendResp(resp, &w)
 		return
 	}
 
 	currentStatus = StatusOK
 	resp.Body = currentUser
 
-	resp.Status = currentStatus
-
-	byteResp, err := json.Marshal(resp)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-	}
-	w.WriteHeader(http.StatusOK)
-	w.Write(byteResp)
+	sendResp(resp, &w)
 }
 
 func (env *Env) loginHandler(w http.ResponseWriter, r *http.Request) {
@@ -91,8 +85,10 @@ func (env *Env) loginHandler(w http.ResponseWriter, r *http.Request) {
 	if identifiableUser.isCorrectPassword(logUserData.Password) {
 		// create cookie
 		expiration := time.Now().Add(10 * time.Hour)
+
 		data := logUserData.Password + time.Now().String()
 		md5CookieValue := fmt.Sprintf("%x", md5.Sum([]byte(data)))
+    
 		cookie := http.Cookie{
 			Name:     "sessionId",
 			Value:    md5CookieValue,
@@ -165,11 +161,23 @@ type Env struct {
 	}
 	sessionDB interface {
 		getUserByCookie(string) (User, error)
-		newSessionCookie(uint64, string) error
+		newSessionCookie(string, uint64) error
 	}
 }
 
 func main() {
+	marvin := User{
+		ID:          1,
+		Name:        "Mikhail",
+		Email:       "mumeu222@mail.ru",
+		Password:    "VBif222!",
+		Age:         20,
+		Description: "Hahahahaha",
+		ImgSrc:      "/img/Yachty-tout.jpg",
+		Tags:        []string{"haha", "hihi"},
+	}
+	users[1] = marvin
+
 	/*db, err := sql.Open("postgres", "postgres://user:pass@localhost/bookstore")
 	if err != nil {
 		log.Fatal(err)
