@@ -34,12 +34,12 @@ func (MockDB) getUserModel(email string) (User, error) {
 type MockSessionDB struct {
 }
 
-func (MockSessionDB) getUserByCookie(email string) (User, error) {
+func (MockSessionDB) getUserByCookie(sessionCookie string) (User, error) {
 	if len(cookies) == 0 {
 		return User{}, errors.New("cookies is empty map")
 	}
 
-	currentUserId, okCookie := cookies[email]
+	currentUserId, okCookie := cookies[sessionCookie]
 	if !okCookie {
 		return User{}, errors.New("cookie not found")
 	}

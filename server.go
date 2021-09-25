@@ -21,6 +21,15 @@ const (
 	StatusInternalServerError = 500
 )
 
+func sendResp(resp JSON, w *http.ResponseWriter) {
+	byteResp, err := json.Marshal(resp)
+	if err != nil {
+		http.Error(*w, err.Error(), http.StatusInternalServerError)
+	}
+	(*w).WriteHeader(http.StatusOK)
+	(*w).Write(byteResp)
+}
+
 func (env *Env) cookieHandler(w http.ResponseWriter, r *http.Request) {
 	var resp JSON
 
@@ -38,7 +47,7 @@ func (env *Env) cookieHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	currentStatus = StatusOK
+	resp.Status = StatusOK
 	resp.Body = currentUser
 
 	sendResp(resp, &w)
@@ -50,11 +59,7 @@ func (env *Env) loginHandler(w http.ResponseWriter, r *http.Request) {
 	byteReq, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		resp.Status = StatusBadRequest
-		byteResp, err := json.Marshal(resp)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-		}
-		w.Write(byteResp)
+		sendResp(resp, &w)
 		return
 	}
 
@@ -62,33 +67,24 @@ func (env *Env) loginHandler(w http.ResponseWriter, r *http.Request) {
 	err = json.Unmarshal(byteReq, &logUserData)
 	if err != nil {
 		resp.Status = StatusBadRequest
-		byteResp, err := json.Marshal(resp)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-		}
-		w.Write(byteResp)
+		sendResp(resp, &w)
 		return
 	}
 
 	identifiableUser, err := env.db.getUserModel(logUserData.Email)
 	if err != nil {
 		resp.Status = StatusInternalServerError
-		byteResp, err := json.Marshal(resp)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-		}
-		w.Write(byteResp)
+		sendResp(resp, &w)
 		return
 	}
 
 	status := StatusOK
 	if identifiableUser.isCorrectPassword(logUserData.Password) {
-		// create cookie
 		expiration := time.Now().Add(10 * time.Hour)
 
 		data := logUserData.Password + time.Now().String()
 		md5CookieValue := fmt.Sprintf("%x", md5.Sum([]byte(data)))
-    
+
 		cookie := http.Cookie{
 			Name:     "sessionId",
 			Value:    md5CookieValue,
@@ -97,14 +93,10 @@ func (env *Env) loginHandler(w http.ResponseWriter, r *http.Request) {
 			HttpOnly: true,
 		}
 
-		err = env.sessionDB.newSessionCookie(identifiableUser.ID, md5CookieValue)
+		err = env.sessionDB.newSessionCookie(md5CookieValue, identifiableUser.ID)
 		if err != nil {
 			resp.Status = StatusInternalServerError
-			byteResp, err := json.Marshal(resp)
-			if err != nil {
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-			}
-			w.Write(byteResp)
+			sendResp(resp, &w)
 			return
 		}
 
@@ -114,11 +106,7 @@ func (env *Env) loginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	resp.Status = status
-	byteResp, err := json.Marshal(resp)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-	}
-	w.Write(byteResp)
+	sendResp(resp, &w)
 }
 
 type spaHandler struct {
@@ -165,7 +153,7 @@ type Env struct {
 	}
 }
 
-func main() {
+func init() {
 	marvin := User{
 		ID:          1,
 		Name:        "Mikhail",
@@ -177,7 +165,9 @@ func main() {
 		Tags:        []string{"haha", "hihi"},
 	}
 	users[1] = marvin
+}
 
+func main() {
 	/*db, err := sql.Open("postgres", "postgres://user:pass@localhost/bookstore")
 	if err != nil {
 		log.Fatal(err)
