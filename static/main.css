@@ -7,11 +7,18 @@ html {
 
 }
 
-div.center-container {
+div.center-container-row {
     display: flex;
     align-items: center;
     justify-content: center;
-} 
+}
+
+div.center-container-column {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
 
 .login-header {
     margin: 0;

@@ -56,9 +56,16 @@ function createInput(type, text, name) {
     return input;
 }
 
-function createCenterContainer() {
+function createCenterContainerRow() {
     const divContainer = document.createElement('div');
-    divContainer.classList.add('center-container');
+    divContainer.classList.add('center-container-row');
+
+    return divContainer;
+}
+
+function createCenterContainerColumn() {
+    const divContainer = document.createElement('div');
+    divContainer.classList.add('center-container-column');
 
     return divContainer;
 }
@@ -84,15 +91,11 @@ function loginPage() {
                     profilePage();
                 }
                 console.log(res.data);
-                // if (res.data.status === 'ok') {
-                //     profilePage();
-                // }
-                // console.log(res.data.status)
             })).catch((error) => console.log(error));
     })
     // --------------------------------------------------------
 
-    const header = createCenterContainer();
+    const header = createCenterContainerRow();
 
     const headerText = document.createElement('span');
     headerText.textContent = 'Войти';
@@ -110,8 +113,10 @@ function loginPage() {
         
         if (test) {
             emailInput.className = 'form-field-valid';
+            // emailFieldWithError.removeChild(emailInputError);
         } else {
             emailInput.className = 'form-field-novalid'
+            // passwordFieldWithError.removeChild(passwordInputError);
         }
     })
 
@@ -138,7 +143,7 @@ function loginPage() {
     submitButton.type = 'submit';
     submitButton.classList.add('login-button');
 
-    const buttonFilling = createCenterContainer();
+    const buttonFilling = createCenterContainerRow();
     const buttonText = document.createElement('span');
     buttonText.textContent = 'Войти';
     buttonText.classList.add('login-button-text');
@@ -166,12 +171,21 @@ function loginPage() {
     const logoBg = document.createElement('div');
     logoBg.classList.add('drip-logo-bg');
 
-    const formContainer = createCenterContainer();
+    const formContainer = createCenterContainerRow();
 
     emailFieldWithIcon.appendChild(emailInput);
     emailFieldWithIcon.appendChild(emailIcon);
     passwordFieldWithIcon.appendChild(passwordInput);
     passwordFieldWithIcon.appendChild(passwordIcon);
+
+    // const emailFieldWithError = createCenterContainerColumn();
+    // const passwordFieldWithError = createCenterContainerColumn();
+
+    // emailFieldWithError.appendChild(emailFieldWithIcon);
+    // passwordFieldWithError.appendChild(passwordFieldWithIcon);
+
+    // logoBg.appendChild(emailFieldWithError);
+    // logoBg.appendChild(passwordFieldWithError);
 
     logoBg.appendChild(emailFieldWithIcon);
     logoBg.appendChild(passwordFieldWithIcon);
@@ -181,7 +195,7 @@ function loginPage() {
 
     formContainer.appendChild(form);
 
-    const regLinkContainer = createCenterContainer();
+    const regLinkContainer = createCenterContainerRow();
     const regLink = document.createElement('a');
     regLink.classList.add('reg-link');
     regLink.href = '/signup';
@@ -194,10 +208,20 @@ function loginPage() {
         const testEmail = emailRegExp.test(emailInput.value);
         const testPassword = passwordRegExp.test(passwordInput.value);
 
-        if (!testEmail || !testPassword) {
+        if (!testEmail) {
             emailInput.className = 'form-field-novalid';
+            // emailInputError = document.createElement('span')
+            // emailInputError.textContent = 'error'
+            // emailFieldWithError.appendChild(emailInputError)
+        }
+        
+        if (!testPassword) {
             passwordInput.className = 'form-field-novalid';
-            // e.preventDefault();
+            // passwordInputError = document.createElement('span')
+            // passwordInputError.textContent = 'error'
+            // passwordFieldWithError.appendChild(passwordInputError)
+        }
+        if (!testEmail || !testPassword) {
             return;
         }
 
@@ -237,7 +261,7 @@ function loginPage() {
 function signupPage() {
     root.innerHTML = '';
 
-    const header = createCenterContainer();
+    const header = createCenterContainerRow();
 
     const headerText = document.createElement('span');
     headerText.textContent = 'Регистрация';
@@ -258,7 +282,7 @@ function signupPage() {
     submitButton.type = 'submit';
     submitButton.classList.add('login-button');
 
-    const buttonFilling = createCenterContainer();
+    const buttonFilling = createCenterContainerRow();
     const buttonText = document.createElement('span');
     buttonText.textContent = 'Зарегистрироваться';
     buttonText.classList.add('login-button-text');
@@ -291,7 +315,7 @@ function signupPage() {
     const logoBg = document.createElement('div');
     logoBg.classList.add('drip-logo-bg');
 
-    const formContainer = createCenterContainer();
+    const formContainer = createCenterContainerRow();
 
     emailFieldWithIcon.appendChild(emailInput);
     emailFieldWithIcon.appendChild(emailIcon);
