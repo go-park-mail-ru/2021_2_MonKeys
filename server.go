@@ -101,6 +101,8 @@ func (env *Env) loginHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		http.SetCookie(w, &cookie)
+
+		resp.Body = identifiableUser
 	} else {
 		status = StatusNotFound
 	}
