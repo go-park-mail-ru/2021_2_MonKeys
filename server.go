@@ -20,25 +20,6 @@ const (
 	StatusOk         = 200
 )
 
-type JSON struct {
-	Status int         `json:"status"`
-	Body   interface{} `json:"body"`
-}
-
-type CurrentUserBody struct {
-	Name        string   `json:"name"`
-	Email       string   `json:"email"`
-	Age         uint     `json:"age"`
-	Description string   `json:"description"`
-	ImgSrc      string   `json:"imgSrc"`
-	Tags        []string `json:"tags"`
-}
-
-type LoginUser struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
-}
-
 func (env *Env) cookieHandler(w http.ResponseWriter, r *http.Request) {
 	currentStatus := StatusNotFound
 	var resp JSON
@@ -55,17 +36,8 @@ func (env *Env) cookieHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userBody := CurrentUserBody{
-		currentUser.Name,
-		currentUser.Email,
-		currentUser.Age,
-		currentUser.Description,
-		currentUser.ImgSrc,
-		currentUser.Tags,
-	}
-
 	currentStatus = StatusOk
-	resp.Body = userBody
+	resp.Body = currentUser
 
 	resp.Status = currentStatus
 
