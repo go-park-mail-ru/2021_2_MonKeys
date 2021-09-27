@@ -51,8 +51,9 @@ func createSessionCookie(user LoginUser) http.Cookie {
 		Name:     "sessionId",
 		Value:    md5CookieValue,
 		Expires:  expiration,
-		Secure:   false,
+		Secure:   true,
 		HttpOnly: true,
+		SameSite: http.SameSiteNoneMode,
 	}
 
 	return cookie
