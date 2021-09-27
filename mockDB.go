@@ -50,6 +50,12 @@ func (db *MockDB) createUser(logUserData LoginUser) (User, error) {
 	return db.users[newID], nil
 }
 
+func (db *MockDB) updateUser(user User) error {
+	db.users[user.ID] = user
+
+	return nil
+}
+
 func (db *MockDB) addSwipedUsers(currentUserId, swipedUserId uint64) error {
 	if len(db.users) == 0 {
 		fmt.Println("1_1")
@@ -126,7 +132,7 @@ func (db MockDB) isSwiped(userID, swipedUserID uint64) bool {
 }
 
 type MockSessionDB struct {
-	cookies     map[string]uint64
+	cookies map[string]uint64
 }
 
 func NewSessionDB() *MockSessionDB {
