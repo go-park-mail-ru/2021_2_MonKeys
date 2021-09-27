@@ -176,6 +176,58 @@ func (env *Env) signupHandler(w http.ResponseWriter, r *http.Request) {
 	sendResp(resp, &w)
 }
 
+func (env *Env) editHandler(w http.ResponseWriter, r *http.Request) {
+	setupCORSResponse(&w, r)
+
+	var resp JSON
+
+	byteReq, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		resp.Status = StatusBadRequest
+		sendResp(resp, &w)
+		return
+	}
+
+	var user User
+	err = json.Unmarshal(byteReq, &user)
+	if err != nil {
+		resp.Status = StatusBadRequest
+		sendResp(resp, &w)
+		return
+	}
+
+	session, err := r.Cookie("sessionId")
+	if err != nil {
+		resp.Status = StatusNotFound
+		sendResp(resp, &w)
+		return
+	}
+
+	currentUser, err := env.getUserByCookie(session.Value)
+	if err != nil {
+		resp.Status = StatusNotFound
+		sendResp(resp, &w)
+		return
+	}
+
+	currentUser.Name = user.Name
+	currentUser.Age = user.Age
+	currentUser.Description = user.Description
+	currentUser.Tags = user.Tags
+
+	err = env.db.updateUser(currentUser)
+	if err != nil {
+		resp.Status = StatusNotFound
+		sendResp(resp, &w)
+		return
+	}
+
+	resp.Status = StatusOK
+	resp.Body = currentUser
+
+	sendResp(resp, &w)
+}
+
 func (env *Env) logoutHandler(w http.ResponseWriter, r *http.Request) {
 	setupCORSResponse(&w, r)
 
@@ -204,14 +256,14 @@ func (env *Env) nextUserHandler(w http.ResponseWriter, r *http.Request) {
 	// get current user by cookie
 	session, err := r.Cookie("sessionId")
 	if err == http.ErrNoCookie {
-	
+
 		resp.Status = StatusNotFound
 		sendResp(resp, &w)
 		return
 	}
 	currentUser, err := env.getUserByCookie(session.Value)
 	if err != nil {
-		
+
 		resp.Status = StatusNotFound
 		sendResp(resp, &w)
 		return
@@ -249,7 +301,7 @@ func (env *Env) nextUserHandler(w http.ResponseWriter, r *http.Request) {
 
 	resp.Status = StatusOK
 	resp.Body = nextUser
-	
+
 	sendResp(resp, &w)
 }
 
@@ -260,6 +312,7 @@ type Env struct {
 		createUser(logUserData LoginUser) (User, error)
 		addSwipedUsers(currentUserId, swipedUserId uint64) error
 		getNextUserForSwipe(currentUserId uint64) (User, error)
+		updateUser(user User) error
 	}
 	sessionDB interface {
 		getUserIDByCookie(sessionCookie string) (uint64, error)
@@ -285,6 +338,7 @@ func (env Env) getUserByCookie(sessionCookie string) (User, error) {
 var (
 	db = NewMockDB()
 )
+
 func init() {
 	marvin := User{
 		ID:          1,
@@ -333,6 +387,7 @@ func main() {
 	router.HandleFunc("/api/v1/currentuser", env.currentUser).Methods("GET")
 	router.HandleFunc("/api/v1/login", env.loginHandler).Methods("POST")
 	//router.HandleFunc("/api/v1/createprofile", env.loginHandler).Methods("POST")
+	router.HandleFunc("/api/v1/edit", env.editHandler).Methods("POST")
 	router.HandleFunc("/api/v1/signup", env.signupHandler).Methods("POST")
 	router.HandleFunc("/api/v1/logout", env.logoutHandler).Methods("GET")
 	router.HandleFunc("/api/v1/nextswipeuser", env.nextUserHandler).Methods("POST")
