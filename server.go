@@ -32,6 +32,7 @@ func sendResp(resp JSON, w *http.ResponseWriter) {
 
 func setupCORSResponse(w *http.ResponseWriter, r *http.Request) {
 	(*w).Header().Set("Access-Control-Allow-Origin", r.Header.Get("Origin"))
+	(*w).Header().Set("Access-Control-Allow-Origin", r.Header.Get("Origin"))
 	(*w).Header().Set("Access-Control-Allow-Credentials", "true")
 	(*w).Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS")
 	(*w).Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, Allow-Credentials, Set-Cookie, Access-Control-Allow-Credentials, Access-Control-Allow-Origin")
@@ -204,14 +205,14 @@ func (env *Env) nextUserHandler(w http.ResponseWriter, r *http.Request) {
 	// get current user by cookie
 	session, err := r.Cookie("sessionId")
 	if err == http.ErrNoCookie {
-	
+
 		resp.Status = StatusNotFound
 		sendResp(resp, &w)
 		return
 	}
 	currentUser, err := env.getUserByCookie(session.Value)
 	if err != nil {
-		
+
 		resp.Status = StatusNotFound
 		sendResp(resp, &w)
 		return
@@ -249,7 +250,7 @@ func (env *Env) nextUserHandler(w http.ResponseWriter, r *http.Request) {
 
 	resp.Status = StatusOK
 	resp.Body = nextUser
-	
+
 	sendResp(resp, &w)
 }
 
@@ -286,7 +287,7 @@ var (
 	db = NewMockDB()
 )
 func init() {
-	marvin := User{
+	db.users[1] = User{
 		ID:          1,
 		Name:        "Mikhail",
 		Email:       "mumeu222@mail.ru",
@@ -296,7 +297,7 @@ func init() {
 		ImgSrc:      "/img/Yachty-tout.jpg",
 		Tags:        []string{"haha", "hihi"},
 	}
-	marvin2 := User{
+	db.users[2] = User{
 		ID:          2,
 		Name:        "Mikhail2",
 		Email:       "mumeu222@mail.ru2",
@@ -306,7 +307,7 @@ func init() {
 		ImgSrc:      "/img/Yachty-tout.jpg",
 		Tags:        []string{"haha", "hihi"},
 	}
-	marvin3 := User{
+	db.users[3] = User{
 		ID:          3,
 		Name:        "Mikhail3",
 		Email:       "mumeu222@mail.ru3",
@@ -316,9 +317,16 @@ func init() {
 		ImgSrc:      "/img/Yachty-tout.jpg",
 		Tags:        []string{"haha", "hihi"},
 	}
-	db.users[1] = marvin
-	db.users[2] = marvin2
-	db.users[3] = marvin3
+	db.users[4] = User{
+		ID:          4,
+		Name:        "MikhaNika",
+		Email:       "test4@mail.ru",
+		Password:    "af57966e1958f52e41550e822dd8e8a4", //VBif222!
+		Age:         21,
+		Description: "Ответственна, самоорганизована, исполнительна, пунктуальна, ориентирована на\nизучение деталей и подробностей, стрессоустойчива.\nУверенный пользователь MS office,высокий уровень грамотности, навыки делового общения",
+		ImgSrc:      "/img/test4.jpg",
+		Tags:        []string{"MS Access", "CRM", "1С-Битрикс", "AXAPTA"},
+	}
 }
 
 func main() {
