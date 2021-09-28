@@ -15,6 +15,7 @@ type User struct {
 	Name        string   `json:"name"`
 	Email       string   `json:"email"`
 	Password    string   `json:"-"`
+	Date        string   `json:"date"`
 	Age         uint     `json:"age"`
 	Description string   `json:"description"`
 	ImgSrc      string   `json:"imgSrc"`
