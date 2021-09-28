@@ -21,25 +21,34 @@ const (
 	StatusEmailAlreadyExists  = 1001
 )
 
-func sendResp(resp JSON, w *http.ResponseWriter) {
+func sendResp(resp JSON, w http.ResponseWriter) {
 	byteResp, err := json.Marshal(resp)
 	if err != nil {
-		http.Error(*w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
-	(*w).WriteHeader(http.StatusOK)
-	(*w).Write(byteResp)
+	w.WriteHeader(http.StatusOK)
+	w.Write(byteResp)
 }
 
-func setupCORSResponse(w *http.ResponseWriter, r *http.Request) {
-	(*w).Header().Set("Access-Control-Allow-Origin", r.Header.Get("Origin"))
-	(*w).Header().Set("Access-Control-Allow-Origin", r.Header.Get("Origin"))
-	(*w).Header().Set("Access-Control-Allow-Credentials", "true")
-	(*w).Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS")
-	(*w).Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, Allow-Credentials, Set-Cookie, Access-Control-Allow-Credentials, Access-Control-Allow-Origin")
+func setupCORSResponse(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", r.Header.Get("Origin"))
+	w.Header().Set("Access-Control-Allow-Credentials", "true")
+	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS")
+	w.Header().Set("Access-Control-Allow-Headers",
+		"Accept," +
+		"Content-Type," +
+		"Content-Length," +
+		"Accept-Encoding," +
+		"X-CSRF-Token," +
+		"Authorization," +
+		"Allow-Credentials," +
+		"Set-Cookie," +
+		"Access-Control-Allow-Credentials," +
+		"Access-Control-Allow-Origin")
 }
 
 func (env *Env) corsHandler(w http.ResponseWriter, r *http.Request) {
-	setupCORSResponse(&w, r)
+	setupCORSResponse(w, r)
 }
 
 func createSessionCookie(user LoginUser) http.Cookie {
@@ -61,38 +70,38 @@ func createSessionCookie(user LoginUser) http.Cookie {
 }
 
 func (env *Env) currentUser(w http.ResponseWriter, r *http.Request) {
-	setupCORSResponse(&w, r)
+	setupCORSResponse(w, r)
 
 	var resp JSON
 	session, err := r.Cookie("sessionId")
 	if err != nil {
 		resp.Status = StatusNotFound
-		sendResp(resp, &w)
+		sendResp(resp, w)
 		return
 	}
 
 	currentUser, err := env.getUserByCookie(session.Value)
 	if err != nil {
 		resp.Status = StatusNotFound
-		sendResp(resp, &w)
+		sendResp(resp, w)
 		return
 	}
 
 	resp.Status = StatusOK
 	resp.Body = currentUser
 
-	sendResp(resp, &w)
+	sendResp(resp, w)
 }
 
 func (env *Env) loginHandler(w http.ResponseWriter, r *http.Request) {
-	setupCORSResponse(&w, r)
+	setupCORSResponse(w, r)
 
 	var resp JSON
 
 	byteReq, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		resp.Status = StatusBadRequest
-		sendResp(resp, &w)
+		sendResp(resp, w)
 		return
 	}
 
@@ -100,14 +109,14 @@ func (env *Env) loginHandler(w http.ResponseWriter, r *http.Request) {
 	err = json.Unmarshal(byteReq, &logUserData)
 	if err != nil {
 		resp.Status = StatusBadRequest
-		sendResp(resp, &w)
+		sendResp(resp, w)
 		return
 	}
 
 	identifiableUser, err := env.db.getUser(logUserData.Email)
 	if err != nil {
 		resp.Status = StatusNotFound
-		sendResp(resp, &w)
+		sendResp(resp, w)
 		return
 	}
 
@@ -117,7 +126,7 @@ func (env *Env) loginHandler(w http.ResponseWriter, r *http.Request) {
 		err = env.sessionDB.newSessionCookie(cookie.Value, identifiableUser.ID)
 		if err != nil {
 			resp.Status = StatusInternalServerError
-			sendResp(resp, &w)
+			sendResp(resp, w)
 			return
 		}
 
@@ -127,18 +136,18 @@ func (env *Env) loginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	resp.Status = status
-	sendResp(resp, &w)
+	sendResp(resp, w)
 }
 
 func (env *Env) signupHandler(w http.ResponseWriter, r *http.Request) {
-	setupCORSResponse(&w, r)
+	setupCORSResponse(w, r)
 
 	var resp JSON
 
 	byteReq, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		resp.Status = StatusBadRequest
-		sendResp(resp, &w)
+		sendResp(resp, w)
 		return
 	}
 
@@ -146,21 +155,21 @@ func (env *Env) signupHandler(w http.ResponseWriter, r *http.Request) {
 	err = json.Unmarshal(byteReq, &logUserData)
 	if err != nil {
 		resp.Status = StatusBadRequest
-		sendResp(resp, &w)
+		sendResp(resp, w)
 		return
 	}
 
 	identifiableUser, _ := env.db.getUser(logUserData.Email)
 	if !identifiableUser.isEmpty() {
 		resp.Status = StatusEmailAlreadyExists
-		sendResp(resp, &w)
+		sendResp(resp, w)
 		return
 	}
 
 	user, err := env.db.createUser(logUserData)
 	if err != nil {
 		resp.Status = StatusInternalServerError
-		sendResp(resp, &w)
+		sendResp(resp, w)
 		return
 	}
 
@@ -168,25 +177,25 @@ func (env *Env) signupHandler(w http.ResponseWriter, r *http.Request) {
 	err = env.sessionDB.newSessionCookie(cookie.Value, user.ID)
 	if err != nil {
 		resp.Status = StatusInternalServerError
-		sendResp(resp, &w)
+		sendResp(resp, w)
 		return
 	}
 
 	http.SetCookie(w, &cookie)
 
 	resp.Status = StatusOK
-	sendResp(resp, &w)
+	sendResp(resp, w)
 }
 
 func (env *Env) editHandler(w http.ResponseWriter, r *http.Request) {
-	setupCORSResponse(&w, r)
+	setupCORSResponse(w, r)
 
 	var resp JSON
 
 	byteReq, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		resp.Status = StatusBadRequest
-		sendResp(resp, &w)
+		sendResp(resp, w)
 		return
 	}
 
@@ -194,21 +203,21 @@ func (env *Env) editHandler(w http.ResponseWriter, r *http.Request) {
 	err = json.Unmarshal(byteReq, &user)
 	if err != nil {
 		resp.Status = StatusBadRequest
-		sendResp(resp, &w)
+		sendResp(resp, w)
 		return
 	}
 
 	session, err := r.Cookie("sessionId")
 	if err != nil {
 		resp.Status = StatusNotFound
-		sendResp(resp, &w)
+		sendResp(resp, w)
 		return
 	}
 
 	currentUser, err := env.getUserByCookie(session.Value)
 	if err != nil {
 		resp.Status = StatusNotFound
-		sendResp(resp, &w)
+		sendResp(resp, w)
 		return
 	}
 
@@ -220,29 +229,29 @@ func (env *Env) editHandler(w http.ResponseWriter, r *http.Request) {
 	err = env.db.updateUser(currentUser)
 	if err != nil {
 		resp.Status = StatusNotFound
-		sendResp(resp, &w)
+		sendResp(resp, w)
 		return
 	}
 
 	resp.Status = StatusOK
 	resp.Body = currentUser
 
-	sendResp(resp, &w)
+	sendResp(resp, w)
 }
 
 func (env *Env) logoutHandler(w http.ResponseWriter, r *http.Request) {
-	setupCORSResponse(&w, r)
+	setupCORSResponse(w, r)
 
 	session, err := r.Cookie("sessionId")
 
 	if err != nil {
-		sendResp(JSON{Status: StatusNotFound}, &w)
+		sendResp(JSON{Status: StatusNotFound}, w)
 		return
 	}
 
 	err = env.sessionDB.deleteSessionCookie(session.Value)
 	if err != nil {
-		sendResp(JSON{Status: StatusInternalServerError}, &w)
+		sendResp(JSON{Status: StatusInternalServerError}, w)
 		return
 	}
 
@@ -251,7 +260,7 @@ func (env *Env) logoutHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (env *Env) nextUserHandler(w http.ResponseWriter, r *http.Request) {
-	setupCORSResponse(&w, r)
+	setupCORSResponse(w, r)
 
 	var resp JSON
 
@@ -260,14 +269,14 @@ func (env *Env) nextUserHandler(w http.ResponseWriter, r *http.Request) {
 	if err == http.ErrNoCookie {
 
 		resp.Status = StatusNotFound
-		sendResp(resp, &w)
+		sendResp(resp, w)
 		return
 	}
 	currentUser, err := env.getUserByCookie(session.Value)
 	if err != nil {
 
 		resp.Status = StatusNotFound
-		sendResp(resp, &w)
+		sendResp(resp, w)
 		return
 	}
 
@@ -275,14 +284,14 @@ func (env *Env) nextUserHandler(w http.ResponseWriter, r *http.Request) {
 	byteReq, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		resp.Status = StatusBadRequest
-		sendResp(resp, &w)
+		sendResp(resp, w)
 		return
 	}
 	var swipedUserData SwipedUser
 	err = json.Unmarshal(byteReq, &swipedUserData)
 	if err != nil {
 		resp.Status = StatusBadRequest
-		sendResp(resp, &w)
+		sendResp(resp, w)
 		return
 	}
 
@@ -290,21 +299,21 @@ func (env *Env) nextUserHandler(w http.ResponseWriter, r *http.Request) {
 	err = env.db.addSwipedUsers(currentUser.ID, swipedUserData.Id)
 	if err != nil {
 		resp.Status = StatusNotFound
-		sendResp(resp, &w)
+		sendResp(resp, w)
 		return
 	}
 	// find next user for swipe
 	nextUser, err := env.db.getNextUserForSwipe(currentUser.ID)
 	if err != nil {
 		resp.Status = StatusNotFound
-		sendResp(resp, &w)
+		sendResp(resp, w)
 		return
 	}
 
 	resp.Status = StatusOK
 	resp.Body = nextUser
 
-	sendResp(resp, &w)
+	sendResp(resp, w)
 }
 
 type Env struct {
