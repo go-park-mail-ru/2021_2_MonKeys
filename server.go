@@ -3,63 +3,105 @@ package main
 import (
 	"crypto/md5"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
-	"os"
-	"path/filepath"
 	"time"
 
 	"github.com/gorilla/mux"
 )
 
 const (
-	StatusOK         = 200
-	StatusBadRequest = 400
-	StatusNotFound   = 404
+	StatusOK                  = 200
+	StatusBadRequest          = 400
+	StatusNotFound            = 404
 	StatusInternalServerError = 500
+	StatusEmailAlreadyExists  = 1001
 )
 
-func sendResp(resp JSON, w *http.ResponseWriter) {
+func sendResp(resp JSON, w http.ResponseWriter) {
 	byteResp, err := json.Marshal(resp)
 	if err != nil {
-		http.Error(*w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
-	(*w).WriteHeader(http.StatusOK)
-	(*w).Write(byteResp)
+	w.WriteHeader(http.StatusOK)
+	w.Write(byteResp)
 }
 
-func (env *Env) cookieHandler(w http.ResponseWriter, r *http.Request) {
-	var resp JSON
+func setupCORSResponse(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", r.Header.Get("Origin"))
+	w.Header().Set("Access-Control-Allow-Credentials", "true")
+	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS")
+	w.Header().Set("Access-Control-Allow-Headers",
+		"Accept," +
+		"Content-Type," +
+		"Content-Length," +
+		"Accept-Encoding," +
+		"X-CSRF-Token," +
+		"Authorization," +
+		"Allow-Credentials," +
+		"Set-Cookie," +
+		"Access-Control-Allow-Credentials," +
+		"Access-Control-Allow-Origin")
+}
 
+func (env *Env) corsHandler(w http.ResponseWriter, r *http.Request) {
+	setupCORSResponse(w, r)
+}
+
+func createSessionCookie(user LoginUser) http.Cookie {
+	expiration := time.Now().Add(10 * time.Hour)
+
+	data := user.Password + time.Now().String()
+	md5CookieValue := fmt.Sprintf("%x", md5.Sum([]byte(data)))
+
+	cookie := http.Cookie{
+		Name:     "sessionId",
+		Value:    md5CookieValue,
+		Expires:  expiration,
+		Secure:   true,
+		HttpOnly: true,
+		SameSite: http.SameSiteNoneMode,
+	}
+
+	return cookie
+}
+
+func (env *Env) currentUser(w http.ResponseWriter, r *http.Request) {
+	setupCORSResponse(w, r)
+
+	var resp JSON
 	session, err := r.Cookie("sessionId")
-	if err == http.ErrNoCookie {
+	if err != nil {
 		resp.Status = StatusNotFound
-		sendResp(resp, &w)
+		sendResp(resp, w)
 		return
 	}
 
-	currentUser, err := env.sessionDB.getUserByCookie(session.Value)
+	currentUser, err := env.getUserByCookie(session.Value)
 	if err != nil {
 		resp.Status = StatusNotFound
-		sendResp(resp, &w)
+		sendResp(resp, w)
 		return
 	}
 
 	resp.Status = StatusOK
 	resp.Body = currentUser
 
-	sendResp(resp, &w)
+	sendResp(resp, w)
 }
 
 func (env *Env) loginHandler(w http.ResponseWriter, r *http.Request) {
+	setupCORSResponse(w, r)
+
 	var resp JSON
 
 	byteReq, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		resp.Status = StatusBadRequest
-		sendResp(resp, &w)
+		sendResp(resp, w)
 		return
 	}
 
@@ -67,36 +109,24 @@ func (env *Env) loginHandler(w http.ResponseWriter, r *http.Request) {
 	err = json.Unmarshal(byteReq, &logUserData)
 	if err != nil {
 		resp.Status = StatusBadRequest
-		sendResp(resp, &w)
+		sendResp(resp, w)
 		return
 	}
 
-	identifiableUser, err := env.db.getUserModel(logUserData.Email)
+	identifiableUser, err := env.db.getUser(logUserData.Email)
 	if err != nil {
-		resp.Status = StatusInternalServerError
-		sendResp(resp, &w)
+		resp.Status = StatusNotFound
+		sendResp(resp, w)
 		return
 	}
 
 	status := StatusOK
 	if identifiableUser.isCorrectPassword(logUserData.Password) {
-		expiration := time.Now().Add(10 * time.Hour)
-
-		data := logUserData.Password + time.Now().String()
-		md5CookieValue := fmt.Sprintf("%x", md5.Sum([]byte(data)))
-
-		cookie := http.Cookie{
-			Name:     "sessionId",
-			Value:    md5CookieValue,
-			Expires:  expiration,
-			Secure:   true,
-			HttpOnly: true,
-		}
-
-		err = env.sessionDB.newSessionCookie(md5CookieValue, identifiableUser.ID)
+		cookie := createSessionCookie(logUserData)
+		err = env.sessionDB.newSessionCookie(cookie.Value, identifiableUser.ID)
 		if err != nil {
 			resp.Status = StatusInternalServerError
-			sendResp(resp, &w)
+			sendResp(resp, w)
 			return
 		}
 
@@ -108,19 +138,122 @@ func (env *Env) loginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	resp.Status = status
-	sendResp(resp, &w)
+	sendResp(resp, w)
+}
+
+func (env *Env) signupHandler(w http.ResponseWriter, r *http.Request) {
+	setupCORSResponse(w, r)
+
+	var resp JSON
+
+	byteReq, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		resp.Status = StatusBadRequest
+		sendResp(resp, w)
+		return
+	}
+
+	var logUserData LoginUser
+	err = json.Unmarshal(byteReq, &logUserData)
+	if err != nil {
+		resp.Status = StatusBadRequest
+		sendResp(resp, w)
+		return
+	}
+
+	identifiableUser, _ := env.db.getUser(logUserData.Email)
+	if !identifiableUser.isEmpty() {
+		resp.Status = StatusEmailAlreadyExists
+		sendResp(resp, w)
+		return
+	}
+
+	user, err := env.db.createUser(logUserData)
+	if err != nil {
+		resp.Status = StatusInternalServerError
+		sendResp(resp, w)
+		return
+	}
+
+	cookie := createSessionCookie(logUserData)
+	err = env.sessionDB.newSessionCookie(cookie.Value, user.ID)
+	if err != nil {
+		resp.Status = StatusInternalServerError
+		sendResp(resp, w)
+		return
+	}
+
+	http.SetCookie(w, &cookie)
+
+	resp.Status = StatusOK
+	sendResp(resp, w)
+}
+
+func (env *Env) editHandler(w http.ResponseWriter, r *http.Request) {
+	setupCORSResponse(w, r)
+
+	var resp JSON
+
+	byteReq, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		resp.Status = StatusBadRequest
+		sendResp(resp, w)
+		return
+	}
+
+	var user User
+	err = json.Unmarshal(byteReq, &user)
+	if err != nil {
+		resp.Status = StatusBadRequest
+		sendResp(resp, w)
+		return
+	}
+
+	session, err := r.Cookie("sessionId")
+	if err != nil {
+		resp.Status = StatusNotFound
+		sendResp(resp, w)
+		return
+	}
+
+	currentUser, err := env.getUserByCookie(session.Value)
+	if err != nil {
+		resp.Status = StatusNotFound
+		sendResp(resp, w)
+		return
+	}
+
+	currentUser.Name = user.Name
+	currentUser.Age = user.Age
+	currentUser.Description = user.Description
+	currentUser.Tags = user.Tags
+
+	err = env.db.updateUser(currentUser)
+	if err != nil {
+		resp.Status = StatusNotFound
+		sendResp(resp, w)
+		return
+	}
+
+	resp.Status = StatusOK
+	resp.Body = currentUser
+
+	sendResp(resp, w)
 }
 
 func (env *Env) logoutHandler(w http.ResponseWriter, r *http.Request) {
+	setupCORSResponse(w, r)
+
 	session, err := r.Cookie("sessionId")
-	if err == http.ErrNoCookie {
-		sendResp(JSON{Status: StatusNotFound}, &w)
+
+	if err != nil {
+		sendResp(JSON{Status: StatusNotFound}, w)
 		return
 	}
 
 	err = env.sessionDB.deleteSessionCookie(session.Value)
 	if err != nil {
-		sendResp(JSON{Status: StatusInternalServerError}, &w)
+		sendResp(JSON{Status: StatusInternalServerError}, w)
 		return
 	}
 
@@ -128,96 +261,163 @@ func (env *Env) logoutHandler(w http.ResponseWriter, r *http.Request) {
 	http.SetCookie(w, session)
 }
 
-type spaHandler struct {
-	staticPath string
-	indexPath  string
-}
+func (env *Env) nextUserHandler(w http.ResponseWriter, r *http.Request) {
+	setupCORSResponse(w, r)
 
-func (h spaHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	// get the absolute path to prevent directory traversal
-	path, err := filepath.Abs(r.URL.Path)
+	var resp JSON
+
+	// get current user by cookie
+	session, err := r.Cookie("sessionId")
+	if err == http.ErrNoCookie {
+
+		resp.Status = StatusNotFound
+		sendResp(resp, w)
+		return
+	}
+	currentUser, err := env.getUserByCookie(session.Value)
 	if err != nil {
-		// if we failed to get the absolute path respond with a 400 bad request
-		// and stop
-		http.Error(w, err.Error(), http.StatusBadRequest)
+
+		resp.Status = StatusNotFound
+		sendResp(resp, w)
 		return
 	}
 
-	// prepend the path with the path to the static directory
-	path = filepath.Join(h.staticPath, path)
-
-	// check whether a file exists at the given path
-	_, err = os.Stat(path)
-	if os.IsNotExist(err) {
-		// file does not exist, serve index.html
-		http.ServeFile(w, r, filepath.Join(h.staticPath, h.indexPath))
-		return
-	} else if err != nil {
-		// if we got an error (that wasn't that the file doesn't exist) stating the
-		// file, return a 500 internal server error and stop
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+	// get swiped user id from json
+	byteReq, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		resp.Status = StatusBadRequest
+		sendResp(resp, w)
 		return
 	}
-	// otherwise, use http.FileServer to serve the static dir
-	http.FileServer(http.Dir(h.staticPath)).ServeHTTP(w, r)
+	var swipedUserData SwipedUser
+	err = json.Unmarshal(byteReq, &swipedUserData)
+	if err != nil {
+		resp.Status = StatusBadRequest
+		sendResp(resp, w)
+		return
+	}
+
+	// add in swaped users map for current user
+	err = env.db.addSwipedUsers(currentUser.ID, swipedUserData.Id)
+	if err != nil {
+		resp.Status = StatusNotFound
+		sendResp(resp, w)
+		return
+	}
+	// find next user for swipe
+	nextUser, err := env.db.getNextUserForSwipe(currentUser.ID)
+	if err != nil {
+		resp.Status = StatusNotFound
+		sendResp(resp, w)
+		return
+	}
+
+	resp.Status = StatusOK
+	resp.Body = nextUser
+
+	sendResp(resp, w)
 }
 
 type Env struct {
 	db interface {
-		getUserModel(string) (User, error)
+		getUser(email string) (User, error)
+		getUserByID(userID uint64) (User, error)
+		createUser(logUserData LoginUser) (User, error)
+		addSwipedUsers(currentUserId, swipedUserId uint64) error
+		getNextUserForSwipe(currentUserId uint64) (User, error)
+		updateUser(user User) error
 	}
 	sessionDB interface {
-		getUserByCookie(sessionCookie string) (User, error)
+		getUserIDByCookie(sessionCookie string) (uint64, error)
 		newSessionCookie(sessionCookie string, userId uint64) error
 		deleteSessionCookie(sessionCookie string) error
 	}
 }
 
+func (env Env) getUserByCookie(sessionCookie string) (User, error) {
+	userID, err := env.sessionDB.getUserIDByCookie(sessionCookie)
+	if err != nil {
+		return User{}, errors.New("error sessionDB: getUserIDByCookie")
+	}
+
+	user, err := env.db.getUserByID(userID)
+	if err != nil {
+		return User{}, errors.New("error db: getUserByID")
+	}
+
+	return user, nil
+}
+
+var (
+	db = NewMockDB()
+)
+
 func init() {
-	marvin := User{
+	db.users[1] = User{
 		ID:          1,
 		Name:        "Mikhail",
 		Email:       "mumeu222@mail.ru",
-		Password:    "VBif222!",
+		Password:    "af57966e1958f52e41550e822dd8e8a4", //VBif222!
 		Age:         20,
 		Description: "Hahahahaha",
 		ImgSrc:      "/img/Yachty-tout.jpg",
 		Tags:        []string{"haha", "hihi"},
 	}
-	users[1] = marvin
+	db.users[2] = User{
+		ID:          2,
+		Name:        "Mikhail2",
+		Email:       "mumeu222@mail.ru2",
+		Password:    "af57966e1958f52e41550e822dd8e8a4", //VBif222!
+		Age:         20,
+		Description: "Hahahahaha",
+		ImgSrc:      "/img/Yachty-tout.jpg",
+		Tags:        []string{"haha", "hihi"},
+	}
+	db.users[3] = User{
+		ID:          3,
+		Name:        "Mikhail3",
+		Email:       "mumeu222@mail.ru3",
+		Password:    "af57966e1958f52e41550e822dd8e8a4", //VBif222!
+		Age:         20,
+		Description: "Hahahahaha",
+		ImgSrc:      "/img/Yachty-tout.jpg",
+		Tags:        []string{"haha", "hihi"},
+	}
+	db.users[4] = User{
+		ID:          4,
+		Name:        "MikhaNika",
+		Email:       "test4@mail.ru",
+		Password:    "af57966e1958f52e41550e822dd8e8a4", //VBif222!
+		Age:         21,
+		Description: "Ответственна, самоорганизована, исполнительна, пунктуальна, ориентирована на\nизучение деталей и подробностей, стрессоустойчива.\nУверенный пользователь MS office,высокий уровень грамотности, навыки делового общения",
+		ImgSrc:      "/img/test4.jpg",
+		Tags:        []string{"MS Access", "CRM", "1С-Битрикс", "AXAPTA"},
+	}
 }
 
 func main() {
-	/*db, err := sql.Open("postgres", "postgres://user:pass@localhost/bookstore")
-	if err != nil {
-		log.Fatal(err)
-	}
-
 	env := &Env{
-		db: ModelsDB{DB: db},
-	}
-	*/
-
-	env := &Env{
-		db:        MockDB{},
-		sessionDB: MockSessionDB{},
+		db:        db, // NewMockDB()
+		sessionDB: NewSessionDB(),
 	}
 
-	mux := mux.NewRouter()
+	router := mux.NewRouter()
 
-	mux.HandleFunc("/api/v1/cookie", env.cookieHandler).Methods("GET")
-	mux.HandleFunc("/api/v1/login", env.loginHandler).Methods("POST")
-	mux.HandleFunc("/api/v1/logout", env.logoutHandler).Methods("GET")
-
-	spa := spaHandler{staticPath: "static", indexPath: "index.html"}
-	mux.PathPrefix("/").Handler(spa)
+	router.PathPrefix("/api/v1/").HandlerFunc(env.corsHandler).Methods("OPTIONS")
+	router.HandleFunc("/api/v1/currentuser", env.currentUser).Methods("GET")
+	router.HandleFunc("/api/v1/login", env.loginHandler).Methods("POST")
+	//router.HandleFunc("/api/v1/createprofile", env.loginHandler).Methods("POST")
+	router.HandleFunc("/api/v1/edit", env.editHandler).Methods("POST")
+	router.HandleFunc("/api/v1/signup", env.signupHandler).Methods("POST")
+	router.HandleFunc("/api/v1/logout", env.logoutHandler).Methods("GET")
+	router.HandleFunc("/api/v1/nextswipeuser", env.nextUserHandler).Methods("POST")
 
 	srv := &http.Server{
-		Handler:      mux,
+		Handler:      router,
 		Addr:         ":8080",
 		WriteTimeout: http.DefaultClient.Timeout,
 		ReadTimeout:  http.DefaultClient.Timeout,
 	}
 
-	log.Fatal(srv.ListenAndServe())
+	log.Fatal(srv.ListenAndServeTLS("./monkeys-drip.com+3.pem", "./monkeys-drip.com+3-key.pem"))
 }
