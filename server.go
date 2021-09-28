@@ -412,10 +412,10 @@ func main() {
 
 	srv := &http.Server{
 		Handler:      router,
-		Addr:         ":8080",
+		Addr:         ":443",
 		WriteTimeout: http.DefaultClient.Timeout,
 		ReadTimeout:  http.DefaultClient.Timeout,
 	}
 
-	log.Fatal(srv.ListenAndServeTLS("./monkeys-drip.com+3.pem", "./monkeys-drip.com+3-key.pem"))
+	log.Fatal(srv.ListenAndServeTLS("api.ijia.me.crt", "api.ijia.me.key"))
 }
