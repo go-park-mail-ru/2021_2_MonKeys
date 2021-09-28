@@ -189,10 +189,23 @@ func (env *Env) signupHandler(w http.ResponseWriter, r *http.Request) {
 	sendResp(resp, w)
 }
 
-func (env *Env) editHandler(w http.ResponseWriter, r *http.Request) {
+func (env *Env) editProfileHandler(w http.ResponseWriter, r *http.Request) {
 	setupCORSResponse(w, r)
 
 	var resp JSON
+	session, err := r.Cookie("sessionId")
+	if err != nil {
+		resp.Status = StatusNotFound
+		sendResp(resp, w)
+		return
+	}
+
+	currentUser, err := env.getUserByCookie(session.Value)
+	if err != nil {
+		resp.Status = StatusNotFound
+		sendResp(resp, w)
+		return
+	}
 
 	byteReq, err := ioutil.ReadAll(r.Body)
 	if err != nil {
@@ -209,28 +222,15 @@ func (env *Env) editHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	session, err := r.Cookie("sessionId")
-	if err != nil {
-		resp.Status = StatusNotFound
-		sendResp(resp, w)
-		return
-	}
-
-	currentUser, err := env.getUserByCookie(session.Value)
-	if err != nil {
-		resp.Status = StatusNotFound
-		sendResp(resp, w)
-		return
-	}
-
 	currentUser.Name = user.Name
 	currentUser.Age = user.Age
 	currentUser.Description = user.Description
+	//currentUser.ImgSrc = user.ImgSrc
 	currentUser.Tags = user.Tags
 
 	err = env.db.updateUser(currentUser)
 	if err != nil {
-		resp.Status = StatusNotFound
+		resp.Status = StatusInternalServerError
 		sendResp(resp, w)
 		return
 	}
@@ -406,8 +406,7 @@ func main() {
 	router.PathPrefix("/api/v1/").HandlerFunc(env.corsHandler).Methods("OPTIONS")
 	router.HandleFunc("/api/v1/currentuser", env.currentUser).Methods("GET")
 	router.HandleFunc("/api/v1/login", env.loginHandler).Methods("POST")
-	//router.HandleFunc("/api/v1/createprofile", env.loginHandler).Methods("POST")
-	router.HandleFunc("/api/v1/edit", env.editHandler).Methods("POST")
+	router.HandleFunc("/api/v1/editprofile", env.editProfileHandler).Methods("POST")
 	router.HandleFunc("/api/v1/signup", env.signupHandler).Methods("POST")
 	router.HandleFunc("/api/v1/logout", env.logoutHandler).Methods("GET")
 	router.HandleFunc("/api/v1/nextswipeuser", env.nextUserHandler).Methods("POST")
