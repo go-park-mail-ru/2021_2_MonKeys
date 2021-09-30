@@ -16,7 +16,7 @@ const (
 )
 
 type TestCase struct {
-	testType    int
+	testType   int
 	BodyReq    io.Reader
 	CookieReq  http.Cookie
 	StatusCode int
@@ -29,26 +29,26 @@ func TestCurrentUser(t *testing.T) {
 		TestCase{
 			BodyReq: nil,
 			CookieReq: http.Cookie{
-				Name:     "sessionId",
-				Value:    "123",
+				Name:  "sessionId",
+				Value: "123",
 			},
 			StatusCode: http.StatusOK,
-			BodyResp: `{"status":200,"body":{"id":1,"name":"","email":"testCurrentUser1@mail.ru","age":0,"description":"","imgSrc":"","tags":null}}`,
+			BodyResp:   `{"status":200,"body":{"id":1,"name":"","email":"testCurrentUser1@mail.ru","age":0,"description":"","imgSrc":"","tags":null}}`,
 		},
 		TestCase{
 			BodyReq: nil,
 			CookieReq: http.Cookie{
-				Name:     "sessionId",
-				Value:    "123123",
+				Name:  "sessionId",
+				Value: "123123",
 			},
 			StatusCode: http.StatusOK,
-			BodyResp: `{"status":404,"body":null}`,
+			BodyResp:   `{"status":404,"body":null}`,
 		},
 		TestCase{
-			BodyReq: nil,
-			CookieReq: http.Cookie{},
+			BodyReq:    nil,
+			CookieReq:  http.Cookie{},
 			StatusCode: http.StatusOK,
-			BodyResp: `{"status":404,"body":null}`,
+			BodyResp:   `{"status":404,"body":null}`,
 		},
 	}
 
@@ -60,7 +60,7 @@ func TestCurrentUser(t *testing.T) {
 		sessionDB: testSessionDB,
 	}
 	testDB.createUser(LoginUser{
-		Email: "testCurrentUser1@mail.ru",
+		Email:    "testCurrentUser1@mail.ru",
 		Password: "123456qQ",
 	})
 	testSessionDB.cookies["123"] = 1
@@ -88,28 +88,28 @@ func TestLogin(t *testing.T) {
 	t.Parallel()
 	cases := []TestCase{
 		TestCase{
-			testType: correctCase,
-			BodyReq: bytes.NewReader([]byte(`{"email":"testLogin1@mail.ru","password":"123456qQ"}`)),
+			testType:   correctCase,
+			BodyReq:    bytes.NewReader([]byte(`{"email":"testLogin1@mail.ru","password":"123456qQ"}`)),
 			StatusCode: http.StatusOK,
 			BodyResp: `{"status":200,"body":{"id":1,"name":"","email":"testLogin1@mail.ru","age":0,"description":"","imgSrc":"","tags":null}}`,
 		},
 		TestCase{
-			testType: wrongCase,
-			BodyReq: bytes.NewReader([]byte(`wrong input data`)),
+			testType:   wrongCase,
+			BodyReq:    bytes.NewReader([]byte(`wrong input data`)),
 			StatusCode: http.StatusOK,
-			BodyResp: `{"status":400,"body":null}`,
+			BodyResp:   `{"status":400,"body":null}`,
 		},
 		TestCase{
-			testType: wrongCase,
-			BodyReq: bytes.NewReader([]byte(`{"email":"wrongEmail","password":"wrongPassword"}`)),
+			testType:   wrongCase,
+			BodyReq:    bytes.NewReader([]byte(`{"email":"wrongEmail","password":"wrongPassword"}`)),
 			StatusCode: http.StatusOK,
-			BodyResp: `{"status":404,"body":null}`,
+			BodyResp:   `{"status":404,"body":null}`,
 		},
 		TestCase{
-			testType: wrongCase,
-			BodyReq: bytes.NewReader([]byte(`{"email":"testLogin1@mail.ru","password":"wrongPassword"}`)),
+			testType:   wrongCase,
+			BodyReq:    bytes.NewReader([]byte(`{"email":"testLogin1@mail.ru","password":"wrongPassword"}`)),
 			StatusCode: http.StatusOK,
-			BodyResp: `{"status":404,"body":null}`,
+			BodyResp:   `{"status":404,"body":null}`,
 		},
 	}
 
@@ -121,7 +121,7 @@ func TestLogin(t *testing.T) {
 		sessionDB: testSessionDB,
 	}
 	testDB.createUser(LoginUser{
-		Email: "testLogin1@mail.ru",
+		Email:    "testLogin1@mail.ru",
 		Password: "123456qQ",
 	})
 
@@ -161,22 +161,22 @@ func TestSignup(t *testing.T) {
 
 	cases := []TestCase{
 		TestCase{
-			testType: correctCase,
-			BodyReq: bytes.NewReader([]byte(`{"email":"` + email + `","password":"` + password + `"}`)),
+			testType:   correctCase,
+			BodyReq:    bytes.NewReader([]byte(`{"email":"` + email + `","password":"` + password + `"}`)),
 			StatusCode: http.StatusOK,
-			BodyResp: `{"status":200,"body":null}`,
+			BodyResp:   `{"status":200,"body":null}`,
 		},
 		TestCase{
-			testType: wrongCase,
-			BodyReq: bytes.NewReader([]byte(`wrong input data`)),
+			testType:   wrongCase,
+			BodyReq:    bytes.NewReader([]byte(`wrong input data`)),
 			StatusCode: http.StatusOK,
-			BodyResp: `{"status":400,"body":null}`,
+			BodyResp:   `{"status":400,"body":null}`,
 		},
 		TestCase{
-			testType: wrongCase,
-			BodyReq: bytes.NewReader([]byte(`{"email":"firsUser@mail.ru","password":"EmailAlreadyExists"}`)),
+			testType:   wrongCase,
+			BodyReq:    bytes.NewReader([]byte(`{"email":"firsUser@mail.ru","password":"EmailAlreadyExists"}`)),
 			StatusCode: http.StatusOK,
-			BodyResp: `{"status":1001,"body":null}`,
+			BodyResp:   `{"status":1001,"body":null}`,
 		},
 	}
 
@@ -191,7 +191,7 @@ func TestSignup(t *testing.T) {
 	for caseNum, item := range cases {
 		testDB.users = make(map[uint64]User)
 		testDB.createUser(LoginUser{
-			Email: "firsUser@mail.ru",
+			Email:    "firsUser@mail.ru",
 			Password: "123456qQ",
 		})
 
@@ -229,19 +229,19 @@ func TestLogout(t *testing.T) {
 		TestCase{
 			testType: correctCase,
 			CookieReq: http.Cookie{
-				Name:     "sessionId",
-				Value:    "1234",
+				Name:  "sessionId",
+				Value: "1234",
 			},
 			StatusCode: http.StatusOK,
 		},
 		TestCase{
 			testType: wrongCase,
 			CookieReq: http.Cookie{
-				Name:     "sessionId",
-				Value:    "wrongCase cookie",
+				Name:  "sessionId",
+				Value: "wrongCase cookie",
 			},
 			StatusCode: http.StatusOK,
-			BodyResp: `{"status":500,"body":null}`,
+			BodyResp:   `{"status":500,"body":null}`,
 		},
 		TestCase{
 			testType:   wrongCase,
@@ -259,7 +259,7 @@ func TestLogout(t *testing.T) {
 		sessionDB: testSessionDB,
 	}
 	testDB.createUser(LoginUser{
-		Email: "testLogout1@mail.ru",
+		Email:    "testLogout1@mail.ru",
 		Password: "123456qQ",
 	})
 
@@ -283,7 +283,7 @@ func TestLogout(t *testing.T) {
 		}
 
 		if _, ok := testSessionDB.cookies["1234"]; ok && item.testType == correctCase {
-			t.Errorf("TestCase [%d]:\nuser session not ended", caseNum + 1)
+			t.Errorf("TestCase [%d]:\nuser session not ended", caseNum+1)
 		}
 	}
 }
@@ -293,50 +293,50 @@ func TestNextUser(t *testing.T) {
 	cases := []TestCase{
 		TestCase{
 			testType: correctCase,
-			BodyReq: bytes.NewReader([]byte(`{"id":321}`)),
+			BodyReq:  bytes.NewReader([]byte(`{"id":321}`)),
 			CookieReq: http.Cookie{
-				Name:     "sessionId",
-				Value:    "123",
+				Name:  "sessionId",
+				Value: "123",
 			},
 			StatusCode: http.StatusOK,
-			BodyResp: `{"status":200,"body":{"id":1,"name":"","email":"testNextUser1@mail.ru","age":0,"description":"","imgSrc":"","tags":null}}`,
+			BodyResp:   `{"status":200,"body":{"id":1,"name":"","email":"testNextUser1@mail.ru","age":0,"description":"","imgSrc":"","tags":null}}`,
 		},
 		TestCase{
 			testType: wrongCase,
-			BodyReq: bytes.NewReader([]byte(`{"id":321}`)),
+			BodyReq:  bytes.NewReader([]byte(`{"id":321}`)),
 			CookieReq: http.Cookie{
-				Name:     "sessionId",
-				Value:    "123123",
+				Name:  "sessionId",
+				Value: "123123",
 			},
 			StatusCode: http.StatusOK,
-			BodyResp: `{"status":404,"body":null}`,
+			BodyResp:   `{"status":404,"body":null}`,
+		},
+		TestCase{
+			testType:   wrongCase,
+			BodyReq:    bytes.NewReader([]byte(`{"id":321}`)),
+			CookieReq:  http.Cookie{},
+			StatusCode: http.StatusOK,
+			BodyResp:   `{"status":404,"body":null}`,
 		},
 		TestCase{
 			testType: wrongCase,
-			BodyReq: bytes.NewReader([]byte(`{"id":321}`)),
-			CookieReq: http.Cookie{},
+			BodyReq:  bytes.NewReader([]byte("wrong json")),
+			CookieReq: http.Cookie{
+				Name:  "sessionId",
+				Value: "123",
+			},
 			StatusCode: http.StatusOK,
-			BodyResp: `{"status":404,"body":null}`,
+			BodyResp:   `{"status":400,"body":null}`,
 		},
 		TestCase{
 			testType: wrongCase,
-			BodyReq: bytes.NewReader([]byte("wrong json")),
+			BodyReq:  bytes.NewReader([]byte(`{"id":1}`)),
 			CookieReq: http.Cookie{
-				Name:     "sessionId",
-				Value:    "123",
+				Name:  "sessionId",
+				Value: "123",
 			},
 			StatusCode: http.StatusOK,
-			BodyResp: `{"status":400,"body":null}`,
-		},
-		TestCase{
-			testType: wrongCase,
-			BodyReq: bytes.NewReader([]byte(`{"id":1}`)),
-			CookieReq: http.Cookie{
-				Name:     "sessionId",
-				Value:    "123",
-			},
-			StatusCode: http.StatusOK,
-			BodyResp: `{"status":404,"body":null}`,
+			BodyResp:   `{"status":404,"body":null}`,
 		},
 	}
 
@@ -349,12 +349,12 @@ func TestNextUser(t *testing.T) {
 	}
 
 	testDB.createUser(LoginUser{
-		Email: "testNextUser1@mail.ru",
+		Email:    "testNextUser1@mail.ru",
 		Password: "123456qQ\"",
 	})
 
 	currenUser, _ := testDB.createUser(LoginUser{
-		Email: "testCurrUser1@mail.ru",
+		Email:    "testCurrUser1@mail.ru",
 		Password: "123456qQ\"",
 	})
 	testSessionDB.cookies["123"] = currenUser.ID
