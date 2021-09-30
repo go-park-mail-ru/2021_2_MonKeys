@@ -8,7 +8,6 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"strconv"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -21,28 +20,6 @@ const (
 	StatusInternalServerError = 500
 	StatusEmailAlreadyExists  = 1001
 )
-
-func getAgeFromDate(date string) (uint, error) {
-	// 2012-12-12
-	// 0123456789
-	// userDay, err := strconv.Atoi(date[8:])
-	// if err != nil {
-	// 	return 0, errors.New("failed on userDay")
-	// }
-	// userMonth, err := strconv.Atoi(date[5:7])
-	// if err != nil {
-	// 	return 0, errors.New("failed on userMonth")
-	// }
-
-	userYear, err := strconv.Atoi(date[:4])
-	if err != nil {
-		return 0, errors.New("failed on userYear")
-	}
-
-	age := (uint)(time.Now().Year() - userYear)
-
-	return age, nil
-}
 
 func sendResp(resp JSON, w http.ResponseWriter) {
 	byteResp, err := json.Marshal(resp)
@@ -228,22 +205,17 @@ func (env *Env) editProfileHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var user User
-	err = json.Unmarshal(byteReq, &user)
+	var newUserData User
+	err = json.Unmarshal(byteReq, &newUserData)
 	if err != nil {
 		resp.Status = StatusBadRequest
 		sendResp(resp, w)
 		return
 	}
 
-	currentUser.Name = user.Name
-	currentUser.Date = user.Date
-	currentUser.Description = user.Description
-	//currentUser.ImgSrc = user.ImgSrc
-	currentUser.Tags = user.Tags
-	currentUser.Age, err = getAgeFromDate(user.Date)
+	err = currentUser.fillProfile(newUserData)
 	if err != nil {
-		resp.Status = StatusNotFound
+		resp.Status = StatusBadRequest
 		sendResp(resp, w)
 		return
 	}
@@ -260,6 +232,7 @@ func (env *Env) editProfileHandler(w http.ResponseWriter, r *http.Request) {
 
 	sendResp(resp, w)
 }
+
 func (env *Env) logoutHandler(w http.ResponseWriter, r *http.Request) {
 	session, err := r.Cookie("sessionId")
 
@@ -340,7 +313,7 @@ type Env struct {
 		createUser(logUserData LoginUser) (User, error)
 		addSwipedUsers(currentUserId, swipedUserId uint64) error
 		getNextUserForSwipe(currentUserId uint64) (User, error)
-		updateUser(user User) error
+		updateUser(newUserData User) error
 	}
 	sessionDB interface {
 		getUserIDByCookie(sessionCookie string) (uint64, error)
