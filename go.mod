@@ -3,7 +3,6 @@ module server
 go 1.14
 
 require (
-	github.com/cpuguy83/go-md2man/v2 v2.0.1 // indirect
 	github.com/go-openapi/jsonreference v0.19.6 // indirect
 	github.com/go-openapi/swag v0.19.15 // indirect
 	github.com/gorilla/mux v1.8.0
