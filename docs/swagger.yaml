@@ -46,6 +46,32 @@ paths:
     post:
       consumes:
       - application/json
+      description: log in
+      parameters:
+      - description: data for login
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/main.LoginUser'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main.JSON'
+        "400":
+          description: ""
+        "404":
+          description: ""
+        "500":
+          description: ""
+      summary: LogIn
+  /nextswipeuser:
+    post:
+      consumes:
+      - application/json
       description: get next user for feed
       parameters:
       - description: data of current user
@@ -68,4 +94,30 @@ paths:
         "500":
           description: ""
       summary: NextUser
+  /signup:
+    post:
+      consumes:
+      - application/json
+      description: registration user
+      parameters:
+      - description: data for registration
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/main.User'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main.JSON'
+        "400":
+          description: ""
+        "404":
+          description: ""
+        "500":
+          description: ""
+      summary: SignUp
 swagger: "2.0"

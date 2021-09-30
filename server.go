@@ -177,7 +177,7 @@ func (env *Env) loginHandler(w http.ResponseWriter, r *http.Request) {
 // @Param input body User true "data for registration"
 // @Success 200 {object} JSON
 // @Failure 400,404,500
-// @Router /login [post]
+// @Router /signup [post]
 func (env *Env) signupHandler(w http.ResponseWriter, r *http.Request) {
 	var resp JSON
 
@@ -304,7 +304,7 @@ func (env *Env) logoutHandler(w http.ResponseWriter, r *http.Request) {
 // @Param input body User true "data of current user"
 // @Success 200 {object} JSON
 // @Failure 400,404,500
-// @Router /login [post]
+// @Router /nextswipeuser [post]
 func (env *Env) nextUserHandler(w http.ResponseWriter, r *http.Request) {
 	var resp JSON
 

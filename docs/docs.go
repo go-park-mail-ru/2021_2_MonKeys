@@ -26,6 +26,46 @@ var doc = `{
     "paths": {
         "/login": {
             "post": {
+                "description": "log in",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "LogIn",
+                "parameters": [
+                    {
+                        "description": "data for login",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/main.LoginUser"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/main.JSON"
+                        }
+                    },
+                    "400": {
+                        "description": ""
+                    },
+                    "404": {
+                        "description": ""
+                    },
+                    "500": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/nextswipeuser": {
+            "post": {
                 "description": "get next user for feed",
                 "consumes": [
                     "application/json"
@@ -37,6 +77,46 @@ var doc = `{
                 "parameters": [
                     {
                         "description": "data of current user",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/main.User"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/main.JSON"
+                        }
+                    },
+                    "400": {
+                        "description": ""
+                    },
+                    "404": {
+                        "description": ""
+                    },
+                    "500": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/signup": {
+            "post": {
+                "description": "registration user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "SignUp",
+                "parameters": [
+                    {
+                        "description": "data for registration",
                         "name": "input",
                         "in": "body",
                         "required": true,
