@@ -224,6 +224,14 @@ func (env *Env) signupHandler(w http.ResponseWriter, r *http.Request) {
 	sendResp(resp, w)
 }
 
+// @Summary EditProfile
+// @Description edit profile data
+// @Accept json
+// @Produce json
+// @Param input body User true "updated user data"
+// @Success 200 {object} JSON
+// @Failure 400,404,500
+// @Router /seditprofile [post]
 func (env *Env) editProfileHandler(w http.ResponseWriter, r *http.Request) {
 	var resp JSON
 	session, err := r.Cookie("sessionId")
@@ -279,6 +287,7 @@ func (env *Env) editProfileHandler(w http.ResponseWriter, r *http.Request) {
 
 	sendResp(resp, w)
 }
+
 func (env *Env) logoutHandler(w http.ResponseWriter, r *http.Request) {
 	session, err := r.Cookie("sessionId")
 
@@ -316,7 +325,7 @@ func (env *Env) nextUserHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// get swiped user id from json
+	// get swiped usedata for registrationr id from json
 	byteReq, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		resp.Status = StatusBadRequest
