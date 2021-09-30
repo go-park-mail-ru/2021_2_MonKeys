@@ -57,13 +57,11 @@ jobs:
       - run:
           name: "making test-results folder"
           command: |
-                mkdir test-results
+                mkdir test-results && cd test-results && mkdir go && pwd
                 ls
-                cd test-results
-                ls
-                mkdir go
+                pwd
       - run:
-            name: "conver to xml for circleCI"
+            name: "convert to xml for circleCI"
             command: |
                 ls
                 gocov convert cover.out | gocov-xml > test-results/go/coverage.xml
