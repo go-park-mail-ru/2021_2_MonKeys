@@ -8,10 +8,12 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"strconv"
 	"time"
 
+	_ "server/docs"
+
 	"github.com/gorilla/mux"
+	httpSwagger "github.com/swaggo/http-swagger"
 )
 
 const (
@@ -22,28 +24,6 @@ const (
 	StatusEmailAlreadyExists  = 1001
 )
 
-func getAgeFromDate(date string) (uint, error) {
-	// 2012-12-12
-	// 0123456789
-	// userDay, err := strconv.Atoi(date[8:])
-	// if err != nil {
-	// 	return 0, errors.New("failed on userDay")
-	// }
-	// userMonth, err := strconv.Atoi(date[5:7])
-	// if err != nil {
-	// 	return 0, errors.New("failed on userMonth")
-	// }
-
-	userYear, err := strconv.Atoi(date[:4])
-	if err != nil {
-		return 0, errors.New("failed on userYear")
-	}
-
-	age := (uint)(time.Now().Year() - userYear)
-
-	return age, nil
-}
-
 func sendResp(resp JSON, w http.ResponseWriter) {
 	byteResp, err := json.Marshal(resp)
 	if err != nil {
@@ -53,25 +33,24 @@ func sendResp(resp JSON, w http.ResponseWriter) {
 	w.Write(byteResp)
 }
 
-func setupCORSResponse(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Access-Control-Allow-Origin", r.Header.Get("Origin"))
-	w.Header().Set("Access-Control-Allow-Credentials", "true")
-	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS")
-	w.Header().Set("Access-Control-Allow-Headers",
-		"Accept,"+
-			"Content-Type,"+
-			"Content-Length,"+
-			"Accept-Encoding,"+
-			"X-CSRF-Token,"+
-			"Authorization,"+
-			"Allow-Credentials,"+
-			"Set-Cookie,"+
-			"Access-Control-Allow-Credentials,"+
-			"Access-Control-Allow-Origin")
-}
-
-func (env *Env) corsHandler(w http.ResponseWriter, r *http.Request) {
-	setupCORSResponse(w, r)
+func CORSMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "https://ijia.me")
+		w.Header().Set("Access-Control-Allow-Credentials", "true")
+		w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Headers",
+			"Accept,"+
+				"Content-Type,"+
+				"Content-Length,"+
+				"Accept-Encoding,"+
+				"X-CSRF-Token,"+
+				"Authorization,"+
+				"Allow-Credentials,"+
+				"Set-Cookie,"+
+				"Access-Control-Allow-Credentials,"+
+				"Access-Control-Allow-Origin")
+		next.ServeHTTP(w, r)
+	})
 }
 
 func createSessionCookie(user LoginUser) http.Cookie {
@@ -93,20 +72,16 @@ func createSessionCookie(user LoginUser) http.Cookie {
 }
 
 func (env *Env) currentUser(w http.ResponseWriter, r *http.Request) {
-	setupCORSResponse(w, r)
-
 	var resp JSON
 	session, err := r.Cookie("sessionId")
 	if err != nil {
-		resp.Status = StatusNotFound
-		sendResp(resp, w)
+		w.WriteHeader(http.StatusNotFound)
 		return
 	}
 
 	currentUser, err := env.getUserByCookie(session.Value)
 	if err != nil {
-		resp.Status = StatusNotFound
-		sendResp(resp, w)
+		w.WriteHeader(http.StatusNotFound)
 		return
 	}
 
@@ -116,30 +91,34 @@ func (env *Env) currentUser(w http.ResponseWriter, r *http.Request) {
 	sendResp(resp, w)
 }
 
+// @Summary LogIn
+// @Description log in
+// @Tags login
+// @Accept json
+// @Produce json
+// @Param input body LoginUser true "data for login"
+// @Success 200 {object} JSON
+// @Failure 400,404,500
+// @Router /login [post]
 func (env *Env) loginHandler(w http.ResponseWriter, r *http.Request) {
-	setupCORSResponse(w, r)
-
 	var resp JSON
 
 	byteReq, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		resp.Status = StatusBadRequest
-		sendResp(resp, w)
+		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
 	var logUserData LoginUser
 	err = json.Unmarshal(byteReq, &logUserData)
 	if err != nil {
-		resp.Status = StatusBadRequest
-		sendResp(resp, w)
+		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
 	identifiableUser, err := env.db.getUser(logUserData.Email)
 	if err != nil {
-		resp.Status = StatusNotFound
-		sendResp(resp, w)
+		w.WriteHeader(http.StatusNotFound)
 		return
 	}
 
@@ -148,12 +127,13 @@ func (env *Env) loginHandler(w http.ResponseWriter, r *http.Request) {
 		cookie := createSessionCookie(logUserData)
 		err = env.sessionDB.newSessionCookie(cookie.Value, identifiableUser.ID)
 		if err != nil {
-			resp.Status = StatusInternalServerError
-			sendResp(resp, w)
+			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
 
 		http.SetCookie(w, &cookie)
+
+		resp.Body = identifiableUser
 	} else {
 		status = StatusNotFound
 	}
@@ -162,23 +142,28 @@ func (env *Env) loginHandler(w http.ResponseWriter, r *http.Request) {
 	sendResp(resp, w)
 }
 
+// @Summary SignUp
+// @Description registration user
+// @Tags registration
+// @Accept json
+// @Produce json
+// @Param input body LoginUser true "data for registration"
+// @Success 200 {object} JSON
+// @Failure 400,404,500
+// @Router /signup [post]
 func (env *Env) signupHandler(w http.ResponseWriter, r *http.Request) {
-	setupCORSResponse(w, r)
-
 	var resp JSON
 
 	byteReq, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		resp.Status = StatusBadRequest
-		sendResp(resp, w)
+		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
 	var logUserData LoginUser
 	err = json.Unmarshal(byteReq, &logUserData)
 	if err != nil {
-		resp.Status = StatusBadRequest
-		sendResp(resp, w)
+		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
@@ -191,16 +176,14 @@ func (env *Env) signupHandler(w http.ResponseWriter, r *http.Request) {
 
 	user, err := env.db.createUser(logUserData)
 	if err != nil {
-		resp.Status = StatusInternalServerError
-		sendResp(resp, w)
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
 	cookie := createSessionCookie(logUserData)
 	err = env.sessionDB.newSessionCookie(cookie.Value, user.ID)
 	if err != nil {
-		resp.Status = StatusInternalServerError
-		sendResp(resp, w)
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
@@ -210,57 +193,42 @@ func (env *Env) signupHandler(w http.ResponseWriter, r *http.Request) {
 	sendResp(resp, w)
 }
 
-func (env *Env) editHandler(w http.ResponseWriter, r *http.Request) {
-	setupCORSResponse(w, r)
-
+func (env *Env) editProfileHandler(w http.ResponseWriter, r *http.Request) {
 	var resp JSON
-
-	byteReq, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		resp.Status = StatusBadRequest
-		sendResp(resp, w)
-		return
-	}
-
-	var user User
-	err = json.Unmarshal(byteReq, &user)
-	if err != nil {
-		fmt.Println("unmarhal error")
-		resp.Status = StatusBadRequest
-		sendResp(resp, w)
-		return
-	}
-
 	session, err := r.Cookie("sessionId")
 	if err != nil {
-		fmt.Println("session error")
-		resp.Status = StatusNotFound
-		sendResp(resp, w)
+		w.WriteHeader(http.StatusNotFound)
 		return
 	}
 
 	currentUser, err := env.getUserByCookie(session.Value)
 	if err != nil {
-		resp.Status = StatusNotFound
-		sendResp(resp, w)
+		w.WriteHeader(http.StatusNotFound)
 		return
 	}
 
-	currentUser.Name = user.Name
-	currentUser.Date = user.Date
-	currentUser.Description = user.Description
-	currentUser.Tags = user.Tags
-	currentUser.Age, err = getAgeFromDate(user.Date)
+	byteReq, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		resp.Status = StatusNotFound
-		sendResp(resp, w)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	var newUserData User
+	err = json.Unmarshal(byteReq, &newUserData)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	err = currentUser.fillProfile(newUserData)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
 	err = env.db.updateUser(currentUser)
 	if err != nil {
-		resp.Status = StatusNotFound
-		sendResp(resp, w)
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
@@ -269,19 +237,17 @@ func (env *Env) editHandler(w http.ResponseWriter, r *http.Request) {
 
 	sendResp(resp, w)
 }
+
 func (env *Env) logoutHandler(w http.ResponseWriter, r *http.Request) {
-	setupCORSResponse(w, r)
-
 	session, err := r.Cookie("sessionId")
-
 	if err != nil {
-		sendResp(JSON{Status: StatusNotFound}, w)
+		w.WriteHeader(http.StatusNotFound)
 		return
 	}
 
 	err = env.sessionDB.deleteSessionCookie(session.Value)
 	if err != nil {
-		sendResp(JSON{Status: StatusInternalServerError}, w)
+		w.WriteHeader(http.StatusNotFound)
 		return
 	}
 
@@ -290,53 +256,43 @@ func (env *Env) logoutHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (env *Env) nextUserHandler(w http.ResponseWriter, r *http.Request) {
-	setupCORSResponse(w, r)
-
 	var resp JSON
 
 	// get current user by cookie
 	session, err := r.Cookie("sessionId")
-	if err == http.ErrNoCookie {
-
-		resp.Status = StatusNotFound
-		sendResp(resp, w)
+	if err != nil {
+		w.WriteHeader(http.StatusNotFound)
 		return
 	}
 	currentUser, err := env.getUserByCookie(session.Value)
 	if err != nil {
-
-		resp.Status = StatusNotFound
-		sendResp(resp, w)
+		w.WriteHeader(http.StatusNotFound)
 		return
 	}
 
-	// get swiped user id from json
+	// get swiped usedata for registrationr id from json
 	byteReq, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		resp.Status = StatusBadRequest
-		sendResp(resp, w)
+		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 	var swipedUserData SwipedUser
 	err = json.Unmarshal(byteReq, &swipedUserData)
 	if err != nil {
-		resp.Status = StatusBadRequest
-		sendResp(resp, w)
+		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
 	// add in swaped users map for current user
 	err = env.db.addSwipedUsers(currentUser.ID, swipedUserData.Id)
 	if err != nil {
-		resp.Status = StatusNotFound
-		sendResp(resp, w)
+		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 	// find next user for swipe
 	nextUser, err := env.db.getNextUserForSwipe(currentUser.ID)
 	if err != nil {
-		resp.Status = StatusNotFound
-		sendResp(resp, w)
+		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
@@ -353,7 +309,7 @@ type Env struct {
 		createUser(logUserData LoginUser) (User, error)
 		addSwipedUsers(currentUserId, swipedUserId uint64) error
 		getNextUserForSwipe(currentUserId uint64) (User, error)
-		updateUser(user User) error
+		updateUser(newUserData User) error
 	}
 	sessionDB interface {
 		getUserIDByCookie(sessionCookie string) (uint64, error)
@@ -427,6 +383,17 @@ func init() {
 	}
 }
 
+// @title Drip API
+// @version 1.0
+// @description API for Drip.
+// @termsOfService http://swagger.io/terms/
+
+// @host api.ijia.me
+// @BasePath /api/v1
+
+// @securityDefinitions.apikey ApiKeyAuth
+// @in header
+// @name Set-Cookie
 func main() {
 	env := &Env{
 		db:        db, // NewMockDB()
@@ -435,14 +402,15 @@ func main() {
 
 	router := mux.NewRouter()
 
-	router.PathPrefix("/api/v1/").HandlerFunc(env.corsHandler).Methods("OPTIONS")
-	router.HandleFunc("/api/v1/currentuser", env.currentUser).Methods("GET")
-	router.HandleFunc("/api/v1/login", env.loginHandler).Methods("POST")
-	//router.HandleFunc("/api/v1/createprofile", env.loginHandler).Methods("POST")
-	router.HandleFunc("/api/v1/edit", env.editHandler).Methods("POST")
-	router.HandleFunc("/api/v1/signup", env.signupHandler).Methods("POST")
-	router.HandleFunc("/api/v1/logout", env.logoutHandler).Methods("GET")
-	router.HandleFunc("/api/v1/nextswipeuser", env.nextUserHandler).Methods("POST")
+	router.HandleFunc("/api/v1/currentuser", env.currentUser).Methods("GET", "OPTIONS")
+	router.HandleFunc("/api/v1/login", env.loginHandler).Methods("POST", "OPTIONS")
+	router.HandleFunc("/api/v1/editprofile", env.editProfileHandler).Methods("POST", "OPTIONS")
+	router.HandleFunc("/api/v1/signup", env.signupHandler).Methods("POST", "OPTIONS")
+	router.HandleFunc("/api/v1/logout", env.logoutHandler).Methods("GET", "OPTIONS")
+	router.HandleFunc("/api/v1/nextswipeuser", env.nextUserHandler).Methods("POST", "OPTIONS")
+	router.Use(CORSMiddleware)
+
+	router.PathPrefix("/api/documentation/").Handler(httpSwagger.WrapHandler)
 
 	srv := &http.Server{
 		Handler:      router,
