@@ -2,7 +2,9 @@ package main
 
 import (
 	"crypto/md5"
+	"errors"
 	"fmt"
+	"time"
 )
 
 type JSON struct {
@@ -15,7 +17,7 @@ type User struct {
 	Name        string   `json:"name"`
 	Email       string   `json:"email"`
 	Password    string   `json:"-"`
-	Date        string   `json:"date"`
+	Date        string   `json:"date,omitempty"`
 	Age         uint     `json:"age"`
 	Description string   `json:"description"`
 	ImgSrc      string   `json:"imgSrc"`
@@ -36,6 +38,34 @@ func (user User) isEmpty() bool {
 
 func (user User) isCorrectPassword(password string) bool {
 	return user.Password == hashPassword(password)
+}
+
+func getAgeFromDate(date string) (uint, error) {
+	birthday, err := time.Parse("2006-01-02", date)
+	if err != nil {
+		return 0, errors.New("failed on userYear")
+	}
+
+	age := uint(time.Now().Year() - birthday.Year())
+	if time.Now().YearDay() < birthday.YearDay() {
+		age -= 1
+	}
+
+	return age, nil
+}
+
+func (user *User) fillProfile(newUserData User) (err error) {
+	user.Name = newUserData.Name
+	user.Date = newUserData.Date
+	user.Age, err = getAgeFromDate(newUserData.Date)
+	if err != nil {
+		return errors.New("failed to save age")
+	}
+	user.Description = newUserData.Description
+	user.ImgSrc = newUserData.ImgSrc
+	user.Tags = newUserData.Tags
+
+	return nil
 }
 
 type LoginUser struct {
