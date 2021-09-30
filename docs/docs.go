@@ -24,24 +24,24 @@ var doc = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/login": {
+        "/editprofile": {
             "post": {
-                "description": "log in",
+                "description": "edit profile data",
                 "consumes": [
                     "application/json"
                 ],
                 "produces": [
                     "application/json"
                 ],
-                "summary": "LogIn",
+                "summary": "EditProfile",
                 "parameters": [
                     {
-                        "description": "data for login",
+                        "description": "updated user data",
                         "name": "input",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/main.LoginUser"
+                            "$ref": "#/definitions/main.User"
                         }
                     }
                 ],
@@ -64,24 +64,24 @@ var doc = `{
                 }
             }
         },
-        "/seditprofile": {
+        "/login": {
             "post": {
-                "description": "edit profile data",
+                "description": "log in",
                 "consumes": [
                     "application/json"
                 ],
                 "produces": [
                     "application/json"
                 ],
-                "summary": "EditProfile",
+                "summary": "LogIn",
                 "parameters": [
                     {
-                        "description": "updated user data",
+                        "description": "data for login",
                         "name": "input",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/main.User"
+                            "$ref": "#/definitions/main.LoginUser"
                         }
                     }
                 ],

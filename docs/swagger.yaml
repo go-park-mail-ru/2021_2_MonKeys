@@ -42,6 +42,32 @@ info:
   title: Drip API
   version: "1.0"
 paths:
+  /editprofile:
+    post:
+      consumes:
+      - application/json
+      description: edit profile data
+      parameters:
+      - description: updated user data
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/main.User'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main.JSON'
+        "400":
+          description: ""
+        "404":
+          description: ""
+        "500":
+          description: ""
+      summary: EditProfile
   /login:
     post:
       consumes:
@@ -68,32 +94,6 @@ paths:
         "500":
           description: ""
       summary: LogIn
-  /seditprofile:
-    post:
-      consumes:
-      - application/json
-      description: edit profile data
-      parameters:
-      - description: updated user data
-        in: body
-        name: input
-        required: true
-        schema:
-          $ref: '#/definitions/main.User'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/main.JSON'
-        "400":
-          description: ""
-        "404":
-          description: ""
-        "500":
-          description: ""
-      summary: EditProfile
   /signup:
     post:
       consumes:
