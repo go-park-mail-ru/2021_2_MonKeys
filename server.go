@@ -463,7 +463,7 @@ func main() {
 	router.HandleFunc("/api/v1/nextswipeuser", env.nextUserHandler).Methods("POST", "OPTIONS")
 	router.Use(CORSMiddleware)
 
-	router.PathPrefix("/documentation/").Handler(httpSwagger.WrapHandler)
+	router.PathPrefix("/api/documentation/").Handler(httpSwagger.WrapHandler)
 
 	srv := &http.Server{
 		Handler:      router,
