@@ -8,6 +8,8 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"server/MockDB"
+	"server/Models"
 	"time"
 
 	_ "server/docs"
@@ -24,7 +26,7 @@ const (
 	StatusEmailAlreadyExists  = 1001
 )
 
-func sendResp(resp JSON, w http.ResponseWriter) {
+func sendResp(resp Models.JSON, w http.ResponseWriter) {
 	byteResp, err := json.Marshal(resp)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -53,7 +55,7 @@ func CORSMiddleware(next http.Handler) http.Handler {
 	})
 }
 
-func createSessionCookie(user LoginUser) http.Cookie {
+func createSessionCookie(user Models.LoginUser) http.Cookie {
 	expiration := time.Now().Add(10 * time.Hour)
 
 	data := user.Password + time.Now().String()
@@ -72,7 +74,7 @@ func createSessionCookie(user LoginUser) http.Cookie {
 }
 
 func (env *Env) currentUser(w http.ResponseWriter, r *http.Request) {
-	var resp JSON
+	var resp Models.JSON
 	session, err := r.Cookie("sessionId")
 	if err != nil {
 		resp.Status = StatusNotFound
@@ -103,7 +105,7 @@ func (env *Env) currentUser(w http.ResponseWriter, r *http.Request) {
 // @Failure 400,404,500
 // @Router /login [post]
 func (env *Env) loginHandler(w http.ResponseWriter, r *http.Request) {
-	var resp JSON
+	var resp Models.JSON
 
 	byteReq, err := ioutil.ReadAll(r.Body)
 	if err != nil {
@@ -112,7 +114,7 @@ func (env *Env) loginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var logUserData LoginUser
+	var logUserData Models.LoginUser
 	err = json.Unmarshal(byteReq, &logUserData)
 	if err != nil {
 		resp.Status = StatusBadRequest
@@ -120,7 +122,7 @@ func (env *Env) loginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	identifiableUser, err := env.db.getUser(logUserData.Email)
+	identifiableUser, err := env.db.GetUser(logUserData.Email)
 	if err != nil {
 		resp.Status = StatusNotFound
 		sendResp(resp, w)
@@ -128,9 +130,9 @@ func (env *Env) loginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	status := StatusOK
-	if identifiableUser.isCorrectPassword(logUserData.Password) {
+	if identifiableUser.IsCorrectPassword(logUserData.Password) {
 		cookie := createSessionCookie(logUserData)
-		err = env.sessionDB.newSessionCookie(cookie.Value, identifiableUser.ID)
+		err = env.sessionDB.NewSessionCookie(cookie.Value, identifiableUser.ID)
 		if err != nil {
 			resp.Status = StatusInternalServerError
 			sendResp(resp, w)
@@ -158,7 +160,7 @@ func (env *Env) loginHandler(w http.ResponseWriter, r *http.Request) {
 // @Failure 400,404,500
 // @Router /signup [post]
 func (env *Env) signupHandler(w http.ResponseWriter, r *http.Request) {
-	var resp JSON
+	var resp Models.JSON
 
 	byteReq, err := ioutil.ReadAll(r.Body)
 	if err != nil {
@@ -167,7 +169,7 @@ func (env *Env) signupHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var logUserData LoginUser
+	var logUserData Models.LoginUser
 	err = json.Unmarshal(byteReq, &logUserData)
 	if err != nil {
 		resp.Status = StatusBadRequest
@@ -175,14 +177,14 @@ func (env *Env) signupHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	identifiableUser, _ := env.db.getUser(logUserData.Email)
-	if !identifiableUser.isEmpty() {
+	identifiableUser, _ := env.db.GetUser(logUserData.Email)
+	if !identifiableUser.IsEmpty() {
 		resp.Status = StatusEmailAlreadyExists
 		sendResp(resp, w)
 		return
 	}
 
-	user, err := env.db.createUser(logUserData)
+	user, err := env.db.CreateUser(logUserData)
 	if err != nil {
 		resp.Status = StatusInternalServerError
 		sendResp(resp, w)
@@ -190,7 +192,7 @@ func (env *Env) signupHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	cookie := createSessionCookie(logUserData)
-	err = env.sessionDB.newSessionCookie(cookie.Value, user.ID)
+	err = env.sessionDB.NewSessionCookie(cookie.Value, user.ID)
 	if err != nil {
 		resp.Status = StatusInternalServerError
 		sendResp(resp, w)
@@ -204,7 +206,7 @@ func (env *Env) signupHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (env *Env) editProfileHandler(w http.ResponseWriter, r *http.Request) {
-	var resp JSON
+	var resp Models.JSON
 	session, err := r.Cookie("sessionId")
 	if err != nil {
 		resp.Status = StatusNotFound
@@ -226,7 +228,7 @@ func (env *Env) editProfileHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var newUserData User
+	var newUserData Models.User
 	err = json.Unmarshal(byteReq, &newUserData)
 	if err != nil {
 		resp.Status = StatusBadRequest
@@ -234,14 +236,14 @@ func (env *Env) editProfileHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = currentUser.fillProfile(newUserData)
+	err = currentUser.FillProfile(newUserData)
 	if err != nil {
 		resp.Status = StatusBadRequest
 		sendResp(resp, w)
 		return
 	}
 
-	err = env.db.updateUser(currentUser)
+	err = env.db.UpdateUser(currentUser)
 	if err != nil {
 		resp.Status = StatusInternalServerError
 		sendResp(resp, w)
@@ -257,13 +259,13 @@ func (env *Env) editProfileHandler(w http.ResponseWriter, r *http.Request) {
 func (env *Env) logoutHandler(w http.ResponseWriter, r *http.Request) {
 	session, err := r.Cookie("sessionId")
 	if err != nil {
-		sendResp(JSON{Status: StatusNotFound}, w)
+		sendResp(Models.JSON{Status: StatusNotFound}, w)
 		return
 	}
 
-	err = env.sessionDB.deleteSessionCookie(session.Value)
+	err = env.sessionDB.DeleteSessionCookie(session.Value)
 	if err != nil {
-		sendResp(JSON{Status: StatusInternalServerError}, w)
+		sendResp(Models.JSON{Status: StatusInternalServerError}, w)
 		return
 	}
 
@@ -272,7 +274,7 @@ func (env *Env) logoutHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (env *Env) nextUserHandler(w http.ResponseWriter, r *http.Request) {
-	var resp JSON
+	var resp Models.JSON
 
 	// get current user by cookie
 	session, err := r.Cookie("sessionId")
@@ -295,7 +297,7 @@ func (env *Env) nextUserHandler(w http.ResponseWriter, r *http.Request) {
 		sendResp(resp, w)
 		return
 	}
-	var swipedUserData SwipedUser
+	var swipedUserData Models.SwipedUser
 	err = json.Unmarshal(byteReq, &swipedUserData)
 	if err != nil {
 		resp.Status = StatusBadRequest
@@ -304,14 +306,14 @@ func (env *Env) nextUserHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// add in swaped users map for current user
-	err = env.db.addSwipedUsers(currentUser.ID, swipedUserData.Id)
+	err = env.db.AddSwipedUsers(currentUser.ID, swipedUserData.Id)
 	if err != nil {
 		resp.Status = StatusNotFound
 		sendResp(resp, w)
 		return
 	}
 	// find next user for swipe
-	nextUser, err := env.db.getNextUserForSwipe(currentUser.ID)
+	nextUser, err := env.db.GetNextUserForSwipe(currentUser.ID)
 	if err != nil {
 		resp.Status = StatusNotFound
 		sendResp(resp, w)
@@ -326,40 +328,41 @@ func (env *Env) nextUserHandler(w http.ResponseWriter, r *http.Request) {
 
 type Env struct {
 	db interface {
-		getUser(email string) (User, error)
-		getUserByID(userID uint64) (User, error)
-		createUser(logUserData LoginUser) (User, error)
-		addSwipedUsers(currentUserId, swipedUserId uint64) error
-		getNextUserForSwipe(currentUserId uint64) (User, error)
-		updateUser(newUserData User) error
+		GetUser(email string) (Models.User, error)
+		GetUserByID(userID uint64) (Models.User, error)
+		CreateUser(logUserData Models.LoginUser) (Models.User, error)
+		AddSwipedUsers(currentUserId, swipedUserId uint64) error
+		GetNextUserForSwipe(currentUserId uint64) (Models.User, error)
+		UpdateUser(newUserData Models.User) error
 	}
 	sessionDB interface {
-		getUserIDByCookie(sessionCookie string) (uint64, error)
-		newSessionCookie(sessionCookie string, userId uint64) error
-		deleteSessionCookie(sessionCookie string) error
+		GetUserIDByCookie(sessionCookie string) (uint64, error)
+		NewSessionCookie(sessionCookie string, userId uint64) error
+		DeleteSessionCookie(sessionCookie string) error
 	}
 }
 
-func (env Env) getUserByCookie(sessionCookie string) (User, error) {
-	userID, err := env.sessionDB.getUserIDByCookie(sessionCookie)
+func (env Env) getUserByCookie(sessionCookie string) (Models.User, error) {
+	userID, err := env.sessionDB.GetUserIDByCookie(sessionCookie)
 	if err != nil {
-		return User{}, errors.New("error sessionDB: getUserIDByCookie")
+		return Models.User{}, errors.New("error sessionDB: GetUserIDByCookie")
 	}
 
-	user, err := env.db.getUserByID(userID)
+	user, err := env.db.GetUserByID(userID)
 	if err != nil {
-		return User{}, errors.New("error db: getUserByID")
+		return Models.User{}, errors.New("error db: getUserByID")
 	}
 
 	return user, nil
 }
 
 var (
-	db = NewMockDB()
+	db = MockDB.NewMockDB()
 )
 
-func init() {
-	db.users[1] = User{
+/*func init() {
+	db.
+	db.users[1] = Models.User{
 		ID:          1,
 		Name:        "Mikhail",
 		Email:       "mumeu222@mail.ru",
@@ -370,7 +373,7 @@ func init() {
 		ImgSrc:      "/img/Yachty-tout.jpg",
 		Tags:        []string{"soccer", "anime"},
 	}
-	db.users[2] = User{
+	db.users[2] = Models.User{
 		ID:          2,
 		Name:        "Mikhail2",
 		Email:       "mumeu222@mail.ru",
@@ -381,7 +384,7 @@ func init() {
 		ImgSrc:      "/img/Yachty-tout.jpg",
 		Tags:        []string{"soccer", "anime"},
 	}
-	db.users[3] = User{
+	db.users[3] = Models.User{
 		ID:          3,
 		Name:        "Mikhail3",
 		Email:       "mumeu222@mail.ru",
@@ -392,7 +395,7 @@ func init() {
 		ImgSrc:      "/img/Yachty-tout.jpg",
 		Tags:        []string{"soccer", "anime"},
 	}
-	db.users[4] = User{
+	db.users[4] = Models.User{
 		ID:          4,
 		Name:        "Mikhail4",
 		Email:       "mumeu222@mail.ru",
@@ -403,7 +406,7 @@ func init() {
 		ImgSrc:      "/img/Yachty-tout.jpg",
 		Tags:        []string{"soccer", "anime"},
 	}
-}
+}*/
 
 // @title Drip API
 // @version 1.0
@@ -419,7 +422,7 @@ func init() {
 func main() {
 	env := &Env{
 		db:        db, // NewMockDB()
-		sessionDB: NewSessionDB(),
+		sessionDB: MockDB.NewSessionDB(),
 	}
 
 	router := mux.NewRouter()
