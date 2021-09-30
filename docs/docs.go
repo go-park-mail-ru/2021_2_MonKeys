@@ -207,7 +207,7 @@ var doc = `{
     "securityDefinitions": {
         "ApiKeyAuth": {
             "type": "apiKey",
-            "name": "Authorization",
+            "name": "Set-Cookie",
             "in": "header"
         }
     }

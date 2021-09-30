@@ -125,6 +125,6 @@ paths:
 securityDefinitions:
   ApiKeyAuth:
     in: header
-    name: Authorization
+    name: Set-Cookie
     type: apiKey
 swagger: "2.0"

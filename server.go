@@ -453,7 +453,7 @@ func init() {
 
 // @securityDefinitions.apikey ApiKeyAuth
 // @in header
-// @name Authorization
+// @name Set-Cookie
 func main() {
 	env := &Env{
 		db:        db, // NewMockDB()
