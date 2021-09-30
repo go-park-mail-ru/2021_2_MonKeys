@@ -13,27 +13,6 @@ definitions:
       password:
         type: string
     type: object
-  main.User:
-    properties:
-      age:
-        type: integer
-      date:
-        type: string
-      description:
-        type: string
-      email:
-        type: string
-      id:
-        type: integer
-      imgSrc:
-        type: string
-      name:
-        type: string
-      tags:
-        items:
-          type: string
-        type: array
-    type: object
 host: api.ijia.me
 info:
   contact: {}
@@ -68,32 +47,6 @@ paths:
         "500":
           description: ""
       summary: LogIn
-  /nextswipeuser:
-    post:
-      consumes:
-      - application/json
-      description: get next user for feed
-      parameters:
-      - description: data of current user
-        in: body
-        name: input
-        required: true
-        schema:
-          $ref: '#/definitions/main.User'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/main.JSON'
-        "400":
-          description: ""
-        "404":
-          description: ""
-        "500":
-          description: ""
-      summary: NextUser
   /signup:
     post:
       consumes:
@@ -105,7 +58,7 @@ paths:
         name: input
         required: true
         schema:
-          $ref: '#/definitions/main.User'
+          $ref: '#/definitions/main.LoginUser'
       produces:
       - application/json
       responses:
