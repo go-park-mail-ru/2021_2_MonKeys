@@ -26,6 +26,11 @@ var doc = `{
     "paths": {
         "/editprofile": {
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "edit profile data",
                 "consumes": [
                     "application/json"
@@ -197,6 +202,13 @@ var doc = `{
                     }
                 }
             }
+        }
+    },
+    "securityDefinitions": {
+        "ApiKeyAuth": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
         }
     }
 }`

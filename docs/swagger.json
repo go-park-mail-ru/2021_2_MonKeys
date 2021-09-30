@@ -12,6 +12,11 @@
     "paths": {
         "/editprofile": {
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "edit profile data",
                 "consumes": [
                     "application/json"
@@ -183,6 +188,13 @@
                     }
                 }
             }
+        }
+    },
+    "securityDefinitions": {
+        "ApiKeyAuth": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
         }
     }
 }

@@ -225,6 +225,7 @@ func (env *Env) signupHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // @Summary EditProfile
+// @Security ApiKeyAuth
 // @Description edit profile data
 // @Accept json
 // @Produce json
@@ -449,6 +450,10 @@ func init() {
 
 // @host api.ijia.me
 // @BasePath /api/v1
+
+// @securityDefinitions.apikey ApiKeyAuth
+// @in header
+// @name Authorization
 func main() {
 	env := &Env{
 		db:        db, // NewMockDB()

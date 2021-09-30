@@ -67,6 +67,8 @@ paths:
           description: ""
         "500":
           description: ""
+      security:
+      - ApiKeyAuth: []
       summary: EditProfile
   /login:
     post:
@@ -120,4 +122,9 @@ paths:
         "500":
           description: ""
       summary: SignUp
+securityDefinitions:
+  ApiKeyAuth:
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"
