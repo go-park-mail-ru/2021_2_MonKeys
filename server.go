@@ -430,7 +430,7 @@ func init() {
 // @description API for Drip.
 // @termsOfService http://swagger.io/terms/
 
-// @host https://api.ijia.me
+// @host api.ijia.me
 // @BasePath /api/v1
 func main() {
 	env := &Env{

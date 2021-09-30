@@ -7,7 +7,7 @@ definitions:
       password:
         type: string
     type: object
-host: https://api.ijia.me
+host: api.ijia.me
 info:
   contact: {}
   description: API for Drip.

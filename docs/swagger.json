@@ -7,7 +7,7 @@
         "contact": {},
         "version": "1.0"
     },
-    "host": "https://api.ijia.me",
+    "host": "api.ijia.me",
     "basePath": "/api/v1",
     "paths": {
         "/login": {
