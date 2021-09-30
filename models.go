@@ -13,15 +13,15 @@ type JSON struct {
 }
 
 type User struct {
-	ID          uint64   `json:"id"`
-	Name        string   `json:"name"`
-	Email       string   `json:"email"`
+	ID          uint64   `json:"id,omitempty"`
+	Name        string   `json:"name,omitempty"`
+	Email       string   `json:"email,omitempty"`
 	Password    string   `json:"-"`
 	Date        string   `json:"date,omitempty"`
-	Age         uint     `json:"age"`
-	Description string   `json:"description"`
-	ImgSrc      string   `json:"imgSrc"`
-	Tags        []string `json:"tags"`
+	Age         uint     `json:"age,omitempty"`
+	Description string   `json:"description,omitempty"`
+	ImgSrc      string   `json:"imgSrc,omitempty"`
+	Tags        []string `json:"tags,omitempty"`
 }
 
 func hashPassword(password string) string {

@@ -33,7 +33,7 @@ func TestCurrentUser(t *testing.T) {
 				Value: "123",
 			},
 			StatusCode: http.StatusOK,
-			BodyResp:   `{"status":200,"body":{"id":1,"name":"","email":"testCurrentUser1@mail.ru","age":0,"description":"","imgSrc":"","tags":null}}`,
+			BodyResp:   `{"status":200,"body":{"id":1,"email":"testCurrentUser1@mail.ru"}}`,
 		},
 		TestCase{
 			BodyReq: nil,
@@ -91,7 +91,7 @@ func TestLogin(t *testing.T) {
 			testType:   correctCase,
 			BodyReq:    bytes.NewReader([]byte(`{"email":"testLogin1@mail.ru","password":"123456qQ"}`)),
 			StatusCode: http.StatusOK,
-			BodyResp:   `{"status":200,"body":{"id":1,"name":"","email":"testLogin1@mail.ru","age":0,"description":"","imgSrc":"","tags":null}}`,
+			BodyResp:   `{"status":200,"body":{"id":1,"email":"testLogin1@mail.ru"}}`,
 		},
 		TestCase{
 			testType:   wrongCase,
@@ -299,7 +299,7 @@ func TestNextUser(t *testing.T) {
 				Value: "123",
 			},
 			StatusCode: http.StatusOK,
-			BodyResp:   `{"status":200,"body":{"id":1,"name":"","email":"testNextUser1@mail.ru","age":0,"description":"","imgSrc":"","tags":null}}`,
+			BodyResp:   `{"status":200,"body":{"id":1,"email":"testNextUser1@mail.ru"}}`,
 		},
 		TestCase{
 			testType: wrongCase,
@@ -435,6 +435,16 @@ func TestEditProfile(t *testing.T) {
 			CookieReq:  http.Cookie{},
 			StatusCode: http.StatusOK,
 			BodyResp:   `{"status":404,"body":null}`,
+		},
+		TestCase{
+			testType: wrongCase,
+			BodyReq:  bytes.NewReader([]byte(`{"name":"testEdit","date":"wrong-format-data","description":"Description Description Description Description","imgSrc":"/img/testEdit/","tags":["Tags","Tags","Tags","Tags","Tags"]}`)),
+			CookieReq: http.Cookie{
+				Name:  "sessionId",
+				Value: "123",
+			},
+			StatusCode: http.StatusOK,
+			BodyResp:   `{"status":400,"body":null}`,
 		},
 		TestCase{
 			testType: wrongCase,
