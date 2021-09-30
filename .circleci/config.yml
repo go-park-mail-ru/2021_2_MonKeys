@@ -21,8 +21,6 @@ jobs:
       
       - store_artifacts:
           path: /tmp/artifacts
-      - store_test_results:
-          path: test-results
   test-coverage:
       working_directory: ~/repo
       docker:
@@ -64,7 +62,7 @@ jobs:
             name: "convert to xml for circleCI"
             command: |
                 ls
-                gocov convert cover.out | gocov-xml > test-results/go/coverage.xml
+                gocov convert cover.out | gocov-xml > test-results/go/results.xml
       - store_test_results:
                 path: test-results
   linter:
