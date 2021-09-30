@@ -33,8 +33,10 @@ var doc = `{
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "login"
+                ],
                 "summary": "LogIn",
-                "operationId": "login",
                 "parameters": [
                     {
                         "description": "data for login",
@@ -74,8 +76,10 @@ var doc = `{
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "registration"
+                ],
                 "summary": "SignUp",
-                "operationId": "registration",
                 "parameters": [
                     {
                         "description": "data for registration",

@@ -26,7 +26,6 @@ paths:
       consumes:
       - application/json
       description: log in
-      operationId: login
       parameters:
       - description: data for login
         in: body
@@ -48,12 +47,13 @@ paths:
         "500":
           description: ""
       summary: LogIn
+      tags:
+      - login
   /signup:
     post:
       consumes:
       - application/json
       description: registration user
-      operationId: registration
       parameters:
       - description: data for registration
         in: body
@@ -75,6 +75,8 @@ paths:
         "500":
           description: ""
       summary: SignUp
+      tags:
+      - registration
 securityDefinitions:
   ApiKeyAuth:
     in: header
