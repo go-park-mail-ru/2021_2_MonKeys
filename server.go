@@ -8,20 +8,13 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strings"
 	"time"
 
 	_ "server/docs"
 
 	"github.com/gorilla/mux"
 	httpSwagger "github.com/swaggo/http-swagger"
-)
-
-const (
-	StatusOK                  = 200
-	StatusBadRequest          = 400
-	StatusNotFound            = 404
-	StatusInternalServerError = 500
-	StatusEmailAlreadyExists  = 1001
 )
 
 func sendResp(resp JSON, w http.ResponseWriter) {
@@ -38,17 +31,18 @@ func CORSMiddleware(next http.Handler) http.Handler {
 		w.Header().Set("Access-Control-Allow-Origin", "https://ijia.me")
 		w.Header().Set("Access-Control-Allow-Credentials", "true")
 		w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS")
-		w.Header().Set("Access-Control-Allow-Headers",
-			"Accept,"+
-				"Content-Type,"+
-				"Content-Length,"+
-				"Accept-Encoding,"+
-				"X-CSRF-Token,"+
-				"Authorization,"+
-				"Allow-Credentials,"+
-				"Set-Cookie,"+
-				"Access-Control-Allow-Credentials,"+
-				"Access-Control-Allow-Origin")
+		var sb strings.Builder
+		sb.WriteString("Accept,")
+		sb.WriteString("Content-Type,")
+		sb.WriteString("Content-Length,")
+		sb.WriteString("Accept-Encoding,")
+		sb.WriteString("X-CSRF-Token,")
+		sb.WriteString("Authorization,")
+		sb.WriteString("Allow-Credentials,")
+		sb.WriteString("Set-Cookie,")
+		sb.WriteString("Access-Control-Allow-Credentials,")
+		sb.WriteString("Access-Control-Allow-Origin")
+		w.Header().Set("Access-Control-Allow-Headers", sb.String())
 		next.ServeHTTP(w, r)
 	})
 }
@@ -75,19 +69,19 @@ func (env *Env) currentUser(w http.ResponseWriter, r *http.Request) {
 	var resp JSON
 	session, err := r.Cookie("sessionId")
 	if err != nil {
-		resp.Status = StatusNotFound
+		resp.Status = http.StatusNotFound
 		sendResp(resp, w)
 		return
 	}
 
 	currentUser, err := env.getUserByCookie(session.Value)
 	if err != nil {
-		resp.Status = StatusNotFound
+		resp.Status = http.StatusNotFound
 		sendResp(resp, w)
 		return
 	}
 
-	resp.Status = StatusOK
+	resp.Status = http.StatusOK
 	resp.Body = currentUser
 
 	sendResp(resp, w)
@@ -107,7 +101,7 @@ func (env *Env) loginHandler(w http.ResponseWriter, r *http.Request) {
 
 	byteReq, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		resp.Status = StatusBadRequest
+		resp.Status = http.StatusBadRequest
 		sendResp(resp, w)
 		return
 	}
@@ -115,24 +109,24 @@ func (env *Env) loginHandler(w http.ResponseWriter, r *http.Request) {
 	var logUserData LoginUser
 	err = json.Unmarshal(byteReq, &logUserData)
 	if err != nil {
-		resp.Status = StatusBadRequest
+		resp.Status = http.StatusBadRequest
 		sendResp(resp, w)
 		return
 	}
 
 	identifiableUser, err := env.db.getUser(logUserData.Email)
 	if err != nil {
-		resp.Status = StatusNotFound
+		resp.Status = http.StatusNotFound
 		sendResp(resp, w)
 		return
 	}
 
-	status := StatusOK
+	status := http.StatusOK
 	if identifiableUser.isCorrectPassword(logUserData.Password) {
 		cookie := createSessionCookie(logUserData)
 		err = env.sessionDB.newSessionCookie(cookie.Value, identifiableUser.ID)
 		if err != nil {
-			resp.Status = StatusInternalServerError
+			resp.Status = http.StatusInternalServerError
 			sendResp(resp, w)
 			return
 		}
@@ -141,7 +135,7 @@ func (env *Env) loginHandler(w http.ResponseWriter, r *http.Request) {
 
 		resp.Body = identifiableUser
 	} else {
-		status = StatusNotFound
+		status = http.StatusNotFound
 	}
 
 	resp.Status = status
@@ -162,7 +156,7 @@ func (env *Env) signupHandler(w http.ResponseWriter, r *http.Request) {
 
 	byteReq, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		resp.Status = StatusBadRequest
+		resp.Status = http.StatusBadRequest
 		sendResp(resp, w)
 		return
 	}
@@ -170,21 +164,21 @@ func (env *Env) signupHandler(w http.ResponseWriter, r *http.Request) {
 	var logUserData LoginUser
 	err = json.Unmarshal(byteReq, &logUserData)
 	if err != nil {
-		resp.Status = StatusBadRequest
+		resp.Status = http.StatusBadRequest
 		sendResp(resp, w)
 		return
 	}
 
 	identifiableUser, _ := env.db.getUser(logUserData.Email)
 	if !identifiableUser.isEmpty() {
-		resp.Status = StatusEmailAlreadyExists
+		resp.Status = http.StatusE
 		sendResp(resp, w)
 		return
 	}
 
 	user, err := env.db.createUser(logUserData)
 	if err != nil {
-		resp.Status = StatusInternalServerError
+		resp.Status = http.StatusInternalServerError
 		sendResp(resp, w)
 		return
 	}
@@ -192,14 +186,14 @@ func (env *Env) signupHandler(w http.ResponseWriter, r *http.Request) {
 	cookie := createSessionCookie(logUserData)
 	err = env.sessionDB.newSessionCookie(cookie.Value, user.ID)
 	if err != nil {
-		resp.Status = StatusInternalServerError
+		resp.Status = http.StatusInternalServerError
 		sendResp(resp, w)
 		return
 	}
 
 	http.SetCookie(w, &cookie)
 
-	resp.Status = StatusOK
+	resp.Status = http.StatusOK
 	sendResp(resp, w)
 }
 
@@ -207,21 +201,21 @@ func (env *Env) editProfileHandler(w http.ResponseWriter, r *http.Request) {
 	var resp JSON
 	session, err := r.Cookie("sessionId")
 	if err != nil {
-		resp.Status = StatusNotFound
+		resp.Status = http.StatusNotFound
 		sendResp(resp, w)
 		return
 	}
 
 	currentUser, err := env.getUserByCookie(session.Value)
 	if err != nil {
-		resp.Status = StatusNotFound
+		resp.Status = http.StatusNotFound
 		sendResp(resp, w)
 		return
 	}
 
 	byteReq, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		resp.Status = StatusBadRequest
+		resp.Status = http.StatusBadRequest
 		sendResp(resp, w)
 		return
 	}
@@ -229,26 +223,26 @@ func (env *Env) editProfileHandler(w http.ResponseWriter, r *http.Request) {
 	var newUserData User
 	err = json.Unmarshal(byteReq, &newUserData)
 	if err != nil {
-		resp.Status = StatusBadRequest
+		resp.Status = http.StatusBadRequest
 		sendResp(resp, w)
 		return
 	}
 
 	err = currentUser.fillProfile(newUserData)
 	if err != nil {
-		resp.Status = StatusBadRequest
+		resp.Status = http.StatusBadRequest
 		sendResp(resp, w)
 		return
 	}
 
 	err = env.db.updateUser(currentUser)
 	if err != nil {
-		resp.Status = StatusInternalServerError
+		resp.Status = http.StatusInternalServerError
 		sendResp(resp, w)
 		return
 	}
 
-	resp.Status = StatusOK
+	resp.Status = http.StatusOK
 	resp.Body = currentUser
 
 	sendResp(resp, w)
@@ -257,13 +251,13 @@ func (env *Env) editProfileHandler(w http.ResponseWriter, r *http.Request) {
 func (env *Env) logoutHandler(w http.ResponseWriter, r *http.Request) {
 	session, err := r.Cookie("sessionId")
 	if err != nil {
-		sendResp(JSON{Status: StatusNotFound}, w)
+		sendResp(JSON{Status: http.StatusNotFound}, w)
 		return
 	}
 
 	err = env.sessionDB.deleteSessionCookie(session.Value)
 	if err != nil {
-		sendResp(JSON{Status: StatusInternalServerError}, w)
+		sendResp(JSON{Status: http.StatusInternalServerError}, w)
 		return
 	}
 
@@ -277,13 +271,13 @@ func (env *Env) nextUserHandler(w http.ResponseWriter, r *http.Request) {
 	// get current user by cookie
 	session, err := r.Cookie("sessionId")
 	if err == http.ErrNoCookie {
-		resp.Status = StatusNotFound
+		resp.Status = http.StatusNotFound
 		sendResp(resp, w)
 		return
 	}
 	currentUser, err := env.getUserByCookie(session.Value)
 	if err != nil {
-		resp.Status = StatusNotFound
+		resp.Status = http.StatusNotFound
 		sendResp(resp, w)
 		return
 	}
@@ -291,14 +285,14 @@ func (env *Env) nextUserHandler(w http.ResponseWriter, r *http.Request) {
 	// get swiped usedata for registrationr id from json
 	byteReq, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		resp.Status = StatusBadRequest
+		resp.Status = http.StatusBadRequest
 		sendResp(resp, w)
 		return
 	}
 	var swipedUserData SwipedUser
 	err = json.Unmarshal(byteReq, &swipedUserData)
 	if err != nil {
-		resp.Status = StatusBadRequest
+		resp.Status = http.StatusBadRequest
 		sendResp(resp, w)
 		return
 	}
@@ -306,19 +300,19 @@ func (env *Env) nextUserHandler(w http.ResponseWriter, r *http.Request) {
 	// add in swaped users map for current user
 	err = env.db.addSwipedUsers(currentUser.ID, swipedUserData.Id)
 	if err != nil {
-		resp.Status = StatusNotFound
+		resp.Status = http.StatusNotFound
 		sendResp(resp, w)
 		return
 	}
 	// find next user for swipe
 	nextUser, err := env.db.getNextUserForSwipe(currentUser.ID)
 	if err != nil {
-		resp.Status = StatusNotFound
+		resp.Status = http.StatusNotFound
 		sendResp(resp, w)
 		return
 	}
 
-	resp.Status = StatusOK
+	resp.Status = http.StatusOK
 	resp.Body = nextUser
 
 	sendResp(resp, w)
