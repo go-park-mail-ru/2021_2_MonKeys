@@ -1,4 +1,4 @@
-package main
+package Handlers
 
 import (
 	"bytes"
@@ -58,8 +58,8 @@ func TestCurrentUser(t *testing.T) {
 	testSessionDB := MockDB.NewSessionDB()
 
 	env := &Env{
-		db:        testDB,
-		sessionDB: testSessionDB,
+		DB:        testDB,
+		SessionDB: testSessionDB,
 	}
 	testDB.CreateUser(Models.LoginUser{
 		Email:    "testCurrentUser1@mail.ru",
@@ -72,7 +72,7 @@ func TestCurrentUser(t *testing.T) {
 		r.AddCookie(&item.CookieReq)
 		w := httptest.NewRecorder()
 
-		env.currentUser(w, r)
+		env.CurrentUser(w, r)
 
 		if w.Code != item.StatusCode {
 			t.Errorf("TestCase [%d]:\nwrongCase StatusCode: \ngot %d\nexpected %d",
@@ -119,8 +119,8 @@ func TestLogin(t *testing.T) {
 	testSessionDB := MockDB.NewSessionDB()
 
 	env := &Env{
-		db:        testDB,
-		sessionDB: testSessionDB,
+		DB:        testDB,
+		SessionDB: testSessionDB,
 	}
 	testDB.CreateUser(Models.LoginUser{
 		Email:    "testLogin1@mail.ru",
@@ -132,7 +132,7 @@ func TestLogin(t *testing.T) {
 		r.AddCookie(&item.CookieReq)
 		w := httptest.NewRecorder()
 
-		env.loginHandler(w, r)
+		env.LoginHandler(w, r)
 
 		if w.Code != item.StatusCode {
 			t.Errorf("TestCase [%d]:\nwrongCase StatusCode: \ngot %d\nexpected %d",
@@ -186,8 +186,8 @@ func TestSignup(t *testing.T) {
 	testSessionDB := MockDB.NewSessionDB()
 
 	env := &Env{
-		db:        testDB,
-		sessionDB: testSessionDB,
+		DB:        testDB,
+		SessionDB: testSessionDB,
 	}
 
 	for caseNum, item := range cases {
@@ -201,7 +201,7 @@ func TestSignup(t *testing.T) {
 		r.AddCookie(&item.CookieReq)
 		w := httptest.NewRecorder()
 
-		env.signupHandler(w, r)
+		env.SignupHandler(w, r)
 
 		if w.Code != item.StatusCode {
 			t.Errorf("TestCase [%d]:\nwrongCase StatusCode: \ngot %d\nexpected %d",
@@ -259,8 +259,8 @@ func TestLogout(t *testing.T) {
 	testSessionDB := MockDB.NewSessionDB()
 
 	env := &Env{
-		db:        testDB,
-		sessionDB: testSessionDB,
+		DB:        testDB,
+		SessionDB: testSessionDB,
 	}
 	user, _ := testDB.CreateUser(Models.LoginUser{
 		Email:    "testLogout1@mail.ru",
@@ -274,7 +274,7 @@ func TestLogout(t *testing.T) {
 
 		testSessionDB.NewSessionCookie("123", user.ID)
 
-		env.logoutHandler(w, r)
+		env.LogoutHandler(w, r)
 
 		if w.Code != item.StatusCode {
 			t.Errorf("TestCase [%d]:\nwrongCase StatusCode: \ngot %d\nexpected %d",
@@ -348,8 +348,8 @@ func TestNextUser(t *testing.T) {
 	testSessionDB := MockDB.NewSessionDB()
 
 	env := &Env{
-		db:        testDB,
-		sessionDB: testSessionDB,
+		DB:        testDB,
+		SessionDB: testSessionDB,
 	}
 
 	testDB.CreateUser(Models.LoginUser{
@@ -368,7 +368,7 @@ func TestNextUser(t *testing.T) {
 		r.AddCookie(&item.CookieReq)
 		w := httptest.NewRecorder()
 
-		env.nextUserHandler(w, r)
+		env.NextUserHandler(w, r)
 
 		if w.Code != item.StatusCode {
 			t.Errorf("TestCase [%d]:\nwrongCase StatusCode: \ngot %d\nexpected %d",
@@ -467,8 +467,8 @@ func TestEditProfile(t *testing.T) {
 	testSessionDB := MockDB.NewSessionDB()
 
 	env := &Env{
-		db:        testDB,
-		sessionDB: testSessionDB,
+		DB:        testDB,
+		SessionDB: testSessionDB,
 	}
 
 	for caseNum, item := range cases {
@@ -484,7 +484,7 @@ func TestEditProfile(t *testing.T) {
 		r.AddCookie(&item.CookieReq)
 		w := httptest.NewRecorder()
 
-		env.editProfileHandler(w, r)
+		env.EditProfileHandler(w, r)
 
 		if w.Code != item.StatusCode {
 			t.Errorf("TestCase [%d]:\nwrongCase StatusCode: \ngot %d\nexpected %d",

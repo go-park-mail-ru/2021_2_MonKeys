@@ -125,6 +125,14 @@ func (db MockDB) IsSwiped(userID, swipedUserID uint64) bool {
 	return false
 }
 
+func (db *MockDB) CreateUserAndProfile(user Models.User) {
+	newID := uint64(len(db.users) + 1)
+
+	user.ID = newID
+
+	db.users[newID] = user
+}
+
 func (db MockDB) DropUsers() {
 	db.users = make(map[uint64]Models.User)
 }
