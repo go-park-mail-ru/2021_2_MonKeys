@@ -34,6 +34,7 @@ var doc = `{
                     "application/json"
                 ],
                 "summary": "LogIn",
+                "operationId": "login",
                 "parameters": [
                     {
                         "description": "data for login",
@@ -74,6 +75,7 @@ var doc = `{
                     "application/json"
                 ],
                 "summary": "SignUp",
+                "operationId": "registration",
                 "parameters": [
                     {
                         "description": "data for registration",

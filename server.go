@@ -118,6 +118,7 @@ func (env *Env) currentUser(w http.ResponseWriter, r *http.Request) {
 
 // @Summary LogIn
 // @Description log in
+// @ID login
 // @Accept json
 // @Produce json
 // @Param input body LoginUser true "data for login"
@@ -172,6 +173,7 @@ func (env *Env) loginHandler(w http.ResponseWriter, r *http.Request) {
 
 // @Summary SignUp
 // @Description registration user
+// @ID registration
 // @Accept json
 // @Produce json
 // @Param input body LoginUser true "data for registration"

@@ -26,6 +26,7 @@ paths:
       consumes:
       - application/json
       description: log in
+      operationId: login
       parameters:
       - description: data for login
         in: body
@@ -52,6 +53,7 @@ paths:
       consumes:
       - application/json
       description: registration user
+      operationId: registration
       parameters:
       - description: data for registration
         in: body
