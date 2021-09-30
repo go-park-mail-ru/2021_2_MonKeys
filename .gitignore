@@ -1,0 +1,9 @@
+.idea
+
+*.png
+*.js
+
+api.ijia.me.key
+api.ijia.me.crt
+
+go.sum
