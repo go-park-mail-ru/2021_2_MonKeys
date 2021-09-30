@@ -1,9 +1,15 @@
+# goland
 .idea
 
-*.png
-*.js
+# build folder
+build
 
+# ssl keys
 api.ijia.me.key
 api.ijia.me.crt
 
+# golang
 go.sum
+
+#codecov tmp
+coverage.out.tmp
