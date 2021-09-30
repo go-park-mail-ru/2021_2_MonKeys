@@ -10,7 +10,10 @@ import (
 	"net/http"
 	"time"
 
+	_ "server/docs"
+
 	"github.com/gorilla/mux"
+	httpSwagger "github.com/swaggo/http-swagger"
 )
 
 const (
@@ -90,6 +93,15 @@ func (env *Env) currentUser(w http.ResponseWriter, r *http.Request) {
 	sendResp(resp, w)
 }
 
+// @Summary LogIn
+// @Description log in
+// @Tags login
+// @Accept json
+// @Produce json
+// @Param input body LoginUser true "data for login"
+// @Success 200 {object} JSON
+// @Failure 400,404,500
+// @Router /login [post]
 func (env *Env) loginHandler(w http.ResponseWriter, r *http.Request) {
 	var resp JSON
 
@@ -136,6 +148,15 @@ func (env *Env) loginHandler(w http.ResponseWriter, r *http.Request) {
 	sendResp(resp, w)
 }
 
+// @Summary SignUp
+// @Description registration user
+// @Tags registration
+// @Accept json
+// @Produce json
+// @Param input body LoginUser true "data for registration"
+// @Success 200 {object} JSON
+// @Failure 400,404,500
+// @Router /signup [post]
 func (env *Env) signupHandler(w http.ResponseWriter, r *http.Request) {
 	var resp JSON
 
@@ -270,7 +291,7 @@ func (env *Env) nextUserHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// get swiped user id from json
+	// get swiped usedata for registrationr id from json
 	byteReq, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		resp.Status = StatusBadRequest
@@ -387,6 +408,17 @@ func init() {
 	}
 }
 
+// @title Drip API
+// @version 1.0
+// @description API for Drip.
+// @termsOfService http://swagger.io/terms/
+
+// @host api.ijia.me
+// @BasePath /api/v1
+
+// @securityDefinitions.apikey ApiKeyAuth
+// @in header
+// @name Set-Cookie
 func main() {
 	env := &Env{
 		db:        db, // NewMockDB()
@@ -402,6 +434,8 @@ func main() {
 	router.HandleFunc("/api/v1/logout", env.logoutHandler).Methods("GET", "OPTIONS")
 	router.HandleFunc("/api/v1/nextswipeuser", env.nextUserHandler).Methods("POST", "OPTIONS")
 	router.Use(CORSMiddleware)
+
+	router.PathPrefix("/api/documentation/").Handler(httpSwagger.WrapHandler)
 
 	srv := &http.Server{
 		Handler:      router,
