@@ -49,18 +49,24 @@ jobs:
             name: "go xml dependecies"
             command: go get github.com/AlekSi/gocov-xml
       - run:
+          name: "run tests"
           command: |
                 go test -coverprofile=cover.out
                 go tool cover -html=cover.out -o coverage.html
                 mv coverage.html /tmp/artifacts
       - run:
+          name: "making test-results folder"
           command: |
                 mkdir test-results
+                ls
                 cd test-results
+                ls
                 mkdir go
       - run:
             name: "conver to xml for circleCI"
-            command: gocov convert cover.out | gocov-xml > test-results/go/coverage.xml
+            command: |
+                ls
+                gocov convert cover.out | gocov-xml > test-results/go/coverage.xml
       - store_test_results:
                 path: test-results
   linter:
