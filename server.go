@@ -17,6 +17,8 @@ import (
 	httpSwagger "github.com/swaggo/http-swagger"
 )
 
+const StatusEmailAlreadyExists = 1001
+
 func sendResp(resp JSON, w http.ResponseWriter) {
 	byteResp, err := json.Marshal(resp)
 	if err != nil {
@@ -171,7 +173,7 @@ func (env *Env) signupHandler(w http.ResponseWriter, r *http.Request) {
 
 	identifiableUser, _ := env.db.getUser(logUserData.Email)
 	if !identifiableUser.isEmpty() {
-		resp.Status = http.StatusE
+		resp.Status = StatusEmailAlreadyExists
 		sendResp(resp, w)
 		return
 	}
