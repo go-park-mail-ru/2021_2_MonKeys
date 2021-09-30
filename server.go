@@ -431,7 +431,7 @@ func init() {
 // @termsOfService http://swagger.io/terms/
 
 // @host https://api.ijia.me
-// @BasePath api/v1
+// @BasePath /api/v1
 func main() {
 	env := &Env{
 		db:        db, // NewMockDB()

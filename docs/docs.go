@@ -90,7 +90,7 @@ type swaggerInfo struct {
 var SwaggerInfo = swaggerInfo{
 	Version:     "1.0",
 	Host:        "https://api.ijia.me",
-	BasePath:    "api/v1",
+	BasePath:    "/api/v1",
 	Schemes:     []string{},
 	Title:       "Drip API",
 	Description: "API for Drip.",
