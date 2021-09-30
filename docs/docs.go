@@ -26,28 +26,31 @@ var doc = `{
     "paths": {
         "/login": {
             "post": {
-                "description": "log in",
+                "description": "get next user for feed",
                 "consumes": [
                     "application/json"
                 ],
                 "produces": [
                     "application/json"
                 ],
-                "summary": "LogIn",
+                "summary": "NextUser",
                 "parameters": [
                     {
-                        "description": "data for login",
+                        "description": "data of current user",
                         "name": "input",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/main.LoginUser"
+                            "$ref": "#/definitions/main.User"
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": ""
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/main.JSON"
+                        }
                     },
                     "400": {
                         "description": ""
@@ -63,6 +66,15 @@ var doc = `{
         }
     },
     "definitions": {
+        "main.JSON": {
+            "type": "object",
+            "properties": {
+                "body": {},
+                "status": {
+                    "type": "integer"
+                }
+            }
+        },
         "main.LoginUser": {
             "type": "object",
             "properties": {
@@ -71,6 +83,38 @@ var doc = `{
                 },
                 "password": {
                     "type": "string"
+                }
+            }
+        },
+        "main.User": {
+            "type": "object",
+            "properties": {
+                "age": {
+                    "type": "integer"
+                },
+                "date": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "imgSrc": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "tags": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 }
             }
         }

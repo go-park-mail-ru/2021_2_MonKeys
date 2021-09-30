@@ -1,11 +1,38 @@
 basePath: /api/v1
 definitions:
+  main.JSON:
+    properties:
+      body: {}
+      status:
+        type: integer
+    type: object
   main.LoginUser:
     properties:
       email:
         type: string
       password:
         type: string
+    type: object
+  main.User:
+    properties:
+      age:
+        type: integer
+      date:
+        type: string
+      description:
+        type: string
+      email:
+        type: string
+      id:
+        type: integer
+      imgSrc:
+        type: string
+      name:
+        type: string
+      tags:
+        items:
+          type: string
+        type: array
     type: object
 host: api.ijia.me
 info:
@@ -19,24 +46,26 @@ paths:
     post:
       consumes:
       - application/json
-      description: log in
+      description: get next user for feed
       parameters:
-      - description: data for login
+      - description: data of current user
         in: body
         name: input
         required: true
         schema:
-          $ref: '#/definitions/main.LoginUser'
+          $ref: '#/definitions/main.User'
       produces:
       - application/json
       responses:
         "200":
-          description: ""
+          description: OK
+          schema:
+            $ref: '#/definitions/main.JSON'
         "400":
           description: ""
         "404":
           description: ""
         "500":
           description: ""
-      summary: LogIn
+      summary: NextUser
 swagger: "2.0"
