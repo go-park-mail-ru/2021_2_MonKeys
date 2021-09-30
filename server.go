@@ -224,15 +224,6 @@ func (env *Env) signupHandler(w http.ResponseWriter, r *http.Request) {
 	sendResp(resp, w)
 }
 
-// @Summary EditProfile
-// @Security ApiKeyAuth
-// @Description edit profile data
-// @Accept json
-// @Produce json
-// @Param input body User true "updated user data"
-// @Success 200 {object} JSON
-// @Failure 400,404,500
-// @Router /editprofile [post]
 func (env *Env) editProfileHandler(w http.ResponseWriter, r *http.Request) {
 	var resp JSON
 	session, err := r.Cookie("sessionId")

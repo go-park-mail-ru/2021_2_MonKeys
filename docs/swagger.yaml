@@ -13,27 +13,6 @@ definitions:
       password:
         type: string
     type: object
-  main.User:
-    properties:
-      age:
-        type: integer
-      date:
-        type: string
-      description:
-        type: string
-      email:
-        type: string
-      id:
-        type: integer
-      imgSrc:
-        type: string
-      name:
-        type: string
-      tags:
-        items:
-          type: string
-        type: array
-    type: object
 host: api.ijia.me
 info:
   contact: {}
@@ -42,34 +21,6 @@ info:
   title: Drip API
   version: "1.0"
 paths:
-  /editprofile:
-    post:
-      consumes:
-      - application/json
-      description: edit profile data
-      parameters:
-      - description: updated user data
-        in: body
-        name: input
-        required: true
-        schema:
-          $ref: '#/definitions/main.User'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/main.JSON'
-        "400":
-          description: ""
-        "404":
-          description: ""
-        "500":
-          description: ""
-      security:
-      - ApiKeyAuth: []
-      summary: EditProfile
   /login:
     post:
       consumes:
