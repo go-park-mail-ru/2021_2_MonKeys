@@ -1,16 +1,42 @@
-basePath: /v2
-host: petstore.swagger.io
+basePath: api/v1
+definitions:
+  main.LoginUser:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    type: object
+host: https://api.ijia.me
 info:
-  contact:
-    email: support@swagger.io
-    name: API Support
-    url: http://www.swagger.io/support
-  description: This is a sample server Petstore server.
-  license:
-    name: Apache 2.0
-    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  contact: {}
+  description: API for Drip.
   termsOfService: http://swagger.io/terms/
-  title: Swagger Example API
+  title: Drip API
   version: "1.0"
-paths: {}
+paths:
+  /login:
+    post:
+      consumes:
+      - application/json
+      description: log in
+      parameters:
+      - description: data for login
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/main.LoginUser'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ""
+        "400":
+          description: ""
+        "404":
+          description: ""
+        "500":
+          description: ""
+      summary: LogIn
 swagger: "2.0"

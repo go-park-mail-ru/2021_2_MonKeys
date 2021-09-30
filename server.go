@@ -122,7 +122,7 @@ func (env *Env) currentUser(w http.ResponseWriter, r *http.Request) {
 // @Produce json
 // @Param input body LoginUser true "data for login"
 // @Success 200
-// @Failure 400, 404, 500
+// @Failure 400,404,500
 // @Router /login [post]
 func (env *Env) loginHandler(w http.ResponseWriter, r *http.Request) {
 	var resp JSON
