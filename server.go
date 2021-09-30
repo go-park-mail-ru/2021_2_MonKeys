@@ -53,25 +53,24 @@ func sendResp(resp JSON, w http.ResponseWriter) {
 	w.Write(byteResp)
 }
 
-func setupCORSResponse(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Access-Control-Allow-Origin", r.Header.Get("Origin"))
-	w.Header().Set("Access-Control-Allow-Credentials", "true")
-	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS")
-	w.Header().Set("Access-Control-Allow-Headers",
-		"Accept,"+
-			"Content-Type,"+
-			"Content-Length,"+
-			"Accept-Encoding,"+
-			"X-CSRF-Token,"+
-			"Authorization,"+
-			"Allow-Credentials,"+
-			"Set-Cookie,"+
-			"Access-Control-Allow-Credentials,"+
-			"Access-Control-Allow-Origin")
-}
-
-func (env *Env) corsHandler(w http.ResponseWriter, r *http.Request) {
-	setupCORSResponse(w, r)
+func CORSMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "https://ijia.me")
+		w.Header().Set("Access-Control-Allow-Credentials", "true")
+		w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Headers",
+			"Accept,"+
+				"Content-Type,"+
+				"Content-Length,"+
+				"Accept-Encoding,"+
+				"X-CSRF-Token,"+
+				"Authorization,"+
+				"Allow-Credentials,"+
+				"Set-Cookie,"+
+				"Access-Control-Allow-Credentials,"+
+				"Access-Control-Allow-Origin")
+		next.ServeHTTP(w, r)
+	})
 }
 
 func createSessionCookie(user LoginUser) http.Cookie {
@@ -93,8 +92,6 @@ func createSessionCookie(user LoginUser) http.Cookie {
 }
 
 func (env *Env) currentUser(w http.ResponseWriter, r *http.Request) {
-	setupCORSResponse(w, r)
-
 	var resp JSON
 	session, err := r.Cookie("sessionId")
 	if err != nil {
@@ -117,8 +114,6 @@ func (env *Env) currentUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func (env *Env) loginHandler(w http.ResponseWriter, r *http.Request) {
-	setupCORSResponse(w, r)
-
 	var resp JSON
 
 	byteReq, err := ioutil.ReadAll(r.Body)
@@ -165,8 +160,6 @@ func (env *Env) loginHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (env *Env) signupHandler(w http.ResponseWriter, r *http.Request) {
-	setupCORSResponse(w, r)
-
 	var resp JSON
 
 	byteReq, err := ioutil.ReadAll(r.Body)
@@ -213,8 +206,6 @@ func (env *Env) signupHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (env *Env) editProfileHandler(w http.ResponseWriter, r *http.Request) {
-	setupCORSResponse(w, r)
-
 	var resp JSON
 	session, err := r.Cookie("sessionId")
 	if err != nil {
@@ -270,8 +261,6 @@ func (env *Env) editProfileHandler(w http.ResponseWriter, r *http.Request) {
 	sendResp(resp, w)
 }
 func (env *Env) logoutHandler(w http.ResponseWriter, r *http.Request) {
-	setupCORSResponse(w, r)
-
 	session, err := r.Cookie("sessionId")
 
 	if err != nil {
@@ -290,8 +279,6 @@ func (env *Env) logoutHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (env *Env) nextUserHandler(w http.ResponseWriter, r *http.Request) {
-	setupCORSResponse(w, r)
-
 	var resp JSON
 
 	// get current user by cookie
@@ -435,13 +422,13 @@ func main() {
 
 	router := mux.NewRouter()
 
-	router.PathPrefix("/api/v1/").HandlerFunc(env.corsHandler).Methods("OPTIONS")
-	router.HandleFunc("/api/v1/currentuser", env.currentUser).Methods("GET")
-	router.HandleFunc("/api/v1/login", env.loginHandler).Methods("POST")
-	router.HandleFunc("/api/v1/editprofile", env.editProfileHandler).Methods("POST")
-	router.HandleFunc("/api/v1/signup", env.signupHandler).Methods("POST")
-	router.HandleFunc("/api/v1/logout", env.logoutHandler).Methods("GET")
-	router.HandleFunc("/api/v1/nextswipeuser", env.nextUserHandler).Methods("POST")
+	router.HandleFunc("/api/v1/currentuser", env.currentUser).Methods("GET", "OPTIONS")
+	router.HandleFunc("/api/v1/login", env.loginHandler).Methods("POST", "OPTIONS")
+	router.HandleFunc("/api/v1/editprofile", env.editProfileHandler).Methods("POST", "OPTIONS")
+	router.HandleFunc("/api/v1/signup", env.signupHandler).Methods("POST", "OPTIONS")
+	router.HandleFunc("/api/v1/logout", env.logoutHandler).Methods("GET", "OPTIONS")
+	router.HandleFunc("/api/v1/nextswipeuser", env.nextUserHandler).Methods("POST", "OPTIONS")
+	router.Use(CORSMiddleware)
 
 	srv := &http.Server{
 		Handler:      router,
