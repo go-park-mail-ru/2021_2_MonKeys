@@ -116,6 +116,14 @@ func (env *Env) currentUser(w http.ResponseWriter, r *http.Request) {
 	sendResp(resp, w)
 }
 
+// @Summary LogIn
+// @Description log in
+// @Accept json
+// @Produce json
+// @Param input body LoginUser true "data for login"
+// @Success 200
+// @Failure 400, 404, 500
+// @Router /login [post]
 func (env *Env) loginHandler(w http.ResponseWriter, r *http.Request) {
 	var resp JSON
 
@@ -422,7 +430,8 @@ func init() {
 // @description API for Drip.
 // @termsOfService http://swagger.io/terms/
 
-// @host petstore.swagger.io
+// @host https://api.ijia.me
+// @BasePath api/v1
 func main() {
 	env := &Env{
 		db:        db, // NewMockDB()
