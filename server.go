@@ -75,15 +75,13 @@ func (env *Env) currentUser(w http.ResponseWriter, r *http.Request) {
 	var resp JSON
 	session, err := r.Cookie("sessionId")
 	if err != nil {
-		resp.Status = StatusNotFound
-		sendResp(resp, w)
+		w.WriteHeader(http.StatusNotFound)
 		return
 	}
 
 	currentUser, err := env.getUserByCookie(session.Value)
 	if err != nil {
-		resp.Status = StatusNotFound
-		sendResp(resp, w)
+		w.WriteHeader(http.StatusNotFound)
 		return
 	}
 
@@ -100,23 +98,20 @@ func (env *Env) loginHandler(w http.ResponseWriter, r *http.Request) {
 
 	byteReq, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		resp.Status = StatusBadRequest
-		sendResp(resp, w)
+		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
 	var logUserData LoginUser
 	err = json.Unmarshal(byteReq, &logUserData)
 	if err != nil {
-		resp.Status = StatusBadRequest
-		sendResp(resp, w)
+		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
 	identifiableUser, err := env.db.getUser(logUserData.Email)
 	if err != nil {
-		resp.Status = StatusNotFound
-		sendResp(resp, w)
+		w.WriteHeader(http.StatusNotFound)
 		return
 	}
 
@@ -125,8 +120,7 @@ func (env *Env) loginHandler(w http.ResponseWriter, r *http.Request) {
 		cookie := createSessionCookie(logUserData)
 		err = env.sessionDB.newSessionCookie(cookie.Value, identifiableUser.ID)
 		if err != nil {
-			resp.Status = StatusInternalServerError
-			sendResp(resp, w)
+			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
 
@@ -148,16 +142,14 @@ func (env *Env) signupHandler(w http.ResponseWriter, r *http.Request) {
 
 	byteReq, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		resp.Status = StatusBadRequest
-		sendResp(resp, w)
+		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
 	var logUserData LoginUser
 	err = json.Unmarshal(byteReq, &logUserData)
 	if err != nil {
-		resp.Status = StatusBadRequest
-		sendResp(resp, w)
+		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
@@ -170,16 +162,14 @@ func (env *Env) signupHandler(w http.ResponseWriter, r *http.Request) {
 
 	user, err := env.db.createUser(logUserData)
 	if err != nil {
-		resp.Status = StatusInternalServerError
-		sendResp(resp, w)
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
 	cookie := createSessionCookie(logUserData)
 	err = env.sessionDB.newSessionCookie(cookie.Value, user.ID)
 	if err != nil {
-		resp.Status = StatusInternalServerError
-		sendResp(resp, w)
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
@@ -195,44 +185,38 @@ func (env *Env) editProfileHandler(w http.ResponseWriter, r *http.Request) {
 	var resp JSON
 	session, err := r.Cookie("sessionId")
 	if err != nil {
-		resp.Status = StatusNotFound
-		sendResp(resp, w)
+		w.WriteHeader(http.StatusNotFound)
 		return
 	}
 
 	currentUser, err := env.getUserByCookie(session.Value)
 	if err != nil {
-		resp.Status = StatusNotFound
-		sendResp(resp, w)
+		w.WriteHeader(http.StatusNotFound)
 		return
 	}
 
 	byteReq, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		resp.Status = StatusBadRequest
-		sendResp(resp, w)
+		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
 	var newUserData User
 	err = json.Unmarshal(byteReq, &newUserData)
 	if err != nil {
-		resp.Status = StatusBadRequest
-		sendResp(resp, w)
+		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
 	err = currentUser.fillProfile(newUserData)
 	if err != nil {
-		resp.Status = StatusBadRequest
-		sendResp(resp, w)
+		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
 	err = env.db.updateUser(currentUser)
 	if err != nil {
-		resp.Status = StatusInternalServerError
-		sendResp(resp, w)
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
@@ -246,15 +230,14 @@ func (env *Env) logoutHandler(w http.ResponseWriter, r *http.Request) {
 	setupCORSResponse(w, r)
 
 	session, err := r.Cookie("sessionId")
-
 	if err != nil {
-		sendResp(JSON{Status: StatusNotFound}, w)
+		w.WriteHeader(http.StatusNotFound)
 		return
 	}
 
 	err = env.sessionDB.deleteSessionCookie(session.Value)
 	if err != nil {
-		sendResp(JSON{Status: StatusInternalServerError}, w)
+		w.WriteHeader(http.StatusNotFound)
 		return
 	}
 
@@ -269,47 +252,39 @@ func (env *Env) nextUserHandler(w http.ResponseWriter, r *http.Request) {
 
 	// get current user by cookie
 	session, err := r.Cookie("sessionId")
-	if err == http.ErrNoCookie {
-
-		resp.Status = StatusNotFound
-		sendResp(resp, w)
+	if err != nil {
+		w.WriteHeader(http.StatusNotFound)
 		return
 	}
 	currentUser, err := env.getUserByCookie(session.Value)
 	if err != nil {
-
-		resp.Status = StatusNotFound
-		sendResp(resp, w)
+		w.WriteHeader(http.StatusNotFound)
 		return
 	}
 
 	// get swiped user id from json
 	byteReq, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		resp.Status = StatusBadRequest
-		sendResp(resp, w)
+		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 	var swipedUserData SwipedUser
 	err = json.Unmarshal(byteReq, &swipedUserData)
 	if err != nil {
-		resp.Status = StatusBadRequest
-		sendResp(resp, w)
+		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
 	// add in swaped users map for current user
 	err = env.db.addSwipedUsers(currentUser.ID, swipedUserData.Id)
 	if err != nil {
-		resp.Status = StatusNotFound
-		sendResp(resp, w)
+		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 	// find next user for swipe
 	nextUser, err := env.db.getNextUserForSwipe(currentUser.ID)
 	if err != nil {
-		resp.Status = StatusNotFound
-		sendResp(resp, w)
+		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 

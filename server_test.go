@@ -41,14 +41,12 @@ func TestCurrentUser(t *testing.T) {
 				Name:  "sessionId",
 				Value: "123123",
 			},
-			StatusCode: http.StatusOK,
-			BodyResp:   `{"status":404,"body":null}`,
+			StatusCode: http.StatusNotFound,
 		},
 		TestCase{
 			BodyReq:    nil,
 			CookieReq:  http.Cookie{},
-			StatusCode: http.StatusOK,
-			BodyResp:   `{"status":404,"body":null}`,
+			StatusCode: http.StatusNotFound,
 		},
 	}
 
@@ -96,14 +94,12 @@ func TestLogin(t *testing.T) {
 		TestCase{
 			testType:   wrongCase,
 			BodyReq:    bytes.NewReader([]byte(`wrong input data`)),
-			StatusCode: http.StatusOK,
-			BodyResp:   `{"status":400,"body":null}`,
+			StatusCode: http.StatusBadRequest,
 		},
 		TestCase{
 			testType:   wrongCase,
 			BodyReq:    bytes.NewReader([]byte(`{"email":"wrongEmail","password":"wrongPassword"}`)),
-			StatusCode: http.StatusOK,
-			BodyResp:   `{"status":404,"body":null}`,
+			StatusCode: http.StatusNotFound,
 		},
 		TestCase{
 			testType:   wrongCase,
@@ -169,8 +165,7 @@ func TestSignup(t *testing.T) {
 		TestCase{
 			testType:   wrongCase,
 			BodyReq:    bytes.NewReader([]byte(`wrong input data`)),
-			StatusCode: http.StatusOK,
-			BodyResp:   `{"status":400,"body":null}`,
+			StatusCode: http.StatusBadRequest,
 		},
 		TestCase{
 			testType:   wrongCase,
@@ -240,14 +235,12 @@ func TestLogout(t *testing.T) {
 				Name:  "sessionId",
 				Value: "wrongCase cookie",
 			},
-			StatusCode: http.StatusOK,
-			BodyResp:   `{"status":500,"body":null}`,
+			StatusCode: http.StatusNotFound,
 		},
 		TestCase{
 			testType:   wrongCase,
 			CookieReq:  http.Cookie{},
-			StatusCode: http.StatusOK,
-			BodyResp:   `{"status":404,"body":null}`,
+			StatusCode: http.StatusNotFound,
 		},
 	}
 
@@ -308,15 +301,13 @@ func TestNextUser(t *testing.T) {
 				Name:  "sessionId",
 				Value: "123123",
 			},
-			StatusCode: http.StatusOK,
-			BodyResp:   `{"status":404,"body":null}`,
+			StatusCode: http.StatusNotFound,
 		},
 		TestCase{
 			testType:   wrongCase,
 			BodyReq:    bytes.NewReader([]byte(`{"id":321}`)),
 			CookieReq:  http.Cookie{},
-			StatusCode: http.StatusOK,
-			BodyResp:   `{"status":404,"body":null}`,
+			StatusCode: http.StatusNotFound,
 		},
 		TestCase{
 			testType: wrongCase,
@@ -325,8 +316,7 @@ func TestNextUser(t *testing.T) {
 				Name:  "sessionId",
 				Value: "123",
 			},
-			StatusCode: http.StatusOK,
-			BodyResp:   `{"status":400,"body":null}`,
+			StatusCode: http.StatusBadRequest,
 		},
 		TestCase{
 			testType: wrongCase,
@@ -335,8 +325,7 @@ func TestNextUser(t *testing.T) {
 				Name:  "sessionId",
 				Value: "123",
 			},
-			StatusCode: http.StatusOK,
-			BodyResp:   `{"status":404,"body":null}`,
+			StatusCode: http.StatusBadRequest,
 		},
 	}
 
@@ -424,17 +413,15 @@ func TestEditProfile(t *testing.T) {
 			BodyReq:  bytes.NewReader(bodyReq),
 			CookieReq: http.Cookie{
 				Name:  "sessionId",
-				Value: "123123",
+				Value: "wrong case cookie",
 			},
-			StatusCode: http.StatusOK,
-			BodyResp:   `{"status":404,"body":null}`,
+			StatusCode: http.StatusNotFound,
 		},
 		TestCase{
 			testType:   wrongCase,
 			BodyReq:    bytes.NewReader(bodyReq),
 			CookieReq:  http.Cookie{},
-			StatusCode: http.StatusOK,
-			BodyResp:   `{"status":404,"body":null}`,
+			StatusCode: http.StatusNotFound,
 		},
 		TestCase{
 			testType: wrongCase,
@@ -443,8 +430,7 @@ func TestEditProfile(t *testing.T) {
 				Name:  "sessionId",
 				Value: "123",
 			},
-			StatusCode: http.StatusOK,
-			BodyResp:   `{"status":400,"body":null}`,
+			StatusCode: http.StatusBadRequest,
 		},
 		TestCase{
 			testType: wrongCase,
@@ -453,8 +439,7 @@ func TestEditProfile(t *testing.T) {
 				Name:  "sessionId",
 				Value: "123",
 			},
-			StatusCode: http.StatusOK,
-			BodyResp:   `{"status":400,"body":null}`,
+			StatusCode: http.StatusBadRequest,
 		},
 	}
 
