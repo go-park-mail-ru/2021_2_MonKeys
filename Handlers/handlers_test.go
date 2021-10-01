@@ -1,4 +1,4 @@
-package main
+package Handlers
 
 import (
 	"bytes"
@@ -7,6 +7,8 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"reflect"
+	"server/MockDB"
+	"server/Models"
 	"testing"
 )
 
@@ -52,25 +54,25 @@ func TestCurrentUser(t *testing.T) {
 		},
 	}
 
-	testDB := NewMockDB()
-	testSessionDB := NewSessionDB()
+	testDB := MockDB.NewMockDB()
+	testSessionDB := MockDB.NewSessionDB()
 
 	env := &Env{
-		db:        testDB,
-		sessionDB: testSessionDB,
+		DB:        testDB,
+		SessionDB: testSessionDB,
 	}
-	testDB.createUser(LoginUser{
+	testDB.CreateUser(Models.LoginUser{
 		Email:    "testCurrentUser1@mail.ru",
 		Password: "123456qQ",
 	})
-	testSessionDB.cookies["123"] = 1
+	testSessionDB.NewSessionCookie("123", 1)
 
 	for caseNum, item := range cases {
 		r := httptest.NewRequest("GET", "/api/v1/currentuser", item.BodyReq)
 		r.AddCookie(&item.CookieReq)
 		w := httptest.NewRecorder()
 
-		env.currentUser(w, r)
+		env.CurrentUser(w, r)
 
 		if w.Code != item.StatusCode {
 			t.Errorf("TestCase [%d]:\nwrongCase StatusCode: \ngot %d\nexpected %d",
@@ -113,14 +115,14 @@ func TestLogin(t *testing.T) {
 		},
 	}
 
-	testDB := NewMockDB()
-	testSessionDB := NewSessionDB()
+	testDB := MockDB.NewMockDB()
+	testSessionDB := MockDB.NewSessionDB()
 
 	env := &Env{
-		db:        testDB,
-		sessionDB: testSessionDB,
+		DB:        testDB,
+		SessionDB: testSessionDB,
 	}
-	testDB.createUser(LoginUser{
+	testDB.CreateUser(Models.LoginUser{
 		Email:    "testLogin1@mail.ru",
 		Password: "123456qQ",
 	})
@@ -130,21 +132,23 @@ func TestLogin(t *testing.T) {
 		r.AddCookie(&item.CookieReq)
 		w := httptest.NewRecorder()
 
-		env.loginHandler(w, r)
+		env.LoginHandler(w, r)
 
 		if w.Code != item.StatusCode {
 			t.Errorf("TestCase [%d]:\nwrongCase StatusCode: \ngot %d\nexpected %d",
 				caseNum+1, w.Code, item.StatusCode)
 		}
 
-		if !testSessionDB.isSessionByUserID(1) && item.testType == correctCase {
-			t.Errorf("TestCase [%d]:\nsession was not created", caseNum+1)
-		}
-		testSessionDB.cookies = make(map[string]uint64)
-
 		if w.Body.String() != item.BodyResp {
 			t.Errorf("TestCase [%d]:\nwrongCase Response: \ngot %s\nexpected %s",
 				caseNum+1, w.Body.String(), item.BodyResp)
+		}
+
+		if item.testType == correctCase {
+			if !testSessionDB.IsSessionByUserID(1) {
+				t.Errorf("TestCase [%d]:\nsession was not created", caseNum+1)
+			}
+			testSessionDB.DropCookies()
 		}
 	}
 }
@@ -155,9 +159,7 @@ func TestSignup(t *testing.T) {
 	email := "testSignup1@mail.ru"
 	password := "123456qQ"
 
-	newUserID := uint64(2)
-	expectedID := newUserID
-	expectedUser := makeUser(expectedID, email, password)
+	expectedUser := Models.MakeUser(2, email, password)
 
 	cases := []TestCase{
 		TestCase{
@@ -180,17 +182,17 @@ func TestSignup(t *testing.T) {
 		},
 	}
 
-	testDB := NewMockDB()
-	testSessionDB := NewSessionDB()
+	testDB := MockDB.NewMockDB()
+	testSessionDB := MockDB.NewSessionDB()
 
 	env := &Env{
-		db:        testDB,
-		sessionDB: testSessionDB,
+		DB:        testDB,
+		SessionDB: testSessionDB,
 	}
 
 	for caseNum, item := range cases {
-		testDB.users = make(map[uint64]User)
-		testDB.createUser(LoginUser{
+		testDB.DropUsers()
+		testDB.CreateUser(Models.LoginUser{
 			Email:    "firsUser@mail.ru",
 			Password: "123456qQ",
 		})
@@ -199,26 +201,28 @@ func TestSignup(t *testing.T) {
 		r.AddCookie(&item.CookieReq)
 		w := httptest.NewRecorder()
 
-		env.signupHandler(w, r)
+		env.SignupHandler(w, r)
 
 		if w.Code != item.StatusCode {
 			t.Errorf("TestCase [%d]:\nwrongCase StatusCode: \ngot %d\nexpected %d",
 				caseNum+1, w.Code, item.StatusCode)
 		}
 
-		if !testSessionDB.isSessionByUserID(newUserID) && item.testType == correctCase {
-			t.Errorf("TestCase [%d]:\nsession was not created", caseNum+1)
-		}
-		testSessionDB.cookies = make(map[string]uint64)
-
-		newUser, _ := testDB.getUser(email)
-		if !reflect.DeepEqual(newUser, expectedUser) && item.testType == correctCase {
-			t.Errorf("TestCase [%d]:\nuser was not created", caseNum+1)
-		}
-
 		if w.Body.String() != item.BodyResp {
 			t.Errorf("TestCase [%d]:\nwrongCase Response: \ngot %s\nexpected %s",
 				caseNum+1, w.Body.String(), item.BodyResp)
+		}
+
+		if item.testType == correctCase {
+			if !testSessionDB.IsSessionByUserID(expectedUser.ID) {
+				t.Errorf("TestCase [%d]:\nsession was not created", caseNum+1)
+			}
+			testSessionDB.DropCookies()
+
+			newUser, _ := testDB.GetUser(email)
+			if !reflect.DeepEqual(newUser, expectedUser) {
+				t.Errorf("TestCase [%d]:\nuser was not created", caseNum+1)
+			}
 		}
 	}
 }
@@ -230,7 +234,7 @@ func TestLogout(t *testing.T) {
 			testType: correctCase,
 			CookieReq: http.Cookie{
 				Name:  "sessionId",
-				Value: "1234",
+				Value: "123",
 			},
 			StatusCode: http.StatusOK,
 		},
@@ -251,14 +255,14 @@ func TestLogout(t *testing.T) {
 		},
 	}
 
-	testDB := NewMockDB()
-	testSessionDB := NewSessionDB()
+	testDB := MockDB.NewMockDB()
+	testSessionDB := MockDB.NewSessionDB()
 
 	env := &Env{
-		db:        testDB,
-		sessionDB: testSessionDB,
+		DB:        testDB,
+		SessionDB: testSessionDB,
 	}
-	testDB.createUser(LoginUser{
+	user, _ := testDB.CreateUser(Models.LoginUser{
 		Email:    "testLogout1@mail.ru",
 		Password: "123456qQ",
 	})
@@ -268,9 +272,9 @@ func TestLogout(t *testing.T) {
 		r.AddCookie(&item.CookieReq)
 		w := httptest.NewRecorder()
 
-		testSessionDB.cookies["1234"] = 1
+		testSessionDB.NewSessionCookie("123", user.ID)
 
-		env.logoutHandler(w, r)
+		env.LogoutHandler(w, r)
 
 		if w.Code != item.StatusCode {
 			t.Errorf("TestCase [%d]:\nwrongCase StatusCode: \ngot %d\nexpected %d",
@@ -282,7 +286,7 @@ func TestLogout(t *testing.T) {
 				caseNum+1, w.Body.String(), item.BodyResp)
 		}
 
-		if _, ok := testSessionDB.cookies["1234"]; ok && item.testType == correctCase {
+		if testSessionDB.IsSessionByUserID(user.ID) && item.testType == correctCase {
 			t.Errorf("TestCase [%d]:\nuser session not ended", caseNum+1)
 		}
 	}
@@ -340,53 +344,53 @@ func TestNextUser(t *testing.T) {
 		},
 	}
 
-	testDB := NewMockDB()
-	testSessionDB := NewSessionDB()
+	testDB := MockDB.NewMockDB()
+	testSessionDB := MockDB.NewSessionDB()
 
 	env := &Env{
-		db:        testDB,
-		sessionDB: testSessionDB,
+		DB:        testDB,
+		SessionDB: testSessionDB,
 	}
 
-	testDB.createUser(LoginUser{
+	testDB.CreateUser(Models.LoginUser{
 		Email:    "testNextUser1@mail.ru",
 		Password: "123456qQ\"",
 	})
 
-	currenUser, _ := testDB.createUser(LoginUser{
+	currenUser, _ := testDB.CreateUser(Models.LoginUser{
 		Email:    "testCurrUser1@mail.ru",
 		Password: "123456qQ\"",
 	})
-	testSessionDB.cookies["123"] = currenUser.ID
+	testSessionDB.NewSessionCookie("123", currenUser.ID)
 
 	for caseNum, item := range cases {
 		r := httptest.NewRequest("POST", "/api/v1/nextswipeuser", item.BodyReq)
 		r.AddCookie(&item.CookieReq)
 		w := httptest.NewRecorder()
 
-		env.nextUserHandler(w, r)
+		env.NextUserHandler(w, r)
 
 		if w.Code != item.StatusCode {
 			t.Errorf("TestCase [%d]:\nwrongCase StatusCode: \ngot %d\nexpected %d",
 				caseNum+1, w.Code, item.StatusCode)
 		}
 
-		if !testDB.isSwiped(currenUser.ID, 321) && item.testType == correctCase {
-			t.Errorf("TestCase [%d]:\nswipe not saved", caseNum+1)
-		}
-		testDB.swipedUsers = make(map[uint64][]uint64)
-
 		if w.Body.String() != item.BodyResp {
 			t.Errorf("TestCase [%d]:\nwrongCase Response: \ngot %s\nexpected %s",
 				caseNum+1, w.Body.String(), item.BodyResp)
 		}
+
+		if !testDB.IsSwiped(currenUser.ID, 321) && item.testType == correctCase {
+			t.Errorf("TestCase [%d]:\nswipe not saved", caseNum+1)
+		}
+		testDB.DropSwipes()
 	}
 }
 
 func TestEditProfile(t *testing.T) {
 	t.Parallel()
 
-	requestUser := User{
+	requestUser := Models.User{
 		Name:        "testEdit",
 		Date:        "1999-10-25",
 		Description: "Description Description Description Description",
@@ -395,15 +399,16 @@ func TestEditProfile(t *testing.T) {
 	}
 	bodyReq, _ := json.Marshal(requestUser)
 
-	expectedUser := makeUser(1, "testEdit@mail.ru", "123456qQ")
-	expectedUser.Name = requestUser.Name
-	expectedUser.Date = requestUser.Date
-	expectedUser.Age = 21
-	expectedUser.Description = requestUser.Description
-	expectedUser.ImgSrc = requestUser.ImgSrc
-	expectedUser.Tags = requestUser.Tags
+	expectedUser := Models.MakeUser(1, "testEdit@mail.ru", "123456qQ")
+	expectedUser.FillProfile(Models.User{
+		Name:        requestUser.Name,
+		Date:        requestUser.Date,
+		Description: requestUser.Description,
+		ImgSrc:      requestUser.ImgSrc,
+		Tags:        requestUser.Tags,
+	})
 
-	BodyRespByte, _ := json.Marshal(JSON{
+	BodyRespByte, _ := json.Marshal(Models.JSON{
 		Status: StatusOK,
 		Body:   expectedUser,
 	})
@@ -458,36 +463,41 @@ func TestEditProfile(t *testing.T) {
 		},
 	}
 
-	testDB := NewMockDB()
-	testSessionDB := NewSessionDB()
+	testDB := MockDB.NewMockDB()
+	testSessionDB := MockDB.NewSessionDB()
 
 	env := &Env{
-		db:        testDB,
-		sessionDB: testSessionDB,
+		DB:        testDB,
+		SessionDB: testSessionDB,
 	}
 
 	for caseNum, item := range cases {
-		testDB.users = make(map[uint64]User)
-		testSessionDB.cookies = make(map[string]uint64)
-		currenUser, _ := testDB.createUser(LoginUser{
+		testDB.DropUsers()
+		testSessionDB.DropCookies()
+		currenUser, _ := testDB.CreateUser(Models.LoginUser{
 			Email:    expectedUser.Email,
 			Password: "123456qQ",
 		})
-		testSessionDB.cookies["123"] = currenUser.ID
+		testSessionDB.NewSessionCookie("123", currenUser.ID)
 
 		r := httptest.NewRequest("POST", "/api/v1/editprofile", item.BodyReq)
 		r.AddCookie(&item.CookieReq)
 		w := httptest.NewRecorder()
 
-		env.editProfileHandler(w, r)
+		env.EditProfileHandler(w, r)
 
 		if w.Code != item.StatusCode {
 			t.Errorf("TestCase [%d]:\nwrongCase StatusCode: \ngot %d\nexpected %d",
 				caseNum+1, w.Code, item.StatusCode)
 		}
 
+		if w.Body.String() != item.BodyResp {
+			t.Errorf("TestCase [%d]:\nwrongCase Response: \ngot %s\nexpected %s",
+				caseNum+1, w.Body.String(), item.BodyResp)
+		}
+
 		if item.testType == correctCase {
-			updateUser, err := testDB.getUser(currenUser.Email)
+			updateUser, err := testDB.GetUser(currenUser.Email)
 			if err != nil {
 				t.Errorf("TestCase [%d]:\nprofile was not created", caseNum+1)
 			}
@@ -495,11 +505,6 @@ func TestEditProfile(t *testing.T) {
 				t.Errorf("TestCase [%d]:\nwrong profile: \ngot %v\nexpected %v",
 					caseNum+1, updateUser, expectedUser)
 			}
-		}
-
-		if w.Body.String() != item.BodyResp {
-			t.Errorf("TestCase [%d]:\nwrongCase Response: \ngot %s\nexpected %s",
-				caseNum+1, w.Body.String(), item.BodyResp)
 		}
 	}
 }
