@@ -420,12 +420,12 @@ func main() {
 
 	router := mux.NewRouter()
 
-	router.HandleFunc("/api/v1/currentuser", env.currentUser).Methods("GET", "OPTIONS")
-	router.HandleFunc("/api/v1/login", env.loginHandler).Methods("POST", "OPTIONS")
-	router.HandleFunc("/api/v1/editprofile", env.editProfileHandler).Methods("POST", "OPTIONS")
-	router.HandleFunc("/api/v1/signup", env.signupHandler).Methods("POST", "OPTIONS")
-	router.HandleFunc("/api/v1/logout", env.logoutHandler).Methods("GET", "OPTIONS")
-	router.HandleFunc("/api/v1/nextswipeuser", env.nextUserHandler).Methods("POST", "OPTIONS")
+	router.HandleFunc("/api/v1/profile", env.currentUser).Methods("GET", "OPTIONS")
+	router.HandleFunc("/api/v1/auth", env.loginHandler).Methods("POST", "OPTIONS")
+	router.HandleFunc("/api/v1/profile", env.editProfileHandler).Methods("PATCH", "OPTIONS")
+	router.HandleFunc("/api/v1/profile", env.signupHandler).Methods("POST", "OPTIONS")
+	router.HandleFunc("/api/v1/auth", env.logoutHandler).Methods("DELETE", "OPTIONS")
+	router.HandleFunc("/api/v1/feed", env.nextUserHandler).Methods("GET", "OPTIONS")
 	router.Use(CORSMiddleware)
 
 	router.PathPrefix("/api/documentation/").Handler(httpSwagger.WrapHandler)
