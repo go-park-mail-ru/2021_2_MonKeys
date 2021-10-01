@@ -6,6 +6,7 @@ import (
 	"server/Handlers"
 	"server/MockDB"
 	"server/Models"
+	"time"
 
 	_ "server/docs"
 
@@ -38,7 +39,11 @@ func CORSMiddleware(next http.Handler) http.Handler {
 				"Set-Cookie,"+
 				"Access-Control-Allow-Credentials,"+
 				"Access-Control-Allow-Origin")
+		start := time.Now()
 		next.ServeHTTP(w, r)
+
+		log.Printf("LOG [%s] %s, %s %s\n",
+			r.Method, r.RemoteAddr, r.URL.Path, time.Since(start))
 	})
 }
 
@@ -130,6 +135,8 @@ func main() {
 		WriteTimeout: http.DefaultClient.Timeout,
 		ReadTimeout:  http.DefaultClient.Timeout,
 	}
+
+	log.Printf("STD starting server at %s\n", srv.Addr)
 
 	log.Fatal(srv.ListenAndServeTLS(certFile, keyFile))
 }
