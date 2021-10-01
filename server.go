@@ -1,14 +1,12 @@
 package main
 
 import (
-	"crypto/md5"
-	"encoding/json"
-	"errors"
-	"fmt"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"strings"
+	"server/Handlers"
+	"server/MockDB"
+	"server/Models"
 	"time"
 
 	_ "server/docs"
@@ -18,15 +16,14 @@ import (
 )
 
 const StatusEmailAlreadyExists = 1001
+const (
+	certFile = "api.ijia.me.crt"
+	keyFile  = "api.ijia.me.key"
+)
 
-func sendResp(resp JSON, w http.ResponseWriter) {
-	byteResp, err := json.Marshal(resp)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-	}
-	w.WriteHeader(http.StatusOK)
-	w.Write(byteResp)
-}
+var (
+	db = MockDB.NewMockDB()
+)
 
 func CORSMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -46,316 +43,14 @@ func CORSMiddleware(next http.Handler) http.Handler {
 		sb.WriteString("Access-Control-Allow-Origin")
 		w.Header().Set("Access-Control-Allow-Headers", sb.String())
 		next.ServeHTTP(w, r)
+
+		log.Printf("LOG [%s] %s, %s %s",
+			r.Method, r.RemoteAddr, r.URL.Path, time.Since(start))
 	})
 }
 
-func createSessionCookie(user LoginUser) http.Cookie {
-	expiration := time.Now().Add(10 * time.Hour)
-
-	data := user.Password + time.Now().String()
-	md5CookieValue := fmt.Sprintf("%x", md5.Sum([]byte(data)))
-
-	cookie := http.Cookie{
-		Name:     "sessionId",
-		Value:    md5CookieValue,
-		Expires:  expiration,
-		Secure:   true,
-		HttpOnly: true,
-		SameSite: http.SameSiteNoneMode,
-	}
-
-	return cookie
-}
-
-func (env *Env) currentUser(w http.ResponseWriter, r *http.Request) {
-	var resp JSON
-	session, err := r.Cookie("sessionId")
-	if err != nil {
-		resp.Status = http.StatusNotFound
-		sendResp(resp, w)
-		return
-	}
-
-	currentUser, err := env.getUserByCookie(session.Value)
-	if err != nil {
-		resp.Status = http.StatusNotFound
-		sendResp(resp, w)
-		return
-	}
-
-	resp.Status = http.StatusOK
-	resp.Body = currentUser
-
-	sendResp(resp, w)
-}
-
-// @Summary LogIn
-// @Description log in
-// @Tags login
-// @Accept json
-// @Produce json
-// @Param input body LoginUser true "data for login"
-// @Success 200 {object} JSON
-// @Failure 400,404,500
-// @Router /login [post]
-func (env *Env) loginHandler(w http.ResponseWriter, r *http.Request) {
-	var resp JSON
-
-	byteReq, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		resp.Status = http.StatusBadRequest
-		sendResp(resp, w)
-		return
-	}
-
-	var logUserData LoginUser
-	err = json.Unmarshal(byteReq, &logUserData)
-	if err != nil {
-		resp.Status = http.StatusBadRequest
-		sendResp(resp, w)
-		return
-	}
-
-	identifiableUser, err := env.db.getUser(logUserData.Email)
-	if err != nil {
-		resp.Status = http.StatusNotFound
-		sendResp(resp, w)
-		return
-	}
-
-	status := http.StatusOK
-	if identifiableUser.isCorrectPassword(logUserData.Password) {
-		cookie := createSessionCookie(logUserData)
-		err = env.sessionDB.newSessionCookie(cookie.Value, identifiableUser.ID)
-		if err != nil {
-			resp.Status = http.StatusInternalServerError
-			sendResp(resp, w)
-			return
-		}
-
-		http.SetCookie(w, &cookie)
-
-		resp.Body = identifiableUser
-	} else {
-		status = http.StatusNotFound
-	}
-
-	resp.Status = status
-	sendResp(resp, w)
-}
-
-// @Summary SignUp
-// @Description registration user
-// @Tags registration
-// @Accept json
-// @Produce json
-// @Param input body LoginUser true "data for registration"
-// @Success 200 {object} JSON
-// @Failure 400,404,500
-// @Router /signup [post]
-func (env *Env) signupHandler(w http.ResponseWriter, r *http.Request) {
-	var resp JSON
-
-	byteReq, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		resp.Status = http.StatusBadRequest
-		sendResp(resp, w)
-		return
-	}
-
-	var logUserData LoginUser
-	err = json.Unmarshal(byteReq, &logUserData)
-	if err != nil {
-		resp.Status = http.StatusBadRequest
-		sendResp(resp, w)
-		return
-	}
-
-	identifiableUser, _ := env.db.getUser(logUserData.Email)
-	if !identifiableUser.isEmpty() {
-		resp.Status = StatusEmailAlreadyExists
-		sendResp(resp, w)
-		return
-	}
-
-	user, err := env.db.createUser(logUserData)
-	if err != nil {
-		resp.Status = http.StatusInternalServerError
-		sendResp(resp, w)
-		return
-	}
-
-	cookie := createSessionCookie(logUserData)
-	err = env.sessionDB.newSessionCookie(cookie.Value, user.ID)
-	if err != nil {
-		resp.Status = http.StatusInternalServerError
-		sendResp(resp, w)
-		return
-	}
-
-	http.SetCookie(w, &cookie)
-
-	resp.Status = http.StatusOK
-	sendResp(resp, w)
-}
-
-func (env *Env) editProfileHandler(w http.ResponseWriter, r *http.Request) {
-	var resp JSON
-	session, err := r.Cookie("sessionId")
-	if err != nil {
-		resp.Status = http.StatusNotFound
-		sendResp(resp, w)
-		return
-	}
-
-	currentUser, err := env.getUserByCookie(session.Value)
-	if err != nil {
-		resp.Status = http.StatusNotFound
-		sendResp(resp, w)
-		return
-	}
-
-	byteReq, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		resp.Status = http.StatusBadRequest
-		sendResp(resp, w)
-		return
-	}
-
-	var newUserData User
-	err = json.Unmarshal(byteReq, &newUserData)
-	if err != nil {
-		resp.Status = http.StatusBadRequest
-		sendResp(resp, w)
-		return
-	}
-
-	err = currentUser.fillProfile(newUserData)
-	if err != nil {
-		resp.Status = http.StatusBadRequest
-		sendResp(resp, w)
-		return
-	}
-
-	err = env.db.updateUser(currentUser)
-	if err != nil {
-		resp.Status = http.StatusInternalServerError
-		sendResp(resp, w)
-		return
-	}
-
-	resp.Status = http.StatusOK
-	resp.Body = currentUser
-
-	sendResp(resp, w)
-}
-
-func (env *Env) logoutHandler(w http.ResponseWriter, r *http.Request) {
-	session, err := r.Cookie("sessionId")
-	if err != nil {
-		sendResp(JSON{Status: http.StatusNotFound}, w)
-		return
-	}
-
-	err = env.sessionDB.deleteSessionCookie(session.Value)
-	if err != nil {
-		sendResp(JSON{Status: http.StatusInternalServerError}, w)
-		return
-	}
-
-	session.Expires = time.Now().AddDate(0, 0, -1)
-	http.SetCookie(w, session)
-}
-
-func (env *Env) nextUserHandler(w http.ResponseWriter, r *http.Request) {
-	var resp JSON
-
-	// get current user by cookie
-	session, err := r.Cookie("sessionId")
-	if err == http.ErrNoCookie {
-		resp.Status = http.StatusNotFound
-		sendResp(resp, w)
-		return
-	}
-	currentUser, err := env.getUserByCookie(session.Value)
-	if err != nil {
-		resp.Status = http.StatusNotFound
-		sendResp(resp, w)
-		return
-	}
-
-	// get swiped usedata for registrationr id from json
-	byteReq, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		resp.Status = http.StatusBadRequest
-		sendResp(resp, w)
-		return
-	}
-	var swipedUserData SwipedUser
-	err = json.Unmarshal(byteReq, &swipedUserData)
-	if err != nil {
-		resp.Status = http.StatusBadRequest
-		sendResp(resp, w)
-		return
-	}
-
-	// add in swaped users map for current user
-	err = env.db.addSwipedUsers(currentUser.ID, swipedUserData.Id)
-	if err != nil {
-		resp.Status = http.StatusNotFound
-		sendResp(resp, w)
-		return
-	}
-	// find next user for swipe
-	nextUser, err := env.db.getNextUserForSwipe(currentUser.ID)
-	if err != nil {
-		resp.Status = http.StatusNotFound
-		sendResp(resp, w)
-		return
-	}
-
-	resp.Status = http.StatusOK
-	resp.Body = nextUser
-
-	sendResp(resp, w)
-}
-
-type Env struct {
-	db interface {
-		getUser(email string) (User, error)
-		getUserByID(userID uint64) (User, error)
-		createUser(logUserData LoginUser) (User, error)
-		addSwipedUsers(currentUserId, swipedUserId uint64) error
-		getNextUserForSwipe(currentUserId uint64) (User, error)
-		updateUser(newUserData User) error
-	}
-	sessionDB interface {
-		getUserIDByCookie(sessionCookie string) (uint64, error)
-		newSessionCookie(sessionCookie string, userId uint64) error
-		deleteSessionCookie(sessionCookie string) error
-	}
-}
-
-func (env Env) getUserByCookie(sessionCookie string) (User, error) {
-	userID, err := env.sessionDB.getUserIDByCookie(sessionCookie)
-	if err != nil {
-		return User{}, errors.New("error sessionDB: getUserIDByCookie")
-	}
-
-	user, err := env.db.getUserByID(userID)
-	if err != nil {
-		return User{}, errors.New("error db: getUserByID")
-	}
-
-	return user, nil
-}
-
-var (
-	db = NewMockDB()
-)
-
 func init() {
-	db.users[1] = User{
+	db.CreateUserAndProfile(Models.User{
 		ID:          1,
 		Name:        "Mikhail",
 		Email:       "mumeu222@mail.ru",
@@ -365,8 +60,8 @@ func init() {
 		Description: "Hahahahaha",
 		ImgSrc:      "/img/Yachty-tout.jpg",
 		Tags:        []string{"soccer", "anime"},
-	}
-	db.users[2] = User{
+	})
+	db.CreateUserAndProfile(Models.User{
 		ID:          2,
 		Name:        "Mikhail2",
 		Email:       "mumeu222@mail.ru",
@@ -376,8 +71,8 @@ func init() {
 		Description: "Hahahahaha",
 		ImgSrc:      "/img/Yachty-tout.jpg",
 		Tags:        []string{"soccer", "anime"},
-	}
-	db.users[3] = User{
+	})
+	db.CreateUserAndProfile(Models.User{
 		ID:          3,
 		Name:        "Mikhail3",
 		Email:       "mumeu222@mail.ru",
@@ -387,8 +82,8 @@ func init() {
 		Description: "Hahahahaha",
 		ImgSrc:      "/img/Yachty-tout.jpg",
 		Tags:        []string{"soccer", "anime"},
-	}
-	db.users[4] = User{
+	})
+	db.CreateUserAndProfile(Models.User{
 		ID:          4,
 		Name:        "Mikhail4",
 		Email:       "mumeu222@mail.ru",
@@ -398,7 +93,23 @@ func init() {
 		Description: "Hahahahaha",
 		ImgSrc:      "/img/Yachty-tout.jpg",
 		Tags:        []string{"soccer", "anime"},
-	}
+	})
+}
+
+func Router(env *Handlers.Env) *mux.Router {
+	router := mux.NewRouter()
+  
+  router.HandleFunc("/api/v1/profile", env.currentUser).Methods("GET", "OPTIONS")
+	router.HandleFunc("/api/v1/auth", env.loginHandler).Methods("POST", "OPTIONS")
+	router.HandleFunc("/api/v1/profile", env.editProfileHandler).Methods("PATCH", "OPTIONS")
+	router.HandleFunc("/api/v1/profile", env.signupHandler).Methods("POST", "OPTIONS")
+	router.HandleFunc("/api/v1/auth", env.logoutHandler).Methods("DELETE", "OPTIONS")
+	router.HandleFunc("/api/v1/feed", env.nextUserHandler).Methods("GET", "OPTIONS")
+	router.Use(CORSMiddleware)
+
+	router.PathPrefix("/api/documentation/").Handler(httpSwagger.WrapHandler)
+
+	return router
 }
 
 // @title Drip API
@@ -413,22 +124,12 @@ func init() {
 // @in header
 // @name Set-Cookie
 func main() {
-	env := &Env{
-		db:        db, // NewMockDB()
-		sessionDB: NewSessionDB(),
+	env := &Handlers.Env{
+		DB:        db, // NewMockDB()
+		SessionDB: MockDB.NewSessionDB(),
 	}
 
-	router := mux.NewRouter()
-
-	router.HandleFunc("/api/v1/profile", env.currentUser).Methods("GET", "OPTIONS")
-	router.HandleFunc("/api/v1/auth", env.loginHandler).Methods("POST", "OPTIONS")
-	router.HandleFunc("/api/v1/profile", env.editProfileHandler).Methods("PATCH", "OPTIONS")
-	router.HandleFunc("/api/v1/profile", env.signupHandler).Methods("POST", "OPTIONS")
-	router.HandleFunc("/api/v1/auth", env.logoutHandler).Methods("DELETE", "OPTIONS")
-	router.HandleFunc("/api/v1/feed", env.nextUserHandler).Methods("GET", "OPTIONS")
-	router.Use(CORSMiddleware)
-
-	router.PathPrefix("/api/documentation/").Handler(httpSwagger.WrapHandler)
+	router := Router(env)
 
 	srv := &http.Server{
 		Handler:      router,
@@ -437,5 +138,7 @@ func main() {
 		ReadTimeout:  http.DefaultClient.Timeout,
 	}
 
-	log.Fatal(srv.ListenAndServeTLS("api.ijia.me.crt", "api.ijia.me.key"))
+	log.Printf("STD starting server at %s\n", srv.Addr)
+
+	log.Fatal(srv.ListenAndServeTLS(certFile, keyFile))
 }

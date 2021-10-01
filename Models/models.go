@@ -1,4 +1,4 @@
-package main
+package Models
 
 import (
 	"crypto/md5"
@@ -28,15 +28,15 @@ func hashPassword(password string) string {
 	return fmt.Sprintf("%x", md5.Sum([]byte(password)))
 }
 
-func makeUser(id uint64, email, password string) User {
+func MakeUser(id uint64, email, password string) User {
 	return User{ID: id, Email: email, Password: hashPassword(password)}
 }
 
-func (user User) isEmpty() bool {
+func (user User) IsEmpty() bool {
 	return len(user.Email) == 0
 }
 
-func (user User) isCorrectPassword(password string) bool {
+func (user User) IsCorrectPassword(password string) bool {
 	return user.Password == hashPassword(password)
 }
 
@@ -54,7 +54,7 @@ func getAgeFromDate(date string) (uint, error) {
 	return age, nil
 }
 
-func (user *User) fillProfile(newUserData User) (err error) {
+func (user *User) FillProfile(newUserData User) (err error) {
 	user.Name = newUserData.Name
 	user.Date = newUserData.Date
 	user.Age, err = getAgeFromDate(newUserData.Date)
