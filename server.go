@@ -42,6 +42,8 @@ func CORSMiddleware(next http.Handler) http.Handler {
 		sb.WriteString("Access-Control-Allow-Credentials,")
 		sb.WriteString("Access-Control-Allow-Origin")
 		w.Header().Set("Access-Control-Allow-Headers", sb.String())
+
+		start := time.Now()
 		next.ServeHTTP(w, r)
 
 		log.Printf("LOG [%s] %s, %s %s",
@@ -99,12 +101,12 @@ func init() {
 func Router(env *Handlers.Env) *mux.Router {
 	router := mux.NewRouter()
   
-  router.HandleFunc("/api/v1/profile", env.currentUser).Methods("GET", "OPTIONS")
-	router.HandleFunc("/api/v1/auth", env.loginHandler).Methods("POST", "OPTIONS")
-	router.HandleFunc("/api/v1/profile", env.editProfileHandler).Methods("PATCH", "OPTIONS")
-	router.HandleFunc("/api/v1/profile", env.signupHandler).Methods("POST", "OPTIONS")
-	router.HandleFunc("/api/v1/auth", env.logoutHandler).Methods("DELETE", "OPTIONS")
-	router.HandleFunc("/api/v1/feed", env.nextUserHandler).Methods("GET", "OPTIONS")
+  	router.HandleFunc("/api/v1/profile", env.CurrentUser).Methods("GET", "OPTIONS")
+	router.HandleFunc("/api/v1/auth", env.LoginHandler).Methods("POST", "OPTIONS")
+	router.HandleFunc("/api/v1/profile", env.EditProfileHandler).Methods("PATCH", "OPTIONS")
+	router.HandleFunc("/api/v1/profile", env.SignupHandler).Methods("POST", "OPTIONS")
+	router.HandleFunc("/api/v1/auth", env.LogoutHandler).Methods("DELETE", "OPTIONS")
+	router.HandleFunc("/api/v1/feed", env.NextUserHandler).Methods("GET", "OPTIONS")
 	router.Use(CORSMiddleware)
 
 	router.PathPrefix("/api/documentation/").Handler(httpSwagger.WrapHandler)
