@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"net/http"
+	"strings"
 	"server/Handlers"
 	"server/MockDB"
 	"server/Models"
@@ -14,6 +15,7 @@ import (
 	httpSwagger "github.com/swaggo/http-swagger"
 )
 
+const StatusEmailAlreadyExists = 1001
 const (
 	certFile = "api.ijia.me.crt"
 	keyFile  = "api.ijia.me.key"
@@ -28,18 +30,18 @@ func CORSMiddleware(next http.Handler) http.Handler {
 		w.Header().Set("Access-Control-Allow-Origin", "https://ijia.me")
 		w.Header().Set("Access-Control-Allow-Credentials", "true")
 		w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS")
-		w.Header().Set("Access-Control-Allow-Headers",
-			"Accept,"+
-				"Content-Type,"+
-				"Content-Length,"+
-				"Accept-Encoding,"+
-				"X-CSRF-Token,"+
-				"Authorization,"+
-				"Allow-Credentials,"+
-				"Set-Cookie,"+
-				"Access-Control-Allow-Credentials,"+
-				"Access-Control-Allow-Origin")
-		start := time.Now()
+		var sb strings.Builder
+		sb.WriteString("Accept,")
+		sb.WriteString("Content-Type,")
+		sb.WriteString("Content-Length,")
+		sb.WriteString("Accept-Encoding,")
+		sb.WriteString("X-CSRF-Token,")
+		sb.WriteString("Authorization,")
+		sb.WriteString("Allow-Credentials,")
+		sb.WriteString("Set-Cookie,")
+		sb.WriteString("Access-Control-Allow-Credentials,")
+		sb.WriteString("Access-Control-Allow-Origin")
+		w.Header().Set("Access-Control-Allow-Headers", sb.String())
 		next.ServeHTTP(w, r)
 
 		log.Printf("LOG [%s] %s, %s %s",
@@ -96,13 +98,13 @@ func init() {
 
 func Router(env *Handlers.Env) *mux.Router {
 	router := mux.NewRouter()
-
-	router.HandleFunc("/api/v1/currentuser", env.CurrentUser).Methods("GET", "OPTIONS")
-	router.HandleFunc("/api/v1/login", env.LoginHandler).Methods("POST", "OPTIONS")
-	router.HandleFunc("/api/v1/editprofile", env.EditProfileHandler).Methods("POST", "OPTIONS")
-	router.HandleFunc("/api/v1/signup", env.SignupHandler).Methods("POST", "OPTIONS")
-	router.HandleFunc("/api/v1/logout", env.LogoutHandler).Methods("GET", "OPTIONS")
-	router.HandleFunc("/api/v1/nextswipeuser", env.NextUserHandler).Methods("POST", "OPTIONS")
+  
+  router.HandleFunc("/api/v1/profile", env.currentUser).Methods("GET", "OPTIONS")
+	router.HandleFunc("/api/v1/auth", env.loginHandler).Methods("POST", "OPTIONS")
+	router.HandleFunc("/api/v1/profile", env.editProfileHandler).Methods("PATCH", "OPTIONS")
+	router.HandleFunc("/api/v1/profile", env.signupHandler).Methods("POST", "OPTIONS")
+	router.HandleFunc("/api/v1/auth", env.logoutHandler).Methods("DELETE", "OPTIONS")
+	router.HandleFunc("/api/v1/feed", env.nextUserHandler).Methods("GET", "OPTIONS")
 	router.Use(CORSMiddleware)
 
 	router.PathPrefix("/api/documentation/").Handler(httpSwagger.WrapHandler)
