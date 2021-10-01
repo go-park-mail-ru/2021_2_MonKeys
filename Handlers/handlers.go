@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"server/Models"
 	"time"
+	"log"
 )
 
 const (
@@ -68,6 +69,8 @@ func (env *Env) CurrentUser(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		resp.Status = StatusNotFound
 		sendResp(resp, w)
+
+		log.Printf("CODE %d ERROR %s", resp.Status, err)
 		return
 	}
 
@@ -75,6 +78,7 @@ func (env *Env) CurrentUser(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		resp.Status = StatusNotFound
 		sendResp(resp, w)
+		log.Printf("CODE %d ERROR %s", resp.Status, err)
 		return
 	}
 
@@ -82,6 +86,8 @@ func (env *Env) CurrentUser(w http.ResponseWriter, r *http.Request) {
 	resp.Body = currentUser
 
 	sendResp(resp, w)
+
+	log.Printf("CODE %d", resp.Status)
 }
 
 // @Summary LogIn
@@ -100,6 +106,7 @@ func (env *Env) LoginHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		resp.Status = StatusBadRequest
 		sendResp(resp, w)
+		log.Printf("CODE %d ERROR %s", resp.Status, err)
 		return
 	}
 
@@ -108,6 +115,7 @@ func (env *Env) LoginHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		resp.Status = StatusBadRequest
 		sendResp(resp, w)
+		log.Printf("CODE %d ERROR %s", resp.Status, err)
 		return
 	}
 
@@ -115,6 +123,7 @@ func (env *Env) LoginHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		resp.Status = StatusNotFound
 		sendResp(resp, w)
+		log.Printf("CODE %d ERROR %s", resp.Status, err)
 		return
 	}
 
@@ -125,6 +134,7 @@ func (env *Env) LoginHandler(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			resp.Status = StatusInternalServerError
 			sendResp(resp, w)
+			log.Printf("CODE %d ERROR %s", resp.Status, err)
 			return
 		}
 
@@ -137,6 +147,8 @@ func (env *Env) LoginHandler(w http.ResponseWriter, r *http.Request) {
 
 	resp.Status = status
 	sendResp(resp, w)
+
+	log.Printf("CODE %d", resp.Status)
 }
 
 // @Summary SignUp
@@ -155,6 +167,7 @@ func (env *Env) SignupHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		resp.Status = StatusBadRequest
 		sendResp(resp, w)
+		log.Printf("CODE %d ERROR %s", resp.Status, err)
 		return
 	}
 
@@ -163,6 +176,7 @@ func (env *Env) SignupHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		resp.Status = StatusBadRequest
 		sendResp(resp, w)
+		log.Printf("CODE %d ERROR %s", resp.Status, err)
 		return
 	}
 
@@ -170,6 +184,7 @@ func (env *Env) SignupHandler(w http.ResponseWriter, r *http.Request) {
 	if !identifiableUser.IsEmpty() {
 		resp.Status = StatusEmailAlreadyExists
 		sendResp(resp, w)
+		log.Printf("CODE %d ERROR %s", resp.Status, err)
 		return
 	}
 
@@ -177,6 +192,7 @@ func (env *Env) SignupHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		resp.Status = StatusInternalServerError
 		sendResp(resp, w)
+		log.Printf("CODE %d ERROR %s", resp.Status, err)
 		return
 	}
 
@@ -192,6 +208,8 @@ func (env *Env) SignupHandler(w http.ResponseWriter, r *http.Request) {
 
 	resp.Status = StatusOK
 	sendResp(resp, w)
+
+	log.Printf("CODE %d", resp.Status)
 }
 
 func (env *Env) EditProfileHandler(w http.ResponseWriter, r *http.Request) {
@@ -200,6 +218,7 @@ func (env *Env) EditProfileHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		resp.Status = StatusNotFound
 		sendResp(resp, w)
+		log.Printf("CODE %d ERROR %s", resp.Status, err)
 		return
 	}
 
@@ -207,6 +226,7 @@ func (env *Env) EditProfileHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		resp.Status = StatusNotFound
 		sendResp(resp, w)
+		log.Printf("CODE %d ERROR %s", resp.Status, err)
 		return
 	}
 
@@ -214,6 +234,7 @@ func (env *Env) EditProfileHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		resp.Status = StatusBadRequest
 		sendResp(resp, w)
+		log.Printf("CODE %d ERROR %s", resp.Status, err)
 		return
 	}
 
@@ -222,6 +243,7 @@ func (env *Env) EditProfileHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		resp.Status = StatusBadRequest
 		sendResp(resp, w)
+		log.Printf("CODE %d ERROR %s", resp.Status, err)
 		return
 	}
 
@@ -229,6 +251,7 @@ func (env *Env) EditProfileHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		resp.Status = StatusBadRequest
 		sendResp(resp, w)
+		log.Printf("CODE %d ERROR %s", resp.Status, err)
 		return
 	}
 
@@ -236,6 +259,7 @@ func (env *Env) EditProfileHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		resp.Status = StatusInternalServerError
 		sendResp(resp, w)
+		log.Printf("CODE %d ERROR %s", resp.Status, err)
 		return
 	}
 
@@ -243,23 +267,29 @@ func (env *Env) EditProfileHandler(w http.ResponseWriter, r *http.Request) {
 	resp.Body = currentUser
 
 	sendResp(resp, w)
+
+	log.Printf("CODE %d", resp.Status)
 }
 
 func (env *Env) LogoutHandler(w http.ResponseWriter, r *http.Request) {
 	session, err := r.Cookie("sessionId")
 	if err != nil {
 		sendResp(Models.JSON{Status: StatusNotFound}, w)
+		log.Printf("CODE %d ERROR %s", StatusNotFound, err)
 		return
 	}
 
 	err = env.SessionDB.DeleteSessionCookie(session.Value)
 	if err != nil {
 		sendResp(Models.JSON{Status: StatusInternalServerError}, w)
+		log.Printf("CODE %d ERROR %s", StatusInternalServerError, err)
 		return
 	}
 
 	session.Expires = time.Now().AddDate(0, 0, -1)
 	http.SetCookie(w, session)
+
+	log.Printf("CODE %d", StatusOK)
 }
 
 func (env *Env) NextUserHandler(w http.ResponseWriter, r *http.Request) {
@@ -270,12 +300,14 @@ func (env *Env) NextUserHandler(w http.ResponseWriter, r *http.Request) {
 	if err == http.ErrNoCookie {
 		resp.Status = StatusNotFound
 		sendResp(resp, w)
+		log.Printf("CODE %d ERROR %s", resp.Status, err)
 		return
 	}
 	currentUser, err := env.getUserByCookie(session.Value)
 	if err != nil {
 		resp.Status = StatusNotFound
 		sendResp(resp, w)
+		log.Printf("CODE %d ERROR %s", resp.Status, err)
 		return
 	}
 
@@ -284,6 +316,7 @@ func (env *Env) NextUserHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		resp.Status = StatusBadRequest
 		sendResp(resp, w)
+		log.Printf("CODE %d ERROR %s", resp.Status, err)
 		return
 	}
 	var swipedUserData Models.SwipedUser
@@ -291,6 +324,7 @@ func (env *Env) NextUserHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		resp.Status = StatusBadRequest
 		sendResp(resp, w)
+		log.Printf("CODE %d ERROR %s", resp.Status, err)
 		return
 	}
 
@@ -299,6 +333,7 @@ func (env *Env) NextUserHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		resp.Status = StatusNotFound
 		sendResp(resp, w)
+		log.Printf("CODE %d ERROR %s", resp.Status, err)
 		return
 	}
 	// find next user for swipe
@@ -306,6 +341,7 @@ func (env *Env) NextUserHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		resp.Status = StatusNotFound
 		sendResp(resp, w)
+		log.Printf("CODE %d ERROR %s", resp.Status, err)
 		return
 	}
 
@@ -313,6 +349,8 @@ func (env *Env) NextUserHandler(w http.ResponseWriter, r *http.Request) {
 	resp.Body = nextUser
 
 	sendResp(resp, w)
+
+	log.Printf("CODE %d", resp.Status)
 }
 
 func (env Env) getUserByCookie(sessionCookie string) (Models.User, error) {

@@ -42,7 +42,7 @@ func CORSMiddleware(next http.Handler) http.Handler {
 		start := time.Now()
 		next.ServeHTTP(w, r)
 
-		log.Printf("LOG [%s] %s, %s %s\n",
+		log.Printf("LOG [%s] %s, %s %s",
 			r.Method, r.RemoteAddr, r.URL.Path, time.Since(start))
 	})
 }
