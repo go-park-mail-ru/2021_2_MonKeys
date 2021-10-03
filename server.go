@@ -3,10 +3,10 @@ package main
 import (
 	"log"
 	"net/http"
-	"strings"
 	"server/Handlers"
 	"server/MockDB"
 	"server/Models"
+	"strings"
 	"time"
 
 	_ "server/docs"
@@ -29,7 +29,7 @@ func CORSMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", "https://ijia.me")
 		w.Header().Set("Access-Control-Allow-Credentials", "true")
-		w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Methods", "POST, GET, DELETE, PUT, OPTIONS")
 		var sb strings.Builder
 		sb.WriteString("Accept,")
 		sb.WriteString("Content-Type,")
@@ -100,12 +100,12 @@ func init() {
 
 func Router(env *Handlers.Env) *mux.Router {
 	router := mux.NewRouter()
-  
-  	router.HandleFunc("/api/v1/profile", env.CurrentUser).Methods("GET", "OPTIONS")
-	router.HandleFunc("/api/v1/auth", env.LoginHandler).Methods("POST", "OPTIONS")
-	router.HandleFunc("/api/v1/profile", env.EditProfileHandler).Methods("PATCH", "OPTIONS")
+
+	router.HandleFunc("/api/v1/profile", env.CurrentUser).Methods("GET", "OPTIONS")
+	router.HandleFunc("/api/v1/session", env.LoginHandler).Methods("POST", "OPTIONS")
+	router.HandleFunc("/api/v1/profile", env.EditProfileHandler).Methods("PUT", "OPTIONS")
 	router.HandleFunc("/api/v1/profile", env.SignupHandler).Methods("POST", "OPTIONS")
-	router.HandleFunc("/api/v1/auth", env.LogoutHandler).Methods("DELETE", "OPTIONS")
+	router.HandleFunc("/api/v1/session", env.LogoutHandler).Methods("DELETE", "OPTIONS")
 	router.HandleFunc("/api/v1/feed", env.NextUserHandler).Methods("GET", "OPTIONS")
 	router.Use(CORSMiddleware)
 
