@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"server/Handlers"
@@ -25,7 +26,7 @@ var (
 	db = MockDB.NewMockDB()
 )
 
-func CORSMiddleware(next http.Handler) http.Handler {
+func CORS(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", "https://ijia.me")
 		w.Header().Set("Access-Control-Allow-Credentials", "true")
@@ -43,11 +44,30 @@ func CORSMiddleware(next http.Handler) http.Handler {
 		sb.WriteString("Access-Control-Allow-Origin")
 		w.Header().Set("Access-Control-Allow-Headers", sb.String())
 
-		start := time.Now()
 		next.ServeHTTP(w, r)
+	})
+}
+
+func Logger(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		start := time.Now()
 
 		log.Printf("LOG [%s] %s, %s %s",
 			r.Method, r.RemoteAddr, r.URL.Path, time.Since(start))
+
+		next.ServeHTTP(w, r)
+	})
+}
+
+func PaincRecovery(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		defer func() {
+			if err := recover(); err != nil {
+				fmt.Printf("Recovered from panic with err: %s on %s", err, r.RequestURI)
+				http.Error(w, "Internal server error", http.StatusInternalServerError)
+			}
+		}()
+		next.ServeHTTP(w, r)
 	})
 }
 
@@ -107,7 +127,11 @@ func Router(env *Handlers.Env) *mux.Router {
 	router.HandleFunc("/api/v1/profile", env.SignupHandler).Methods("POST", "OPTIONS")
 	router.HandleFunc("/api/v1/session", env.LogoutHandler).Methods("DELETE", "OPTIONS")
 	router.HandleFunc("/api/v1/feed", env.NextUserHandler).Methods("GET", "OPTIONS")
-	router.Use(CORSMiddleware)
+
+	// middleware
+	router.Use(Logger)
+	router.Use(CORS)
+	router.Use(PaincRecovery)
 
 	router.PathPrefix("/api/documentation/").Handler(httpSwagger.WrapHandler)
 
