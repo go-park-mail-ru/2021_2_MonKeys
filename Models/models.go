@@ -61,6 +61,7 @@ func (user *User) FillProfile(newUserData User) (err error) {
 	if err != nil {
 		return errors.New("failed to save age")
 	}
+	user.Date = newUserData.Date
 	user.Description = newUserData.Description
 	user.ImgSrc = newUserData.ImgSrc
 	user.Tags = newUserData.Tags
@@ -75,4 +76,14 @@ type LoginUser struct {
 
 type SwipedUser struct {
 	Id uint64 `json:"id"`
+}
+
+type Tag struct {
+	Id      uint64 `json:"id"`
+	TagText string `json:"tagText"`
+}
+
+type Tags struct {
+	AllTags map[uint64]Tag `json:"allTags"`
+	Count   uint64         `json:"tagsCount"`
 }
