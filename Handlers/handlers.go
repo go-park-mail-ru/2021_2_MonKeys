@@ -6,10 +6,10 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"server/Models"
 	"time"
-	"log"
 )
 
 const (
@@ -55,6 +55,7 @@ type Env struct {
 		AddSwipedUsers(currentUserId, swipedUserId uint64) error
 		GetNextUserForSwipe(currentUserId uint64) (Models.User, error)
 		UpdateUser(newUserData Models.User) error
+		GetTags() map[uint64]string
 	}
 	SessionDB interface {
 		GetUserIDByCookie(sessionCookie string) (uint64, error)
@@ -351,6 +352,36 @@ func (env *Env) NextUserHandler(w http.ResponseWriter, r *http.Request) {
 	sendResp(resp, w)
 
 	log.Printf("CODE %d", resp.Status)
+}
+
+func (env *Env) GetAllTags(w http.ResponseWriter, r *http.Request) {
+	allTags := env.DB.GetTags()
+	var respTag Models.Tag
+	var currentAllTags = make(map[uint64]Models.Tag)
+	var respAllTags Models.Tags
+	counter := 0
+
+	for key, value := range allTags {
+		respTag.Id = key
+		respTag.TagText = value
+		currentAllTags[uint64(counter)] = respTag
+		counter++
+	}
+
+	respAllTags.AllTags = currentAllTags
+	respAllTags.Count = uint64(counter)
+
+	var resp Models.JSON
+
+	resp.Status = http.StatusOK
+	resp.Body = respAllTags
+
+	byteResp, err := json.Marshal(resp)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+	w.WriteHeader(http.StatusOK)
+	w.Write(byteResp)
 }
 
 func (env Env) getUserByCookie(sessionCookie string) (Models.User, error) {

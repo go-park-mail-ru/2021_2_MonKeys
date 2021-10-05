@@ -8,10 +8,11 @@ import (
 type MockDB struct {
 	users       map[uint64]Models.User
 	swipedUsers map[uint64][]uint64
+	tags        map[uint64]string
 }
 
 func NewMockDB() *MockDB {
-	return &MockDB{make(map[uint64]Models.User), make(map[uint64][]uint64)}
+	return &MockDB{make(map[uint64]Models.User), make(map[uint64][]uint64), make(map[uint64]string)}
 }
 
 func (db MockDB) GetUser(email string) (Models.User, error) {
@@ -139,6 +140,15 @@ func (db MockDB) DropUsers() {
 
 func (db MockDB) DropSwipes() {
 	db.swipedUsers = make(map[uint64][]uint64)
+}
+
+func (db MockDB) CreateTag(text string) {
+	newID := uint64(len(db.tags) + 1)
+	db.tags[newID] = text
+}
+
+func (db MockDB) GetTags() map[uint64]string {
+	return db.tags
 }
 
 type MockSessionDB struct {

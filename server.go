@@ -116,6 +116,14 @@ func init() {
 		ImgSrc:      "/img/Yachty-tout.jpg",
 		Tags:        []string{"soccer", "anime"},
 	})
+	db.CreateTag("anime")
+	db.CreateTag("netflix")
+	db.CreateTag("games")
+	db.CreateTag("walk")
+	db.CreateTag("JS")
+	db.CreateTag("baumanka")
+	db.CreateTag("music")
+	db.CreateTag("sport")
 }
 
 func Router(env *Handlers.Env) *mux.Router {
@@ -127,6 +135,7 @@ func Router(env *Handlers.Env) *mux.Router {
 	router.HandleFunc("/api/v1/profile", env.SignupHandler).Methods("POST", "OPTIONS")
 	router.HandleFunc("/api/v1/session", env.LogoutHandler).Methods("DELETE", "OPTIONS")
 	router.HandleFunc("/api/v1/feed", env.NextUserHandler).Methods("GET", "OPTIONS")
+	router.HandleFunc("/api/v1/tags", env.GetAllTags).Methods("GET", "OPTIONS")
 
 	// middleware
 	router.Use(Logger)
