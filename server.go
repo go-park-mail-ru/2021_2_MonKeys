@@ -159,12 +159,13 @@ func main() {
 
 	srv := &http.Server{
 		Handler:      router,
-		Addr:         ":443",
+		Addr:         ":8000",
 		WriteTimeout: http.DefaultClient.Timeout,
 		ReadTimeout:  http.DefaultClient.Timeout,
 	}
 
 	log.Printf("STD starting server at %s\n", srv.Addr)
 
-	log.Fatal(srv.ListenAndServeTLS(certFile, keyFile))
+	log.Fatal(srv.ListenAndServe())
+	// log.Fatal(srv.ListenAndServeTLS(certFile, keyFile))
 }
