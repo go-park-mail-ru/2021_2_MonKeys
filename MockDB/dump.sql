@@ -27,10 +27,11 @@ create table profile_tag(
      REFERENCES tag (id)
 );
 
-create table likes(  
+create table reactions(  
     id serial not null primary key,
     id1 integer,
-    id2 integer, 
+    id2 integer,
+    type varchar(255) null,
     constraint fk_pt_profile1
      foreign key (id1) 
      REFERENCES profile (id),

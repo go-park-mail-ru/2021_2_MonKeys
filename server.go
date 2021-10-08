@@ -14,6 +14,7 @@ import (
 
 	"github.com/gorilla/mux"
 	httpSwagger "github.com/swaggo/http-swagger"
+	"github.com/tarantool/go-tarantool"
 )
 
 const StatusEmailAlreadyExists = 1001
@@ -159,6 +160,16 @@ func Router(env *Handlers.Env) *mux.Router {
 // @in header
 // @name Set-Cookie
 func main() {
+
+	conn, err := tarantool.Connect("127.0.0.1:3301", tarantool.Opts{
+		User: "admin",
+		Pass: "pass",
+	})
+	if err != nil {
+		log.Fatalf("Connection refused")
+	}
+	defer conn.Close()
+
 	env := &Handlers.Env{
 		DB:        db, // NewMockDB()
 		SessionDB: MockDB.NewSessionDB(),
