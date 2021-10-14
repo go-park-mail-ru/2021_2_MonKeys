@@ -1,0 +1,23 @@
+{
+    "debug": true,
+    "server": {
+      "address": ":8000"
+    },
+    "context":{
+      "timeout":2
+    },
+    "database": {
+        "host": "127.0.0.1",
+        "port": ":5541",
+        "user": "user",
+        "pass": "password",
+        "name": "drip"
+    },
+    "session": {
+        "host": "127.0.0.1",
+        "port": ":3301",
+        "user": "admin",
+        "pass": "pass",
+        "name": "drip"
+    }
+  }
