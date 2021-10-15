@@ -1,16 +1,16 @@
-package main
+package server
 
 import (
+	"dripapp/Handlers"
+	"dripapp/MockDB"
+	"dripapp/Models"
 	"fmt"
 	"log"
 	"net/http"
-	"server/Handlers"
-	"server/MockDB"
-	"server/Models"
 	"strings"
 	"time"
 
-	_ "server/docs"
+	_ "dripapp/docs"
 
 	"github.com/gorilla/mux"
 	httpSwagger "github.com/swaggo/http-swagger"
@@ -60,7 +60,7 @@ func Logger(next http.Handler) http.Handler {
 	})
 }
 
-func PaincRecovery(next http.Handler) http.Handler {
+func PanicRecovery(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		defer func() {
 			if err := recover(); err != nil {
@@ -141,7 +141,7 @@ func Router(env *Handlers.Env) *mux.Router {
 	// middleware
 	router.Use(Logger)
 	router.Use(CORS)
-	router.Use(PaincRecovery)
+	router.Use(PanicRecovery)
 
 	router.PathPrefix("/api/documentation/").Handler(httpSwagger.WrapHandler)
 
@@ -159,7 +159,7 @@ func Router(env *Handlers.Env) *mux.Router {
 // @securityDefinitions.apikey ApiKeyAuth
 // @in header
 // @name Set-Cookie
-func main() {
+func server() {
 
 	conn, err := tarantool.Connect("127.0.0.1:3301", tarantool.Opts{
 		User: "admin",

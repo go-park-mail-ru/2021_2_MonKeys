@@ -1,26 +1,26 @@
 package MockDB
 
 import (
-	"dripapp/Models"
+	"dripapp/internal/pkg/models"
 	"errors"
 )
 
 type MockDB struct {
-	users       map[uint64]Models.User
+	users       map[uint64]models.User
 	swipedUsers map[uint64][]uint64
 	tags        map[uint64]string
 }
 
 func NewMockDB() *MockDB {
-	return &MockDB{make(map[uint64]Models.User), make(map[uint64][]uint64), make(map[uint64]string)}
+	return &MockDB{make(map[uint64]models.User), make(map[uint64][]uint64), make(map[uint64]string)}
 }
 
-func (db MockDB) GetUser(email string) (Models.User, error) {
+func (db MockDB) GetUser(email string) (models.User, error) {
 	if len(db.users) == 0 {
-		return Models.User{}, errors.New("users is empty map")
+		return models.User{}, errors.New("users is empty map")
 	}
 
-	currentUser := Models.User{}
+	currentUser := models.User{}
 	okUser := false
 	for _, value := range db.users {
 		if value.Email == email {
@@ -29,29 +29,29 @@ func (db MockDB) GetUser(email string) (Models.User, error) {
 		}
 	}
 	if !okUser {
-		return Models.User{}, errors.New("User not found")
+		return models.User{}, errors.New("User not found")
 	}
 
 	return currentUser, nil
 }
 
-func (db MockDB) GetUserByID(userID uint64) (Models.User, error) {
+func (db MockDB) GetUserByID(userID uint64) (models.User, error) {
 	if user, ok := db.users[userID]; ok {
 		return user, nil
 	}
 
-	return Models.User{}, errors.New("")
+	return models.User{}, errors.New("")
 }
 
-func (db *MockDB) CreateUser(logUserData Models.LoginUser) (Models.User, error) {
+func (db *MockDB) CreateUser(logUserData models.LoginUser) (models.User, error) {
 	newID := uint64(len(db.users) + 1)
 
-	db.users[newID] = Models.MakeUser(newID, logUserData.Email, logUserData.Password)
+	db.users[newID] = *models.NewUser(newID, logUserData.Email, logUserData.Password)
 
 	return db.users[newID], nil
 }
 
-func (db *MockDB) UpdateUser(newUserData Models.User) (err error) {
+func (db *MockDB) UpdateUser(newUserData models.User) (err error) {
 	db.users[newUserData.ID] = newUserData
 
 	return nil
@@ -66,9 +66,9 @@ func (db *MockDB) AddSwipedUsers(currentUserId, swipedUserId uint64) error {
 	return nil
 }
 
-func (db MockDB) GetNextUserForSwipe(currentUserId uint64) (Models.User, error) {
+func (db MockDB) GetNextUserForSwipe(currentUserId uint64) (models.User, error) {
 	if len(db.users) == 0 {
-		return Models.User{}, errors.New("users is empty map")
+		return models.User{}, errors.New("users is empty map")
 	}
 	if len(db.swipedUsers) == 0 {
 		for key, value := range db.users {
@@ -76,7 +76,7 @@ func (db MockDB) GetNextUserForSwipe(currentUserId uint64) (Models.User, error) 
 				return value, nil
 			}
 		}
-		return Models.User{}, errors.New("haven't any other users for swipe")
+		return models.User{}, errors.New("haven't any other users for swipe")
 	}
 
 	// find all users swiped by the current user
@@ -97,7 +97,7 @@ func (db MockDB) GetNextUserForSwipe(currentUserId uint64) (Models.User, error) 
 		}
 	}
 
-	return Models.User{}, errors.New("haven't any other users for swipe")
+	return models.User{}, errors.New("haven't any other users for swipe")
 }
 
 func existsIn(value uint64, target []uint64) bool {
@@ -126,7 +126,7 @@ func (db MockDB) IsSwiped(userID, swipedUserID uint64) bool {
 	return false
 }
 
-func (db *MockDB) CreateUserAndProfile(user Models.User) {
+func (db *MockDB) CreateUserAndProfile(user models.User) {
 	newID := uint64(len(db.users) + 1)
 
 	user.ID = newID
@@ -135,7 +135,7 @@ func (db *MockDB) CreateUserAndProfile(user Models.User) {
 }
 
 func (db MockDB) DropUsers() {
-	db.users = make(map[uint64]Models.User)
+	db.users = make(map[uint64]models.User)
 }
 
 func (db MockDB) DropSwipes() {

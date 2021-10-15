@@ -2,13 +2,13 @@ package Handlers
 
 import (
 	"crypto/md5"
+	"dripapp/Models"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
-	"server/Models"
 	"time"
 )
 

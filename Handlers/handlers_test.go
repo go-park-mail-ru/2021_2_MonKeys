@@ -2,13 +2,13 @@ package Handlers
 
 import (
 	"bytes"
+	"dripapp/MockDB"
+	"dripapp/Models"
 	"encoding/json"
 	"io"
 	"net/http"
 	"net/http/httptest"
 	"reflect"
-	"server/MockDB"
-	"server/Models"
 	"testing"
 )
 

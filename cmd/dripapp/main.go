@@ -1,14 +1,17 @@
 package main
 
 import (
+	"dripapp/Handlers"
+	"dripapp/MockDB"
+	"dripapp/Models"
+	"dripapp/internal/dripapp/middleware"
 	"log"
 	"net/http"
-	"server/Handlers"
-	"server/MockDB"
-	"server/Models"
-	"server/internal/dripapp/middleware"
+	"os"
 
-	_ "server/docs"
+	"github.com/spf13/viper"
+
+	_ "dripapp/docs"
 
 	"github.com/gorilla/mux"
 	httpSwagger "github.com/swaggo/http-swagger"
@@ -78,9 +81,25 @@ func init() {
 	db.CreateTag("baumanka")
 	db.CreateTag("music")
 	db.CreateTag("sport")
+
+	viper.SetConfigFile(`../../config.json`)
+	err := viper.ReadInConfig()
+	if err != nil {
+		panic(err)
+	}
+
+	if viper.GetBool(`debug`) {
+		log.Println("Service RUN on DEBUG mode")
+	}
 }
 
 func Router(env *Handlers.Env) *mux.Router {
+	logFile, err := os.OpenFile("../../logs.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	if err != nil {
+		log.Fatalf("error opening file: %v", err)
+	}
+	defer logFile.Close()
+
 	router := mux.NewRouter()
 
 	router.HandleFunc("/api/v1/profile", env.CurrentUser).Methods("GET", "OPTIONS")
@@ -92,7 +111,7 @@ func Router(env *Handlers.Env) *mux.Router {
 	router.HandleFunc("/api/v1/tags", env.GetAllTags).Methods("GET", "OPTIONS")
 
 	// middleware
-	router.Use(middleware.Logger)
+	router.Use(middleware.Logger(logFile))
 	router.Use(middleware.CORS)
 	router.Use(middleware.PanicRecovery)
 
