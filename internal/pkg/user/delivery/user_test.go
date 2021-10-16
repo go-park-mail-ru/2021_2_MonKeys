@@ -63,11 +63,17 @@ func TestCurrentUser(t *testing.T) {
 		UserUCase: _userUCase.NewUserUsecase(testDB, testSessionDB),
 	}
 
-	testDB.CreateUser(&models.LoginUser{
-		Email:    "testCurrentUser1@mail.ru",
-		Password: "123456qQ",
-	})
-	testSessionDB.NewSessionCookie("123", 1)
+	_ , err := testDB.CreateUser(&models.LoginUser{
+			Email:    "testCurrentUser1@mail.ru",
+			Password: "123456qQ",
+		})
+	if err != nil{
+		t.Errorf("Create user error");
+	}
+	err = testSessionDB.NewSessionCookie("123", 1)
+	if err != nil{
+		t.Errorf("New session Cookie error")
+	}
 
 	for caseNum, item := range cases {
 		r := httptest.NewRequest("GET", "/api/v1/currentuser", item.BodyReq)

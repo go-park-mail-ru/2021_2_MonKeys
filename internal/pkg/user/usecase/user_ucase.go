@@ -58,7 +58,10 @@ func sendResp(resp models.JSON, w http.ResponseWriter) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 	w.WriteHeader(http.StatusOK)
-	w.Write(byteResp)
+	_, err = w.Write(byteResp)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
 }
 
 func (h *userUsecase) getUserByCookie(sessionCookie string) (*models.User, error) {
@@ -392,5 +395,8 @@ func (h *userUsecase) GetAllTags(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 	w.WriteHeader(http.StatusOK)
-	w.Write(byteResp)
+	_, err = w.Write(byteResp)
+	if err != nil{
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
 }

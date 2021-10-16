@@ -4,6 +4,7 @@ go 1.13
 
 require (
 	github.com/go-openapi/spec v0.20.4 // indirect
+	github.com/golangci/golangci-lint v1.42.1 // indirect
 	github.com/gorilla/mux v1.8.0
 	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/spf13/viper v1.9.0

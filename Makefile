@@ -8,6 +8,10 @@ test-coverage:
 test: 
 	go test ./...
 
+linter: 
+	go get github.com/golangci/golangci-lint/cmd/golangci-lint@v1.42.1
+	go run github.com/golangci/golangci-lint/cmd/golangci-lint run ./...
+
 run: 
 	go run server
 
