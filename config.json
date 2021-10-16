@@ -1,6 +1,7 @@
 {
     "debug": true,
     "server": {
+      "host": "127.0.0.1",
       "address": ":8000"
     },
     "context":{
@@ -19,5 +20,9 @@
         "user": "admin",
         "pass": "pass",
         "name": "drip"
+    },
+    "setting": {
+      "sertFile": "api.ijia.me.crt",
+      "keyFile": "api.ijia.me.key"
     }
   }

@@ -1,21 +1,20 @@
 package main
 
 import (
-	"dripapp/Handlers"
-	"dripapp/MockDB"
-	"dripapp/Models"
 	"dripapp/internal/dripapp/middleware"
+	"dripapp/internal/pkg/models"
+	"dripapp/internal/pkg/session"
+	_userDelivery "dripapp/internal/pkg/user/delivery"
+	_userRepo "dripapp/internal/pkg/user/repository"
+	_userUsecase "dripapp/internal/pkg/user/usecase"
 	"log"
 	"net/http"
 	"os"
-
-	"github.com/spf13/viper"
 
 	_ "dripapp/docs"
 
 	"github.com/gorilla/mux"
 	httpSwagger "github.com/swaggo/http-swagger"
-	"github.com/tarantool/go-tarantool"
 )
 
 const StatusEmailAlreadyExists = 1001
@@ -25,11 +24,11 @@ const (
 )
 
 var (
-	db = MockDB.NewMockDB()
+	userRepo = _userRepo.NewMockDB()
 )
 
 func init() {
-	db.CreateUserAndProfile(Models.User{
+	userRepo.CreateUserAndProfile(&models.User{
 		ID:          1,
 		Name:        "Mikhail",
 		Email:       "mumeu222@mail.ru",
@@ -40,7 +39,7 @@ func init() {
 		ImgSrc:      "/img/Yachty-tout.jpg",
 		Tags:        []string{"soccer", "anime"},
 	})
-	db.CreateUserAndProfile(Models.User{
+	userRepo.CreateUserAndProfile(&models.User{
 		ID:          2,
 		Name:        "Mikhail2",
 		Email:       "mumeu222@mail.ru",
@@ -51,7 +50,7 @@ func init() {
 		ImgSrc:      "/img/Yachty-tout.jpg",
 		Tags:        []string{"soccer", "anime"},
 	})
-	db.CreateUserAndProfile(Models.User{
+	userRepo.CreateUserAndProfile(&models.User{
 		ID:          3,
 		Name:        "Mikhail3",
 		Email:       "mumeu222@mail.ru",
@@ -62,7 +61,7 @@ func init() {
 		ImgSrc:      "/img/Yachty-tout.jpg",
 		Tags:        []string{"soccer", "anime"},
 	})
-	db.CreateUserAndProfile(Models.User{
+	userRepo.CreateUserAndProfile(&models.User{
 		ID:          4,
 		Name:        "Mikhail4",
 		Email:       "mumeu222@mail.ru",
@@ -73,51 +72,24 @@ func init() {
 		ImgSrc:      "/img/Yachty-tout.jpg",
 		Tags:        []string{"soccer", "anime"},
 	})
-	db.CreateTag("anime")
-	db.CreateTag("netflix")
-	db.CreateTag("games")
-	db.CreateTag("walk")
-	db.CreateTag("JS")
-	db.CreateTag("baumanka")
-	db.CreateTag("music")
-	db.CreateTag("sport")
+	userRepo.CreateTag("anime")
+	userRepo.CreateTag("netflix")
+	userRepo.CreateTag("games")
+	userRepo.CreateTag("walk")
+	userRepo.CreateTag("JS")
+	userRepo.CreateTag("baumanka")
+	userRepo.CreateTag("music")
+	userRepo.CreateTag("sport")
 
-	viper.SetConfigFile(`../../config.json`)
-	err := viper.ReadInConfig()
-	if err != nil {
-		panic(err)
-	}
+	// viper.SetConfigFile(`../../config.json`)
+	// err := viper.ReadInConfig()
+	// if err != nil {
+	// 	panic(err)
+	// }
 
-	if viper.GetBool(`debug`) {
-		log.Println("Service RUN on DEBUG mode")
-	}
-}
-
-func Router(env *Handlers.Env) *mux.Router {
-	logFile, err := os.OpenFile("../../logs.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
-	if err != nil {
-		log.Fatalf("error opening file: %v", err)
-	}
-	defer logFile.Close()
-
-	router := mux.NewRouter()
-
-	router.HandleFunc("/api/v1/profile", env.CurrentUser).Methods("GET", "OPTIONS")
-	router.HandleFunc("/api/v1/session", env.LoginHandler).Methods("POST", "OPTIONS")
-	router.HandleFunc("/api/v1/profile", env.EditProfileHandler).Methods("PUT", "OPTIONS")
-	router.HandleFunc("/api/v1/profile", env.SignupHandler).Methods("POST", "OPTIONS")
-	router.HandleFunc("/api/v1/session", env.LogoutHandler).Methods("DELETE", "OPTIONS")
-	router.HandleFunc("/api/v1/feed", env.NextUserHandler).Methods("GET", "OPTIONS")
-	router.HandleFunc("/api/v1/tags", env.GetAllTags).Methods("GET", "OPTIONS")
-
-	// middleware
-	router.Use(middleware.Logger(logFile))
-	router.Use(middleware.CORS)
-	router.Use(middleware.PanicRecovery)
-
-	router.PathPrefix("/api/documentation/").Handler(httpSwagger.WrapHandler)
-
-	return router
+	// if viper.GetBool(`debug`) {
+	// 	log.Println("Service RUN on DEBUG mode")
+	// }
 }
 
 // @title Drip API
@@ -132,22 +104,66 @@ func Router(env *Handlers.Env) *mux.Router {
 // @in header
 // @name Set-Cookie
 func main() {
+	// conn, err := tarantool.Connect("127.0.0.1:3301", tarantool.Opts{
+	// 	User: "admin",
+	// 	Pass: "pass",
+	// })
+	// if err != nil {
+	// 	log.Fatalf("Connection refused")
+	// }
+	// defer func(conn *tarantool.Connection) {
+	// 	err := conn.Close()
+	// 	if err != nil {
 
-	conn, err := tarantool.Connect("127.0.0.1:3301", tarantool.Opts{
-		User: "admin",
-		Pass: "pass",
-	})
+	// 	}
+	// }(conn)
+
+	// logfile
+	logFile, err := os.OpenFile("../../logs.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
-		log.Fatalf("Connection refused")
+		log.Fatalf("error opening file: %v", err)
 	}
-	defer conn.Close()
+	defer func(logFile *os.File) {
+		err := logFile.Close()
+		if err != nil {
 
-	env := &Handlers.Env{
-		DB:        db, // NewMockDB()
-		SessionDB: MockDB.NewSessionDB(),
+		}
+	}(logFile)
+
+	// handlers
+	// userRepo := _userRepo.NewMockDB()
+	// sm, err := session.NewTarantoolConnection()
+	sess := session.NewSessionDB()
+	if err != nil {
+		log.Fatal(err)
 	}
 
-	router := Router(env)
+	userUCase := _userUsecase.NewUserUsecase(userRepo, sess)
+
+	userHandler := &_userDelivery.UserHandler{
+		UserUCase: userUCase,
+	}
+
+	// router
+	router := mux.NewRouter()
+
+	router.HandleFunc("/api/v1/session", userHandler.LoginHandler).Methods("POST", "OPTIONS")
+	router.HandleFunc("/api/v1/session", userHandler.LogoutHandler).Methods("DELETE", "OPTIONS")
+
+	router.HandleFunc("/api/v1/profile", userHandler.CurrentUser).Methods("GET", "OPTIONS")
+	router.HandleFunc("/api/v1/profile", userHandler.EditProfileHandler).Methods("PUT", "OPTIONS")
+	router.HandleFunc("/api/v1/profile", userHandler.SignupHandler).Methods("POST", "OPTIONS")
+
+	router.HandleFunc("/api/v1/feed", userHandler.NextUserHandler).Methods("GET", "OPTIONS")
+
+	router.HandleFunc("/api/v1/tags", userHandler.GetAllTags).Methods("GET", "OPTIONS")
+
+	router.PathPrefix("/api/documentation/").Handler(httpSwagger.WrapHandler)
+
+	// middleware
+	router.Use(middleware.Logger(logFile))
+	router.Use(middleware.CORS)
+	router.Use(middleware.PanicRecovery)
 
 	srv := &http.Server{
 		Handler:      router,

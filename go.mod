@@ -15,9 +15,9 @@ require (
 	github.com/tarantool/go-tarantool v0.0.0-20210330210617-56fe55c5fa5c
 	go.uber.org/atomic v1.9.0 // indirect
 	go.uber.org/multierr v1.7.0 // indirect
-	go.uber.org/zap v1.19.1
-	golang.org/x/net v0.0.0-20211014222326-fd004c51d1d6 // indirect
-	golang.org/x/sys v0.0.0-20211013075003-97ac67df715c // indirect
+	go.uber.org/zap v1.19.1 // indirect
+	golang.org/x/net v0.0.0-20211015210444-4f30a5c0130f // indirect
+	golang.org/x/sys v0.0.0-20211015200801-69063c4bb744 // indirect
 	golang.org/x/tools v0.1.7 // indirect
 	gopkg.in/vmihailenco/msgpack.v2 v2.9.2 // indirect
 )
