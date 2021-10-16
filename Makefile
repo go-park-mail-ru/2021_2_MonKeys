@@ -17,4 +17,4 @@ run:
 
 build:
 	go get ./...
-	go build -v -o build/apiServer server
+	go build -v -o ./build/apiDripapp cmd/dripapp/main.go
