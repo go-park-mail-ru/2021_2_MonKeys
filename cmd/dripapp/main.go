@@ -1,4 +1,4 @@
-package main
+package dripapp
 
 import (
 	"dripapp/internal/dripapp/middleware"
