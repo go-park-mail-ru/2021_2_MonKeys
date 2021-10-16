@@ -97,7 +97,7 @@ jobs:
                 gocov convert cover.out | gocov-xml > test-results/go/results.xml
       - run:
             name: upload codecov
-            command: - bash <(curl -s https://codecov.io/bash)
+            command: bash <(curl -s https://codecov.io/bash)
   linter:
     working_directory: ~/repo
     docker:
