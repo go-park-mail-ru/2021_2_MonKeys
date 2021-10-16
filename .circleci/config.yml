@@ -67,7 +67,7 @@ jobs:
           command: go get github.com/golangci/golangci-lint/cmd/golangci-lint@v1.42.1
       - run:
           name: Running GolangCI-LINT
-          command: go run github.com/golangci/golangci-lint/cmd/golangci-lint run ./...
+          command: go run github.com/golangci/golangci-lint/cmd/golangci-lint run ./... --disable unused --disable deadcode
       
 workflows:
   version: 2

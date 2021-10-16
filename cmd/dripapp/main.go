@@ -14,14 +14,16 @@ import (
 	_ "dripapp/docs"
 
 	"github.com/gorilla/mux"
+	"github.com/spf13/viper"
 	httpSwagger "github.com/swaggo/http-swagger"
 )
 
 const StatusEmailAlreadyExists = 1001
-const (
-	certFile = "api.ijia.me.crt"
-	keyFile  = "api.ijia.me.key"
-)
+
+// const (
+// 	certFile = "api.ijia.me.crt"
+// 	keyFile  = "api.ijia.me.key"
+// )
 
 var (
 	userRepo = _userRepo.NewMockDB()
@@ -81,15 +83,15 @@ func init() {
 	userRepo.CreateTag("music")
 	userRepo.CreateTag("sport")
 
-	// viper.SetConfigFile(`config.json`)
-	// err := viper.ReadInConfig()
-	// if err != nil {
-	// 	panic(err)
-	// }
+	viper.SetConfigFile(`config.json`)
+	err := viper.ReadInConfig()
+	if err != nil {
+		panic(err)
+	}
 
-	// if viper.GetBool(`debug`) {
-	// 	log.Println("Service RUN on DEBUG mode")
-	// }
+	if viper.GetBool(`debug`) {
+		log.Println("Service RUN on DEBUG mode")
+	}
 }
 
 // @title Drip API
@@ -132,7 +134,7 @@ func main() {
 	defer func(logFile *os.File) {
 		err := logFile.Close()
 		if err != nil {
-
+			log.Fatal(err)
 		}
 	}(logFile)
 

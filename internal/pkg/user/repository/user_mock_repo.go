@@ -134,19 +134,19 @@ func (db *MockDB) CreateUserAndProfile(user *models.User) {
 	db.users[newID] = user
 }
 
-func (db MockDB) DropUsers() {
+func (db *MockDB) DropUsers() {
 	db.users = make(map[uint64]*models.User)
 }
 
-func (db MockDB) DropSwipes() {
+func (db *MockDB) DropSwipes() {
 	db.swipedUsers = make(map[uint64][]uint64)
 }
 
-func (db MockDB) CreateTag(text string) {
+func (db *MockDB) CreateTag(text string) {
 	newID := uint64(len(db.tags) + 1)
 	db.tags[newID] = text
 }
 
-func (db MockDB) GetTags() map[uint64]string {
+func (db *MockDB) GetTags() map[uint64]string {
 	return db.tags
 }

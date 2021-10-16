@@ -63,15 +63,15 @@ func TestCurrentUser(t *testing.T) {
 		UserUCase: _userUCase.NewUserUsecase(testDB, testSessionDB),
 	}
 
-	_ , err := testDB.CreateUser(&models.LoginUser{
-			Email:    "testCurrentUser1@mail.ru",
-			Password: "123456qQ",
-		})
-	if err != nil{
-		t.Errorf("Create user error");
+	_, err := testDB.CreateUser(&models.LoginUser{
+		Email:    "testCurrentUser1@mail.ru",
+		Password: "123456qQ",
+	})
+	if err != nil {
+		t.Errorf("Create user error")
 	}
 	err = testSessionDB.NewSessionCookie("123", 1)
-	if err != nil{
+	if err != nil {
 		t.Errorf("New session Cookie error")
 	}
 
@@ -129,10 +129,13 @@ func TestLogin(t *testing.T) {
 	userHandler := &UserHandler{
 		UserUCase: _userUCase.NewUserUsecase(testDB, testSessionDB),
 	}
-	testDB.CreateUser(&models.LoginUser{
+	_, err := testDB.CreateUser(&models.LoginUser{
 		Email:    "testLogin1@mail.ru",
 		Password: "123456qQ",
 	})
+	if err != nil {
+		t.Errorf("Create user failed")
+	}
 
 	for caseNum, item := range cases {
 		r := httptest.NewRequest("POST", "/api/v1/login", item.BodyReq)
@@ -198,10 +201,13 @@ func TestSignup(t *testing.T) {
 
 	for caseNum, item := range cases {
 		testDB.DropUsers()
-		testDB.CreateUser(&models.LoginUser{
+		_, err := testDB.CreateUser(&models.LoginUser{
 			Email:    "firsUser@mail.ru",
 			Password: "123456qQ",
 		})
+		if err != nil {
+			t.Errorf("Create user failed")
+		}
 
 		r := httptest.NewRequest("POST", "/api/v1/signup", item.BodyReq)
 		r.AddCookie(&item.CookieReq)
@@ -268,17 +274,23 @@ func TestLogout(t *testing.T) {
 		UserUCase: _userUCase.NewUserUsecase(testDB, testSessionDB),
 	}
 
-	user, _ := testDB.CreateUser(&models.LoginUser{
+	user, err := testDB.CreateUser(&models.LoginUser{
 		Email:    "testLogout1@mail.ru",
 		Password: "123456qQ",
 	})
+	if err != nil {
+		t.Errorf("Create user failed")
+	}
 
 	for caseNum, item := range cases {
 		r := httptest.NewRequest("GET", "/api/v1/logout", item.BodyReq)
 		r.AddCookie(&item.CookieReq)
 		w := httptest.NewRecorder()
 
-		testSessionDB.NewSessionCookie("123", user.ID)
+		err := testSessionDB.NewSessionCookie("123", user.ID)
+		if err != nil {
+			t.Errorf("New session Cookie error")
+		}
 
 		userHandler.LogoutHandler(w, r)
 
@@ -357,16 +369,22 @@ func TestNextUser(t *testing.T) {
 		UserUCase: _userUCase.NewUserUsecase(testDB, testSessionDB),
 	}
 
-	testDB.CreateUser(&models.LoginUser{
+	_, err := testDB.CreateUser(&models.LoginUser{
 		Email:    "testNextUser1@mail.ru",
 		Password: "123456qQ\"",
 	})
+	if err != nil {
+		t.Errorf("Create user failed")
+	}
 
 	currenUser, _ := testDB.CreateUser(&models.LoginUser{
 		Email:    "testCurrUser1@mail.ru",
 		Password: "123456qQ\"",
 	})
-	testSessionDB.NewSessionCookie("123", currenUser.ID)
+	err = testSessionDB.NewSessionCookie("123", currenUser.ID)
+	if err != nil {
+		t.Error("New session error")
+	}
 
 	for caseNum, item := range cases {
 		r := httptest.NewRequest("POST", "/api/v1/nextswipeuser", item.BodyReq)
@@ -402,16 +420,22 @@ func TestEditProfile(t *testing.T) {
 		ImgSrc:      "/img/testEdit/",
 		Tags:        []string{"Tags", "Tags", "Tags", "Tags", "Tags"},
 	}
-	bodyReq, _ := json.Marshal(requestUser)
+	bodyReq, err := json.Marshal(requestUser)
+	if err != nil {
+		t.Error("marshal error")
+	}
 
 	expectedUser := models.NewUser(1, "testEdit@mail.ru", "123456qQ")
-	expectedUser.FillProfile(&models.User{
+	err = expectedUser.FillProfile(&models.User{
 		Name:        requestUser.Name,
 		Date:        requestUser.Date,
 		Description: requestUser.Description,
 		ImgSrc:      requestUser.ImgSrc,
 		Tags:        requestUser.Tags,
 	})
+	if err != nil {
+		t.Error("fill profile error")
+	}
 
 	BodyRespByte, _ := json.Marshal(models.JSON{
 		Status: StatusOK,
@@ -478,11 +502,17 @@ func TestEditProfile(t *testing.T) {
 	for caseNum, item := range cases {
 		testDB.DropUsers()
 		testSessionDB.DropCookies()
-		currenUser, _ := testDB.CreateUser(&models.LoginUser{
+		currenUser, err := testDB.CreateUser(&models.LoginUser{
 			Email:    expectedUser.Email,
 			Password: "123456qQ",
 		})
-		testSessionDB.NewSessionCookie("123", currenUser.ID)
+		if err != nil {
+			t.Error("create user error")
+		}
+		err = testSessionDB.NewSessionCookie("123", currenUser.ID)
+		if err != nil {
+			t.Error("new session error")
+		}
 
 		r := httptest.NewRequest("POST", "/api/v1/editprofile", item.BodyReq)
 		r.AddCookie(&item.CookieReq)
