@@ -21,12 +21,11 @@ jobs:
       
       - store_artifacts:
           path: /tmp/artifacts
-  test-coverage:
+  unit-tests:
       working_directory: ~/repo
       docker:
         - image: circleci/golang:1.16
       steps:
-        
       - checkout
       - run:
           name: Install Dependencies
@@ -40,18 +39,6 @@ jobs:
           command: |
             mkdir -p /tmp/artifacts
       - run: cd cmd/dripapp && go build
-      - run: 
-            name: "go cov dependecies"
-            command: go get github.com/axw/gocov/gocov
-      - run: 
-            name: "go xml dependecies"
-            command: go get github.com/AlekSi/gocov-xml
-      - run:
-          name: "run tests"
-          command: |
-                go test -coverprofile=cover.out
-                go tool cover -html=cover.out -o coverage.html
-                mv coverage.html /tmp/artifacts
       - run:
           name: "making test-results folder"
           command: |
@@ -59,10 +46,11 @@ jobs:
                 ls
                 pwd
       - run:
-            name: "convert to xml for circleCI"
+            name: "Running tests and storing under test-results folder"
             command: |
-                ls
-                gocov convert cover.out | gocov-xml > test-results/go/results.xml
+                ls 
+                go get gotest.tools/gotestsum
+                go run gotest.tools/gotestsum --junitfile test-results/go/unit-tests.xml
       - store_test_results:
                 path: test-results
   linter:
@@ -94,6 +82,6 @@ workflows:
   build-test:
     jobs:
       - build
-      - test-coverage:
+      - unit-tests:
           requires:
             - build
