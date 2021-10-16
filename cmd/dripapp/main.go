@@ -14,6 +14,7 @@ import (
 	_ "dripapp/docs"
 
 	"github.com/gorilla/mux"
+	"github.com/spf13/viper"
 	httpSwagger "github.com/swaggo/http-swagger"
 )
 
@@ -81,15 +82,15 @@ func init() {
 	userRepo.CreateTag("music")
 	userRepo.CreateTag("sport")
 
-	// viper.SetConfigFile(`../../config.json`)
-	// err := viper.ReadInConfig()
-	// if err != nil {
-	// 	panic(err)
-	// }
+	viper.SetConfigFile(`../config.json`)
+	err := viper.ReadInConfig()
+	if err != nil {
+		panic(err)
+	}
 
-	// if viper.GetBool(`debug`) {
-	// 	log.Println("Service RUN on DEBUG mode")
-	// }
+	if viper.GetBool(`debug`) {
+		log.Println("Service RUN on DEBUG mode")
+	}
 }
 
 // @title Drip API
@@ -117,6 +118,12 @@ func main() {
 
 	// 	}
 	// }(conn)
+
+	// dbHost := viper.GetString(`database.host`)
+	// dbPort := viper.GetString(`database.port`)
+	// dbUser := viper.GetString(`database.user`)
+	// dbPass := viper.GetString(`database.pass`)
+	// dbName := viper.GetString(`database.name`)
 
 	// logfile
 	logFile, err := os.OpenFile("../../logs.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
