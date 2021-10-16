@@ -1,4 +1,6 @@
 version: 2.1
+orbs:
+  codecov: codecov/codecov@1.0.2
 jobs:
   build:
     working_directory: ~/repo
@@ -53,6 +55,50 @@ jobs:
                 go run gotest.tools/gotestsum --junitfile test-results/go/unit-tests.xml
       - store_test_results:
                 path: test-results
+  test-coverage:
+      working_directory: ~/repo
+      docker:
+        - image: circleci/golang:1.16
+      steps:
+        
+      - checkout
+      - run:
+          name: Install Dependencies
+          command: go get ./...
+      - save_cache:
+          key: go-mod-v4-{{ checksum "go.sum" }}
+          paths:
+            - "/go/pkg/mod"
+      - run:
+          name: "Create a temp directory for artifacts"
+          command: |
+            mkdir -p /tmp/artifacts
+      - run: go build
+      - run: 
+            name: "go cov dependecies"
+            command: go get github.com/axw/gocov/gocov
+      - run: 
+            name: "go xml dependecies"
+            command: go get github.com/AlekSi/gocov-xml
+      - run:
+          name: "run tests"
+          command: |
+                go test -coverprofile=cover.out
+                go tool cover -html=cover.out -o coverage.html
+                mv coverage.html /tmp/artifacts
+      - run:
+          name: "making test-results folder"
+          command: |
+                mkdir test-results && cd test-results && mkdir go && pwd
+                ls
+                pwd
+      - run:
+            name: "convert to xml for circleCI"
+            command: |
+                ls
+                gocov convert cover.out | gocov-xml > test-results/go/results.xml
+      - codecov/upload:
+                file: test-results/go/results.xml
   linter:
     working_directory: ~/repo
     docker:
