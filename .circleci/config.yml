@@ -82,7 +82,7 @@ jobs:
           name: "Create a temp directory for artifacts"
           command: |
             mkdir -p /tmp/artifacts
-      - run: go build
+      - run: cd cmd/dripapp && go build
       
       - store_artifacts:
           path: /tmp/artifacts
