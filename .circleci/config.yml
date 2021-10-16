@@ -1,6 +1,4 @@
 version: 2.1
-orbs:
-  codecov: codecov/codecov@1.0.2
 jobs:
   build:
     working_directory: ~/repo
@@ -98,7 +96,7 @@ jobs:
                 ls
                 gocov convert cover.out | gocov-xml > test-results/go/results.xml
       - codecov/upload:
-                file: test-results/go/results.xml
+                - bash <(curl -s https://codecov.io/bash)
   linter:
     working_directory: ~/repo
     docker:
