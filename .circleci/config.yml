@@ -71,7 +71,6 @@ jobs:
           name: "Create a temp directory for artifacts"
           command: |
             mkdir -p /tmp/artifacts
-      - run: go build
       - run: 
             name: "go cov dependecies"
             command: go get github.com/axw/gocov/gocov
