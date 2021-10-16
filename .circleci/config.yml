@@ -123,5 +123,8 @@ workflows:
       - unit-tests:
           requires:
             - build
+      - test-coverage:
+          requires:
+            - build
 
             
