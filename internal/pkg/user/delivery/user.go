@@ -2,6 +2,9 @@ package delivery
 
 import (
 	"dripapp/internal/pkg/models"
+	"encoding/json"
+	"io/ioutil"
+	"log"
 	"net/http"
 )
 
@@ -18,12 +21,55 @@ type UserHandler struct {
 	UserUCase models.UserUsecase
 }
 
+func sendResp(resp models.JSON, w http.ResponseWriter) {
+	byteResp, err := json.Marshal(resp)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+	w.WriteHeader(http.StatusOK)
+	_, err = w.Write(byteResp)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+}
+
 func (h *UserHandler) CurrentUser(w http.ResponseWriter, r *http.Request) {
-	h.UserUCase.CurrentUser(w, r)
+	var resp models.JSON
+
+	user, status := h.UserUCase.CurrentUser(r.Context(), r)
+	resp.Status = status
+	if status == StatusOK {
+		resp.Body = user
+	}
+
+	sendResp(resp, w)
 }
 
 func (h *UserHandler) EditProfileHandler(w http.ResponseWriter, r *http.Request) {
-	h.UserUCase.EditProfileHandler(w, r)
+	var resp models.JSON
+	byteReq, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		resp.Status = StatusBadRequest
+		sendResp(resp, w)
+		log.Printf("CODE %d ERROR %s", resp.Status, err)
+		return
+	}
+
+	var newUserData models.User
+	err = json.Unmarshal(byteReq, &newUserData)
+	if err != nil {
+		resp.Status = StatusBadRequest
+		sendResp(resp, w)
+		log.Printf("CODE %d ERROR %s", resp.Status, err)
+		return
+	}
+	user, status := h.UserUCase.EditProfile(r.Context(), newUserData, r)
+	resp.Status = status
+	if status == StatusOK {
+		resp.Body = user
+	}
+
+	sendResp(resp, w)
 }
 
 // @Summary LogIn
@@ -36,11 +82,36 @@ func (h *UserHandler) EditProfileHandler(w http.ResponseWriter, r *http.Request)
 // @Failure 400,404,500
 // @Router /login [post]
 func (h *UserHandler) LoginHandler(w http.ResponseWriter, r *http.Request) {
-	h.UserUCase.LoginHandler(w, r)
+	var resp models.JSON
+
+	byteReq, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		resp.Status = StatusBadRequest
+		sendResp(resp, w)
+		log.Printf("CODE %d ERROR %s", resp.Status, err)
+		return
+	}
+
+	var logUserData *models.LoginUser
+	err = json.Unmarshal(byteReq, &logUserData)
+	if err != nil {
+		resp.Status = StatusBadRequest
+		sendResp(resp, w)
+		log.Printf("CODE %d ERROR %s", resp.Status, err)
+		return
+	}
+	user, status := h.UserUCase.Login(r.Context(), *logUserData, w, r)
+	resp.Status = status
+	if status == StatusOK {
+		resp.Body = user
+	}
+
+	sendResp(resp, w)
 }
 
 func (h *UserHandler) LogoutHandler(w http.ResponseWriter, r *http.Request) {
-	h.UserUCase.LogoutHandler(w, r)
+	status := h.UserUCase.Logout(r.Context(), w, r)
+	sendResp(models.JSON{Status: status}, w)
 }
 
 // @Summary SignUp
@@ -53,13 +124,63 @@ func (h *UserHandler) LogoutHandler(w http.ResponseWriter, r *http.Request) {
 // @Failure 400,404,500
 // @Router /signup [post]
 func (h *UserHandler) SignupHandler(w http.ResponseWriter, r *http.Request) {
-	h.UserUCase.SignupHandler(w, r)
+	var resp models.JSON
+
+	byteReq, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		resp.Status = StatusBadRequest
+		sendResp(resp, w)
+		log.Printf("CODE %d ERROR %s", resp.Status, err)
+		return
+	}
+
+	var logUserData *models.LoginUser
+	err = json.Unmarshal(byteReq, &logUserData)
+	if err != nil {
+		resp.Status = StatusBadRequest
+		sendResp(resp, w)
+		log.Printf("CODE %d ERROR %s", resp.Status, err)
+		return
+	}
+
+	status := h.UserUCase.Signup(r.Context(), *logUserData, w)
+	resp.Status = status
+	sendResp(resp, w)
 }
 
 func (h *UserHandler) NextUserHandler(w http.ResponseWriter, r *http.Request) {
-	h.UserUCase.NextUserHandler(w, r)
+	var resp models.JSON
+
+	// get swiped usedata for registrationr id from json
+	byteReq, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		resp.Status = StatusBadRequest
+		sendResp(resp, w)
+		log.Printf("CODE %d ERROR %s", resp.Status, err)
+		return
+	}
+	var swipedUserData models.SwipedUser
+	err = json.Unmarshal(byteReq, &swipedUserData)
+	if err != nil {
+		resp.Status = StatusBadRequest
+		sendResp(resp, w)
+		log.Printf("CODE %d ERROR %s", resp.Status, err)
+		return
+	}
+
+	nextUser, status := h.UserUCase.NextUser(r.Context(), swipedUserData, r)
+	resp.Status = status
+	if status == StatusOK {
+		resp.Body = nextUser
+	}
+
+	sendResp(resp, w)
 }
 
 func (h *UserHandler) GetAllTags(w http.ResponseWriter, r *http.Request) {
-	h.UserUCase.GetAllTags(w, r)
+	var resp models.JSON
+	allTags, status := h.UserUCase.GetAllTags(r.Context(), r)
+	resp.Body = allTags
+	resp.Status = status
+	sendResp(resp, w)
 }

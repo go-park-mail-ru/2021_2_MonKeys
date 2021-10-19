@@ -1,6 +1,7 @@
 package models
 
 import (
+	"context"
 	"crypto/md5"
 	"errors"
 	"fmt"
@@ -90,33 +91,34 @@ func (user *User) FillProfile(newUserData *User) (err error) {
 }
 
 var (
-	ErrNoUser  = errors.New("no user found")
-	ErrBadPass = errors.New("invalid password")
+	ErrNoUser             = errors.New("no user found")
+	ErrBadPass            = errors.New("invalid password")
+	ErrEmailAlreadyExists = errors.New("email already exists")
 )
 
 // ArticleUsecase represent the article's usecases
 type UserUsecase interface {
-	CurrentUser(w http.ResponseWriter, r *http.Request)
-	EditProfileHandler(w http.ResponseWriter, r *http.Request)
-	LoginHandler(w http.ResponseWriter, r *http.Request)
-	LogoutHandler(w http.ResponseWriter, r *http.Request)
-	SignupHandler(w http.ResponseWriter, r *http.Request)
-	NextUserHandler(w http.ResponseWriter, r *http.Request)
-	GetAllTags(w http.ResponseWriter, r *http.Request)
+	CurrentUser(c context.Context, r *http.Request) (User, int)
+	EditProfile(c context.Context, newUserData User, r *http.Request) (User, int)
+	Login(c context.Context, logUserData LoginUser, w http.ResponseWriter, r *http.Request) (User, int)
+	Logout(c context.Context, w http.ResponseWriter, r *http.Request) int
+	Signup(c context.Context, logUserData LoginUser, w http.ResponseWriter) int
+	NextUser(c context.Context, swipedUserData SwipedUser, r *http.Request) (User, int)
+	GetAllTags(c context.Context, r *http.Request) (Tags, int)
 }
 
 // ArticleRepository represent the article's repository contract
 type UserRepository interface {
-	GetUser(email string) (*User, error)
-	GetUserByID(userID uint64) (*User, error)
-	CreateUser(logUserData *LoginUser) (*User, error)
-	UpdateUser(newUserData *User) error
-	AddSwipedUsers(currentUserId, swipedUserId uint64) error
-	GetNextUserForSwipe(currentUserId uint64) (*User, error)
-	IsSwiped(userID, swipedUserID uint64) bool
-	CreateUserAndProfile(user *User)
-	DropUsers()
-	DropSwipes()
-	CreateTag(text string)
-	GetTags() map[uint64]string
+	GetUser(ctx context.Context, email string) (*User, error)
+	GetUserByID(ctx context.Context, userID uint64) (*User, error)
+	CreateUser(ctx context.Context, logUserData *LoginUser) (*User, error)
+	UpdateUser(ctx context.Context, newUserData *User) error
+	AddSwipedUsers(ctx context.Context, currentUserId, swipedUserId uint64) error
+	GetNextUserForSwipe(ctx context.Context, currentUserId uint64) (*User, error)
+	IsSwiped(ctx context.Context, userID, swipedUserID uint64) bool
+	CreateUserAndProfile(ctx context.Context, user *User)
+	DropUsers(ctx context.Context)
+	DropSwipes(ctx context.Context)
+	CreateTag(ctx context.Context, text string)
+	GetTags(ctx context.Context) map[uint64]string
 }

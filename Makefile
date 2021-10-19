@@ -9,16 +9,16 @@ test:
 	go test ./...
 
 linter: 
+	go get github.com/golangci/golangci-lint/cmd/golangci-lint@v1.42.1
 	go run github.com/golangci/golangci-lint/cmd/golangci-lint run ./... --disable unused --disable deadcode
+	go mod tidy
 
 run: 
-	go run server
+	# go run cmd/dripapp/main.go
+	build/dripapp
 
 get:
 	go get ./...
 
-get-linter:
-	go get github.com/golangci/golangci-lint/cmd/golangci-lint@v1.42.1
-
 build:
-	go build -v -o ./build/apiDripapp cmd/dripapp/main.go
+	go build -v -o ./build/dripapp cmd/dripapp/main.go

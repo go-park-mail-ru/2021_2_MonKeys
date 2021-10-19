@@ -2,6 +2,7 @@ package delivery
 
 import (
 	"bytes"
+	"dripapp/configs"
 	"dripapp/internal/pkg/models"
 	"dripapp/internal/pkg/session"
 	_userRepo "dripapp/internal/pkg/user/repository"
@@ -59,11 +60,12 @@ func TestCurrentUser(t *testing.T) {
 	testDB := _userRepo.NewMockDB()
 	testSessionDB := session.NewSessionDB()
 
+	timeoutContext := configs.Timeouts.ContextTimeout
 	userHandler := &UserHandler{
-		UserUCase: _userUCase.NewUserUsecase(testDB, testSessionDB),
+		UserUCase: _userUCase.NewUserUsecase(testDB, testSessionDB, timeoutContext),
 	}
 
-	_, err := testDB.CreateUser(&models.LoginUser{
+	_, err := testDB.CreateUser(nil, &models.LoginUser{
 		Email:    "testCurrentUser1@mail.ru",
 		Password: "123456qQ",
 	})
@@ -126,10 +128,11 @@ func TestLogin(t *testing.T) {
 	testDB := _userRepo.NewMockDB()
 	testSessionDB := session.NewSessionDB()
 
+	timeoutContext := configs.Timeouts.ContextTimeout
 	userHandler := &UserHandler{
-		UserUCase: _userUCase.NewUserUsecase(testDB, testSessionDB),
+		UserUCase: _userUCase.NewUserUsecase(testDB, testSessionDB, timeoutContext),
 	}
-	_, err := testDB.CreateUser(&models.LoginUser{
+	_, err := testDB.CreateUser(nil, &models.LoginUser{
 		Email:    "testLogin1@mail.ru",
 		Password: "123456qQ",
 	})
@@ -195,13 +198,14 @@ func TestSignup(t *testing.T) {
 	testDB := _userRepo.NewMockDB()
 	testSessionDB := session.NewSessionDB()
 
+	timeoutContext := configs.Timeouts.ContextTimeout
 	userHandler := &UserHandler{
-		UserUCase: _userUCase.NewUserUsecase(testDB, testSessionDB),
+		UserUCase: _userUCase.NewUserUsecase(testDB, testSessionDB, timeoutContext),
 	}
 
 	for caseNum, item := range cases {
-		testDB.DropUsers()
-		_, err := testDB.CreateUser(&models.LoginUser{
+		testDB.DropUsers(nil)
+		_, err := testDB.CreateUser(nil, &models.LoginUser{
 			Email:    "firsUser@mail.ru",
 			Password: "123456qQ",
 		})
@@ -231,7 +235,7 @@ func TestSignup(t *testing.T) {
 			}
 			testSessionDB.DropCookies()
 
-			newUser, _ := testDB.GetUser(email)
+			newUser, _ := testDB.GetUser(nil, email)
 			if !reflect.DeepEqual(newUser, expectedUser) {
 				t.Errorf("TestCase [%d]:\nuser was not created", caseNum+1)
 			}
@@ -270,11 +274,12 @@ func TestLogout(t *testing.T) {
 	testDB := _userRepo.NewMockDB()
 	testSessionDB := session.NewSessionDB()
 
+	timeoutContext := configs.Timeouts.ContextTimeout
 	userHandler := &UserHandler{
-		UserUCase: _userUCase.NewUserUsecase(testDB, testSessionDB),
+		UserUCase: _userUCase.NewUserUsecase(testDB, testSessionDB, timeoutContext),
 	}
 
-	user, err := testDB.CreateUser(&models.LoginUser{
+	user, err := testDB.CreateUser(nil, &models.LoginUser{
 		Email:    "testLogout1@mail.ru",
 		Password: "123456qQ",
 	})
@@ -365,11 +370,12 @@ func TestNextUser(t *testing.T) {
 	testDB := _userRepo.NewMockDB()
 	testSessionDB := session.NewSessionDB()
 
+	timeoutContext := configs.Timeouts.ContextTimeout
 	userHandler := &UserHandler{
-		UserUCase: _userUCase.NewUserUsecase(testDB, testSessionDB),
+		UserUCase: _userUCase.NewUserUsecase(testDB, testSessionDB, timeoutContext),
 	}
 
-	_, err := testDB.CreateUser(&models.LoginUser{
+	_, err := testDB.CreateUser(nil, &models.LoginUser{
 		Email:    "testNextUser1@mail.ru",
 		Password: "123456qQ\"",
 	})
@@ -377,7 +383,7 @@ func TestNextUser(t *testing.T) {
 		t.Errorf("Create user failed")
 	}
 
-	currenUser, _ := testDB.CreateUser(&models.LoginUser{
+	currenUser, _ := testDB.CreateUser(nil, &models.LoginUser{
 		Email:    "testCurrUser1@mail.ru",
 		Password: "123456qQ\"",
 	})
@@ -403,10 +409,10 @@ func TestNextUser(t *testing.T) {
 				caseNum+1, w.Body.String(), item.BodyResp)
 		}
 
-		if !testDB.IsSwiped(currenUser.ID, 321) && item.testType == correctCase {
+		if !testDB.IsSwiped(nil, currenUser.ID, 321) && item.testType == correctCase {
 			t.Errorf("TestCase [%d]:\nswipe not saved", caseNum+1)
 		}
-		testDB.DropSwipes()
+		testDB.DropSwipes(nil)
 	}
 }
 
@@ -495,14 +501,15 @@ func TestEditProfile(t *testing.T) {
 	testDB := _userRepo.NewMockDB()
 	testSessionDB := session.NewSessionDB()
 
+	timeoutContext := configs.Timeouts.ContextTimeout
 	userHandler := &UserHandler{
-		UserUCase: _userUCase.NewUserUsecase(testDB, testSessionDB),
+		UserUCase: _userUCase.NewUserUsecase(testDB, testSessionDB, timeoutContext),
 	}
 
 	for caseNum, item := range cases {
-		testDB.DropUsers()
+		testDB.DropUsers(nil)
 		testSessionDB.DropCookies()
-		currenUser, err := testDB.CreateUser(&models.LoginUser{
+		currenUser, err := testDB.CreateUser(nil, &models.LoginUser{
 			Email:    expectedUser.Email,
 			Password: "123456qQ",
 		})
@@ -531,7 +538,7 @@ func TestEditProfile(t *testing.T) {
 		}
 
 		if item.testType == correctCase {
-			updateUser, err := testDB.GetUser(currenUser.Email)
+			updateUser, err := testDB.GetUser(nil, currenUser.Email)
 			if err != nil {
 				t.Errorf("TestCase [%d]:\nprofile was not created", caseNum+1)
 			}

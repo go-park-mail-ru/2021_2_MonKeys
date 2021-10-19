@@ -2,10 +2,9 @@
     "debug": true,
     "server": {
       "host": "127.0.0.1",
-      "address": ":8000"
-    },
-    "context":{
-      "timeout":2
+      "port": ":8000",
+      "sertFile": "api.ijia.me.crt",
+      "keyFile": "api.ijia.me.key"
     },
     "database": {
         "host": "127.0.0.1",
@@ -20,9 +19,5 @@
         "user": "admin",
         "pass": "pass",
         "name": "drip"
-    },
-    "setting": {
-      "sertFile": "api.ijia.me.crt",
-      "keyFile": "api.ijia.me.key"
     }
   }
