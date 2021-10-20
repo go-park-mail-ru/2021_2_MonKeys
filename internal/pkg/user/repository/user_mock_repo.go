@@ -18,7 +18,7 @@ func NewMockDB() *MockDB {
 	newDB.CreateUserAndProfile(nil, &models.User{
 		ID:          1,
 		Name:        "Mikhail",
-		Email:       "mumeu222@mail.ru",
+		Email:       "lol1@mail.ru",
 		Password:    "af57966e1958f52e41550e822dd8e8a4", //VBif222!
 		Date:        "2012-12-12",
 		Age:         20,
@@ -29,7 +29,7 @@ func NewMockDB() *MockDB {
 	newDB.CreateUserAndProfile(nil, &models.User{
 		ID:          2,
 		Name:        "Mikhail2",
-		Email:       "mumeu222@mail.ru",
+		Email:       "lol2@mail.ru",
 		Password:    "af57966e1958f52e41550e822dd8e8a4", //VBif222!
 		Date:        "2012-12-12",
 		Age:         20,
@@ -40,7 +40,7 @@ func NewMockDB() *MockDB {
 	newDB.CreateUserAndProfile(nil, &models.User{
 		ID:          3,
 		Name:        "Mikhail3",
-		Email:       "mumeu222@mail.ru",
+		Email:       "lol3@mail.ru",
 		Password:    "af57966e1958f52e41550e822dd8e8a4", //VBif222!
 		Date:        "2012-12-12",
 		Age:         20,
@@ -51,7 +51,7 @@ func NewMockDB() *MockDB {
 	newDB.CreateUserAndProfile(nil, &models.User{
 		ID:          4,
 		Name:        "Mikhail4",
-		Email:       "mumeu222@mail.ru",
+		Email:       "lol4@mail.ru",
 		Password:    "af57966e1958f52e41550e822dd8e8a4", //VBif222!
 		Date:        "2012-12-12",
 		Age:         20,
@@ -71,21 +71,21 @@ func NewMockDB() *MockDB {
 	return newDB
 }
 
-func (db *MockDB) GetUser(ctx context.Context, email string) (*models.User, error) {
+func (db *MockDB) GetUser(ctx context.Context, email string) (models.User, error) {
 	if len(db.users) == 0 {
-		return &models.User{}, errors.New("users is empty map")
+		return models.User{}, errors.New("users is empty map")
 	}
 
-	currentUser := &models.User{}
+	currentUser := models.User{}
 	okUser := false
 	for _, value := range db.users {
 		if value.Email == email {
-			currentUser = value
+			currentUser = *value
 			okUser = true
 		}
 	}
 	if !okUser {
-		return &models.User{}, errors.New("User not found")
+		return models.User{}, errors.New("User not found")
 	}
 
 	return currentUser, nil

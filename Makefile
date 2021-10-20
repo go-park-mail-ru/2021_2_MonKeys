@@ -14,11 +14,12 @@ linter:
 	go mod tidy
 
 run: 
-	# go run cmd/dripapp/main.go
-	build/dripapp
+	go run cmd/dripapp/main.go
+	# build/dripapp
 
 get:
 	go get ./...
 
 build:
+	rm -rf build/dripapp
 	go build -v -o ./build/dripapp cmd/dripapp/main.go

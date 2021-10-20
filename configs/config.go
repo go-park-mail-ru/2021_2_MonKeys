@@ -7,7 +7,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-type postgresConfig struct {
+type PostgresConfig struct {
 	User     string
 	Password string
 	Port     string
@@ -15,34 +15,34 @@ type postgresConfig struct {
 	DBName   string
 }
 
-type tarantoolConfig struct {
-	Size      int
-	Network   string
-	Address   string
-	Password  string
-	SecretKey []byte
+type TarantoolConfig struct {
+	User     string
+	Password string
+	Port     string
+	Host     string
+	DBName   string
 }
 
-type serverConfig struct {
+type ServerConfig struct {
 	Host     string
 	Port     string
 	SertFile string
 	KeyFile  string
 }
 
-var Postgres postgresConfig
-
-var Tarantool tarantoolConfig
-
-var Server serverConfig
-
-var Timeouts timeouts
-
 type timeouts struct {
 	WriteTimeout   time.Duration
 	ReadTimeout    time.Duration
 	ContextTimeout time.Duration
 }
+
+var Postgres PostgresConfig
+
+var Tarantool TarantoolConfig
+
+var Server ServerConfig
+
+var Timeouts timeouts
 
 func init() {
 	viper.SetConfigFile("config.json")
@@ -55,7 +55,7 @@ func init() {
 		log.Println("Service RUN on DEBUG mode")
 	}
 
-	// Postgres = postgresConfig{
+	// Postgres = PostgresConfig{
 	// 	User:     os.Getenv("PostgresUser"),
 	// 	Password: os.Getenv("PostgresPassword"),
 	// 	Port:     os.Getenv("PostgresPort"),
@@ -63,15 +63,15 @@ func init() {
 	// 	DBName:   os.Getenv("PostgresDBName"),
 	// }
 
-	// Tarantool = tarantoolConfig{
-	// 	Size:      10,
-	// 	Network:   "tcp",
-	// 	Address:   os.Getenv("RedisAddress"),
-	// 	Password:  os.Getenv("RedisPassword"),
-	// 	SecretKey: []byte(os.Getenv("SESSION_KEY")),
-	// }
+	Tarantool = TarantoolConfig{
+		Port:     viper.GetString(`session.port`),
+		Host:     viper.GetString(`session.host`),
+		User:     viper.GetString(`session.user`),
+		Password: viper.GetString(`session.pass`),
+		DBName:   viper.GetString(`session.name`),
+	}
 
-	Server = serverConfig{
+	Server = ServerConfig{
 		Port:     viper.GetString(`server.port`),
 		Host:     viper.GetString(`server.host`),
 		SertFile: viper.GetString(`server.sertFile`),

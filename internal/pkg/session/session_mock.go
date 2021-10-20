@@ -1,6 +1,8 @@
 package session
 
-import "errors"
+import (
+	"errors"
+)
 
 type MockSessionDB struct {
 	cookies map[string]uint64

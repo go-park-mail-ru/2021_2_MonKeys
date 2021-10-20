@@ -44,7 +44,8 @@ func main() {
 
 	// handlers
 	userRepo := _userRepo.NewMockDB()
-	sm := session.NewSessionDB()
+	// sm := session.NewSessionDB()
+	sm, err := session.NewTarantoolConnection(configs.Tarantool)
 	if err != nil {
 		log.Fatal(err)
 	}

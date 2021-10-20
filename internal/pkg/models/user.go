@@ -109,7 +109,7 @@ type UserUsecase interface {
 
 // ArticleRepository represent the article's repository contract
 type UserRepository interface {
-	GetUser(ctx context.Context, email string) (*User, error)
+	GetUser(ctx context.Context, email string) (User, error)
 	GetUserByID(ctx context.Context, userID uint64) (*User, error)
 	CreateUser(ctx context.Context, logUserData *LoginUser) (*User, error)
 	UpdateUser(ctx context.Context, newUserData *User) error

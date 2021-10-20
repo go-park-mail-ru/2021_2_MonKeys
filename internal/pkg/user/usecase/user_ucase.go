@@ -67,7 +67,8 @@ func sendResp(resp models.JSON, w http.ResponseWriter) {
 func (h *userUsecase) getUserByCookie(c context.Context, sessionCookie string) (models.User, error) {
 	userID, err := h.Session.GetUserIDByCookie(sessionCookie)
 	if err != nil {
-		return models.User{}, errors.New("error sessionDB: GetUserIDByCookie")
+		return models.User{},
+			err
 	}
 
 	user, err := h.UserRepo.GetUserByID(c, userID)
@@ -108,6 +109,7 @@ func (h *userUsecase) EditProfile(c context.Context, newUserData models.User, r 
 		return models.User{}, StatusNotFound
 	}
 
+	fmt.Println("get user", session.Value)
 	currentUser, err := h.getUserByCookie(ctx, session.Value)
 	if err != nil {
 		log.Printf("CODE %d ERROR %s", StatusNotFound, err)
@@ -151,15 +153,16 @@ func (h *userUsecase) Login(c context.Context, logUserData models.LoginUser, w h
 	if identifiableUser.IsCorrectPassword(logUserData.Password) {
 		cookie := createSessionCookie(logUserData)
 
-		err = h.Session.NewSessionCookie(cookie.Value, identifiableUser.ID)
-		if err != nil {
-			log.Printf("CODE %d ERROR %s", StatusInternalServerError, err)
-			return models.User{}, StatusInternalServerError
+		if !h.Session.IsSessionByUserID(identifiableUser.ID) {
+			http.SetCookie(w, &cookie)
+			err = h.Session.NewSessionCookie(cookie.Value, identifiableUser.ID)
+			if err != nil {
+				log.Printf("CODE %d ERROR %s", StatusInternalServerError, err)
+				return models.User{}, StatusInternalServerError
+			}
 		}
 
-		http.SetCookie(w, &cookie)
-
-		return *identifiableUser, StatusOK
+		return identifiableUser, StatusOK
 	} else {
 		log.Printf("CODE %d", StatusNotFound)
 		return models.User{}, StatusNotFound
@@ -212,13 +215,15 @@ func (h *userUsecase) Signup(c context.Context, logUserData models.LoginUser, w 
 	}
 
 	cookie := createSessionCookie(logUserData)
-	err = h.Session.NewSessionCookie(cookie.Value, user.ID)
-	if err != nil {
-		log.Printf("CODE %d ERROR %s", StatusInternalServerError, err)
-		return StatusInternalServerError
-	}
 
-	http.SetCookie(w, &cookie)
+	if !h.Session.IsSessionByUserID(identifiableUser.ID) {
+		http.SetCookie(w, &cookie)
+		err = h.Session.NewSessionCookie(cookie.Value, user.ID)
+		if err != nil {
+			log.Printf("CODE %d ERROR %s", StatusInternalServerError, err)
+			return StatusInternalServerError
+		}
+	}
 
 	log.Printf("CODE %d", StatusOK)
 
