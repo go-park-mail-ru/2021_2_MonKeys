@@ -5,8 +5,8 @@ test-coverage:
 	go test -coverprofile=coverage.out.tmp ./...
 	go tool cover -html=coverage.out.tmp
 
-test: 
-	go test ./...
+test:
+	go test
 
 linter: 
 	go get github.com/golangci/golangci-lint/cmd/golangci-lint@v1.42.1

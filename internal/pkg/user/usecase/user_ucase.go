@@ -162,7 +162,7 @@ func (h *userUsecase) Login(c context.Context, logUserData models.LoginUser, w h
 			}
 		}
 
-		return identifiableUser, StatusOK
+		return *identifiableUser, StatusOK
 	} else {
 		log.Printf("CODE %d", StatusNotFound)
 		return models.User{}, StatusNotFound

@@ -253,6 +253,7 @@ func TestLogout(t *testing.T) {
 				Value: "123",
 			},
 			StatusCode: http.StatusOK,
+			BodyResp:   `{"status":200,"body":null}`,
 		},
 		TestCase{
 			testType: wrongCase,

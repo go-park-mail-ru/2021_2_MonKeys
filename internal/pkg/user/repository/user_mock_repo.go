@@ -15,6 +15,10 @@ type MockDB struct {
 func NewMockDB() *MockDB {
 	newDB := &MockDB{make(map[uint64]*models.User), make(map[uint64][]uint64), make(map[uint64]string)}
 
+	return newDB
+}
+
+func (newDB *MockDB) MockDB() {
 	newDB.CreateUserAndProfile(nil, &models.User{
 		ID:          1,
 		Name:        "Mikhail",
@@ -67,13 +71,11 @@ func NewMockDB() *MockDB {
 	newDB.CreateTag(nil, "baumanka")
 	newDB.CreateTag(nil, "music")
 	newDB.CreateTag(nil, "sport")
-
-	return newDB
 }
 
-func (db *MockDB) GetUser(ctx context.Context, email string) (models.User, error) {
+func (db *MockDB) GetUser(ctx context.Context, email string) (*models.User, error) {
 	if len(db.users) == 0 {
-		return models.User{}, errors.New("users is empty map")
+		return &models.User{}, errors.New("users is empty map")
 	}
 
 	currentUser := models.User{}
@@ -85,10 +87,10 @@ func (db *MockDB) GetUser(ctx context.Context, email string) (models.User, error
 		}
 	}
 	if !okUser {
-		return models.User{}, errors.New("User not found")
+		return &models.User{}, errors.New("User not found")
 	}
 
-	return currentUser, nil
+	return &currentUser, nil
 }
 
 func (db *MockDB) GetUserByID(ctx context.Context, userID uint64) (*models.User, error) {

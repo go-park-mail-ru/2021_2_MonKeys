@@ -30,7 +30,7 @@ type ServerConfig struct {
 	KeyFile  string
 }
 
-type timeouts struct {
+type TimeoutsConfig struct {
 	WriteTimeout   time.Duration
 	ReadTimeout    time.Duration
 	ContextTimeout time.Duration
@@ -42,9 +42,9 @@ var Tarantool TarantoolConfig
 
 var Server ServerConfig
 
-var Timeouts timeouts
+var Timeouts TimeoutsConfig
 
-func init() {
+func SetConfig() {
 	viper.SetConfigFile("config.json")
 	err := viper.ReadInConfig()
 	if err != nil {
@@ -55,13 +55,13 @@ func init() {
 		log.Println("Service RUN on DEBUG mode")
 	}
 
-	// Postgres = PostgresConfig{
-	// 	User:     os.Getenv("PostgresUser"),
-	// 	Password: os.Getenv("PostgresPassword"),
-	// 	Port:     os.Getenv("PostgresPort"),
-	// 	Host:     os.Getenv("PostgresHost"),
-	// 	DBName:   os.Getenv("PostgresDBName"),
-	// }
+	Postgres = PostgresConfig{
+		Port:     viper.GetString(`database.port`),
+		Host:     viper.GetString(`database.host`),
+		User:     viper.GetString(`database.user`),
+		Password: viper.GetString(`database.pass`),
+		DBName:   viper.GetString(`database.name`),
+	}
 
 	Tarantool = TarantoolConfig{
 		Port:     viper.GetString(`session.port`),
@@ -78,7 +78,7 @@ func init() {
 		KeyFile:  viper.GetString(`server.keyFile`),
 	}
 
-	Timeouts = timeouts{
+	Timeouts = TimeoutsConfig{
 		WriteTimeout:   15 * time.Second,
 		ReadTimeout:    15 * time.Second,
 		ContextTimeout: time.Second * 2,

@@ -42,8 +42,11 @@ func main() {
 		}
 	}(logFile)
 
+	configs.SetConfig()
+
 	// handlers
 	userRepo := _userRepo.NewMockDB()
+	userRepo.MockDB()
 	// sm := session.NewSessionDB()
 	sm, err := session.NewTarantoolConnection(configs.Tarantool)
 	if err != nil {
@@ -62,6 +65,7 @@ func main() {
 	router.Use(middleware.PanicRecovery)
 
 	_userDelivery.SetRouting(router, userUCase)
+
 	srv := &http.Server{
 		Handler:      router,
 		Addr:         configs.Server.Port,
