@@ -9,7 +9,7 @@ import (
 	"github.com/tarantool/go-tarantool"
 )
 
-const success = "Connection success (mytarantool) on: "
+const success = "Connection success (drip_tarantool) on: "
 
 type SessionManager struct {
 	TarantoolConn *tarantool.Connection
@@ -18,8 +18,9 @@ type SessionManager struct {
 func NewTarantoolConnection(tntConfig configs.TarantoolConfig) (*SessionManager, error) {
 	addrPort := fmt.Sprintf("%s%s", tntConfig.Host, tntConfig.Port)
 	conn, err := tarantool.Connect(addrPort, tarantool.Opts{
-		User: tntConfig.User,
-		Pass: tntConfig.Password,
+		User: "guest",
+		// User: tntConfig.User,
+		// Pass: tntConfig.Password,
 	})
 
 	seesManager := SessionManager{conn}

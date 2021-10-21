@@ -6,17 +6,17 @@ volumes:
   tarantool:
 
 services:
-  main_service:
-    image: main_service
-    ports:
-      - "8000:8000"
-    # env_file:
-    #   - envs/golang.env
-    volumes:
-      - $PWD/media:/app/media
-    depends_on:
-      - tarantool
-      - postgres
+  # main_service:
+  #   image: main_service
+  #   ports:
+  #     - "8000:8000"
+  #   # env_file:
+  #   #   - envs/golang.env
+  #   volumes:
+  #     - $PWD/media:/app/media
+  #   depends_on:
+  #     - tarantool
+  #     - postgres
 
 #   staff:
 #     image: staff_service
@@ -45,12 +45,12 @@ services:
 #       - postgres
 
   tarantool:
-    image: "tarantool/tarantool"
+    image: "drip_tarantool"
     ports:
       - "3301:3301"
     volumes:
-      - tarantool:/data
-      - $PWD/docker/tarantool_scripts/dump.lua:/docker-entrypoint-initdb.d/dump.lua
+      - tarantool:/var/lib/tarantool
+    #   - $PWD/docker/tarantool_scripts/dripapp.lua:/opt/tarantool/dripapp.lua
 
   postgres:
     image: postgres:latest

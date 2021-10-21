@@ -1,10 +1,7 @@
 package configs
 
 import (
-	"log"
 	"time"
-
-	"github.com/spf13/viper"
 )
 
 type PostgresConfig struct {
@@ -45,37 +42,51 @@ var Server ServerConfig
 var Timeouts TimeoutsConfig
 
 func SetConfig() {
-	viper.SetConfigFile("config.json")
-	err := viper.ReadInConfig()
-	if err != nil {
-		log.Fatal(err)
-	}
+	// viper.SetConfigFile("config.json")
+	// err := viper.ReadInConfig()
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
 
-	if viper.GetBool(`debug`) {
-		log.Println("Service RUN on DEBUG mode")
-	}
+	// if viper.GetBool(`debug`) {
+	// 	log.Println("Service RUN on DEBUG mode")
+	// }
 
 	Postgres = PostgresConfig{
-		Port:     viper.GetString(`database.port`),
-		Host:     viper.GetString(`database.host`),
-		User:     viper.GetString(`database.user`),
-		Password: viper.GetString(`database.pass`),
-		DBName:   viper.GetString(`database.name`),
+		// Port:     viper.GetString(`database.port`),
+		// Host:     viper.GetString(`database.host`),
+		// User:     viper.GetString(`database.user`),
+		// Password: viper.GetString(`database.pass`),
+		// DBName:   viper.GetString(`database.name`),
+		Port:     ":5432",
+		Host:     "127.0.0.1",
+		User:     "admin",
+		Password: "lolkek",
+		DBName:   "postgres",
 	}
 
 	Tarantool = TarantoolConfig{
-		Port:     viper.GetString(`session.port`),
-		Host:     viper.GetString(`session.host`),
-		User:     viper.GetString(`session.user`),
-		Password: viper.GetString(`session.pass`),
-		DBName:   viper.GetString(`session.name`),
+		// Port:     viper.GetString(`session.port`),
+		// Host:     viper.GetString(`session.host`),
+		// User:     viper.GetString(`session.user`),
+		// Password: viper.GetString(`session.pass`),
+		// DBName:   viper.GetString(`session.name`),
+		Port:     ":3301",
+		Host:     "127.0.0.1",
+		User:     "admin",
+		Password: "pass",
+		DBName:   "drip",
 	}
 
 	Server = ServerConfig{
-		Port:     viper.GetString(`server.port`),
-		Host:     viper.GetString(`server.host`),
-		SertFile: viper.GetString(`server.sertFile`),
-		KeyFile:  viper.GetString(`server.keyFile`),
+		// Port:     viper.GetString(`server.port`),
+		// Host:     viper.GetString(`server.host`),
+		// SertFile: viper.GetString(`server.sertFile`),
+		// KeyFile:  viper.GetString(`server.keyFile`),
+		Host:     "127.0.0.1",
+		Port:     ":8000",
+		SertFile: "api.ijia.me.crt",
+		KeyFile:  "api.ijia.me.key",
 	}
 
 	Timeouts = TimeoutsConfig{

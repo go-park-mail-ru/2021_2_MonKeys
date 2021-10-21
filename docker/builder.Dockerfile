@@ -4,4 +4,4 @@ WORKDIR /dripapp
 
 COPY . .
 
-RUN make build
+RUN make build-go

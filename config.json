@@ -8,10 +8,10 @@
     },
     "database": {
         "host": "127.0.0.1",
-        "port": ":5541",
-        "user": "user",
-        "pass": "password",
-        "name": "drip"
+        "port": ":5432",
+        "user": "admin",
+        "pass": "lolkek",
+        "name": "postgres"
     },
     "session": {
         "host": "127.0.0.1",
