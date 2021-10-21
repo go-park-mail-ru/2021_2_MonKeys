@@ -142,7 +142,7 @@ func (h *userUsecase) EditProfile(c context.Context, newUserData models.User, r 
 // @Success 200 {object} JSON
 // @Failure 400,404,500
 // @Router /login [post]
-func (h *userUsecase) Login(c context.Context, logUserData models.LoginUser, w http.ResponseWriter, r *http.Request) (models.User, int) {
+func (h *userUsecase) Login(c context.Context, logUserData models.LoginUser, w http.ResponseWriter) (models.User, int) {
 
 	identifiableUser, err := h.UserRepo.GetUser(c, logUserData.Email)
 	if err != nil {
@@ -164,7 +164,7 @@ func (h *userUsecase) Login(c context.Context, logUserData models.LoginUser, w h
 
 		return *identifiableUser, StatusOK
 	} else {
-		log.Printf("CODE %d", StatusNotFound)
+		log.Printf("CODE %d ERROR %s", StatusNotFound, errors.New("not correct password"))
 		return models.User{}, StatusNotFound
 	}
 }

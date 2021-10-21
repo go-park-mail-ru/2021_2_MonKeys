@@ -13,3 +13,6 @@ go.sum
 
 #codecov tmp
 coverage.out.tmp
+
+# envs
+envs/

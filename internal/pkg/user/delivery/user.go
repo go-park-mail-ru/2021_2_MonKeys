@@ -100,7 +100,7 @@ func (h *UserHandler) LoginHandler(w http.ResponseWriter, r *http.Request) {
 		log.Printf("CODE %d ERROR %s", resp.Status, err)
 		return
 	}
-	user, status := h.UserUCase.Login(r.Context(), *logUserData, w, r)
+	user, status := h.UserUCase.Login(r.Context(), *logUserData, w)
 	resp.Status = status
 	if status == StatusOK {
 		resp.Body = user

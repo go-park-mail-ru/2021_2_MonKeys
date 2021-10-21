@@ -100,7 +100,7 @@ var (
 type UserUsecase interface {
 	CurrentUser(c context.Context, r *http.Request) (User, int)
 	EditProfile(c context.Context, newUserData User, r *http.Request) (User, int)
-	Login(c context.Context, logUserData LoginUser, w http.ResponseWriter, r *http.Request) (User, int)
+	Login(c context.Context, logUserData LoginUser, w http.ResponseWriter) (User, int)
 	Logout(c context.Context, w http.ResponseWriter, r *http.Request) int
 	Signup(c context.Context, logUserData LoginUser, w http.ResponseWriter) int
 	NextUser(c context.Context, swipedUserData SwipedUser, r *http.Request) (User, int)
