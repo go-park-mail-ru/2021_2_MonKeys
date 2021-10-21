@@ -46,10 +46,6 @@ build:
 
 ## run: Run app
 run:
-	docker rm -vf $$(docker ps -a -q) || true
-	docker build -t dependencies -f ${DOCKER_DIR}/builder.Dockerfile .
-	docker build -t drip_tarantool -f ${DOCKER_DIR}/drip_tarantool.Dockerfile .
-	docker-compose up --build --no-deps
 	./main_service
 
 ## app: Build and run app
