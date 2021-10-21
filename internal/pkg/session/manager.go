@@ -79,6 +79,4 @@ func (conn *SessionManager) IsSessionByUserID(userID uint64) bool {
 	}
 	return true
 }
-func (conn *SessionManager) DropCookies() {
-	return
-}
+func (conn *SessionManager) DropCookies() {}

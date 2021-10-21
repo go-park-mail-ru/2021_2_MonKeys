@@ -2,6 +2,7 @@ package delivery
 
 import (
 	"bytes"
+	"context"
 	"dripapp/configs"
 	"dripapp/internal/pkg/models"
 	"dripapp/internal/pkg/session"
@@ -65,7 +66,7 @@ func TestCurrentUser(t *testing.T) {
 		UserUCase: _userUCase.NewUserUsecase(testDB, testSessionDB, timeoutContext),
 	}
 
-	_, err := testDB.CreateUser(nil, &models.LoginUser{
+	_, err := testDB.CreateUser(context.TODO(), &models.LoginUser{
 		Email:    "testCurrentUser1@mail.ru",
 		Password: "123456qQ",
 	})
@@ -132,7 +133,7 @@ func TestLogin(t *testing.T) {
 	userHandler := &UserHandler{
 		UserUCase: _userUCase.NewUserUsecase(testDB, testSessionDB, timeoutContext),
 	}
-	_, err := testDB.CreateUser(nil, &models.LoginUser{
+	_, err := testDB.CreateUser(context.TODO(), &models.LoginUser{
 		Email:    "testLogin1@mail.ru",
 		Password: "123456qQ",
 	})
@@ -204,8 +205,8 @@ func TestSignup(t *testing.T) {
 	}
 
 	for caseNum, item := range cases {
-		testDB.DropUsers(nil)
-		_, err := testDB.CreateUser(nil, &models.LoginUser{
+		testDB.DropUsers(context.TODO())
+		_, err := testDB.CreateUser(context.TODO(), &models.LoginUser{
 			Email:    "firsUser@mail.ru",
 			Password: "123456qQ",
 		})
@@ -235,7 +236,7 @@ func TestSignup(t *testing.T) {
 			}
 			testSessionDB.DropCookies()
 
-			newUser, _ := testDB.GetUser(nil, email)
+			newUser, _ := testDB.GetUser(context.TODO(), email)
 			if !reflect.DeepEqual(newUser, expectedUser) {
 				t.Errorf("TestCase [%d]:\nuser was not created", caseNum+1)
 			}
@@ -280,7 +281,7 @@ func TestLogout(t *testing.T) {
 		UserUCase: _userUCase.NewUserUsecase(testDB, testSessionDB, timeoutContext),
 	}
 
-	user, err := testDB.CreateUser(nil, &models.LoginUser{
+	user, err := testDB.CreateUser(context.TODO(), &models.LoginUser{
 		Email:    "testLogout1@mail.ru",
 		Password: "123456qQ",
 	})
@@ -376,7 +377,7 @@ func TestNextUser(t *testing.T) {
 		UserUCase: _userUCase.NewUserUsecase(testDB, testSessionDB, timeoutContext),
 	}
 
-	_, err := testDB.CreateUser(nil, &models.LoginUser{
+	_, err := testDB.CreateUser(context.TODO(), &models.LoginUser{
 		Email:    "testNextUser1@mail.ru",
 		Password: "123456qQ\"",
 	})
@@ -384,7 +385,7 @@ func TestNextUser(t *testing.T) {
 		t.Errorf("Create user failed")
 	}
 
-	currenUser, _ := testDB.CreateUser(nil, &models.LoginUser{
+	currenUser, _ := testDB.CreateUser(context.TODO(), &models.LoginUser{
 		Email:    "testCurrUser1@mail.ru",
 		Password: "123456qQ\"",
 	})
@@ -410,10 +411,10 @@ func TestNextUser(t *testing.T) {
 				caseNum+1, w.Body.String(), item.BodyResp)
 		}
 
-		if !testDB.IsSwiped(nil, currenUser.ID, 321) && item.testType == correctCase {
+		if !testDB.IsSwiped(context.TODO(), currenUser.ID, 321) && item.testType == correctCase {
 			t.Errorf("TestCase [%d]:\nswipe not saved", caseNum+1)
 		}
-		testDB.DropSwipes(nil)
+		testDB.DropSwipes(context.TODO())
 	}
 }
 
@@ -508,9 +509,9 @@ func TestEditProfile(t *testing.T) {
 	}
 
 	for caseNum, item := range cases {
-		testDB.DropUsers(nil)
+		testDB.DropUsers(context.TODO())
 		testSessionDB.DropCookies()
-		currenUser, err := testDB.CreateUser(nil, &models.LoginUser{
+		currenUser, err := testDB.CreateUser(context.TODO(), &models.LoginUser{
 			Email:    expectedUser.Email,
 			Password: "123456qQ",
 		})
@@ -539,7 +540,7 @@ func TestEditProfile(t *testing.T) {
 		}
 
 		if item.testType == correctCase {
-			updateUser, err := testDB.GetUser(nil, currenUser.Email)
+			updateUser, err := testDB.GetUser(context.TODO(), currenUser.Email)
 			if err != nil {
 				t.Errorf("TestCase [%d]:\nprofile was not created", caseNum+1)
 			}

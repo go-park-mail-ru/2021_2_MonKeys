@@ -28,8 +28,10 @@ linter:
 	go mod tidy
 
 run: 
-	go run cmd/dripapp/main.go
-	# build/dripapp
+	docker rm -vf $$(docker ps -a -q) || true
+	docker build -t dependencies -f ${DOCKER_DIR}/builder.Dockerfile .
+	docker build -t main_service -f ${DOCKER_DIR}/main_service.Dockerfile .
+	docker-compose up --build --no-deps
 
 get:
 	go get ./...

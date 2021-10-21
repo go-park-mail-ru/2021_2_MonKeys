@@ -19,7 +19,7 @@ func NewMockDB() *MockDB {
 }
 
 func (newDB *MockDB) MockDB() {
-	newDB.CreateUserAndProfile(nil, &models.User{
+	newDB.CreateUserAndProfile(context.TODO(), &models.User{
 		ID:          1,
 		Name:        "Mikhail",
 		Email:       "lol1@mail.ru",
@@ -30,7 +30,7 @@ func (newDB *MockDB) MockDB() {
 		ImgSrc:      "/img/Yachty-tout.jpg",
 		Tags:        []string{"soccer", "anime"},
 	})
-	newDB.CreateUserAndProfile(nil, &models.User{
+	newDB.CreateUserAndProfile(context.TODO(), &models.User{
 		ID:          2,
 		Name:        "Mikhail2",
 		Email:       "lol2@mail.ru",
@@ -41,7 +41,7 @@ func (newDB *MockDB) MockDB() {
 		ImgSrc:      "/img/Yachty-tout.jpg",
 		Tags:        []string{"soccer", "anime"},
 	})
-	newDB.CreateUserAndProfile(nil, &models.User{
+	newDB.CreateUserAndProfile(context.TODO(), &models.User{
 		ID:          3,
 		Name:        "Mikhail3",
 		Email:       "lol3@mail.ru",
@@ -52,7 +52,7 @@ func (newDB *MockDB) MockDB() {
 		ImgSrc:      "/img/Yachty-tout.jpg",
 		Tags:        []string{"soccer", "anime"},
 	})
-	newDB.CreateUserAndProfile(nil, &models.User{
+	newDB.CreateUserAndProfile(context.TODO(), &models.User{
 		ID:          4,
 		Name:        "Mikhail4",
 		Email:       "lol4@mail.ru",
@@ -63,14 +63,14 @@ func (newDB *MockDB) MockDB() {
 		ImgSrc:      "/img/Yachty-tout.jpg",
 		Tags:        []string{"soccer", "anime"},
 	})
-	newDB.CreateTag(nil, "anime")
-	newDB.CreateTag(nil, "netflix")
-	newDB.CreateTag(nil, "games")
-	newDB.CreateTag(nil, "walk")
-	newDB.CreateTag(nil, "JS")
-	newDB.CreateTag(nil, "baumanka")
-	newDB.CreateTag(nil, "music")
-	newDB.CreateTag(nil, "sport")
+	newDB.CreateTag(context.TODO(), "anime")
+	newDB.CreateTag(context.TODO(), "netflix")
+	newDB.CreateTag(context.TODO(), "games")
+	newDB.CreateTag(context.TODO(), "walk")
+	newDB.CreateTag(context.TODO(), "JS")
+	newDB.CreateTag(context.TODO(), "baumanka")
+	newDB.CreateTag(context.TODO(), "music")
+	newDB.CreateTag(context.TODO(), "sport")
 }
 
 func (db *MockDB) GetUser(ctx context.Context, email string) (*models.User, error) {
