@@ -54,12 +54,11 @@ func (conn *SessionManager) NewSessionCookie(sessionCookie string, id uint64) er
 	fmt.Println(sessionCookie)
 	resp, err := conn.TarantoolConn.Insert("sessions", []interface{}{id, sessionCookie})
 	if err != nil {
-		return nil
+		return err
 	}
 
 	if len(resp.Data) == 0 {
-		// return errors.New("this cookie already exists")
-		return nil
+		return errors.New("this cookie already exists")
 	}
 	return nil
 }
