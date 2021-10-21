@@ -15,5 +15,7 @@ go.sum
 coverage.out.tmp
 *.out
 
+main-service
+
 # envs
 envs/

@@ -1,8 +1,0 @@
-mode: set
-dripapp/internal/pkg/user/delivery/user.go:21.75,23.2 1 1
-dripapp/internal/pkg/user/delivery/user.go:25.82,27.2 1 1
-dripapp/internal/pkg/user/delivery/user.go:38.76,40.2 1 1
-dripapp/internal/pkg/user/delivery/user.go:42.77,44.2 1 1
-dripapp/internal/pkg/user/delivery/user.go:55.77,57.2 1 1
-dripapp/internal/pkg/user/delivery/user.go:59.79,61.2 1 1
-dripapp/internal/pkg/user/delivery/user.go:63.74,65.2 1 0
