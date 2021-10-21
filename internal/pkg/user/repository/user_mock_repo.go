@@ -1,4 +1,4 @@
-package MockDB
+package repository
 
 import (
 	"context"
@@ -13,9 +13,7 @@ type MockDB struct {
 }
 
 func NewMockDB() *MockDB {
-	newDB := &MockDB{make(map[uint64]*models.User), make(map[uint64][]uint64), make(map[uint64]string)}
-
-	return newDB
+	return &MockDB{make(map[uint64]*models.User), make(map[uint64][]uint64), make(map[uint64]string)}
 }
 
 func (newDB *MockDB) MockDB() {
