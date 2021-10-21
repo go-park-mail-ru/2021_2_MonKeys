@@ -4,6 +4,10 @@ PROJECT_DIR := ${CURDIR}
 
 DOCKER_DIR := ${CURDIR}/docker
 
+install-dependencies:
+	sudo apt install docker.io
+
+
 ## build-go: Build compiles project
 build-go:
 	go build -o ${MAIN_SERVICE_BINARY} cmd/dripapp/main.go
