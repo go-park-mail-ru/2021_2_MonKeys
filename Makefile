@@ -44,7 +44,7 @@ linter:
 ## build: Build and start docker with new changes
 build:
 	docker rm -vf $$(docker ps -a -q) || true
-	docker build -t dependencies -f ${DOCKER_DIR}/builder.Dockerfile .
+# docker build -t dependencies -f ${DOCKER_DIR}/builder.Dockerfile .
 	docker build -t drip_tarantool -f ${DOCKER_DIR}/drip_tarantool.Dockerfile .
 	docker-compose up --build --no-deps -d
 
@@ -53,7 +53,7 @@ run:
 	./main_service
 
 ## app: Build and run app
-app: build
+app: build-go build
 	./main_service
 
 ## get: get all dependencies

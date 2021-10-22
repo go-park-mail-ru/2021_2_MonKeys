@@ -109,7 +109,6 @@ func (h *userUsecase) EditProfile(c context.Context, newUserData models.User, r 
 		return models.User{}, StatusNotFound
 	}
 
-	fmt.Println("get user", session.Value)
 	currentUser, err := h.getUserByCookie(ctx, session.Value)
 	if err != nil {
 		log.Printf("CODE %d ERROR %s", StatusNotFound, err)
@@ -154,13 +153,14 @@ func (h *userUsecase) Login(c context.Context, logUserData models.LoginUser, w h
 		cookie := createSessionCookie(logUserData)
 
 		if !h.Session.IsSessionByUserID(identifiableUser.ID) {
-			http.SetCookie(w, &cookie)
+			// http.SetCookie(w, &cookie)
 			err = h.Session.NewSessionCookie(cookie.Value, identifiableUser.ID)
 			if err != nil {
 				log.Printf("CODE %d ERROR %s", StatusInternalServerError, err)
 				return models.User{}, StatusInternalServerError
 			}
 		}
+		http.SetCookie(w, &cookie)
 
 		return *identifiableUser, StatusOK
 	} else {
@@ -217,13 +217,13 @@ func (h *userUsecase) Signup(c context.Context, logUserData models.LoginUser, w 
 	cookie := createSessionCookie(logUserData)
 
 	if !h.Session.IsSessionByUserID(identifiableUser.ID) {
-		http.SetCookie(w, &cookie)
 		err = h.Session.NewSessionCookie(cookie.Value, user.ID)
 		if err != nil {
 			log.Printf("CODE %d ERROR %s", StatusInternalServerError, err)
 			return StatusInternalServerError
 		}
 	}
+	http.SetCookie(w, &cookie)
 
 	log.Printf("CODE %d", StatusOK)
 
