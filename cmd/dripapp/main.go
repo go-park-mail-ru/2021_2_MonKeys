@@ -44,7 +44,21 @@ func main() {
 
 	configs.SetConfig()
 
-	// handlers
+	// repositories
+	// connStr := fmt.Sprintf("user=%s password=%s dbname=%s sslmode=disable port=%s host=%s",
+	// 	configs.Postgres.User,
+	// 	configs.Postgres.Password,
+	// 	configs.Postgres.DBName,
+	// 	configs.Postgres.Port,
+	// 	configs.Postgres.Host)
+
+	// conn, err := sqlx.Open("postgres", connStr)
+	// if err != nil {
+	// 	log.Fatal(err)
+	// 	return
+	// }
+
+	// userRepo := _userRepo.NewPostgresUserRepository(conn)
 	userRepo := _userRepo.NewMockDB()
 	userRepo.MockDB()
 	// sm := session.NewSessionDB()

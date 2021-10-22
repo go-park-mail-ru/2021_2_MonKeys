@@ -12,7 +12,7 @@ type PostgreUserRepo struct {
 	conn *sqlx.DB
 }
 
-func NewPostgresStaffRepository(conn *sqlx.DB) PostgreUserRepo {
+func NewPostgresUserRepository(conn *sqlx.DB) PostgreUserRepo {
 	return PostgreUserRepo{conn}
 }
 

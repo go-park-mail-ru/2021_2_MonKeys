@@ -52,7 +52,6 @@ func (conn *SessionManager) GetUserIDByCookie(sessionCookie string) (userID uint
 }
 
 func (conn *SessionManager) NewSessionCookie(sessionCookie string, id uint64) error {
-	fmt.Println(sessionCookie)
 	resp, err := conn.TarantoolConn.Insert("sessions", []interface{}{id, sessionCookie})
 	if err != nil {
 		return err

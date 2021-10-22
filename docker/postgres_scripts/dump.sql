@@ -7,25 +7,26 @@ create table if not exists drip_profile(
     password varchar(255) null,
     date date null,
     description varchar(255) null,
-    img varchar(255) null
+    imgs varchar(255)[] null,
+    tags varchar(255)[] null
 );
 
-create table if not exists tag(  
-    id serial not null primary key,
-    tag_name varchar(255) null
-);
+-- create table if not exists tag(  
+--     id serial not null primary key,
+--     tag_name varchar(255) null
+-- );
 
-create table if not exists profile_tag(  
-    id serial not null primary key,
-    profile_id integer,
-    tag_id integer, 
-    constraint fk_pt_profile
-     foreign key (profile_id) 
-     REFERENCES drip_profile (id),
-    constraint fk_pt_tag
-     foreign key (tag_id) 
-     REFERENCES tag (id)
-);
+-- create table if not exists profile_tag(  
+--     id serial not null primary key,
+--     profile_id integer,
+--     tag_id integer, 
+--     constraint fk_pt_profile
+--      foreign key (profile_id) 
+--      REFERENCES drip_profile (id),
+--     constraint fk_pt_tag
+--      foreign key (tag_id) 
+--      REFERENCES tag (id)
+-- );
 
 create table if not exists reactions(  
     id serial not null primary key,
