@@ -72,7 +72,7 @@ func SetConfig() {
 		// Password: viper.GetString(`session.pass`),
 		// DBName:   viper.GetString(`session.name`),
 		Port:     ":3301",
-		Host:     "127.0.0.1",
+		Host:     "tarantool",
 		User:     "admin",
 		Password: "pass",
 		DBName:   "drip",

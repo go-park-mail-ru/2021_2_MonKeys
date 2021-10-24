@@ -4,23 +4,20 @@ PROJECT_DIR := ${CURDIR}
 
 DOCKER_DIR := ${CURDIR}/docker
 
+## install-dependencies: Install docker
 install-dependencies:
 	sudo apt install docker.io
 
-
 ## build-go: Build compiles project
 build-go:
+	go mod tidy
 	go build -o ${MAIN_SERVICE_BINARY} cmd/dripapp/main.go
 
 ## build-docker: Builds all docker containers
 build-docker:
 	docker build -t dependencies -f ${DOCKER_DIR}/builder.Dockerfile .
 	docker build -t drip_tarantool -f ${DOCKER_DIR}/drip_tarantool.Dockerfile .
-# docker build -t main_service -f ${DOCKER_DIR}/main_service.Dockerfile .
-
-## run-and-build: Build and start docker
-build-and-run: build-docker
-	docker-compose up
+	docker build -t main_service -f ${DOCKER_DIR}/main_service.Dockerfile .
 	
 ## test-coverage: get final code coverage
 test-coverage:
@@ -33,7 +30,7 @@ test:
 
 ## run-background: run process in background(available after build)
 run-background:
-	docker-compose up -d
+	docker-compose up --build --no-deps -d
 
 ## linter: linterint all files
 linter: 
@@ -44,20 +41,20 @@ linter:
 ## build: Build and start docker with new changes
 build:
 	docker rm -vf $$(docker ps -a -q) || true
-# docker build -t dependencies -f ${DOCKER_DIR}/builder.Dockerfile .
+	docker build -t dependencies -f ${DOCKER_DIR}/builder.Dockerfile .
 	docker build -t drip_tarantool -f ${DOCKER_DIR}/drip_tarantool.Dockerfile .
-	docker-compose up --build --no-deps -d
+	docker build -t main_service -f ${DOCKER_DIR}/main_service.Dockerfile .
 
 ## run: Run app
 run:
-	./main_service
+	docker-compose up --build --no-deps
 
 ## app: Build and run app
-app: build-go build
-	./main_service
+app: build run
 
 ## get: get all dependencies
 get:
+	go mod tidy
 	go get ./...
 
 .PHONY: help

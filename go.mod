@@ -22,8 +22,8 @@ require (
 	github.com/lib/pq v1.10.3
 	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/swaggo/files v0.0.0-20210815190702-a29dd2bc99b2 // indirect
-	golang.org/x/net v0.0.0-20211015210444-4f30a5c0130f // indirect
-	golang.org/x/sys v0.0.0-20211015200801-69063c4bb744 // indirect
+	golang.org/x/net v0.0.0-20211020060615-d418f374d309 // indirect
+	golang.org/x/sys v0.0.0-20211023085530-d6a326fbbf70 // indirect
 	golang.org/x/tools v0.1.7 // indirect
 	google.golang.org/protobuf v1.27.1 // indirect
 	gopkg.in/vmihailenco/msgpack.v2 v2.9.2 // indirect

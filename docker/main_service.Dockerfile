@@ -1,7 +1,5 @@
 FROM dependencies AS builder
 
-WORKDIR /app
+WORKDIR /dripapp
 
-COPY main_service /app/
-
-CMD /app/main_service
+CMD /dripapp/main_service
