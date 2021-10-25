@@ -63,6 +63,7 @@ func (h *UserHandler) EditProfileHandler(w http.ResponseWriter, r *http.Request)
 		log.Printf("CODE %d ERROR %s", resp.Status, err)
 		return
 	}
+
 	user, status := h.UserUCase.EditProfile(r.Context(), newUserData, r)
 	resp.Status = status
 	if status == StatusOK {
@@ -70,48 +71,6 @@ func (h *UserHandler) EditProfileHandler(w http.ResponseWriter, r *http.Request)
 	}
 
 	sendResp(resp, w)
-}
-
-// @Summary LogIn
-// @Description log in
-// @Tags login
-// @Accept json
-// @Produce json
-// @Param input body LoginUser true "data for login"
-// @Success 200 {object} JSON
-// @Failure 400,404,500
-// @Router /login [post]
-func (h *UserHandler) LoginHandler(w http.ResponseWriter, r *http.Request) {
-	var resp models.JSON
-
-	byteReq, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		resp.Status = StatusBadRequest
-		sendResp(resp, w)
-		log.Printf("CODE %d ERROR %s", resp.Status, err)
-		return
-	}
-
-	var logUserData *models.LoginUser
-	err = json.Unmarshal(byteReq, &logUserData)
-	if err != nil {
-		resp.Status = StatusBadRequest
-		sendResp(resp, w)
-		log.Printf("CODE %d ERROR %s", resp.Status, err)
-		return
-	}
-	user, status := h.UserUCase.Login(r.Context(), *logUserData, w)
-	resp.Status = status
-	if status == StatusOK {
-		resp.Body = user
-	}
-
-	sendResp(resp, w)
-}
-
-func (h *UserHandler) LogoutHandler(w http.ResponseWriter, r *http.Request) {
-	status := h.UserUCase.Logout(r.Context(), w, r)
-	sendResp(models.JSON{Status: status}, w)
 }
 
 // @Summary SignUp

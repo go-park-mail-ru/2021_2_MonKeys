@@ -61,7 +61,7 @@ func (user *User) IsCorrectPassword(password string) bool {
 	return user.Password == hashPassword(password)
 }
 
-func getAgeFromDate(date string) (uint, error) {
+func GetAgeFromDate(date string) (uint, error) {
 	birthday, err := time.Parse("2006-01-02", date)
 	if err != nil {
 		return 0, errors.New("failed on userYear")
@@ -78,7 +78,7 @@ func getAgeFromDate(date string) (uint, error) {
 func (user *User) FillProfile(newUserData *User) (err error) {
 	user.Name = newUserData.Name
 	user.Date = newUserData.Date
-	user.Age, err = getAgeFromDate(newUserData.Date)
+	user.Age, err = GetAgeFromDate(newUserData.Date)
 	if err != nil {
 		return errors.New("failed to save age")
 	}

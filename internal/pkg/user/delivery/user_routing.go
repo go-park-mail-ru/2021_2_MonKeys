@@ -2,6 +2,7 @@ package delivery
 
 import (
 	"dripapp/internal/pkg/models"
+	_sessionDelivery "dripapp/internal/pkg/session/delivery"
 
 	"github.com/gorilla/mux"
 	httpSwagger "github.com/swaggo/http-swagger"
@@ -11,9 +12,12 @@ func SetRouting(router *mux.Router, us models.UserUsecase) {
 	userHandler := &UserHandler{
 		UserUCase: us,
 	}
+	sessionHandler := &_sessionDelivery.SessionHandler{
+		UserUCase: us,
+	}
 
-	router.HandleFunc("/api/v1/session", userHandler.LoginHandler).Methods("POST", "OPTIONS")
-	router.HandleFunc("/api/v1/session", userHandler.LogoutHandler).Methods("DELETE", "OPTIONS")
+	router.HandleFunc("/api/v1/session", sessionHandler.LoginHandler).Methods("POST", "OPTIONS")
+	router.HandleFunc("/api/v1/session", sessionHandler.LogoutHandler).Methods("DELETE", "OPTIONS")
 
 	router.HandleFunc("/api/v1/profile", userHandler.CurrentUser).Methods("GET", "OPTIONS")
 	router.HandleFunc("/api/v1/profile", userHandler.EditProfileHandler).Methods("PUT", "OPTIONS")

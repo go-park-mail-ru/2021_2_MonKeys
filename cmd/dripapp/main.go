@@ -31,7 +31,7 @@ const StatusEmailAlreadyExists = 1001
 // @name Set-Cookie
 func main() {
 	// logfile
-	logFile, err := os.OpenFile("../../logs.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	logFile, err := os.OpenFile("logs.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
 		log.Fatalf("error opening file: %v", err)
 	}

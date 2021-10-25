@@ -6,17 +6,17 @@ volumes:
   tarantool:
 
 services:
-  main_service:
-    image: main_service
-    ports:
-      - "8000:8000"
-    # env_file:
-    #   - envs/golang.env
-    volumes:
-      - $PWD/media:/app/media
-    depends_on:
-      - tarantool
-      - postgres
+  # main_service:
+  #   image: main_service
+  #   ports:
+  #     - "8000:8000"
+  #   # env_file:
+  #   #   - envs/golang.env
+  #   volumes:
+  #     - $PWD/media:/dripapp/media
+  #   depends_on:
+  #     - tarantool
+  #     - postgres
 
 #   staff:
 #     image: staff_service

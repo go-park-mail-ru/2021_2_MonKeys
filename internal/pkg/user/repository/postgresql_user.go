@@ -3,11 +3,9 @@ package repository
 import (
 	"context"
 	"dripapp/internal/pkg/models"
-	"errors"
 	"fmt"
 	"log"
 	"strings"
-	"time"
 
 	"github.com/jmoiron/sqlx"
 	"github.com/lib/pq"
@@ -16,20 +14,6 @@ import (
 
 type PostgreUserRepo struct {
 	conn *sqlx.DB
-}
-
-func getAgeFromDate(date string) (uint, error) {
-	birthday, err := time.Parse("2006-01-02", date)
-	if err != nil {
-		return 0, errors.New("failed on userYear")
-	}
-
-	age := uint(time.Now().Year() - birthday.Year())
-	if time.Now().YearDay() < birthday.YearDay() {
-		age -= 1
-	}
-
-	return age, nil
 }
 
 func NewPostgresUserRepository(conn *sqlx.DB) PostgreUserRepo {
@@ -70,7 +54,7 @@ func (p *PostgreUserRepo) CreateUserAndProfile(ctx context.Context, user models.
 		return models.User{}, err
 	}
 
-	RespUser.Age, err = getAgeFromDate(RespUser.Date)
+	RespUser.Age, err = models.GetAgeFromDate(RespUser.Date)
 	if err != nil {
 		log.Fatal(err)
 	}

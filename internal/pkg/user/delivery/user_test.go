@@ -6,6 +6,7 @@ import (
 	"dripapp/configs"
 	"dripapp/internal/pkg/models"
 	"dripapp/internal/pkg/session"
+	_sessionDelivery "dripapp/internal/pkg/session/delivery"
 	_userRepo "dripapp/internal/pkg/user/repository"
 	_userUCase "dripapp/internal/pkg/user/usecase"
 	"encoding/json"
@@ -130,9 +131,10 @@ func TestLogin(t *testing.T) {
 	testSessionDB := session.NewSessionDB()
 
 	timeoutContext := configs.Timeouts.ContextTimeout
-	userHandler := &UserHandler{
+	sessionHandler := &_sessionDelivery.SessionHandler{
 		UserUCase: _userUCase.NewUserUsecase(testDB, testSessionDB, timeoutContext),
 	}
+
 	_, err := testDB.CreateUser(context.TODO(), &models.LoginUser{
 		Email:    "testLogin1@mail.ru",
 		Password: "123456qQ",
@@ -146,7 +148,7 @@ func TestLogin(t *testing.T) {
 		r.AddCookie(&item.CookieReq)
 		w := httptest.NewRecorder()
 
-		userHandler.LoginHandler(w, r)
+		sessionHandler.LoginHandler(w, r)
 
 		if w.Code != item.StatusCode {
 			t.Errorf("TestCase [%d]:\nwrongCase StatusCode: \ngot %d\nexpected %d",
@@ -277,7 +279,7 @@ func TestLogout(t *testing.T) {
 	testSessionDB := session.NewSessionDB()
 
 	timeoutContext := configs.Timeouts.ContextTimeout
-	userHandler := &UserHandler{
+	sessionHandler := &_sessionDelivery.SessionHandler{
 		UserUCase: _userUCase.NewUserUsecase(testDB, testSessionDB, timeoutContext),
 	}
 
@@ -299,7 +301,7 @@ func TestLogout(t *testing.T) {
 			t.Errorf("New session Cookie error")
 		}
 
-		userHandler.LogoutHandler(w, r)
+		sessionHandler.LogoutHandler(w, r)
 
 		if w.Code != item.StatusCode {
 			t.Errorf("TestCase [%d]:\nwrongCase StatusCode: \ngot %d\nexpected %d",
