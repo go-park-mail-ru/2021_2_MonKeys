@@ -32,7 +32,7 @@ type TestCase struct {
 func TestCurrentUser(t *testing.T) {
 	t.Parallel()
 	cases := []TestCase{
-		TestCase{
+		{
 			BodyReq: nil,
 			CookieReq: http.Cookie{
 				Name:  "sessionId",
@@ -41,7 +41,7 @@ func TestCurrentUser(t *testing.T) {
 			StatusCode: http.StatusOK,
 			BodyResp:   `{"status":200,"body":{"id":1,"email":"testCurrentUser1@mail.ru"}}`,
 		},
-		TestCase{
+		{
 			BodyReq: nil,
 			CookieReq: http.Cookie{
 				Name:  "sessionId",
@@ -50,7 +50,7 @@ func TestCurrentUser(t *testing.T) {
 			StatusCode: http.StatusOK,
 			BodyResp:   `{"status":404,"body":null}`,
 		},
-		TestCase{
+		{
 			BodyReq:    nil,
 			CookieReq:  http.Cookie{},
 			StatusCode: http.StatusOK,
@@ -100,25 +100,25 @@ func TestCurrentUser(t *testing.T) {
 func TestLogin(t *testing.T) {
 	t.Parallel()
 	cases := []TestCase{
-		TestCase{
+		{
 			testType:   correctCase,
 			BodyReq:    bytes.NewReader([]byte(`{"email":"testLogin1@mail.ru","password":"123456qQ"}`)),
 			StatusCode: http.StatusOK,
 			BodyResp:   `{"status":200,"body":{"id":1,"email":"testLogin1@mail.ru"}}`,
 		},
-		TestCase{
+		{
 			testType:   wrongCase,
 			BodyReq:    bytes.NewReader([]byte(`wrong input data`)),
 			StatusCode: http.StatusOK,
 			BodyResp:   `{"status":400,"body":null}`,
 		},
-		TestCase{
+		{
 			testType:   wrongCase,
 			BodyReq:    bytes.NewReader([]byte(`{"email":"wrongEmail","password":"wrongPassword"}`)),
 			StatusCode: http.StatusOK,
 			BodyResp:   `{"status":404,"body":null}`,
 		},
-		TestCase{
+		{
 			testType:   wrongCase,
 			BodyReq:    bytes.NewReader([]byte(`{"email":"testLogin1@mail.ru","password":"wrongPassword"}`)),
 			StatusCode: http.StatusOK,
@@ -176,19 +176,19 @@ func TestSignup(t *testing.T) {
 	expectedUser := models.NewUser(2, email, password)
 
 	cases := []TestCase{
-		TestCase{
+		{
 			testType:   correctCase,
 			BodyReq:    bytes.NewReader([]byte(`{"email":"` + email + `","password":"` + password + `"}`)),
 			StatusCode: http.StatusOK,
 			BodyResp:   `{"status":200,"body":null}`,
 		},
-		TestCase{
+		{
 			testType:   wrongCase,
 			BodyReq:    bytes.NewReader([]byte(`wrong input data`)),
 			StatusCode: http.StatusOK,
 			BodyResp:   `{"status":400,"body":null}`,
 		},
-		TestCase{
+		{
 			testType:   wrongCase,
 			BodyReq:    bytes.NewReader([]byte(`{"email":"firsUser@mail.ru","password":"EmailAlreadyExists"}`)),
 			StatusCode: http.StatusOK,
@@ -247,7 +247,7 @@ func TestSignup(t *testing.T) {
 func TestLogout(t *testing.T) {
 	t.Parallel()
 	cases := []TestCase{
-		TestCase{
+		{
 			testType: correctCase,
 			CookieReq: http.Cookie{
 				Name:  "sessionId",
@@ -256,7 +256,7 @@ func TestLogout(t *testing.T) {
 			StatusCode: http.StatusOK,
 			BodyResp:   `{"status":200,"body":null}`,
 		},
-		TestCase{
+		{
 			testType: wrongCase,
 			CookieReq: http.Cookie{
 				Name:  "sessionId",
@@ -265,7 +265,7 @@ func TestLogout(t *testing.T) {
 			StatusCode: http.StatusOK,
 			BodyResp:   `{"status":500,"body":null}`,
 		},
-		TestCase{
+		{
 			testType:   wrongCase,
 			CookieReq:  http.Cookie{},
 			StatusCode: http.StatusOK,
@@ -320,7 +320,7 @@ func TestLogout(t *testing.T) {
 func TestNextUser(t *testing.T) {
 	t.Parallel()
 	cases := []TestCase{
-		TestCase{
+		{
 			testType: correctCase,
 			BodyReq:  bytes.NewReader([]byte(`{"id":321}`)),
 			CookieReq: http.Cookie{
@@ -330,7 +330,7 @@ func TestNextUser(t *testing.T) {
 			StatusCode: http.StatusOK,
 			BodyResp:   `{"status":200,"body":{"id":1,"email":"testNextUser1@mail.ru"}}`,
 		},
-		TestCase{
+		{
 			testType: wrongCase,
 			BodyReq:  bytes.NewReader([]byte(`{"id":321}`)),
 			CookieReq: http.Cookie{
@@ -340,14 +340,14 @@ func TestNextUser(t *testing.T) {
 			StatusCode: http.StatusOK,
 			BodyResp:   `{"status":404,"body":null}`,
 		},
-		TestCase{
+		{
 			testType:   wrongCase,
 			BodyReq:    bytes.NewReader([]byte(`{"id":321}`)),
 			CookieReq:  http.Cookie{},
 			StatusCode: http.StatusOK,
 			BodyResp:   `{"status":404,"body":null}`,
 		},
-		TestCase{
+		{
 			testType: wrongCase,
 			BodyReq:  bytes.NewReader([]byte("wrong json")),
 			CookieReq: http.Cookie{
@@ -357,7 +357,7 @@ func TestNextUser(t *testing.T) {
 			StatusCode: http.StatusOK,
 			BodyResp:   `{"status":400,"body":null}`,
 		},
-		TestCase{
+		{
 			testType: wrongCase,
 			BodyReq:  bytes.NewReader([]byte(`{"id":1}`)),
 			CookieReq: http.Cookie{
@@ -411,7 +411,11 @@ func TestNextUser(t *testing.T) {
 				caseNum+1, w.Body.String(), item.BodyResp)
 		}
 
-		if !testDB.IsSwiped(context.TODO(), currenUser.ID, 321) && item.testType == correctCase {
+		resp, ok := testDB.IsSwiped(context.TODO(), currenUser.ID, 321)
+		if ok != nil {
+			t.Error("IsSwiped error")
+		}
+		if !resp && item.testType == correctCase {
 			t.Errorf("TestCase [%d]:\nswipe not saved", caseNum+1)
 		}
 		testDB.DropSwipes(context.TODO())
@@ -425,7 +429,7 @@ func TestEditProfile(t *testing.T) {
 		Name:        "testEdit",
 		Date:        "1999-10-25",
 		Description: "Description Description Description Description",
-		ImgSrc:      "/img/testEdit/",
+		Imgs:        []string{"/img/testEdit/"},
 		Tags:        []string{"Tags", "Tags", "Tags", "Tags", "Tags"},
 	}
 	bodyReq, err := json.Marshal(requestUser)
@@ -438,7 +442,7 @@ func TestEditProfile(t *testing.T) {
 		Name:        requestUser.Name,
 		Date:        requestUser.Date,
 		Description: requestUser.Description,
-		ImgSrc:      requestUser.ImgSrc,
+		Imgs:        requestUser.Imgs,
 		Tags:        requestUser.Tags,
 	})
 	if err != nil {
@@ -451,7 +455,7 @@ func TestEditProfile(t *testing.T) {
 	})
 
 	cases := []TestCase{
-		TestCase{
+		{
 			testType: correctCase,
 			BodyReq:  bytes.NewReader(bodyReq),
 			CookieReq: http.Cookie{
@@ -461,7 +465,7 @@ func TestEditProfile(t *testing.T) {
 			StatusCode: http.StatusOK,
 			BodyResp:   string(BodyRespByte),
 		},
-		TestCase{
+		{
 			testType: wrongCase,
 			BodyReq:  bytes.NewReader(bodyReq),
 			CookieReq: http.Cookie{
@@ -471,14 +475,14 @@ func TestEditProfile(t *testing.T) {
 			StatusCode: http.StatusOK,
 			BodyResp:   `{"status":404,"body":null}`,
 		},
-		TestCase{
+		{
 			testType:   wrongCase,
 			BodyReq:    bytes.NewReader(bodyReq),
 			CookieReq:  http.Cookie{},
 			StatusCode: http.StatusOK,
 			BodyResp:   `{"status":404,"body":null}`,
 		},
-		TestCase{
+		{
 			testType: wrongCase,
 			BodyReq:  bytes.NewReader([]byte(`{"name":"testEdit","date":"wrong-format-data","description":"Description Description Description Description","imgSrc":"/img/testEdit/","tags":["Tags","Tags","Tags","Tags","Tags"]}`)),
 			CookieReq: http.Cookie{
@@ -488,7 +492,7 @@ func TestEditProfile(t *testing.T) {
 			StatusCode: http.StatusOK,
 			BodyResp:   `{"status":400,"body":null}`,
 		},
-		TestCase{
+		{
 			testType: wrongCase,
 			BodyReq:  bytes.NewReader([]byte(`wrong data`)),
 			CookieReq: http.Cookie{

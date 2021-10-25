@@ -22,7 +22,7 @@ type User struct {
 	Date        string   `json:"date,omitempty"`
 	Age         uint     `json:"age,omitempty"`
 	Description string   `json:"description,omitempty"`
-	ImgSrc      string   `json:"imgSrc,omitempty"`
+	Imgs        []string `json:"imgSrc,omitempty"`
 	Tags        []string `json:"tags,omitempty"`
 }
 
@@ -36,8 +36,8 @@ type SwipedUser struct {
 }
 
 type Tag struct {
-	Id      uint64 `json:"id"`
-	TagText string `json:"tagText"`
+	Id       uint64 `json:"id"`
+	Tag_Name string `json:"tagText"`
 }
 
 type Tags struct {
@@ -84,7 +84,7 @@ func (user *User) FillProfile(newUserData *User) (err error) {
 	}
 	user.Date = newUserData.Date
 	user.Description = newUserData.Description
-	user.ImgSrc = newUserData.ImgSrc
+	user.Imgs = newUserData.Imgs
 	user.Tags = newUserData.Tags
 
 	return nil
@@ -113,12 +113,12 @@ type UserRepository interface {
 	GetUserByID(ctx context.Context, userID uint64) (*User, error)
 	CreateUser(ctx context.Context, logUserData *LoginUser) (*User, error)
 	UpdateUser(ctx context.Context, newUserData *User) error
-	AddSwipedUsers(ctx context.Context, currentUserId, swipedUserId uint64) error
-	GetNextUserForSwipe(ctx context.Context, currentUserId uint64) (*User, error)
-	IsSwiped(ctx context.Context, userID, swipedUserID uint64) bool
-	CreateUserAndProfile(ctx context.Context, user *User)
-	DropUsers(ctx context.Context)
-	DropSwipes(ctx context.Context)
-	CreateTag(ctx context.Context, text string)
+	AddSwipedUsers(ctx context.Context, currentUserId uint64, swipedUserId uint64, type_name string) error
+	GetNextUserForSwipe(ctx context.Context, currentUserId uint64) (User, error)
+	IsSwiped(ctx context.Context, userID, swipedUserID uint64) (bool, error)
+	CreateUserAndProfile(ctx context.Context, user *User) (User, error)
+	DropUsers(ctx context.Context) error
+	DropSwipes(ctx context.Context) error
+	CreateTag(ctx context.Context, tag_name string) error
 	GetTags(ctx context.Context) map[uint64]string
 }

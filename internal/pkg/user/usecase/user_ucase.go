@@ -247,7 +247,7 @@ func (h *userUsecase) NextUser(c context.Context, swipedUserData models.SwipedUs
 	}
 
 	// add in swaped users map for current user
-	err = h.UserRepo.AddSwipedUsers(ctx, currentUser.ID, swipedUserData.Id)
+	err = h.UserRepo.AddSwipedUsers(ctx, currentUser.ID, swipedUserData.Id, "like")
 	if err != nil {
 		log.Printf("CODE %d ERROR %s", StatusNotFound, err)
 		return models.User{}, StatusNotFound
@@ -261,7 +261,7 @@ func (h *userUsecase) NextUser(c context.Context, swipedUserData models.SwipedUs
 
 	log.Printf("CODE %d", StatusOK)
 
-	return *nextUser, StatusOK
+	return nextUser, StatusOK
 }
 
 func (h *userUsecase) GetAllTags(c context.Context, r *http.Request) (models.Tags, int) {
@@ -276,7 +276,7 @@ func (h *userUsecase) GetAllTags(c context.Context, r *http.Request) (models.Tag
 
 	for key, value := range allTags {
 		respTag.Id = key
-		respTag.TagText = value
+		respTag.Tag_Name = value
 		currentAllTags[uint64(counter)] = respTag
 		counter++
 	}

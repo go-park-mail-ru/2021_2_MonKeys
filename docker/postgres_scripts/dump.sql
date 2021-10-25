@@ -1,8 +1,8 @@
-drop table matches if exists;
-drop table reactions if exists;
-drop table profile_tag if exists;
-drop table tag if exists;
-drop table profile if exists;
+drop table if exists matches;
+drop table if exists reactions;
+drop table if exists profile_tag;
+drop table if exists tag;
+drop table if exists profile;
 create table if not exists profile(
   id serial not null primary key,
   create_time date default now(),
@@ -10,9 +10,9 @@ create table if not exists profile(
   name varchar(255) null,
   email varchar(255) null,
   password varchar(255) null,
-  date date null,
+  date varchar(255)  null,
   description varchar(255) null,
-  imgs varchar(255) [] null -- tags varchar(255)[] null
+  imgs varchar(255) [] null
 );
 create table if not exists tag(
   id serial not null primary key,
