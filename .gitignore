@@ -1,5 +1,6 @@
 # goland
 .idea
+.vscode
 
 # build folder
 build
