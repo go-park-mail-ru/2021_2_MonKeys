@@ -23,7 +23,7 @@ func (newDB *MockDB) MockDB() {
 		Email:       "lol1@mail.ru",
 		Password:    "af57966e1958f52e41550e822dd8e8a4", //VBif222!
 		Date:        "2012-12-12",
-		Age:         20,
+		Age:         "20",
 		Description: "Hahahahaha",
 		Imgs:        []string{"/img/Yachty-tout.jpg"},
 		Tags:        []string{"soccer", "anime"},
@@ -34,7 +34,7 @@ func (newDB *MockDB) MockDB() {
 		Email:       "lol2@mail.ru",
 		Password:    "af57966e1958f52e41550e822dd8e8a4", //VBif222!
 		Date:        "2012-12-12",
-		Age:         20,
+		Age:         "20",
 		Description: "Hahahahaha",
 		Imgs:        []string{"/img/Yachty-tout.jpg"},
 		Tags:        []string{"soccer", "anime"},
@@ -45,7 +45,7 @@ func (newDB *MockDB) MockDB() {
 		Email:       "lol3@mail.ru",
 		Password:    "af57966e1958f52e41550e822dd8e8a4", //VBif222!
 		Date:        "2012-12-12",
-		Age:         20,
+		Age:         "20",
 		Description: "Hahahahaha",
 		Imgs:        []string{"/img/Yachty-tout.jpg"},
 		Tags:        []string{"soccer", "anime"},
@@ -56,7 +56,7 @@ func (newDB *MockDB) MockDB() {
 		Email:       "lol4@mail.ru",
 		Password:    "af57966e1958f52e41550e822dd8e8a4", //VBif222!
 		Date:        "2012-12-12",
-		Age:         20,
+		Age:         "20",
 		Description: "Hahahahaha",
 		Imgs:        []string{"/img/Yachty-tout.jpg"},
 		Tags:        []string{"soccer", "anime"},

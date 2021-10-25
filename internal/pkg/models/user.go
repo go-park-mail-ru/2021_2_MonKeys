@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strconv"
 	"time"
 )
 
@@ -20,7 +21,7 @@ type User struct {
 	Email       string   `json:"email,omitempty"`
 	Password    string   `json:"-"`
 	Date        string   `json:"date,omitempty"`
-	Age         uint     `json:"age,omitempty"`
+	Age         string   `json:"age"`
 	Description string   `json:"description,omitempty"`
 	Imgs        []string `json:"imgSrc,omitempty"`
 	Tags        []string `json:"tags,omitempty"`
@@ -61,10 +62,10 @@ func (user *User) IsCorrectPassword(password string) bool {
 	return user.Password == hashPassword(password)
 }
 
-func GetAgeFromDate(date string) (uint, error) {
+func GetAgeFromDate(date string) (string, error) {
 	birthday, err := time.Parse("2006-01-02", date)
 	if err != nil {
-		return 0, errors.New("failed on userYear")
+		return "", errors.New("failed on userYear")
 	}
 
 	age := uint(time.Now().Year() - birthday.Year())
@@ -72,7 +73,7 @@ func GetAgeFromDate(date string) (uint, error) {
 		age -= 1
 	}
 
-	return age, nil
+	return strconv.Itoa(int(age)), nil
 }
 
 func (user *User) FillProfile(newUserData *User) (err error) {
