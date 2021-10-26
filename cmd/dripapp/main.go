@@ -45,12 +45,10 @@ func main() {
 	configs.SetConfig()
 
 	// repositories
-	// connStr := fmt.Sprintf("user=%s password=%s dbname=%s sslmode=disable port=%s host=%s",
+	// connStr := fmt.Sprintf("user=%s password=%s dbname=%s sslmode=disable",
 	// 	configs.Postgres.User,
 	// 	configs.Postgres.Password,
-	// 	configs.Postgres.DBName,
-	// 	configs.Postgres.Port,
-	// 	configs.Postgres.Host)
+	// 	configs.Postgres.DBName)
 
 	// conn, err := sqlx.Open("postgres", connStr)
 	// if err != nil {
