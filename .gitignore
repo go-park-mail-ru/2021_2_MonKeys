@@ -24,3 +24,6 @@ envs/
 
 # media files
 media
+
+#logs
+logs.log

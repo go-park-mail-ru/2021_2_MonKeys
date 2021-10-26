@@ -12,13 +12,14 @@ install-dependencies:
 build-go:
 	go mod tidy
 	go build -o ${MAIN_SERVICE_BINARY} cmd/dripapp/main.go
+	#go build -o ${MAIN_SERVICE_BINARY} cmd/media_server/main.go
 
 ## build-docker: Builds all docker containers
 build-docker:
 	docker build -t dependencies -f ${DOCKER_DIR}/builder.Dockerfile .
 	docker build -t drip_tarantool -f ${DOCKER_DIR}/drip_tarantool.Dockerfile .
 	docker build -t main_service -f ${DOCKER_DIR}/main_service.Dockerfile .
-	
+
 ## test-coverage: get final code coverage
 test-coverage:
 	go test -coverprofile=coverage.out.tmp ./...
@@ -33,7 +34,7 @@ run-background:
 	docker-compose up --build --no-deps -d
 
 ## linter: linterint all files
-linter: 
+linter:
 	go get github.com/golangci/golangci-lint/cmd/golangci-lint@v1.42.1
 	go run github.com/golangci/golangci-lint/cmd/golangci-lint run ./... --disable unused --disable deadcode
 	go mod tidy
