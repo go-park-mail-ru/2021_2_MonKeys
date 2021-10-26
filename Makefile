@@ -12,7 +12,6 @@ install-dependencies:
 build-go:
 	go mod tidy
 	go build -o ${MAIN_SERVICE_BINARY} cmd/dripapp/main.go
-	#go build -o ${MAIN_SERVICE_BINARY} cmd/media_server/main.go
 
 ## build-docker: Builds all docker containers
 build-docker:
