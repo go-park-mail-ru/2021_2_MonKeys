@@ -39,9 +39,9 @@ func (db *MockSessionDB) DeleteSessionCookie(sessionCookie string) error {
 	return nil
 }
 
-func (db *MockSessionDB) IsSessionByUserID(userID uint64) bool {
-	for _, currentUserID := range db.cookies {
-		if currentUserID == userID {
+func (db *MockSessionDB) IsSessionByCookie(sessionCookie string) bool {
+	for cookieUser := range db.cookies {
+		if cookieUser == sessionCookie {
 			return true
 		}
 	}

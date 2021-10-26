@@ -54,9 +54,13 @@ run:
 ## app: Build and run app
 app:
 # build run
+	docker rm -vf $$(docker ps -a -q) || true
 	docker build -t drip_tarantool -f ${DOCKER_DIR}/drip_tarantool.Dockerfile .
 	docker-compose up --build --no-deps -d
 	go run cmd/dripapp/main.go
+
+down:
+	docker-compose down
 
 ## get: get all dependencies
 get:

@@ -1,0 +1,130 @@
+2021/10/25 22:48:34 LOG [POST] 127.0.0.1:40120, /api/v1/session 1.181µs
+2021/10/25 22:48:34 unknown origin ""
+2021/10/25 22:48:34 CODE 500 ERROR Space '513' does not exist (0x24)
+2021/10/25 22:48:34 http: superfluous response.WriteHeader call from dripapp/internal/pkg/session/delivery.sendResp (session.go:21)
+2021/10/25 22:49:53 LOG [POST] 127.0.0.1:40158, /api/v1/session 860ns
+2021/10/25 22:49:53 unknown origin ""
+2021/10/25 22:49:53 CODE 500 ERROR Space '514' does not exist (0x24)
+2021/10/25 22:49:53 http: superfluous response.WriteHeader call from dripapp/internal/pkg/session/delivery.sendResp (session.go:21)
+2021/10/25 23:00:07 LOG [POST] 127.0.0.1:40316, /api/v1/session 996ns
+2021/10/25 23:00:07 unknown origin ""
+2021/10/25 23:00:07 CODE 500 ERROR Space '515' does not exist (0x24)
+2021/10/25 23:00:07 http: superfluous response.WriteHeader call from dripapp/internal/pkg/session/delivery.sendResp (session.go:21)
+2021/10/25 23:26:39 LOG [POST] 127.0.0.1:40688, /api/v1/session 1.286µs
+2021/10/25 23:26:39 unknown origin ""
+2021/10/25 23:26:39 CODE 500 ERROR Space '516' does not exist (0x24)
+2021/10/25 23:26:39 http: superfluous response.WriteHeader call from dripapp/internal/pkg/session/delivery.sendResp (session.go:21)
+2021/10/25 23:31:37 LOG [POST] 127.0.0.1:40776, /api/v1/session 917ns
+2021/10/25 23:31:37 unknown origin ""
+2021/10/25 23:31:37 CODE 500 ERROR there is no space with name lol
+2021/10/25 23:31:37 http: superfluous response.WriteHeader call from dripapp/internal/pkg/session/delivery.sendResp (session.go:21)
+2021/10/25 23:32:56 LOG [POST] 127.0.0.1:40810, /api/v1/session 862ns
+2021/10/25 23:32:56 unknown origin ""
+2021/10/25 23:32:56 CODE 500 ERROR Space '518' does not exist (0x24)
+2021/10/25 23:32:56 http: superfluous response.WriteHeader call from dripapp/internal/pkg/session/delivery.sendResp (session.go:21)
+2021/10/25 23:36:02 LOG [POST] 127.0.0.1:40884, /api/v1/session 1.352µs
+2021/10/25 23:36:02 unknown origin ""
+2021/10/25 23:36:02 CODE 500 ERROR Space '519' does not exist (0x24)
+2021/10/25 23:36:02 http: superfluous response.WriteHeader call from dripapp/internal/pkg/session/delivery.sendResp (session.go:21)
+2021/10/25 23:43:33 LOG [POST] 127.0.0.1:41152, /api/v1/session 1.615µs
+2021/10/25 23:43:33 unknown origin ""
+2021/10/25 23:43:33 CODE 500 ERROR there is no space with name sessions
+2021/10/25 23:43:33 http: superfluous response.WriteHeader call from dripapp/internal/pkg/session/delivery.sendResp (session.go:21)
+2021/10/25 23:53:11 LOG [POST] 127.0.0.1:41360, /api/v1/session 890ns
+2021/10/25 23:53:11 unknown origin ""
+2021/10/25 23:53:11 CODE 500 ERROR this cookie already exists
+2021/10/25 23:53:11 http: superfluous response.WriteHeader call from dripapp/internal/pkg/session/delivery.sendResp (session.go:21)
+2021/10/25 23:54:47 LOG [GET] 127.0.0.1:41388, /api/v1/profile 1.803µs
+2021/10/25 23:54:47 unknown origin ""
+2021/10/25 23:54:47 CODE 404 ERROR http: named cookie not present
+2021/10/25 23:54:47 http: superfluous response.WriteHeader call from dripapp/internal/pkg/user/delivery.sendResp (user.go:29)
+2021/10/26 00:14:53 LOG [GET] [::1]:40154, /api/v1/profile 821.785µs
+2021/10/26 00:14:53 CODE 404 ERROR Space '523' does not exist (0x24)
+2021/10/26 00:17:50 LOG [POST] [::1]:40154, /api/v1/session 10.112µs
+2021/10/26 00:17:50 CODE 500 ERROR Space '523' does not exist (0x24)
+2021/10/26 00:18:20 LOG [POST] [::1]:40154, /api/v1/session 2.723µs
+2021/10/26 00:18:20 CODE 500 ERROR Space '523' does not exist (0x24)
+2021/10/26 15:57:54 LOG [POST] 127.0.0.1:54056, /api/v1/session 994ns
+2021/10/26 15:57:54 CODE 500 ERROR Space '524' does not exist (0x24)
+2021/10/26 16:08:34 LOG [POST] 127.0.0.1:54278, /api/v1/session 1.23µs
+2021/10/26 16:09:52 LOG [POST] 127.0.0.1:54306, /api/v1/session 1.266µs
+2021/10/26 16:13:02 LOG [GET] [::1]:46334, /api/v1/profile 1.016µs
+2021/10/26 16:13:02 CODE 404 ERROR http: named cookie not present
+2021/10/26 16:13:31 LOG [POST] [::1]:46334, /api/v1/session 4.323µs
+2021/10/26 16:16:22 LOG [GET] [::1]:47904, /api/v1/profile 1.282µs
+2021/10/26 16:16:22 CODE 404 ERROR Space '530' does not exist (0x24)
+2021/10/26 16:16:45 LOG [POST] [::1]:47904, /api/v1/session 4.624µs
+2021/10/26 16:23:07 LOG [GET] [::1]:51308, /api/v1/profile 1.037µs
+2021/10/26 16:23:07 CODE 404 ERROR Space '531' does not exist (0x24)
+2021/10/26 16:23:20 LOG [POST] [::1]:51308, /api/v1/session 4.935µs
+2021/10/26 16:23:20 CODE 200
+2021/10/26 16:34:17 LOG [GET] [::1]:56906, /api/v1/profile 1.575µs
+2021/10/26 16:34:18 LOG [GET] [::1]:56906, /api/v1/profile 1.936µs
+2021/10/26 16:34:36 LOG [GET] [::1]:57086, /api/v1/profile 1.327µs
+2021/10/26 16:34:36 LOG [GET] [::1]:57086, /api/v1/profile 1.945µs
+2021/10/26 16:37:38 LOG [GET] [::1]:58628, /api/v1/profile 1.667µs
+2021/10/26 16:37:54 LOG [GET] [::1]:58628, /api/v1/profile 3.301µs
+2021/10/26 16:37:54 CODE 404 ERROR http: named cookie not present
+2021/10/26 16:41:30 LOG [POST] [::1]:60568, /api/v1/session 5.064µs
+2021/10/26 16:41:30 CODE 200
+2021/10/26 16:41:47 LOG [GET] [::1]:60568, /api/v1/profile 1.601µs
+2021/10/26 16:41:47 CODE 404 ERROR cannot cast data: fdfed749a5bf48dd419f973fcfb2d53e
+2021/10/26 16:41:52 LOG [GET] [::1]:60568, /api/v1/profile 1.673µs
+2021/10/26 16:41:52 CODE 404 ERROR cannot cast data: fdfed749a5bf48dd419f973fcfb2d53e
+2021/10/26 16:43:33 LOG [GET] [::1]:33404, /api/v1/profile 3.34µs
+2021/10/26 16:45:13 LOG [GET] [::1]:34280, /api/v1/profile 12.871µs
+2021/10/26 16:49:18 LOG [GET] [::1]:36336, /api/v1/profile 1.523µs
+2021/10/26 16:49:18 CODE 404 ERROR not exixsts this cookie
+2021/10/26 16:49:39 LOG [POST] [::1]:36336, /api/v1/session 18.088µs
+2021/10/26 16:49:39 CODE 200
+2021/10/26 16:49:57 LOG [GET] [::1]:36336, /api/v1/profile 1.921µs
+2021/10/26 16:49:57 CODE 404 ERROR cannot cast data: 7846be25a5cb8b176741241bd8c1fa76
+2021/10/26 16:49:59 LOG [GET] [::1]:36336, /api/v1/profile 1.852µs
+2021/10/26 16:49:59 CODE 404 ERROR cannot cast data: 7846be25a5cb8b176741241bd8c1fa76
+2021/10/26 16:50:31 LOG [GET] [::1]:36966, /api/v1/profile 1.405µs
+2021/10/26 16:50:31 CODE 404 ERROR not exixsts this cookie
+2021/10/26 16:50:42 LOG [POST] [::1]:36966, /api/v1/session 5.359µs
+2021/10/26 16:50:42 CODE 200
+2021/10/26 16:50:48 LOG [GET] [::1]:36966, /api/v1/profile 1.833µs
+2021/10/26 16:50:48 CODE 200
+2021/10/26 16:51:50 LOG [OPTIONS] [::1]:37620, /api/v1/session 4.943µs
+2021/10/26 16:51:50 LOG [DELETE] [::1]:36966, /api/v1/session 5.369µs
+2021/10/26 16:51:50 CODE 500 ERROR Space '540' does not exist (0x24)
+2021/10/26 16:51:51 LOG [DELETE] [::1]:36966, /api/v1/session 5.265µs
+2021/10/26 16:51:51 CODE 500 ERROR Space '540' does not exist (0x24)
+2021/10/26 16:51:52 LOG [DELETE] [::1]:36966, /api/v1/session 3.105µs
+2021/10/26 16:51:52 CODE 500 ERROR Space '540' does not exist (0x24)
+2021/10/26 16:51:52 LOG [DELETE] [::1]:36966, /api/v1/session 2.683µs
+2021/10/26 16:51:52 CODE 500 ERROR Space '540' does not exist (0x24)
+2021/10/26 16:51:52 LOG [DELETE] [::1]:36966, /api/v1/session 2.652µs
+2021/10/26 16:51:52 CODE 500 ERROR Space '540' does not exist (0x24)
+2021/10/26 16:51:52 LOG [DELETE] [::1]:36966, /api/v1/session 1.792µs
+2021/10/26 16:51:52 CODE 500 ERROR Space '540' does not exist (0x24)
+2021/10/26 16:51:52 LOG [DELETE] [::1]:36966, /api/v1/session 3.576µs
+2021/10/26 16:51:52 CODE 500 ERROR Space '540' does not exist (0x24)
+2021/10/26 16:51:52 LOG [DELETE] [::1]:36966, /api/v1/session 2.649µs
+2021/10/26 16:51:52 CODE 500 ERROR Space '540' does not exist (0x24)
+2021/10/26 16:51:53 LOG [DELETE] [::1]:36966, /api/v1/session 2.451µs
+2021/10/26 16:51:53 CODE 500 ERROR Space '540' does not exist (0x24)
+2021/10/26 16:51:53 LOG [DELETE] [::1]:36966, /api/v1/session 2.129µs
+2021/10/26 16:51:53 CODE 500 ERROR Space '540' does not exist (0x24)
+2021/10/26 17:03:48 LOG [GET] [::1]:43648, /api/v1/profile 950ns
+2021/10/26 17:03:48 CODE 404 ERROR not exixsts this cookie
+2021/10/26 17:04:12 LOG [POST] [::1]:43648, /api/v1/session 2.153µs
+2021/10/26 17:04:12 CODE 200
+2021/10/26 17:04:19 LOG [GET] [::1]:43648, /api/v1/profile 2.008µs
+2021/10/26 17:04:19 CODE 200
+2021/10/26 17:04:26 LOG [OPTIONS] [::1]:43954, /api/v1/session 1.324µs
+2021/10/26 17:04:26 LOG [DELETE] [::1]:43648, /api/v1/session 2.25µs
+2021/10/26 17:04:26 CODE 200
+2021/10/26 17:04:58 LOG [POST] [::1]:43648, /api/v1/session 1.467µs
+2021/10/26 17:04:58 CODE 200
+2021/10/26 17:05:09 LOG [GET] [::1]:43648, /api/v1/profile 1.786µs
+2021/10/26 17:05:09 CODE 200
+2021/10/26 17:07:35 LOG [GET] [::1]:43648, /api/v1/profile 9.557µs
+2021/10/26 17:07:35 CODE 200
+2021/10/26 17:07:39 LOG [OPTIONS] [::1]:43954, /api/v1/session 1.609µs
+2021/10/26 17:07:39 LOG [DELETE] [::1]:43648, /api/v1/session 2.066µs
+2021/10/26 17:07:39 CODE 200
+2021/10/26 17:08:24 LOG [POST] [::1]:43648, /api/v1/session 1.652µs
+2021/10/26 17:08:24 CODE 200

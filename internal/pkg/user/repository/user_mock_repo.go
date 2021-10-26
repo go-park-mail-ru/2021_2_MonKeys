@@ -61,6 +61,7 @@ func (newDB *MockDB) MockDB() {
 		Imgs:        []string{"/img/Yachty-tout.jpg"},
 		Tags:        []string{"soccer", "anime"},
 	})
+
 	newDB.CreateTag(context.TODO(), "anime")
 	newDB.CreateTag(context.TODO(), "netflix")
 	newDB.CreateTag(context.TODO(), "games")

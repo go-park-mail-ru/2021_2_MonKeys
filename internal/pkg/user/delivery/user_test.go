@@ -161,7 +161,7 @@ func TestLogin(t *testing.T) {
 		}
 
 		if item.testType == correctCase {
-			if !testSessionDB.IsSessionByUserID(1) {
+			if !testSessionDB.IsSessionByCookie(item.CookieReq.Value) {
 				t.Errorf("TestCase [%d]:\nsession was not created", caseNum+1)
 			}
 			testSessionDB.DropCookies()
@@ -233,7 +233,7 @@ func TestSignup(t *testing.T) {
 		}
 
 		if item.testType == correctCase {
-			if !testSessionDB.IsSessionByUserID(expectedUser.ID) {
+			if !testSessionDB.IsSessionByCookie(item.CookieReq.Value) {
 				t.Errorf("TestCase [%d]:\nsession was not created", caseNum+1)
 			}
 			testSessionDB.DropCookies()
@@ -313,7 +313,7 @@ func TestLogout(t *testing.T) {
 				caseNum+1, w.Body.String(), item.BodyResp)
 		}
 
-		if testSessionDB.IsSessionByUserID(user.ID) && item.testType == correctCase {
+		if testSessionDB.IsSessionByCookie(item.CookieReq.Value) && item.testType == correctCase {
 			t.Errorf("TestCase [%d]:\nuser session not ended", caseNum+1)
 		}
 	}

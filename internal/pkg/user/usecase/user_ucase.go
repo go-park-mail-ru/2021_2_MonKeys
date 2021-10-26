@@ -67,8 +67,7 @@ func sendResp(resp models.JSON, w http.ResponseWriter) {
 func (h *userUsecase) getUserByCookie(c context.Context, sessionCookie string) (models.User, error) {
 	userID, err := h.Session.GetUserIDByCookie(sessionCookie)
 	if err != nil {
-		return models.User{},
-			err
+		return models.User{}, err
 	}
 
 	user, err := h.UserRepo.GetUserByID(c, userID)
@@ -152,8 +151,7 @@ func (h *userUsecase) Login(c context.Context, logUserData models.LoginUser, w h
 	if identifiableUser.IsCorrectPassword(logUserData.Password) {
 		cookie := createSessionCookie(logUserData)
 
-		if !h.Session.IsSessionByUserID(identifiableUser.ID) {
-			// http.SetCookie(w, &cookie)
+		if !h.Session.IsSessionByCookie(cookie.Value) {
 			err = h.Session.NewSessionCookie(cookie.Value, identifiableUser.ID)
 			if err != nil {
 				log.Printf("CODE %d ERROR %s", StatusInternalServerError, err)
@@ -161,6 +159,8 @@ func (h *userUsecase) Login(c context.Context, logUserData models.LoginUser, w h
 			}
 		}
 		http.SetCookie(w, &cookie)
+
+		log.Printf("CODE %d", StatusOK)
 
 		return *identifiableUser, StatusOK
 	} else {
@@ -216,7 +216,7 @@ func (h *userUsecase) Signup(c context.Context, logUserData models.LoginUser, w 
 
 	cookie := createSessionCookie(logUserData)
 
-	if !h.Session.IsSessionByUserID(identifiableUser.ID) {
+	if !h.Session.IsSessionByCookie(cookie.Value) {
 		err = h.Session.NewSessionCookie(cookie.Value, user.ID)
 		if err != nil {
 			log.Printf("CODE %d ERROR %s", StatusInternalServerError, err)
