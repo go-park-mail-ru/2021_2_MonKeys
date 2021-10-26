@@ -5,6 +5,7 @@ import (
 	"dripapp/internal/pkg/models"
 	"errors"
 	"io"
+	"log"
 	"os"
 )
 
@@ -14,7 +15,16 @@ type MockDB struct {
 	tags        map[uint64]string
 }
 
+const dirMedia = "./media"
+const basePhotoPath = dirMedia + "/profile_photos"
+
 func NewMockDB() *MockDB {
+	os.Mkdir(dirMedia, 0777)
+	err := os.Mkdir(basePhotoPath, 0777)
+	if err != nil {
+		log.Println("mkdir: ", err)
+		return nil
+	}
 	return &MockDB{make(map[uint64]*models.User), make(map[uint64][]uint64), make(map[uint64]string)}
 }
 
@@ -101,11 +111,8 @@ func (db *MockDB) GetUserByID(ctx context.Context, userID uint64) (*models.User,
 	return &models.User{}, errors.New("")
 }
 
-
-const basePhotoPath = "./media/profile_photos/"
-
 func getPathUserPhoto(user models.User) string {
-	return basePhotoPath + user.Email
+	return basePhotoPath + "/" + user.Email
 }
 
 func (db *MockDB) CreateUser(ctx context.Context, logUserData *models.LoginUser) (*models.User, error) {
