@@ -73,6 +73,14 @@ func (h *UserHandler) EditProfileHandler(w http.ResponseWriter, r *http.Request)
 	sendResp(resp, w)
 }
 
+func (h *UserHandler) UploadPhoto(w http.ResponseWriter, r *http.Request) {
+	h.UserUCase.AddPhoto(r.Context(), w, r)
+}
+
+func (h *UserHandler) DeletePhoto(w http.ResponseWriter, r *http.Request) {
+	h.UserUCase.DeletePhoto(r.Context(), w, r)
+}
+
 // @Summary SignUp
 // @Description registration user
 // @Tags registration

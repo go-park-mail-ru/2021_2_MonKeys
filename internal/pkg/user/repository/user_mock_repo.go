@@ -4,6 +4,8 @@ import (
 	"context"
 	"dripapp/internal/pkg/models"
 	"errors"
+	"io"
+	"os"
 )
 
 type MockDB struct {
@@ -99,16 +101,64 @@ func (db *MockDB) GetUserByID(ctx context.Context, userID uint64) (*models.User,
 	return &models.User{}, errors.New("")
 }
 
+
+const basePhotoPath = "./media/profile_photos/"
+
+func getPathUserPhoto(user models.User) string {
+	return basePhotoPath + user.Name + "/"
+}
+
 func (db *MockDB) CreateUser(ctx context.Context, logUserData *models.LoginUser) (*models.User, error) {
 	newID := uint64(len(db.users) + 1)
 
 	db.users[newID] = models.NewUser(newID, logUserData.Email, logUserData.Password)
+
+	err := os.Mkdir(getPathUserPhoto(*db.users[newID]), 0666)
+	if err != nil {
+		return nil, err
+	}
 
 	return db.users[newID], nil
 }
 
 func (db *MockDB) UpdateUser(ctx context.Context, newUserData *models.User) (err error) {
 	db.users[newUserData.ID] = newUserData
+
+	return nil
+}
+
+func (db *MockDB) AddPhoto(ctx context.Context, user models.User, newPhoto io.Reader) error {
+	photoPath := getPathUserPhoto(user) + user.GetNameToNewPhoto()
+
+	savedPhoto, err := os.Create(photoPath)
+	if err != nil {
+		return err
+	}
+	defer savedPhoto.Close()
+
+	_, err = io.Copy(savedPhoto, newPhoto)
+	if err != nil {
+		return err
+	}
+
+	user.SaveNewPhoto()
+
+	db.users[user.ID].Imgs = user.Imgs
+
+	return nil
+}
+
+func (db *MockDB) DeletePhoto(ctx context.Context, user models.User, photo string) error {
+	photoPath := getPathUserPhoto(user) + photo
+
+	err := os.Remove(photoPath)
+	if err != nil {
+		return err
+	}
+
+	user.DeletePhoto(photo)
+
+	db.users[user.ID].Imgs = user.Imgs
 
 	return nil
 }
