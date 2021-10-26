@@ -267,7 +267,7 @@ func (p *PostgreUserRepo) insertTags(ctx context.Context, id uint64, tags []stri
 }
 
 func (p *PostgreUserRepo) AddPhoto(ctx context.Context, user models.User, newPhoto io.Reader) error {
-	photoPath := getPathUserPhoto(user) + user.GetNameToNewPhoto()
+	photoPath := getPathUserPhoto(user) + "/" + user.GetNameToNewPhoto()
 
 	savedPhoto, err := os.Create(photoPath)
 	if err != nil {

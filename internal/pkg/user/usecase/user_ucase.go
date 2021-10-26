@@ -173,6 +173,8 @@ func (h *userUsecase) AddPhoto(c context.Context, w http.ResponseWriter, r *http
 
 
 
+	currentUser.SaveNewPhoto()
+
 	err = h.UserRepo.AddPhoto(c, currentUser, uploadedPhoto)
 	if err != nil {
 		resp.Status = StatusInternalServerError

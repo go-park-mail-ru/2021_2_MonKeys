@@ -97,6 +97,10 @@ func (user *User) FillProfile(newUserData *User) (err error) {
 }
 
 func (user *User) GetLastPhoto() string {
+	if len(user.Imgs) == 0 {
+		return "1.png"
+	}
+
 	return user.Imgs[len(user.Imgs)-1]
 }
 

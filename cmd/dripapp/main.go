@@ -60,9 +60,9 @@ func main() {
 
 	// userRepo := _userRepo.NewPostgresUserRepository(conn)
 	userRepo := _userRepo.NewMockDB()
-	userRepo.MockDB()
-	// sm := session.NewSessionDB()
-	sm, err := session.NewTarantoolConnection(configs.Tarantool)
+	//userRepo.MockDB()
+	sm := session.NewSessionDB()
+	//sm, err := session.NewTarantoolConnection(configs.Tarantool)
 	if err != nil {
 		log.Fatal(err)
 	}

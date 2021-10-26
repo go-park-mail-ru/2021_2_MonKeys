@@ -105,7 +105,7 @@ func (db *MockDB) GetUserByID(ctx context.Context, userID uint64) (*models.User,
 const basePhotoPath = "./media/profile_photos/"
 
 func getPathUserPhoto(user models.User) string {
-	return basePhotoPath + user.Name + "/"
+	return basePhotoPath + user.Email
 }
 
 func (db *MockDB) CreateUser(ctx context.Context, logUserData *models.LoginUser) (*models.User, error) {
@@ -113,7 +113,7 @@ func (db *MockDB) CreateUser(ctx context.Context, logUserData *models.LoginUser)
 
 	db.users[newID] = models.NewUser(newID, logUserData.Email, logUserData.Password)
 
-	err := os.Mkdir(getPathUserPhoto(*db.users[newID]), 0666)
+	err := os.Mkdir(getPathUserPhoto(*db.users[newID]), 0777)
 	if err != nil {
 		return nil, err
 	}
@@ -128,7 +128,7 @@ func (db *MockDB) UpdateUser(ctx context.Context, newUserData *models.User) (err
 }
 
 func (db *MockDB) AddPhoto(ctx context.Context, user models.User, newPhoto io.Reader) error {
-	photoPath := getPathUserPhoto(user) + user.GetNameToNewPhoto()
+	photoPath := getPathUserPhoto(user) + "/" + user.GetNameToNewPhoto()
 
 	savedPhoto, err := os.Create(photoPath)
 	if err != nil {
@@ -140,8 +140,6 @@ func (db *MockDB) AddPhoto(ctx context.Context, user models.User, newPhoto io.Re
 	if err != nil {
 		return err
 	}
-
-	user.SaveNewPhoto()
 
 	db.users[user.ID].Imgs = user.Imgs
 
