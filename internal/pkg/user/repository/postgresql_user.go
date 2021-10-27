@@ -299,5 +299,6 @@ func (p *PostgreUserRepo) IsSwiped(ctx context.Context, userID, swipedUserID uin
 }
 
 func (p *PostgreUserRepo) GetNextUserForSwipe(ctx context.Context, currentUserId uint64) (models.User, error) {
+	fmt.Printf("lol")
 	return models.User{}, nil
 }

@@ -111,23 +111,23 @@ func (h *UserHandler) NextUserHandler(w http.ResponseWriter, r *http.Request) {
 	var resp models.JSON
 
 	// get swiped usedata for registrationr id from json
-	byteReq, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		resp.Status = StatusBadRequest
-		sendResp(resp, w)
-		log.Printf("CODE %d ERROR %s", resp.Status, err)
-		return
-	}
-	var swipedUserData models.SwipedUser
-	err = json.Unmarshal(byteReq, &swipedUserData)
-	if err != nil {
-		resp.Status = StatusBadRequest
-		sendResp(resp, w)
-		log.Printf("CODE %d ERROR %s", resp.Status, err)
-		return
-	}
-
-	nextUser, status := h.UserUCase.NextUser(r.Context(), swipedUserData, r)
+	// byteReq, err := ioutil.ReadAll(r.Body)
+	// if err != nil {
+	// 	resp.Status = StatusBadRequest
+	// 	sendResp(resp, w)
+	// 	log.Printf("CODE %d ERROR %s", resp.Status, err)
+	// 	return
+	// }
+	// var swipedUserData models.SwipedUser
+	// var byteReq []byte
+	// err := json.Unmarshal(byteReq, &swipedUserData)
+	// if err != nil {
+	// 	resp.Status = StatusBadRequest
+	// 	sendResp(resp, w)
+	// 	log.Printf("CODE %d ERROR %s", resp.Status, err)
+	// 	return
+	// }
+	nextUser, status := h.UserUCase.NextUser(r.Context(), r)
 	resp.Status = status
 	if status == StatusOK {
 		resp.Body = nextUser

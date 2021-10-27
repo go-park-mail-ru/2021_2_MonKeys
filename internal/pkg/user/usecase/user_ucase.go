@@ -230,7 +230,7 @@ func (h *userUsecase) Signup(c context.Context, logUserData models.LoginUser, w 
 	return StatusOK
 }
 
-func (h *userUsecase) NextUser(c context.Context, swipedUserData models.SwipedUser, r *http.Request) (models.User, int) {
+func (h *userUsecase) NextUser(c context.Context, r *http.Request) (models.User, int) {
 	ctx, cancel := context.WithTimeout(c, h.contextTimeout)
 	defer cancel()
 
@@ -247,12 +247,13 @@ func (h *userUsecase) NextUser(c context.Context, swipedUserData models.SwipedUs
 	}
 
 	// add in swaped users map for current user
-	err = h.UserRepo.AddSwipedUsers(ctx, currentUser.ID, swipedUserData.Id, "like")
-	if err != nil {
-		log.Printf("CODE %d ERROR %s", StatusNotFound, err)
-		return models.User{}, StatusNotFound
-	}
+	// err = h.UserRepo.AddSwipedUsers(ctx, currentUser.ID, swipedUserData.Id, "like")
+	// if err != nil {
+	// 	log.Printf("CODE %d ERROR %s", StatusNotFound, err)
+	// 	return models.User{}, StatusNotFound
+	// }
 	// find next user for swipe
+	fmt.Printf("zdec")
 	nextUser, err := h.UserRepo.GetNextUserForSwipe(ctx, currentUser.ID)
 	if err != nil {
 		log.Printf("CODE %d ERROR %s", StatusNotFound, err)
