@@ -103,7 +103,7 @@ type UserUsecase interface {
 	Login(c context.Context, logUserData LoginUser, w http.ResponseWriter) (User, int)
 	Logout(c context.Context, w http.ResponseWriter, r *http.Request) int
 	Signup(c context.Context, logUserData LoginUser, w http.ResponseWriter) int
-	NextUser(c context.Context, r *http.Request) (User, int)
+	NextUser(c context.Context, r *http.Request) ([]User, int)
 	GetAllTags(c context.Context, r *http.Request) (Tags, int)
 }
 

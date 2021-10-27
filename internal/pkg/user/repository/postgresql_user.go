@@ -359,26 +359,27 @@ func (p *PostgreUserRepo) IsSwiped(ctx context.Context, userID, swipedUserID uin
 
 func (p *PostgreUserRepo) GetNextUserForSwipe(ctx context.Context, currentUserId uint64) ([]models.User, error) {
 	query := `select
-					op.id,
-					op.name,
-					op.email,
-					op.password,
-					op.date,
-					op.description
+				op.id,
+				op.name,
+				op.email,
+				op.password,
+				op.date,
+				op.description
+			from
+				(
+				select
+					r.id1 as rid1,
+					r.id2 as rid2
 				from
-					(
-					select
-						r.id1 as rid1,
-						r.id2 as rid2
-					from
-						reactions r
-					where
-						r.id1 = $1
-					) lol
-					right join profile op on lol.rid2 = op.id
+					reactions r
 				where
-					lol.rid1 is null
-					and op.id <> $1 limit 5;`
+					r.id1 = $1
+				) prevReact
+				right join profile op on prevReact.rid2 = op.id
+			where
+				prevReact.rid1 is null
+				and op.id <> $1
+				and op.name <> '' and op.date <> '' limit 5;`
 
 	var notSwipedUser []models.User
 	err := p.conn.Select(&notSwipedUser, query, currentUserId)
