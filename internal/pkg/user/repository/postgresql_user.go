@@ -336,7 +336,7 @@ func (p *PostgreUserRepo) GetNextUserForSwipe(ctx context.Context, currentUserId
 					right join profile op on lol.rid2 = op.id
 				where
 					lol.rid1 is null
-					and op.id <> $1;`
+					and op.id <> $1 limit 5;`
 
 	var notSwipedUser []models.User
 	err := p.conn.Select(&notSwipedUser, query, currentUserId)

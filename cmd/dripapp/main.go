@@ -56,6 +56,15 @@ func main() {
 	// 	return
 	// }
 
+	// router
+	router := mux.NewRouter()
+
+	// middleware
+	router.Use(middleware.Logger(logFile))
+	router.Use(middleware.CORS)
+	router.Use(middleware.PanicRecovery)
+
+	// repository
 	// userRepo := _userRepo.NewPostgresUserRepository(conn)
 	userRepo := _userRepo.NewMockDB()
 	userRepo.MockDB()
@@ -66,16 +75,11 @@ func main() {
 	}
 
 	timeoutContext := configs.Timeouts.ContextTimeout
+
+	// usecase
 	userUCase := _userUsecase.NewUserUsecase(userRepo, sm, timeoutContext)
 
-	// router
-	router := mux.NewRouter()
-
-	// middleware
-	router.Use(middleware.Logger(logFile))
-	router.Use(middleware.CORS)
-	router.Use(middleware.PanicRecovery)
-
+	// delivery
 	_userDelivery.SetRouting(router, userUCase)
 
 	srv := &http.Server{
