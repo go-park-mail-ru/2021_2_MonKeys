@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"dripapp/configs"
 	"dripapp/internal/pkg/models"
 	"errors"
 	"fmt"
@@ -14,6 +15,8 @@ import (
 	"github.com/lib/pq"
 	_ "github.com/lib/pq"
 )
+
+const success = "Connection success (postgre) on: "
 
 type PostgreUserRepo struct {
 	conn *sqlx.DB
@@ -33,9 +36,22 @@ func getAgeFromDate(date string) (string, error) {
 	return strconv.Itoa(int(age)), nil
 }
 
-func NewPostgresUserRepository(conn *sqlx.DB) models.UserRepository {
-	return &PostgreUserRepo{conn}
+func NewPostgresUserRepository(config configs.PostgresConfig) (models.UserRepository, error) {
+	connStr := fmt.Sprintf("user=%s password=%s dbname=%s sslmode=disable",
+		configs.Postgres.User,
+		configs.Postgres.Password,
+		configs.Postgres.DBName)
+
+	conn, err := sqlx.Open("postgres", connStr)
+	if err != nil {
+		return nil, err
+	}
+
+	log.Printf("%s%s", success, connStr)
+	return &PostgreUserRepo{conn}, nil
 }
+
+func (p *PostgreUserRepo) Init() {}
 
 func (p *PostgreUserRepo) GetUser(ctx context.Context, email string) (*models.User, error) {
 	query := `select id, name, email, password, date, description
@@ -89,7 +105,7 @@ func (p *PostgreUserRepo) CreateUser(ctx context.Context, logUserData *models.Lo
                   email, 
                   password) 
                   VALUES ($1,$2) 
-                  RETURNING email, password;`
+                  RETURNING id, email, password;`
 
 	var RespUser models.User
 	err := p.conn.GetContext(ctx, &RespUser, query, logUserData.Email, logUserData.Password)

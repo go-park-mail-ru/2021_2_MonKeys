@@ -44,18 +44,6 @@ func main() {
 
 	configs.SetConfig()
 
-	// repositories
-	// connStr := fmt.Sprintf("user=%s password=%s dbname=%s sslmode=disable",
-	// 	configs.Postgres.User,
-	// 	configs.Postgres.Password,
-	// 	configs.Postgres.DBName)
-
-	// conn, err := sqlx.Open("postgres", connStr)
-	// if err != nil {
-	// 	log.Fatal(err)
-	// 	return
-	// }
-
 	// router
 	router := mux.NewRouter()
 
@@ -65,10 +53,15 @@ func main() {
 	router.Use(middleware.PanicRecovery)
 
 	// repository
-	// userRepo := _userRepo.NewPostgresUserRepository(conn)
-	userRepo := _userRepo.NewMockDB()
-	userRepo.MockDB()
+	userRepo, err := _userRepo.NewPostgresUserRepository(configs.Postgres)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// userRepo := _userRepo.NewMockDB()
+	// userRepo.Init()
 	// sm := session.NewSessionDB()
+
 	sm, err := session.NewTarantoolConnection(configs.Tarantool)
 	if err != nil {
 		log.Fatal(err)

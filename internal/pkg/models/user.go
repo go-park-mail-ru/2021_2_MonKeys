@@ -47,10 +47,10 @@ type Tags struct {
 }
 
 func NewUser(id uint64, email string, password string) *User {
-	return &User{ID: id, Email: email, Password: hashPassword(password)}
+	return &User{ID: id, Email: email, Password: HashPassword(password)}
 }
 
-func hashPassword(password string) string {
+func HashPassword(password string) string {
 	return fmt.Sprintf("%x", md5.Sum([]byte(password)))
 }
 
@@ -59,7 +59,7 @@ func (user *User) IsEmpty() bool {
 }
 
 func (user *User) IsCorrectPassword(password string) bool {
-	return user.Password == hashPassword(password)
+	return user.Password == HashPassword(password)
 }
 
 func GetAgeFromDate(date string) (string, error) {
@@ -119,6 +119,7 @@ type UserRepository interface {
 	GetTags(ctx context.Context) (map[uint64]string, error)
 	DropSwipes(ctx context.Context) error
 	DropUsers(ctx context.Context) error
+	Init()
 	GetTagsByID(ctx context.Context, id uint64) ([]string, error)
 	GetImgsByID(ctx context.Context, id uint64) ([]string, error)
 	CreateTag(ctx context.Context, tag_name string) error

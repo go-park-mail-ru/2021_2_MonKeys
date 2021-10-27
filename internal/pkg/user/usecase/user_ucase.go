@@ -208,6 +208,7 @@ func (h *userUsecase) Signup(c context.Context, logUserData models.LoginUser, w 
 		return StatusEmailAlreadyExists
 	}
 
+	logUserData.Password = models.HashPassword(logUserData.Password)
 	user, err := h.UserRepo.CreateUser(c, &logUserData)
 	if err != nil {
 		log.Printf("CODE %d ERROR %s", StatusInternalServerError, err)

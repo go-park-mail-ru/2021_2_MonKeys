@@ -12,12 +12,12 @@ type MockDB struct {
 	tags        map[uint64]string
 }
 
-func NewMockDB() *MockDB {
+func NewMockDB() models.UserRepository {
 	return &MockDB{make(map[uint64]*models.User), make(map[uint64][]uint64), make(map[uint64]string)}
 }
 
-func (newDB *MockDB) MockDB() {
-	newDB.CreateUserAndProfile(context.TODO(), &models.User{
+func (newDB *MockDB) Init() {
+	newDB.CreateUserAndProfile(context.TODO(), models.User{
 		ID:          1,
 		Name:        "Mikhail",
 		Email:       "lol1@mail.ru",
@@ -28,7 +28,7 @@ func (newDB *MockDB) MockDB() {
 		Imgs:        []string{"/img/Yachty-tout.jpg"},
 		Tags:        []string{"soccer", "anime"},
 	})
-	newDB.CreateUserAndProfile(context.TODO(), &models.User{
+	newDB.CreateUserAndProfile(context.TODO(), models.User{
 		ID:          2,
 		Name:        "Mikhail2",
 		Email:       "lol2@mail.ru",
@@ -39,7 +39,7 @@ func (newDB *MockDB) MockDB() {
 		Imgs:        []string{"/img/Yachty-tout.jpg"},
 		Tags:        []string{"soccer", "anime"},
 	})
-	newDB.CreateUserAndProfile(context.TODO(), &models.User{
+	newDB.CreateUserAndProfile(context.TODO(), models.User{
 		ID:          3,
 		Name:        "Mikhail3",
 		Email:       "lol3@mail.ru",
@@ -50,7 +50,7 @@ func (newDB *MockDB) MockDB() {
 		Imgs:        []string{"/img/Yachty-tout.jpg"},
 		Tags:        []string{"soccer", "anime"},
 	})
-	newDB.CreateUserAndProfile(context.TODO(), &models.User{
+	newDB.CreateUserAndProfile(context.TODO(), models.User{
 		ID:          4,
 		Name:        "Mikhail4",
 		Email:       "lol4@mail.ru",
@@ -61,7 +61,6 @@ func (newDB *MockDB) MockDB() {
 		Imgs:        []string{"/img/Yachty-tout.jpg"},
 		Tags:        []string{"soccer", "anime"},
 	})
-
 	newDB.CreateTag(context.TODO(), "anime")
 	newDB.CreateTag(context.TODO(), "netflix")
 	newDB.CreateTag(context.TODO(), "games")
@@ -70,6 +69,26 @@ func (newDB *MockDB) MockDB() {
 	newDB.CreateTag(context.TODO(), "baumanka")
 	newDB.CreateTag(context.TODO(), "music")
 	newDB.CreateTag(context.TODO(), "sport")
+}
+
+func (db *MockDB) CreateUser(ctx context.Context, logUserData *models.LoginUser) (*models.User, error) {
+	newID := uint64(len(db.users) + 1)
+
+	db.users[newID] = models.NewUser(newID, logUserData.Email, logUserData.Password)
+
+	return db.users[newID], nil
+}
+
+func (db *MockDB) GetImgsByID(ctx context.Context, id uint64) ([]string, error) {
+	return nil, nil
+}
+
+func (db *MockDB) DeleteUser(ctx context.Context, user models.User) error {
+	return nil
+}
+
+func (db *MockDB) InsertTags(ctx context.Context, id uint64, tags []string) error {
+	return nil
 }
 
 func (db *MockDB) GetUser(ctx context.Context, email string) (*models.User, error) {
@@ -100,18 +119,10 @@ func (db *MockDB) GetUserByID(ctx context.Context, userID uint64) (*models.User,
 	return &models.User{}, errors.New("")
 }
 
-func (db *MockDB) CreateUser(ctx context.Context, logUserData *models.LoginUser) (*models.User, error) {
-	newID := uint64(len(db.users) + 1)
-
-	db.users[newID] = models.NewUser(newID, logUserData.Email, logUserData.Password)
-
-	return db.users[newID], nil
-}
-
-func (db *MockDB) UpdateUser(ctx context.Context, newUserData *models.User) (err error) {
+func (db *MockDB) UpdateUser(ctx context.Context, newUserData *models.User) (models.User, error) {
 	db.users[newUserData.ID] = newUserData
 
-	return nil
+	return models.User{}, nil
 }
 
 func (db *MockDB) AddSwipedUsers(ctx context.Context, currentUserId, swipedUserId uint64, type_name string) error {
@@ -123,38 +134,38 @@ func (db *MockDB) AddSwipedUsers(ctx context.Context, currentUserId, swipedUserI
 	return nil
 }
 
-func (db *MockDB) GetNextUserForSwipe(ctx context.Context, currentUserId uint64) (models.User, error) {
+func (db *MockDB) GetNextUserForSwipe(ctx context.Context, currentUserId uint64) ([]models.User, error) {
 	if len(db.users) == 0 {
-		return models.User{}, errors.New("users is empty map")
+		return []models.User{}, errors.New("users is empty map")
 	}
-	if len(db.swipedUsers) == 0 {
-		for key, value := range db.users {
-			if key != currentUserId {
-				return *value, nil
-			}
-		}
-		return models.User{}, errors.New("haven't any other users for swipe")
-	}
+	// if len(db.swipedUsers) == 0 {
+	// 	for key, value := range db.users {
+	// 		if key != currentUserId {
+	// 			return *value, nil
+	// 		}
+	// 	}
+	// 	return models.User{}, errors.New("haven't any other users for swipe")
+	// }
 
 	// find all users swiped by the current user
-	var allSwipedUsersForCurrentUser []uint64
-	for key, value := range db.swipedUsers {
-		if key == currentUserId {
-			allSwipedUsersForCurrentUser = value
-		}
-	}
+	// var allSwipedUsersForCurrentUser []uint64
+	// for key, value := range db.swipedUsers {
+	// 	if key == currentUserId {
+	// 		allSwipedUsersForCurrentUser = value
+	// 	}
+	// }
 
 	// find a user who has not yet been swiped by the current user
-	for key, value := range db.users {
-		if key == currentUserId {
-			continue
-		}
-		if !existsIn(key, allSwipedUsersForCurrentUser) {
-			return *value, nil
-		}
-	}
+	// for key, value := range db.users {
+	// 	if key == currentUserId {
+	// 		continue
+	// 	}
+	// 	if !existsIn(key, allSwipedUsersForCurrentUser) {
+	// 		return *value, nil
+	// 	}
+	// }
 
-	return models.User{}, errors.New("haven't any other users for swipe")
+	return nil, errors.New("haven't any other users for swipe")
 }
 
 func existsIn(value uint64, target []uint64) bool {
@@ -182,14 +193,14 @@ func (db *MockDB) IsSwiped(ctx context.Context, userID, swipedUserID uint64) (bo
 	return false, nil
 }
 
-func (db *MockDB) CreateUserAndProfile(ctx context.Context, user *models.User) (models.User, error) {
+func (db *MockDB) CreateUserAndProfile(ctx context.Context, user models.User) (models.User, error) {
 	newID := uint64(len(db.users) + 1)
 
 	user.ID = newID
 
-	db.users[newID] = user
+	db.users[newID] = &user
 
-	return *user, nil
+	return user, nil
 }
 
 func (db *MockDB) DropUsers(ctx context.Context) error {
@@ -210,6 +221,14 @@ func (db *MockDB) CreateTag(ctx context.Context, tag_name string) error {
 	return nil
 }
 
-func (db *MockDB) GetTags(ctx context.Context) map[uint64]string {
-	return db.tags
+func (db *MockDB) GetTags(ctx context.Context) (map[uint64]string, error) {
+	return db.tags, nil
+}
+
+func (db *MockDB) GetTagsByID(ctx context.Context, id uint64) ([]string, error) {
+	return nil, nil
+}
+
+func (db *MockDB) UpdateImgs(ctx context.Context, id uint64, imgs []string) error {
+	return nil
 }
