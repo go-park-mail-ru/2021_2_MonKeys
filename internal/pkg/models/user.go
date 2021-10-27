@@ -32,12 +32,11 @@ type LoginUser struct {
 	Password string `json:"password"`
 }
 
-type SwipedUser struct {
-	Id uint64 `json:"id"`
-}
+// type SwipedUser struct {
+// 	Id uint64 `json:"id"`
+// }
 
 type Tag struct {
-	Id       uint64 `json:"id"`
 	Tag_Name string `json:"tagText"`
 }
 
@@ -104,7 +103,7 @@ type UserUsecase interface {
 	Login(c context.Context, logUserData LoginUser, w http.ResponseWriter) (User, int)
 	Logout(c context.Context, w http.ResponseWriter, r *http.Request) int
 	Signup(c context.Context, logUserData LoginUser, w http.ResponseWriter) int
-	NextUser(c context.Context, swipedUserData SwipedUser, r *http.Request) (User, int)
+	NextUser(c context.Context, r *http.Request) ([]User, int)
 	GetAllTags(c context.Context, r *http.Request) (Tags, int)
 }
 
@@ -120,6 +119,7 @@ type UserRepository interface {
 	DropSwipes(ctx context.Context) error
 	DropUsers(ctx context.Context) error
 	Init()
+	DeleteTags(ctx context.Context, userId uint64) error
 	GetTagsByID(ctx context.Context, id uint64) ([]string, error)
 	GetImgsByID(ctx context.Context, id uint64) ([]string, error)
 	CreateTag(ctx context.Context, tag_name string) error

@@ -149,7 +149,7 @@ func (p *PostgreUserRepo) CreateUserAndProfile(ctx context.Context, user models.
 
 func (p *PostgreUserRepo) UpdateUser(ctx context.Context, newUserData *models.User) (models.User, error) {
 	query := `update profile
-		set name=$1, date=$3, description=$4, imgs=&5
+		set name=$1, date=$3, description=$4, imgs=$5
 		where email=$2
 		RETURNING id, email, password, name, email, password, date, description;`
 
@@ -157,16 +157,44 @@ func (p *PostgreUserRepo) UpdateUser(ctx context.Context, newUserData *models.Us
 	err := p.conn.GetContext(ctx, &RespUser, query, newUserData.Name, newUserData.Email, newUserData.Date,
 		newUserData.Description, pq.Array(newUserData.Imgs))
 
-	RespUser.Imgs, err = p.GetImgsByID(ctx, RespUser.ID)
-	if err != nil {
-		return models.User{}, err
+	if len(newUserData.Tags) != 0 {
+		err = p.DeleteTags(ctx, newUserData.ID)
+		if err != nil {
+			return models.User{}, err
+		}
+		err = p.InsertTags(ctx, newUserData.ID, newUserData.Tags)
+		if err != nil {
+			return models.User{}, err
+		}
 	}
-	RespUser.Tags, err = p.GetTagsByID(ctx, RespUser.ID)
-	if err != nil {
-		return models.User{}, err
+
+	if len(newUserData.Imgs) != 0 {
+		RespUser.Imgs, err = p.GetImgsByID(ctx, RespUser.ID)
+		if err != nil {
+			return models.User{}, err
+		}
+	}
+
+	if len(newUserData.Tags) != 0 {
+		RespUser.Tags, err = p.GetTagsByID(ctx, RespUser.ID)
+		if err != nil {
+			return models.User{}, err
+		}
 	}
 
 	return RespUser, err
+}
+
+func (p *PostgreUserRepo) DeleteTags(ctx context.Context, userId uint64) error {
+	query := `delete from profile_tag where profile_id=$1`
+
+	stmt, _ := p.conn.Prepare(query)
+	_, err := stmt.Exec(userId)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (p *PostgreUserRepo) DeleteUser(ctx context.Context, user models.User) error {
@@ -180,7 +208,7 @@ func (p *PostgreUserRepo) DeleteUser(ctx context.Context, user models.User) erro
 }
 
 func (p *PostgreUserRepo) GetTags(ctx context.Context) (map[uint64]string, error) {
-	query := `select id, tag_name from tag;`
+	query := `select tag_name from tag;`
 
 	var tags []models.Tag
 	err := p.conn.Select(&tags, query)
@@ -190,8 +218,9 @@ func (p *PostgreUserRepo) GetTags(ctx context.Context) (map[uint64]string, error
 
 	tagsMap := make(map[uint64]string)
 
-	for _, val := range tags {
-		tagsMap[val.Id] = val.Tag_Name
+	var i uint64
+	for i = 0; i < uint64(len(tags)); i++ {
+		tagsMap[i] = tags[i].Tag_Name
 	}
 
 	return tagsMap, nil
@@ -266,7 +295,7 @@ func (p *PostgreUserRepo) InsertTags(ctx context.Context, id uint64, tags []stri
 		return nil
 	}
 
-	query := "insert into profile_tag(profile_id, tag_id)\nvalues\n"
+	query := "insert into profile_tag(profile_id, tag_id) values"
 
 	vals := []interface{}{}
 	vals = append(vals, id)
@@ -284,9 +313,6 @@ func (p *PostgreUserRepo) InsertTags(ctx context.Context, id uint64, tags []stri
 	sb.WriteString(strings.Join(inserts, ",\n"))
 	sb.WriteString(";")
 	query = sb.String()
-
-	fmt.Println(query)
-	fmt.Println(vals)
 
 	stmt, _ := p.conn.Prepare(query)
 	_, err := stmt.Exec(vals...)
@@ -333,26 +359,27 @@ func (p *PostgreUserRepo) IsSwiped(ctx context.Context, userID, swipedUserID uin
 
 func (p *PostgreUserRepo) GetNextUserForSwipe(ctx context.Context, currentUserId uint64) ([]models.User, error) {
 	query := `select
-					op.id,
-					op.name,
-					op.email,
-					op.password,
-					op.date,
-					op.description
+				op.id,
+				op.name,
+				op.email,
+				op.password,
+				op.date,
+				op.description
+			from
+				(
+				select
+					r.id1 as rid1,
+					r.id2 as rid2
 				from
-					(
-					select
-						r.id1 as rid1,
-						r.id2 as rid2
-					from
-						reactions r
-					where
-						r.id1 = $1
-					) lol
-					right join profile op on lol.rid2 = op.id
+					reactions r
 				where
-					lol.rid1 is null
-					and op.id <> $1 limit 5;`
+					r.id1 = $1
+				) prevReact
+				right join profile op on prevReact.rid2 = op.id
+			where
+				prevReact.rid1 is null
+				and op.id <> $1
+				and op.name <> '' and op.date <> '' limit 5;`
 
 	var notSwipedUser []models.User
 	err := p.conn.Select(&notSwipedUser, query, currentUserId)

@@ -231,7 +231,7 @@ func (h *userUsecase) Signup(c context.Context, logUserData models.LoginUser, w 
 	return StatusOK
 }
 
-func (h *userUsecase) NextUser(c context.Context, swipedUserData models.SwipedUser, r *http.Request) (models.User, int) {
+func (h *userUsecase) NextUser(c context.Context, r *http.Request) ([]models.User, int) {
 	ctx, cancel := context.WithTimeout(c, h.contextTimeout)
 	defer cancel()
 
@@ -239,30 +239,30 @@ func (h *userUsecase) NextUser(c context.Context, swipedUserData models.SwipedUs
 	session, err := r.Cookie("sessionId")
 	if err == http.ErrNoCookie {
 		log.Printf("CODE %d ERROR %s", StatusNotFound, err)
-		return models.User{}, StatusNotFound
+		return []models.User{}, StatusNotFound
 	}
 	currentUser, err := h.getUserByCookie(ctx, session.Value)
 	if err != nil {
 		log.Printf("CODE %d ERROR %s", StatusNotFound, err)
-		return models.User{}, StatusNotFound
+		return []models.User{}, StatusNotFound
 	}
 
 	// add in swaped users map for current user
-	err = h.UserRepo.AddSwipedUsers(ctx, currentUser.ID, swipedUserData.Id, "like")
-	if err != nil {
-		log.Printf("CODE %d ERROR %s", StatusNotFound, err)
-		return models.User{}, StatusNotFound
-	}
+	// err = h.UserRepo.AddSwipedUsers(ctx, currentUser.ID, swipedUserData.Id, "like")
+	// if err != nil {
+	// 	log.Printf("CODE %d ERROR %s", StatusNotFound, err)
+	// 	return models.User{}, StatusNotFound
+	// }
 	// find next user for swipe
 	nextUsers, err := h.UserRepo.GetNextUserForSwipe(ctx, currentUser.ID)
 	if err != nil {
 		log.Printf("CODE %d ERROR %s", StatusNotFound, err)
-		return models.User{}, StatusNotFound
+		return []models.User{}, StatusNotFound
 	}
 
 	log.Printf("CODE %d", StatusOK)
 
-	return nextUsers[0], StatusOK
+	return nextUsers, StatusOK
 }
 
 func (h *userUsecase) GetAllTags(c context.Context, r *http.Request) (models.Tags, int) {
@@ -278,8 +278,7 @@ func (h *userUsecase) GetAllTags(c context.Context, r *http.Request) (models.Tag
 	var respAllTags models.Tags
 	counter := 0
 
-	for key, value := range allTags {
-		respTag.Id = key
+	for _, value := range allTags {
 		respTag.Tag_Name = value
 		currentAllTags[uint64(counter)] = respTag
 		counter++

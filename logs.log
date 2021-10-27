@@ -1,0 +1,501 @@
+2021/10/25 22:48:34 LOG [POST] 127.0.0.1:40120, /api/v1/session 1.181µs
+2021/10/25 22:48:34 unknown origin ""
+2021/10/25 22:48:34 CODE 500 ERROR Space '513' does not exist (0x24)
+2021/10/25 22:48:34 http: superfluous response.WriteHeader call from dripapp/internal/pkg/session/delivery.sendResp (session.go:21)
+2021/10/25 22:49:53 LOG [POST] 127.0.0.1:40158, /api/v1/session 860ns
+2021/10/25 22:49:53 unknown origin ""
+2021/10/25 22:49:53 CODE 500 ERROR Space '514' does not exist (0x24)
+2021/10/25 22:49:53 http: superfluous response.WriteHeader call from dripapp/internal/pkg/session/delivery.sendResp (session.go:21)
+2021/10/25 23:00:07 LOG [POST] 127.0.0.1:40316, /api/v1/session 996ns
+2021/10/25 23:00:07 unknown origin ""
+2021/10/25 23:00:07 CODE 500 ERROR Space '515' does not exist (0x24)
+2021/10/25 23:00:07 http: superfluous response.WriteHeader call from dripapp/internal/pkg/session/delivery.sendResp (session.go:21)
+2021/10/25 23:26:39 LOG [POST] 127.0.0.1:40688, /api/v1/session 1.286µs
+2021/10/25 23:26:39 unknown origin ""
+2021/10/25 23:26:39 CODE 500 ERROR Space '516' does not exist (0x24)
+2021/10/25 23:26:39 http: superfluous response.WriteHeader call from dripapp/internal/pkg/session/delivery.sendResp (session.go:21)
+2021/10/25 23:31:37 LOG [POST] 127.0.0.1:40776, /api/v1/session 917ns
+2021/10/25 23:31:37 unknown origin ""
+2021/10/25 23:31:37 CODE 500 ERROR there is no space with name lol
+2021/10/25 23:31:37 http: superfluous response.WriteHeader call from dripapp/internal/pkg/session/delivery.sendResp (session.go:21)
+2021/10/25 23:32:56 LOG [POST] 127.0.0.1:40810, /api/v1/session 862ns
+2021/10/25 23:32:56 unknown origin ""
+2021/10/25 23:32:56 CODE 500 ERROR Space '518' does not exist (0x24)
+2021/10/25 23:32:56 http: superfluous response.WriteHeader call from dripapp/internal/pkg/session/delivery.sendResp (session.go:21)
+2021/10/25 23:36:02 LOG [POST] 127.0.0.1:40884, /api/v1/session 1.352µs
+2021/10/25 23:36:02 unknown origin ""
+2021/10/25 23:36:02 CODE 500 ERROR Space '519' does not exist (0x24)
+2021/10/25 23:36:02 http: superfluous response.WriteHeader call from dripapp/internal/pkg/session/delivery.sendResp (session.go:21)
+2021/10/25 23:43:33 LOG [POST] 127.0.0.1:41152, /api/v1/session 1.615µs
+2021/10/25 23:43:33 unknown origin ""
+2021/10/25 23:43:33 CODE 500 ERROR there is no space with name sessions
+2021/10/25 23:43:33 http: superfluous response.WriteHeader call from dripapp/internal/pkg/session/delivery.sendResp (session.go:21)
+2021/10/25 23:53:11 LOG [POST] 127.0.0.1:41360, /api/v1/session 890ns
+2021/10/25 23:53:11 unknown origin ""
+2021/10/25 23:53:11 CODE 500 ERROR this cookie already exists
+2021/10/25 23:53:11 http: superfluous response.WriteHeader call from dripapp/internal/pkg/session/delivery.sendResp (session.go:21)
+2021/10/25 23:54:47 LOG [GET] 127.0.0.1:41388, /api/v1/profile 1.803µs
+2021/10/25 23:54:47 unknown origin ""
+2021/10/25 23:54:47 CODE 404 ERROR http: named cookie not present
+2021/10/25 23:54:47 http: superfluous response.WriteHeader call from dripapp/internal/pkg/user/delivery.sendResp (user.go:29)
+2021/10/26 00:14:53 LOG [GET] [::1]:40154, /api/v1/profile 821.785µs
+2021/10/26 00:14:53 CODE 404 ERROR Space '523' does not exist (0x24)
+2021/10/26 00:17:50 LOG [POST] [::1]:40154, /api/v1/session 10.112µs
+2021/10/26 00:17:50 CODE 500 ERROR Space '523' does not exist (0x24)
+2021/10/26 00:18:20 LOG [POST] [::1]:40154, /api/v1/session 2.723µs
+2021/10/26 00:18:20 CODE 500 ERROR Space '523' does not exist (0x24)
+2021/10/26 15:57:54 LOG [POST] 127.0.0.1:54056, /api/v1/session 994ns
+2021/10/26 15:57:54 CODE 500 ERROR Space '524' does not exist (0x24)
+2021/10/26 16:08:34 LOG [POST] 127.0.0.1:54278, /api/v1/session 1.23µs
+2021/10/26 16:09:52 LOG [POST] 127.0.0.1:54306, /api/v1/session 1.266µs
+2021/10/26 16:13:02 LOG [GET] [::1]:46334, /api/v1/profile 1.016µs
+2021/10/26 16:13:02 CODE 404 ERROR http: named cookie not present
+2021/10/26 16:13:31 LOG [POST] [::1]:46334, /api/v1/session 4.323µs
+2021/10/26 16:16:22 LOG [GET] [::1]:47904, /api/v1/profile 1.282µs
+2021/10/26 16:16:22 CODE 404 ERROR Space '530' does not exist (0x24)
+2021/10/26 16:16:45 LOG [POST] [::1]:47904, /api/v1/session 4.624µs
+2021/10/26 16:23:07 LOG [GET] [::1]:51308, /api/v1/profile 1.037µs
+2021/10/26 16:23:07 CODE 404 ERROR Space '531' does not exist (0x24)
+2021/10/26 16:23:20 LOG [POST] [::1]:51308, /api/v1/session 4.935µs
+2021/10/26 16:23:20 CODE 200
+2021/10/26 16:34:17 LOG [GET] [::1]:56906, /api/v1/profile 1.575µs
+2021/10/26 16:34:18 LOG [GET] [::1]:56906, /api/v1/profile 1.936µs
+2021/10/26 16:34:36 LOG [GET] [::1]:57086, /api/v1/profile 1.327µs
+2021/10/26 16:34:36 LOG [GET] [::1]:57086, /api/v1/profile 1.945µs
+2021/10/26 16:37:38 LOG [GET] [::1]:58628, /api/v1/profile 1.667µs
+2021/10/26 16:37:54 LOG [GET] [::1]:58628, /api/v1/profile 3.301µs
+2021/10/26 16:37:54 CODE 404 ERROR http: named cookie not present
+2021/10/26 16:41:30 LOG [POST] [::1]:60568, /api/v1/session 5.064µs
+2021/10/26 16:41:30 CODE 200
+2021/10/26 16:41:47 LOG [GET] [::1]:60568, /api/v1/profile 1.601µs
+2021/10/26 16:41:47 CODE 404 ERROR cannot cast data: fdfed749a5bf48dd419f973fcfb2d53e
+2021/10/26 16:41:52 LOG [GET] [::1]:60568, /api/v1/profile 1.673µs
+2021/10/26 16:41:52 CODE 404 ERROR cannot cast data: fdfed749a5bf48dd419f973fcfb2d53e
+2021/10/26 16:43:33 LOG [GET] [::1]:33404, /api/v1/profile 3.34µs
+2021/10/26 16:45:13 LOG [GET] [::1]:34280, /api/v1/profile 12.871µs
+2021/10/26 16:49:18 LOG [GET] [::1]:36336, /api/v1/profile 1.523µs
+2021/10/26 16:49:18 CODE 404 ERROR not exixsts this cookie
+2021/10/26 16:49:39 LOG [POST] [::1]:36336, /api/v1/session 18.088µs
+2021/10/26 16:49:39 CODE 200
+2021/10/26 16:49:57 LOG [GET] [::1]:36336, /api/v1/profile 1.921µs
+2021/10/26 16:49:57 CODE 404 ERROR cannot cast data: 7846be25a5cb8b176741241bd8c1fa76
+2021/10/26 16:49:59 LOG [GET] [::1]:36336, /api/v1/profile 1.852µs
+2021/10/26 16:49:59 CODE 404 ERROR cannot cast data: 7846be25a5cb8b176741241bd8c1fa76
+2021/10/26 16:50:31 LOG [GET] [::1]:36966, /api/v1/profile 1.405µs
+2021/10/26 16:50:31 CODE 404 ERROR not exixsts this cookie
+2021/10/26 16:50:42 LOG [POST] [::1]:36966, /api/v1/session 5.359µs
+2021/10/26 16:50:42 CODE 200
+2021/10/26 16:50:48 LOG [GET] [::1]:36966, /api/v1/profile 1.833µs
+2021/10/26 16:50:48 CODE 200
+2021/10/26 16:51:50 LOG [OPTIONS] [::1]:37620, /api/v1/session 4.943µs
+2021/10/26 16:51:50 LOG [DELETE] [::1]:36966, /api/v1/session 5.369µs
+2021/10/26 16:51:50 CODE 500 ERROR Space '540' does not exist (0x24)
+2021/10/26 16:51:51 LOG [DELETE] [::1]:36966, /api/v1/session 5.265µs
+2021/10/26 16:51:51 CODE 500 ERROR Space '540' does not exist (0x24)
+2021/10/26 16:51:52 LOG [DELETE] [::1]:36966, /api/v1/session 3.105µs
+2021/10/26 16:51:52 CODE 500 ERROR Space '540' does not exist (0x24)
+2021/10/26 16:51:52 LOG [DELETE] [::1]:36966, /api/v1/session 2.683µs
+2021/10/26 16:51:52 CODE 500 ERROR Space '540' does not exist (0x24)
+2021/10/26 16:51:52 LOG [DELETE] [::1]:36966, /api/v1/session 2.652µs
+2021/10/26 16:51:52 CODE 500 ERROR Space '540' does not exist (0x24)
+2021/10/26 16:51:52 LOG [DELETE] [::1]:36966, /api/v1/session 1.792µs
+2021/10/26 16:51:52 CODE 500 ERROR Space '540' does not exist (0x24)
+2021/10/26 16:51:52 LOG [DELETE] [::1]:36966, /api/v1/session 3.576µs
+2021/10/26 16:51:52 CODE 500 ERROR Space '540' does not exist (0x24)
+2021/10/26 16:51:52 LOG [DELETE] [::1]:36966, /api/v1/session 2.649µs
+2021/10/26 16:51:52 CODE 500 ERROR Space '540' does not exist (0x24)
+2021/10/26 16:51:53 LOG [DELETE] [::1]:36966, /api/v1/session 2.451µs
+2021/10/26 16:51:53 CODE 500 ERROR Space '540' does not exist (0x24)
+2021/10/26 16:51:53 LOG [DELETE] [::1]:36966, /api/v1/session 2.129µs
+2021/10/26 16:51:53 CODE 500 ERROR Space '540' does not exist (0x24)
+2021/10/26 17:03:48 LOG [GET] [::1]:43648, /api/v1/profile 950ns
+2021/10/26 17:03:48 CODE 404 ERROR not exixsts this cookie
+2021/10/26 17:04:12 LOG [POST] [::1]:43648, /api/v1/session 2.153µs
+2021/10/26 17:04:12 CODE 200
+2021/10/26 17:04:19 LOG [GET] [::1]:43648, /api/v1/profile 2.008µs
+2021/10/26 17:04:19 CODE 200
+2021/10/26 17:04:26 LOG [OPTIONS] [::1]:43954, /api/v1/session 1.324µs
+2021/10/26 17:04:26 LOG [DELETE] [::1]:43648, /api/v1/session 2.25µs
+2021/10/26 17:04:26 CODE 200
+2021/10/26 17:04:58 LOG [POST] [::1]:43648, /api/v1/session 1.467µs
+2021/10/26 17:04:58 CODE 200
+2021/10/26 17:05:09 LOG [GET] [::1]:43648, /api/v1/profile 1.786µs
+2021/10/26 17:05:09 CODE 200
+2021/10/26 17:07:35 LOG [GET] [::1]:43648, /api/v1/profile 9.557µs
+2021/10/26 17:07:35 CODE 200
+2021/10/26 17:07:39 LOG [OPTIONS] [::1]:43954, /api/v1/session 1.609µs
+2021/10/26 17:07:39 LOG [DELETE] [::1]:43648, /api/v1/session 2.066µs
+2021/10/26 17:07:39 CODE 200
+2021/10/26 17:08:24 LOG [POST] [::1]:43648, /api/v1/session 1.652µs
+2021/10/26 17:08:24 CODE 200
+2021/10/26 22:45:29 LOG [GET] [::1]:39550, /api/v1/profile 43.8µs
+2021/10/26 22:45:29 CODE 404 ERROR not exixsts this cookie
+2021/10/26 22:45:35 LOG [POST] [::1]:39554, /api/v1/session 1.5µs
+2021/10/26 22:45:35 CODE 200
+2021/10/26 22:45:35 LOG [GET] [::1]:39554, /api/v1/profile 1.1µs
+2021/10/26 22:45:35 CODE 200
+2021/10/26 22:46:17 LOG [GET] [::1]:39584, /api/v1/profile 63.1µs
+2021/10/26 22:46:17 CODE 200
+2021/10/26 22:46:27 LOG [OPTIONS] [::1]:39594, /api/v1/session 1.2µs
+2021/10/26 22:46:27 LOG [DELETE] [::1]:39596, /api/v1/session 1.4µs
+2021/10/26 22:46:27 CODE 200
+2021/10/26 22:46:42 LOG [POST] [::1]:39600, /api/v1/session 1.2µs
+2021/10/26 22:46:42 CODE 200
+2021/10/26 22:46:42 LOG [GET] [::1]:39600, /api/v1/profile 1.9µs
+2021/10/26 22:46:42 CODE 200
+2021/10/26 22:48:35 LOG [OPTIONS] [::1]:39632, /api/v1/session 17.9µs
+2021/10/26 22:48:35 LOG [DELETE] [::1]:39634, /api/v1/session 1.2µs
+2021/10/26 22:48:35 CODE 200
+2021/10/26 22:48:38 LOG [GET] [::1]:39634, /api/v1/profile 2.1µs
+2021/10/26 22:48:38 CODE 404 ERROR http: named cookie not present
+2021/10/26 22:48:44 LOG [POST] [::1]:39634, /api/v1/session 3.1µs
+2021/10/26 22:48:44 CODE 200
+2021/10/26 22:48:44 LOG [GET] [::1]:39634, /api/v1/profile 1.5µs
+2021/10/26 22:48:44 CODE 200
+2021/10/26 22:51:11 LOG [GET] [::1]:39640, /api/v1/profile 5.1µs
+2021/10/26 22:51:11 CODE 200
+2021/10/26 22:51:16 LOG [OPTIONS] [::1]:39632, /api/v1/session 4.3µs
+2021/10/26 22:51:16 LOG [DELETE] [::1]:39640, /api/v1/session 3.8µs
+2021/10/26 22:51:16 CODE 200
+2021/10/26 22:51:18 LOG [GET] [::1]:39640, /api/v1/profile 1.8µs
+2021/10/26 22:51:18 CODE 404 ERROR http: named cookie not present
+2021/10/26 22:51:24 LOG [POST] [::1]:39640, /api/v1/session 1.7µs
+2021/10/26 22:51:24 CODE 200
+2021/10/26 22:51:24 LOG [GET] [::1]:39640, /api/v1/profile 1.9µs
+2021/10/26 22:51:24 CODE 200
+2021/10/26 22:51:49 LOG [GET] [::1]:39640, /api/v1/profile 2.1µs
+2021/10/26 22:51:49 CODE 200
+2021/10/26 22:51:51 LOG [OPTIONS] [::1]:39632, /api/v1/session 2.1µs
+2021/10/26 22:51:51 LOG [DELETE] [::1]:39640, /api/v1/session 2.3µs
+2021/10/26 22:51:51 CODE 200
+2021/10/26 22:51:52 LOG [GET] [::1]:39640, /api/v1/profile 2.9µs
+2021/10/26 22:51:52 CODE 404 ERROR http: named cookie not present
+2021/10/26 22:51:57 LOG [POST] [::1]:39640, /api/v1/session 3.2µs
+2021/10/26 22:51:57 CODE 200
+2021/10/26 22:51:57 LOG [GET] [::1]:39640, /api/v1/profile 2.1µs
+2021/10/26 22:51:57 LOG [GET] [::1]:39634, /api/v1/user/cards 196.7µs
+2021/10/26 22:51:57 CODE 400 ERROR unexpected end of JSON input
+2021/10/26 22:51:57 CODE 200
+2021/10/26 22:53:42 LOG [OPTIONS] [::1]:39632, /api/v1/session 120.6µs
+2021/10/26 22:53:42 LOG [DELETE] [::1]:39640, /api/v1/session 3.8µs
+2021/10/26 22:53:42 CODE 200
+2021/10/26 22:53:48 LOG [GET] [::1]:39640, /api/v1/profile 2µs
+2021/10/26 22:53:48 CODE 404 ERROR http: named cookie not present
+2021/10/26 22:54:00 LOG [GET] [::1]:39640, /api/v1/profile 2.5µs
+2021/10/26 22:54:00 CODE 404 ERROR http: named cookie not present
+2021/10/26 22:54:05 LOG [POST] [::1]:39640, /api/v1/session 2µs
+2021/10/26 22:54:05 CODE 200
+2021/10/26 22:54:05 LOG [GET] [::1]:39640, /api/v1/profile 2.1µs
+2021/10/26 22:54:05 LOG [GET] [::1]:39634, /api/v1/user/cards 1.6µs
+2021/10/26 22:54:05 CODE 400 ERROR unexpected end of JSON input
+2021/10/26 22:54:05 CODE 200
+2021/10/26 23:01:09 LOG [GET] [::1]:39710, /api/v1/profile 3.2µs
+2021/10/26 23:01:09 CODE 200
+2021/10/26 23:01:13 LOG [OPTIONS] [::1]:39712, /api/v1/session 2.1µs
+2021/10/26 23:01:13 LOG [DELETE] [::1]:39710, /api/v1/session 1.9µs
+2021/10/26 23:01:13 CODE 200
+2021/10/26 23:01:25 LOG [POST] [::1]:39714, /api/v1/session 2µs
+2021/10/26 23:01:25 CODE 200
+2021/10/26 23:01:25 LOG [GET] [::1]:39714, /api/v1/profile 1.3µs
+2021/10/26 23:01:25 CODE 200
+2021/10/26 23:01:25 LOG [GET] [::1]:39716, /api/v1/user/cards 1.7µs
+2021/10/26 23:01:25 CODE 400 ERROR unexpected end of JSON input
+2021/10/26 23:19:35 LOG [OPTIONS] [::1]:39820, /api/v1/session 53.5µs
+2021/10/26 23:19:35 LOG [DELETE] [::1]:39822, /api/v1/session 1.6µs
+2021/10/26 23:19:35 CODE 200
+2021/10/26 23:19:37 LOG [GET] [::1]:39822, /api/v1/profile 2µs
+2021/10/26 23:19:37 CODE 404 ERROR http: named cookie not present
+2021/10/26 23:20:00 LOG [POST] [::1]:39830, /api/v1/session 36.7µs
+2021/10/26 23:20:00 CODE 200
+2021/10/26 23:20:00 LOG [GET] [::1]:39830, /api/v1/profile 1.8µs
+2021/10/26 23:20:00 CODE 200
+2021/10/26 23:20:00 LOG [GET] [::1]:39832, /api/v1/user/cards 1.2µs
+2021/10/26 23:20:00 CODE 200
+2021/10/26 23:23:23 LOG [OPTIONS] [::1]:39876, /api/v1/session 1.6µs
+2021/10/26 23:23:23 LOG [DELETE] [::1]:39878, /api/v1/session 2µs
+2021/10/26 23:23:23 CODE 200
+2021/10/26 23:23:24 LOG [GET] [::1]:39892, /api/v1/profile 1.9µs
+2021/10/26 23:23:24 CODE 404 ERROR http: named cookie not present
+2021/10/26 23:23:29 LOG [POST] [::1]:39892, /api/v1/session 3.4µs
+2021/10/26 23:23:29 CODE 200
+2021/10/26 23:23:29 LOG [GET] [::1]:39892, /api/v1/profile 2.5µs
+2021/10/26 23:23:29 CODE 200
+2021/10/26 23:23:29 LOG [GET] [::1]:39894, /api/v1/user/cards 2.1µs
+2021/10/26 23:23:29 CODE 200
+2021/10/26 23:24:59 LOG [GET] [::1]:39922, /api/v1/profile 2.2µs
+2021/10/26 23:24:59 CODE 404 ERROR not exixsts this cookie
+2021/10/26 23:25:14 LOG [POST] [::1]:39924, /api/v1/session 1.6µs
+2021/10/26 23:25:14 CODE 200
+2021/10/26 23:25:14 LOG [GET] [::1]:39924, /api/v1/profile 2.2µs
+2021/10/26 23:25:14 CODE 200
+2021/10/26 23:25:14 LOG [GET] [::1]:39926, /api/v1/user/cards 2.1µs
+2021/10/26 23:25:14 CODE 200
+2021/10/26 23:27:21 LOG [OPTIONS] [::1]:39966, /api/v1/session 1.9µs
+2021/10/26 23:27:21 LOG [DELETE] [::1]:39968, /api/v1/session 2.1µs
+2021/10/26 23:27:21 CODE 200
+2021/10/26 23:27:25 LOG [GET] [::1]:39968, /api/v1/profile 2.2µs
+2021/10/26 23:27:25 CODE 404 ERROR http: named cookie not present
+2021/10/26 23:27:30 LOG [POST] [::1]:39974, /api/v1/session 1.5µs
+2021/10/26 23:27:30 CODE 200
+2021/10/26 23:27:30 LOG [GET] [::1]:39974, /api/v1/profile 2.2µs
+2021/10/26 23:27:30 CODE 200
+2021/10/26 23:27:30 LOG [GET] [::1]:39976, /api/v1/user/cards 3.3µs
+2021/10/26 23:27:30 CODE 200
+2021/10/26 23:29:07 LOG [OPTIONS] [::1]:40008, /api/v1/session 1.8µs
+2021/10/26 23:29:07 LOG [DELETE] [::1]:40010, /api/v1/session 1.7µs
+2021/10/26 23:29:07 CODE 200
+2021/10/26 23:29:08 LOG [GET] [::1]:40010, /api/v1/profile 3.4µs
+2021/10/26 23:29:08 CODE 404 ERROR http: named cookie not present
+2021/10/26 23:29:13 LOG [POST] [::1]:40016, /api/v1/session 1.6µs
+2021/10/26 23:29:13 CODE 200
+2021/10/26 23:29:13 LOG [GET] [::1]:40016, /api/v1/profile 2.6µs
+2021/10/26 23:29:13 CODE 200
+2021/10/26 23:29:13 LOG [GET] [::1]:40018, /api/v1/user/cards 2.1µs
+2021/10/26 23:29:13 CODE 200
+2021/10/27 10:18:00 LOG [POST] [::1]:58124, /api/v1/session 1.5µs
+2021/10/27 10:18:00 CODE 200
+2021/10/27 10:18:00 LOG [GET] [::1]:58124, /api/v1/profile 1.8µs
+2021/10/27 10:18:00 CODE 200
+2021/10/27 10:18:00 LOG [GET] [::1]:58126, /api/v1/user/cards 2.3µs
+2021/10/27 10:18:00 CODE 200
+2021/10/27 10:35:30 LOG [GET] [::1]:58226, /api/v1/profile 44.7µs
+2021/10/27 10:35:30 CODE 200
+2021/10/27 10:35:36 LOG [OPTIONS] [::1]:58228, /api/v1/session 2.7µs
+2021/10/27 10:35:36 LOG [DELETE] [::1]:58226, /api/v1/session 3.4µs
+2021/10/27 10:35:36 CODE 200
+2021/10/27 10:35:37 LOG [GET] [::1]:58226, /api/v1/profile 2µs
+2021/10/27 10:35:37 CODE 404 ERROR http: named cookie not present
+2021/10/27 10:35:56 LOG [POST] [::1]:58226, /api/v1/session 6.3µs
+2021/10/27 10:35:56 CODE 200
+2021/10/27 10:35:56 LOG [GET] [::1]:58226, /api/v1/profile 2.3µs
+2021/10/27 10:35:56 CODE 200
+2021/10/27 10:35:56 LOG [GET] [::1]:58232, /api/v1/user/cards 2.2µs
+2021/10/27 10:35:56 CODE 200
+2021/10/27 10:56:31 LOG [GET] [::1]:58350, /api/v1/profile 2.2µs
+2021/10/27 10:56:31 CODE 404 ERROR not exixsts this cookie
+2021/10/27 10:56:43 LOG [POST] [::1]:58350, /api/v1/session 6µs
+2021/10/27 10:56:43 CODE 200
+2021/10/27 10:56:43 LOG [GET] [::1]:58350, /api/v1/profile 5.3µs
+2021/10/27 10:56:43 CODE 200
+2021/10/27 10:56:43 LOG [GET] [::1]:58354, /api/v1/user/cards 2.5µs
+2021/10/27 10:56:43 CODE 200
+2021/10/27 10:56:48 LOG [GET] [::1]:58354, /api/v1/tags 5.5µs
+2021/10/27 10:56:58 LOG [OPTIONS] [::1]:58356, /api/v1/profile 3µs
+2021/10/27 10:56:58 LOG [PUT] [::1]:58354, /api/v1/profile 2.3µs
+2021/10/27 10:56:58 CODE 200
+2021/10/27 10:59:32 LOG [OPTIONS] [::1]:58378, /api/v1/session 54µs
+2021/10/27 10:59:32 LOG [DELETE] [::1]:58380, /api/v1/session 1.5µs
+2021/10/27 10:59:32 CODE 200
+2021/10/27 10:59:33 LOG [GET] [::1]:58380, /api/v1/profile 2.2µs
+2021/10/27 10:59:33 CODE 404 ERROR http: named cookie not present
+2021/10/27 10:59:39 LOG [POST] [::1]:58380, /api/v1/session 117.2µs
+2021/10/27 10:59:39 CODE 200
+2021/10/27 10:59:39 LOG [GET] [::1]:58380, /api/v1/profile 1.7µs
+2021/10/27 10:59:39 CODE 200
+2021/10/27 10:59:39 LOG [GET] [::1]:58394, /api/v1/user/cards 1.7µs
+2021/10/27 10:59:39 CODE 200
+2021/10/27 10:59:44 LOG [GET] [::1]:58394, /api/v1/tags 3.9µs
+2021/10/27 14:01:14 LOG [GET] [::1]:58524, /api/v1/profile 1.7µs
+2021/10/27 14:01:14 CODE 404 ERROR not exixsts this cookie
+2021/10/27 14:01:32 LOG [POST] [::1]:58526, /api/v1/session 2.1µs
+2021/10/27 14:01:32 CODE 404 ERROR pq: relation "profile" does not exist
+2021/10/27 14:01:55 LOG [POST] [::1]:58536, /api/v1/session 2.4µs
+2021/10/27 14:01:55 CODE 404 ERROR pq: relation "profile" does not exist
+2021/10/27 14:02:07 LOG [POST] [::1]:58542, /api/v1/profile 3.2µs
+2021/10/27 14:02:07 CODE 500 ERROR pq: relation "profile" does not exist
+2021/10/27 14:08:12 LOG [GET] [::1]:58708, /api/v1/profile 2.6µs
+2021/10/27 14:08:12 CODE 404 ERROR http: named cookie not present
+2021/10/27 14:08:21 LOG [POST] [::1]:58710, /api/v1/profile 2µs
+2021/10/27 14:08:21 CODE 200
+2021/10/27 14:08:31 LOG [OPTIONS] [::1]:58720, /api/v1/profile 38.9µs
+2021/10/27 14:08:31 LOG [PUT] [::1]:58722, /api/v1/profile 2.4µs
+2021/10/27 14:08:31 CODE 500 ERROR sql: no rows in result set
+2021/10/27 14:10:45 LOG [GET] [::1]:58752, /api/v1/profile 2.3µs
+2021/10/27 14:10:45 CODE 404 ERROR not exixsts this cookie
+2021/10/27 14:10:57 LOG [POST] [::1]:58754, /api/v1/profile 2.3µs
+2021/10/27 14:10:57 CODE 200
+2021/10/27 14:11:02 LOG [OPTIONS] [::1]:58764, /api/v1/profile 2µs
+2021/10/27 14:11:02 LOG [PUT] [::1]:58754, /api/v1/profile 2.4µs
+2021/10/27 14:11:02 CODE 500 ERROR pq: syntax error at or near "=&"
+2021/10/27 14:11:42 LOG [GET] [::1]:58790, /api/v1/profile 3µs
+2021/10/27 14:11:42 CODE 404 ERROR not exixsts this cookie
+2021/10/27 14:11:58 LOG [POST] [::1]:58792, /api/v1/profile 1.8µs
+2021/10/27 14:11:58 CODE 200
+2021/10/27 14:12:03 LOG [OPTIONS] [::1]:58802, /api/v1/profile 6.4µs
+2021/10/27 14:12:03 LOG [PUT] [::1]:58804, /api/v1/profile 3.3µs
+2021/10/27 14:12:03 CODE 200
+2021/10/27 14:12:12 LOG [OPTIONS] [::1]:58820, /api/v1/profile 2.4µs
+2021/10/27 14:12:12 LOG [PUT] [::1]:58822, /api/v1/profile 1.5µs
+2021/10/27 14:12:12 CODE 200
+2021/10/27 14:12:14 LOG [GET] [::1]:58822, /api/v1/tags 6.5µs
+2021/10/27 14:12:15 LOG [GET] [::1]:58822, /api/v1/tags 140.4µs
+2021/10/27 14:14:58 LOG [GET] [::1]:58852, /api/v1/tags 2.7µs
+2021/10/27 14:15:42 LOG [POST] [::1]:58878, /api/v1/profile 1.5µs
+2021/10/27 14:15:42 CODE 200
+2021/10/27 14:15:50 LOG [GET] [::1]:58878, /api/v1/tags 5.3µs
+2021/10/27 14:16:04 LOG [OPTIONS] [::1]:58884, /api/v1/profile 1.8µs
+2021/10/27 14:16:04 LOG [PUT] [::1]:58878, /api/v1/profile 1.5µs
+2021/10/27 14:16:04 CODE 200
+2021/10/27 14:16:07 LOG [OPTIONS] [::1]:58884, /api/v1/profile 6.1µs
+2021/10/27 14:16:07 LOG [PUT] [::1]:58878, /api/v1/profile 5.5µs
+2021/10/27 14:16:07 CODE 200
+2021/10/27 14:16:13 LOG [OPTIONS] [::1]:58884, /api/v1/profile 6µs
+2021/10/27 14:16:13 LOG [PUT] [::1]:58878, /api/v1/profile 3.8µs
+2021/10/27 14:16:13 CODE 200
+2021/10/27 14:16:17 LOG [OPTIONS] [::1]:58884, /api/v1/profile 13.2µs
+2021/10/27 14:16:17 LOG [PUT] [::1]:58878, /api/v1/profile 3.3µs
+2021/10/27 14:16:17 CODE 200
+2021/10/27 14:24:29 LOG [POST] [::1]:58948, /api/v1/profile 1.3µs
+2021/10/27 14:24:29 CODE 200
+2021/10/27 14:24:41 LOG [GET] [::1]:58948, /api/v1/tags 4.5µs
+2021/10/27 14:24:52 LOG [OPTIONS] [::1]:58960, /api/v1/profile 3.8µs
+2021/10/27 14:24:52 LOG [PUT] [::1]:58948, /api/v1/profile 2.3µs
+2021/10/27 14:24:52 CODE 500 ERROR sql: no rows in result set
+2021/10/27 14:34:09 LOG [OPTIONS] [::1]:59008, /api/v1/profile 2.5µs
+2021/10/27 14:34:09 LOG [PUT] [::1]:59010, /api/v1/profile 1.6µs
+2021/10/27 14:34:09 CODE 404 ERROR not exixsts this cookie
+2021/10/27 14:34:18 LOG [GET] [::1]:59024, /api/v1/profile 24.1µs
+2021/10/27 14:34:18 CODE 404 ERROR http: named cookie not present
+2021/10/27 14:34:29 LOG [POST] [::1]:59024, /api/v1/profile 5.6µs
+2021/10/27 14:34:29 CODE 200
+2021/10/27 14:34:35 LOG [GET] [::1]:59024, /api/v1/tags 2.2µs
+2021/10/27 14:34:37 LOG [OPTIONS] [::1]:59032, /api/v1/profile 3µs
+2021/10/27 14:34:37 LOG [PUT] [::1]:59024, /api/v1/profile 3µs
+2021/10/27 14:34:37 CODE 500 ERROR sql: no rows in result set
+2021/10/27 14:35:22 LOG [GET] [::1]:59054, /api/v1/profile 2.2µs
+2021/10/27 14:35:22 CODE 404 ERROR not exixsts this cookie
+2021/10/27 14:35:32 LOG [POST] [::1]:59054, /api/v1/profile 5.9µs
+2021/10/27 14:35:33 CODE 200
+2021/10/27 14:35:36 LOG [GET] [::1]:59054, /api/v1/tags 5.9µs
+2021/10/27 14:35:39 LOG [OPTIONS] [::1]:59060, /api/v1/profile 2.9µs
+2021/10/27 14:35:39 LOG [PUT] [::1]:59054, /api/v1/profile 2µs
+2021/10/27 14:35:39 CODE 200
+2021/10/27 14:41:23 LOG [GET] [::1]:59114, /api/v1/profile 3.4µs
+2021/10/27 14:41:23 CODE 404 ERROR http: named cookie not present
+2021/10/27 14:41:34 LOG [POST] [::1]:59118, /api/v1/profile 2.5µs
+2021/10/27 14:41:34 CODE 200
+2021/10/27 14:41:40 LOG [GET] [::1]:59118, /api/v1/tags 2.1µs
+2021/10/27 14:41:42 LOG [OPTIONS] [::1]:59126, /api/v1/profile 2.8µs
+2021/10/27 14:41:42 LOG [PUT] [::1]:59118, /api/v1/profile 2.8µs
+2021/10/27 14:41:42 CODE 500 ERROR sql: no rows in result set
+2021/10/27 14:45:16 LOG [OPTIONS] [::1]:59156, /api/v1/profile 2.6µs
+2021/10/27 14:45:16 LOG [PUT] [::1]:59158, /api/v1/profile 1.2µs
+2021/10/27 14:45:16 CODE 404 ERROR not exixsts this cookie
+2021/10/27 14:45:26 LOG [GET] [::1]:59158, /api/v1/profile 2.3µs
+2021/10/27 14:45:26 CODE 404 ERROR not exixsts this cookie
+2021/10/27 14:45:49 LOG [POST] [::1]:59174, /api/v1/profile 3.5µs
+2021/10/27 14:45:49 CODE 200
+2021/10/27 14:46:11 LOG [GET] [::1]:59174, /api/v1/tags 5.9µs
+2021/10/27 14:46:14 LOG [OPTIONS] [::1]:59186, /api/v1/profile 2.9µs
+2021/10/27 14:46:14 LOG [PUT] [::1]:59174, /api/v1/profile 1.9µs
+2021/10/27 14:46:15 CODE 500 ERROR sql: no rows in result set
+2021/10/27 14:48:47 LOG [GET] [::1]:59220, /api/v1/profile 2.4µs
+2021/10/27 14:48:47 CODE 404 ERROR not exixsts this cookie
+2021/10/27 14:49:14 LOG [POST] [::1]:59220, /api/v1/profile 4.4µs
+2021/10/27 14:49:14 CODE 200
+2021/10/27 14:49:34 LOG [GET] [::1]:59220, /api/v1/tags 7.2µs
+2021/10/27 14:49:39 LOG [OPTIONS] [::1]:59230, /api/v1/profile 2.1µs
+2021/10/27 14:49:39 LOG [PUT] [::1]:59220, /api/v1/profile 2µs
+2021/10/27 14:49:39 CODE 200
+2021/10/27 14:50:02 LOG [OPTIONS] [::1]:59230, /api/v1/profile 7.2µs
+2021/10/27 14:50:02 LOG [PUT] [::1]:59220, /api/v1/profile 4µs
+2021/10/27 14:50:02 CODE 200
+2021/10/27 22:37:27 LOG [GET] [::1]:60404, /api/v1/profile 2.3µs
+2021/10/27 22:37:27 CODE 404 ERROR http: named cookie not present
+2021/10/27 22:39:53 LOG [POST] [::1]:60432, /api/v1/profile 1.8µs
+2021/10/27 22:39:53 CODE 200
+2021/10/27 22:40:00 LOG [GET] [::1]:60432, /api/v1/tags 1.3µs
+2021/10/27 22:40:02 LOG [OPTIONS] [::1]:60442, /api/v1/profile 1.8µs
+2021/10/27 22:40:02 LOG [PUT] [::1]:60432, /api/v1/profile 1.9µs
+2021/10/27 22:40:02 CODE 200
+2021/10/27 22:40:05 LOG [OPTIONS] [::1]:60450, /api/v1/session 2.3µs
+2021/10/27 22:40:05 LOG [DELETE] [::1]:60452, /api/v1/session 2.1µs
+2021/10/27 22:40:05 CODE 200
+2021/10/27 22:40:17 LOG [POST] [::1]:60460, /api/v1/profile 1.2µs
+2021/10/27 22:40:17 CODE 200
+2021/10/27 22:40:29 LOG [OPTIONS] [::1]:60462, /api/v1/profile 2µs
+2021/10/27 22:40:29 LOG [PUT] [::1]:60464, /api/v1/profile 900ns
+2021/10/27 22:40:29 CODE 200
+2021/10/27 22:40:31 LOG [OPTIONS] [::1]:60462, /api/v1/session 1.4µs
+2021/10/27 22:40:31 LOG [DELETE] [::1]:60464, /api/v1/session 1.9µs
+2021/10/27 22:40:31 CODE 200
+2021/10/27 22:40:49 LOG [POST] [::1]:60482, /api/v1/profile 1.7µs
+2021/10/27 22:40:49 CODE 200
+2021/10/27 22:40:58 LOG [OPTIONS] [::1]:60484, /api/v1/profile 2.1µs
+2021/10/27 22:40:58 LOG [PUT] [::1]:60486, /api/v1/profile 2.9µs
+2021/10/27 22:40:58 CODE 200
+2021/10/27 22:41:01 LOG [OPTIONS] [::1]:60484, /api/v1/session 2.8µs
+2021/10/27 22:41:01 LOG [DELETE] [::1]:60486, /api/v1/session 2.8µs
+2021/10/27 22:41:01 CODE 200
+2021/10/27 22:41:08 LOG [POST] [::1]:60500, /api/v1/session 1µs
+2021/10/27 22:41:08 CODE 200
+2021/10/27 22:41:08 LOG [GET] [::1]:60500, /api/v1/profile 2.3µs
+2021/10/27 22:41:08 CODE 200
+2021/10/27 22:41:08 LOG [GET] [::1]:60502, /api/v1/user/cards 2.4µs
+2021/10/27 22:41:08 CODE 200
+2021/10/27 22:48:10 LOG [GET] [::1]:60576, /api/v1/profile 2.6µs
+2021/10/27 22:48:10 CODE 404 ERROR not exixsts this cookie
+2021/10/27 22:48:30 LOG [POST] [::1]:60580, /api/v1/session 1.2µs
+2021/10/27 22:48:30 CODE 404 ERROR sql: no rows in result set
+2021/10/27 22:48:45 LOG [POST] [::1]:60588, /api/v1/profile 1.2µs
+2021/10/27 22:48:45 CODE 200
+2021/10/27 22:48:53 LOG [OPTIONS] [::1]:60596, /api/v1/profile 2.6µs
+2021/10/27 22:48:53 LOG [PUT] [::1]:60588, /api/v1/profile 3.8µs
+2021/10/27 22:48:53 CODE 200
+2021/10/27 22:48:54 LOG [OPTIONS] [::1]:60604, /api/v1/session 3.5µs
+2021/10/27 22:48:54 LOG [DELETE] [::1]:60606, /api/v1/session 2.1µs
+2021/10/27 22:48:54 CODE 200
+2021/10/27 22:49:27 LOG [POST] [::1]:60618, /api/v1/profile 2.1µs
+2021/10/27 22:49:27 CODE 200
+2021/10/27 22:49:33 LOG [OPTIONS] [::1]:60620, /api/v1/profile 3µs
+2021/10/27 22:49:33 LOG [PUT] [::1]:60618, /api/v1/profile 2.1µs
+2021/10/27 22:49:33 CODE 200
+2021/10/27 22:49:34 LOG [OPTIONS] [::1]:60634, /api/v1/session 2.2µs
+2021/10/27 22:49:34 LOG [DELETE] [::1]:60636, /api/v1/session 1.9µs
+2021/10/27 22:49:34 CODE 200
+2021/10/27 22:49:46 LOG [POST] [::1]:60642, /api/v1/profile 2.7µs
+2021/10/27 22:49:46 CODE 200
+2021/10/27 22:49:52 LOG [OPTIONS] [::1]:60646, /api/v1/profile 2.2µs
+2021/10/27 22:49:52 LOG [PUT] [::1]:60642, /api/v1/profile 2.2µs
+2021/10/27 22:49:52 CODE 200
+2021/10/27 22:49:54 LOG [OPTIONS] [::1]:60660, /api/v1/session 4µs
+2021/10/27 22:49:54 LOG [DELETE] [::1]:60662, /api/v1/session 1.9µs
+2021/10/27 22:49:54 CODE 200
+2021/10/27 22:50:01 LOG [POST] [::1]:60662, /api/v1/session 1µs
+2021/10/27 22:50:01 CODE 200
+2021/10/27 22:50:01 LOG [GET] [::1]:60662, /api/v1/profile 2.3µs
+2021/10/27 22:50:01 CODE 200
+2021/10/27 22:50:01 LOG [GET] [::1]:60668, /api/v1/user/cards 2.2µs
+2021/10/27 22:50:01 CODE 200
+2021/10/27 22:54:30 LOG [GET] [::1]:60718, /api/v1/profile 1.9µs
+2021/10/27 22:54:30 CODE 404 ERROR http: named cookie not present
+2021/10/27 22:54:41 LOG [POST] [::1]:60720, /api/v1/profile 2.1µs
+2021/10/27 22:54:41 CODE 200
+2021/10/27 22:54:46 LOG [OPTIONS] [::1]:60730, /api/v1/profile 2.9µs
+2021/10/27 22:54:46 LOG [PUT] [::1]:60720, /api/v1/profile 2.1µs
+2021/10/27 22:54:46 CODE 200
+2021/10/27 22:54:48 LOG [OPTIONS] [::1]:60730, /api/v1/session 3.1µs
+2021/10/27 22:54:48 LOG [DELETE] [::1]:60720, /api/v1/session 2.9µs
+2021/10/27 22:54:48 CODE 200
+2021/10/27 22:54:58 LOG [POST] [::1]:60740, /api/v1/profile 2.2µs
+2021/10/27 22:54:58 CODE 200
+2021/10/27 22:55:04 LOG [OPTIONS] [::1]:60742, /api/v1/profile 2.4µs
+2021/10/27 22:55:04 LOG [PUT] [::1]:60744, /api/v1/profile 1.5µs
+2021/10/27 22:55:04 CODE 200
+2021/10/27 22:55:04 LOG [OPTIONS] [::1]:60742, /api/v1/session 5µs
+2021/10/27 22:55:04 LOG [DELETE] [::1]:60744, /api/v1/session 4.9µs
+2021/10/27 22:55:04 CODE 200
+2021/10/27 22:55:15 LOG [POST] [::1]:60758, /api/v1/profile 1.8µs
+2021/10/27 22:55:15 CODE 200
+2021/10/27 22:55:21 LOG [OPTIONS] [::1]:60762, /api/v1/profile 2.4µs
+2021/10/27 22:55:21 LOG [PUT] [::1]:60764, /api/v1/profile 1.4µs
+2021/10/27 22:55:21 CODE 200
+2021/10/27 22:55:22 LOG [OPTIONS] [::1]:60762, /api/v1/session 3.6µs
+2021/10/27 22:55:22 LOG [DELETE] [::1]:60764, /api/v1/session 7.6µs
+2021/10/27 22:55:22 CODE 200
+2021/10/27 22:55:30 LOG [POST] [::1]:60778, /api/v1/session 1.7µs
+2021/10/27 22:55:30 CODE 200
+2021/10/27 22:55:30 LOG [GET] [::1]:60778, /api/v1/profile 2.1µs
+2021/10/27 22:55:30 CODE 200
+2021/10/27 22:55:30 LOG [GET] [::1]:60780, /api/v1/user/cards 1.9µs
+2021/10/27 22:55:30 CODE 200
