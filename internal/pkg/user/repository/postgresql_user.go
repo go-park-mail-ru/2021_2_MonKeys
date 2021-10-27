@@ -174,8 +174,9 @@ func (p *PostgreUserRepo) GetTags(ctx context.Context) (map[uint64]string, error
 
 	tagsMap := make(map[uint64]string)
 
-	for _, val := range tags {
-		tagsMap[val.Id] = val.Tag_Name
+	var i uint64
+	for i = 0; i < uint64(len(tags)); i++ {
+		tagsMap[i] = tags[i].Tag_Name
 	}
 
 	return tagsMap, nil

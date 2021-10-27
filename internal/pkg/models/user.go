@@ -37,7 +37,6 @@ type LoginUser struct {
 // }
 
 type Tag struct {
-	Id       uint64 `json:"id"`
 	Tag_Name string `json:"tagText"`
 }
 

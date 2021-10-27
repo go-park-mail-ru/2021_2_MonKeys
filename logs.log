@@ -271,3 +271,27 @@
 2021/10/27 10:35:56 CODE 200
 2021/10/27 10:35:56 LOG [GET] [::1]:58232, /api/v1/user/cards 2.2µs
 2021/10/27 10:35:56 CODE 200
+2021/10/27 10:56:31 LOG [GET] [::1]:58350, /api/v1/profile 2.2µs
+2021/10/27 10:56:31 CODE 404 ERROR not exixsts this cookie
+2021/10/27 10:56:43 LOG [POST] [::1]:58350, /api/v1/session 6µs
+2021/10/27 10:56:43 CODE 200
+2021/10/27 10:56:43 LOG [GET] [::1]:58350, /api/v1/profile 5.3µs
+2021/10/27 10:56:43 CODE 200
+2021/10/27 10:56:43 LOG [GET] [::1]:58354, /api/v1/user/cards 2.5µs
+2021/10/27 10:56:43 CODE 200
+2021/10/27 10:56:48 LOG [GET] [::1]:58354, /api/v1/tags 5.5µs
+2021/10/27 10:56:58 LOG [OPTIONS] [::1]:58356, /api/v1/profile 3µs
+2021/10/27 10:56:58 LOG [PUT] [::1]:58354, /api/v1/profile 2.3µs
+2021/10/27 10:56:58 CODE 200
+2021/10/27 10:59:32 LOG [OPTIONS] [::1]:58378, /api/v1/session 54µs
+2021/10/27 10:59:32 LOG [DELETE] [::1]:58380, /api/v1/session 1.5µs
+2021/10/27 10:59:32 CODE 200
+2021/10/27 10:59:33 LOG [GET] [::1]:58380, /api/v1/profile 2.2µs
+2021/10/27 10:59:33 CODE 404 ERROR http: named cookie not present
+2021/10/27 10:59:39 LOG [POST] [::1]:58380, /api/v1/session 117.2µs
+2021/10/27 10:59:39 CODE 200
+2021/10/27 10:59:39 LOG [GET] [::1]:58380, /api/v1/profile 1.7µs
+2021/10/27 10:59:39 CODE 200
+2021/10/27 10:59:39 LOG [GET] [::1]:58394, /api/v1/user/cards 1.7µs
+2021/10/27 10:59:39 CODE 200
+2021/10/27 10:59:44 LOG [GET] [::1]:58394, /api/v1/tags 3.9µs
