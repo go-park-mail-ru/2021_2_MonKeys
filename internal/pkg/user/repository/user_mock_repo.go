@@ -10,7 +10,7 @@ import (
 )
 
 type MockDB struct {
-	users       map[uint64]*models.User
+	users       map[uint64]models.User
 	swipedUsers map[uint64][]uint64
 	tags        map[uint64]string
 }
@@ -23,13 +23,12 @@ func NewMockDB() *MockDB {
 	err := os.Mkdir(basePhotoPath, 0777)
 	if err != nil {
 		log.Println("mkdir: ", err)
-		return nil
 	}
-	return &MockDB{make(map[uint64]*models.User), make(map[uint64][]uint64), make(map[uint64]string)}
+	return &MockDB{make(map[uint64]models.User), make(map[uint64][]uint64), make(map[uint64]string)}
 }
 
 func (newDB *MockDB) MockDB() {
-	newDB.CreateUserAndProfile(context.TODO(), &models.User{
+	newDB.CreateUserAndProfile(context.TODO(), models.User{
 		ID:          1,
 		Name:        "Mikhail",
 		Email:       "lol1@mail.ru",
@@ -40,7 +39,7 @@ func (newDB *MockDB) MockDB() {
 		Imgs:        []string{"/img/Yachty-tout.jpg"},
 		Tags:        []string{"soccer", "anime"},
 	})
-	newDB.CreateUserAndProfile(context.TODO(), &models.User{
+	newDB.CreateUserAndProfile(context.TODO(), models.User{
 		ID:          2,
 		Name:        "Mikhail2",
 		Email:       "lol2@mail.ru",
@@ -51,7 +50,7 @@ func (newDB *MockDB) MockDB() {
 		Imgs:        []string{"/img/Yachty-tout.jpg"},
 		Tags:        []string{"soccer", "anime"},
 	})
-	newDB.CreateUserAndProfile(context.TODO(), &models.User{
+	newDB.CreateUserAndProfile(context.TODO(), models.User{
 		ID:          3,
 		Name:        "Mikhail3",
 		Email:       "lol3@mail.ru",
@@ -62,7 +61,7 @@ func (newDB *MockDB) MockDB() {
 		Imgs:        []string{"/img/Yachty-tout.jpg"},
 		Tags:        []string{"soccer", "anime"},
 	})
-	newDB.CreateUserAndProfile(context.TODO(), &models.User{
+	newDB.CreateUserAndProfile(context.TODO(), models.User{
 		ID:          4,
 		Name:        "Mikhail4",
 		Email:       "lol4@mail.ru",
@@ -83,52 +82,52 @@ func (newDB *MockDB) MockDB() {
 	newDB.CreateTag(context.TODO(), "sport")
 }
 
-func (db *MockDB) GetUser(ctx context.Context, email string) (*models.User, error) {
+func (db *MockDB) GetUser(ctx context.Context, email string) (models.User, error) {
 	if len(db.users) == 0 {
-		return &models.User{}, errors.New("users is empty map")
+		return models.User{}, errors.New("users is empty map")
 	}
 
 	currentUser := models.User{}
 	okUser := false
 	for _, value := range db.users {
 		if value.Email == email {
-			currentUser = *value
+			currentUser = value
 			okUser = true
 		}
 	}
 	if !okUser {
-		return &models.User{}, errors.New("User not found")
+		return models.User{}, errors.New("User not found")
 	}
 
-	return &currentUser, nil
+	return currentUser, nil
 }
 
-func (db *MockDB) GetUserByID(ctx context.Context, userID uint64) (*models.User, error) {
+func (db *MockDB) GetUserByID(ctx context.Context, userID uint64) (models.User, error) {
 	if user, ok := db.users[userID]; ok {
 		return user, nil
 	}
 
-	return &models.User{}, errors.New("")
+	return models.User{}, errors.New("")
 }
 
 func getPathUserPhoto(user models.User) string {
 	return basePhotoPath + "/" + user.Email
 }
 
-func (db *MockDB) CreateUser(ctx context.Context, logUserData *models.LoginUser) (*models.User, error) {
+func (db *MockDB) CreateUser(ctx context.Context, logUserData models.LoginUser) (models.User, error) {
 	newID := uint64(len(db.users) + 1)
 
-	db.users[newID] = models.NewUser(newID, logUserData.Email, logUserData.Password)
+	db.users[newID] = models.MakeUser(newID, logUserData.Email, logUserData.Password)
 
-	err := os.Mkdir(getPathUserPhoto(*db.users[newID]), 0777)
+	err := os.Mkdir(getPathUserPhoto(db.users[newID]), 0777)
 	if err != nil {
-		return nil, err
+		return models.User{}, err
 	}
 
 	return db.users[newID], nil
 }
 
-func (db *MockDB) UpdateUser(ctx context.Context, newUserData *models.User) (err error) {
+func (db *MockDB) UpdateUser(ctx context.Context, newUserData models.User) (err error) {
 	db.users[newUserData.ID] = newUserData
 
 	return nil
@@ -148,7 +147,7 @@ func (db *MockDB) AddPhoto(ctx context.Context, user models.User, newPhoto io.Re
 		return err
 	}
 
-	db.users[user.ID].Imgs = user.Imgs
+	db.users[user.ID] = user
 
 	return nil
 }
@@ -163,7 +162,7 @@ func (db *MockDB) DeletePhoto(ctx context.Context, user models.User, photo strin
 
 	user.DeletePhoto(photo)
 
-	db.users[user.ID].Imgs = user.Imgs
+	db.users[user.ID] = user
 
 	return nil
 }
@@ -184,7 +183,7 @@ func (db *MockDB) GetNextUserForSwipe(ctx context.Context, currentUserId uint64)
 	if len(db.swipedUsers) == 0 {
 		for key, value := range db.users {
 			if key != currentUserId {
-				return *value, nil
+				return value, nil
 			}
 		}
 		return models.User{}, errors.New("haven't any other users for swipe")
@@ -204,7 +203,7 @@ func (db *MockDB) GetNextUserForSwipe(ctx context.Context, currentUserId uint64)
 			continue
 		}
 		if !existsIn(key, allSwipedUsersForCurrentUser) {
-			return *value, nil
+			return value, nil
 		}
 	}
 
@@ -236,18 +235,18 @@ func (db *MockDB) IsSwiped(ctx context.Context, userID, swipedUserID uint64) (bo
 	return false, nil
 }
 
-func (db *MockDB) CreateUserAndProfile(ctx context.Context, user *models.User) (models.User, error) {
+func (db *MockDB) CreateUserAndProfile(ctx context.Context, user models.User) (models.User, error) {
 	newID := uint64(len(db.users) + 1)
 
 	user.ID = newID
 
 	db.users[newID] = user
 
-	return *user, nil
+	return user, nil
 }
 
 func (db *MockDB) DropUsers(ctx context.Context) error {
-	db.users = make(map[uint64]*models.User)
+	db.users = make(map[uint64]models.User)
 
 	return nil
 }

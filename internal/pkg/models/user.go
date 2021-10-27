@@ -51,8 +51,8 @@ type Photo struct {
 	Title string `json:"photo"`
 }
 
-func NewUser(id uint64, email string, password string) *User {
-	return &User{ID: id, Email: email, Password: hashPassword(password)}
+func MakeUser(id uint64, email string, password string) User {
+	return User{ID: id, Email: email, Password: hashPassword(password)}
 }
 
 func hashPassword(password string) string {
@@ -163,16 +163,16 @@ type UserUsecase interface {
 
 // ArticleRepository represent the article's repository contract
 type UserRepository interface {
-	GetUser(ctx context.Context, email string) (*User, error)
-	GetUserByID(ctx context.Context, userID uint64) (*User, error)
-	CreateUser(ctx context.Context, logUserData *LoginUser) (*User, error)
-	UpdateUser(ctx context.Context, newUserData *User) error
+	GetUser(ctx context.Context, email string) (User, error)
+	GetUserByID(ctx context.Context, userID uint64) (User, error)
+	CreateUser(ctx context.Context, logUserData LoginUser) (User, error)
+	UpdateUser(ctx context.Context, newUserData User) error
 	AddPhoto(ctx context.Context, user User, newPhoto io.Reader) error
 	DeletePhoto(ctx context.Context, user User, photo string) error
 	AddSwipedUsers(ctx context.Context, currentUserId uint64, swipedUserId uint64, type_name string) error
 	GetNextUserForSwipe(ctx context.Context, currentUserId uint64) (User, error)
 	IsSwiped(ctx context.Context, userID, swipedUserID uint64) (bool, error)
-	CreateUserAndProfile(ctx context.Context, user *User) (User, error)
+	CreateUserAndProfile(ctx context.Context, user User) (User, error)
 	DropUsers(ctx context.Context) error
 	DropSwipes(ctx context.Context) error
 	CreateTag(ctx context.Context, tag_name string) error

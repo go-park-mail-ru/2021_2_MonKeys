@@ -79,7 +79,7 @@ func (h *userUsecase) getUserByCookie(c context.Context, sessionCookie string) (
 		return models.User{}, errors.New("error db: getUserByID")
 	}
 
-	return *user, nil
+	return user, nil
 }
 
 func (h *userUsecase) CurrentUser(c context.Context, r *http.Request) (models.User, int) {
@@ -124,7 +124,7 @@ func (h *userUsecase) EditProfile(c context.Context, newUserData models.User, r 
 		return models.User{}, StatusBadRequest
 	}
 
-	err = h.UserRepo.UpdateUser(c, &currentUser)
+	err = h.UserRepo.UpdateUser(c, currentUser)
 	if err != nil {
 		log.Printf("CODE %d ERROR %s", StatusInternalServerError, err)
 		return models.User{}, StatusInternalServerError
@@ -279,7 +279,7 @@ func (h *userUsecase) Login(c context.Context, logUserData models.LoginUser, w h
 		}
 		http.SetCookie(w, &cookie)
 
-		return *identifiableUser, StatusOK
+		return identifiableUser, StatusOK
 	} else {
 		log.Printf("CODE %d ERROR %s", StatusNotFound, errors.New("not correct password"))
 		return models.User{}, StatusNotFound
@@ -325,7 +325,7 @@ func (h *userUsecase) Signup(c context.Context, logUserData models.LoginUser, w 
 		return StatusEmailAlreadyExists
 	}
 
-	user, err := h.UserRepo.CreateUser(c, &logUserData)
+	user, err := h.UserRepo.CreateUser(c, logUserData)
 	if err != nil {
 		log.Printf("CODE %d ERROR %s", StatusInternalServerError, err)
 		return StatusInternalServerError
@@ -333,12 +333,10 @@ func (h *userUsecase) Signup(c context.Context, logUserData models.LoginUser, w 
 
 	cookie := createSessionCookie(logUserData)
 
-	if !h.Session.IsSessionByUserID(identifiableUser.ID) {
-		err = h.Session.NewSessionCookie(cookie.Value, user.ID)
-		if err != nil {
-			log.Printf("CODE %d ERROR %s", StatusInternalServerError, err)
-			return StatusInternalServerError
-		}
+	err = h.Session.NewSessionCookie(cookie.Value, user.ID)
+	if err != nil {
+		log.Printf("CODE %d ERROR %s", StatusInternalServerError, err)
+		return StatusInternalServerError
 	}
 	http.SetCookie(w, &cookie)
 

@@ -101,7 +101,7 @@ func (h *UserHandler) SignupHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var logUserData *models.LoginUser
+	var logUserData models.LoginUser
 	err = json.Unmarshal(byteReq, &logUserData)
 	if err != nil {
 		resp.Status = StatusBadRequest
@@ -110,7 +110,8 @@ func (h *UserHandler) SignupHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	status := h.UserUCase.Signup(r.Context(), *logUserData, w)
+	log.Println("Email: ", logUserData.Email, " Password: ", logUserData.Password)
+	status := h.UserUCase.Signup(r.Context(), logUserData, w)
 	resp.Status = status
 	sendResp(resp, w)
 }
