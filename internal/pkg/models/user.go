@@ -166,8 +166,6 @@ type UserRepository interface {
 	GetUserByID(ctx context.Context, userID uint64) (User, error)
 	CreateUser(ctx context.Context, logUserData LoginUser) (User, error)
 	UpdateUser(ctx context.Context, newUserData User) (User, error)
-	AddPhoto(ctx context.Context, user User, newPhoto io.Reader) error
-	DeletePhoto(ctx context.Context, user User, photo string) error
 	CreateUserAndProfile(ctx context.Context, user User) (User, error)
 	DropSwipes(ctx context.Context) error
 	DropUsers(ctx context.Context) error
@@ -182,4 +180,7 @@ type UserRepository interface {
 	AddSwipedUsers(ctx context.Context, currentUserId uint64, swipedUserId uint64, type_name string) error
 	IsSwiped(ctx context.Context, userID, swipedUserID uint64) (bool, error)
 	GetNextUserForSwipe(ctx context.Context, currentUserId uint64) ([]User, error)
+
+	AddPhoto(ctx context.Context, user User, newPhoto io.Reader) error
+	DeletePhoto(ctx context.Context, user User, photo string) error
 }
