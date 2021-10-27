@@ -44,30 +44,6 @@ func main() {
 
 	configs.SetConfig()
 
-	// repositories
-	// connStr := fmt.Sprintf("user=%s password=%s dbname=%s sslmode=disable",
-	// 	configs.Postgres.User,
-	// 	configs.Postgres.Password,
-	// 	configs.Postgres.DBName)
-
-	// conn, err := sqlx.Open("postgres", connStr)
-	// if err != nil {
-	// 	log.Fatal(err)
-	// 	return
-	// }
-
-	// userRepo := _userRepo.NewPostgresUserRepository(conn)
-	userRepo := _userRepo.NewMockDB()
-	userRepo.MockDB()
-	// sm := session.NewSessionDB()
-	sm, err := session.NewTarantoolConnection(configs.Tarantool)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	timeoutContext := configs.Timeouts.ContextTimeout
-	userUCase := _userUsecase.NewUserUsecase(userRepo, sm, timeoutContext)
-
 	// router
 	router := mux.NewRouter()
 
@@ -76,6 +52,27 @@ func main() {
 	router.Use(middleware.CORS)
 	router.Use(middleware.PanicRecovery)
 
+	// repository
+	userRepo, err := _userRepo.NewPostgresUserRepository(configs.Postgres)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// userRepo := _userRepo.NewMockDB()
+	// userRepo.Init()
+	// sm := session.NewSessionDB()
+
+	sm, err := session.NewTarantoolConnection(configs.Tarantool)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	timeoutContext := configs.Timeouts.ContextTimeout
+
+	// usecase
+	userUCase := _userUsecase.NewUserUsecase(userRepo, sm, timeoutContext)
+
+	// delivery
 	_userDelivery.SetRouting(router, userUCase)
 
 	srv := &http.Server{

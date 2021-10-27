@@ -121,4 +121,5 @@ func (conn *SessionManager) IsSessionByCookie(sessionCookie string) bool {
 	}
 	return true
 }
+
 func (conn *SessionManager) DropCookies() {}

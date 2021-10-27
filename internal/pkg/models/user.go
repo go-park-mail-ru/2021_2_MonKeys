@@ -46,10 +46,10 @@ type Tags struct {
 }
 
 func NewUser(id uint64, email string, password string) *User {
-	return &User{ID: id, Email: email, Password: hashPassword(password)}
+	return &User{ID: id, Email: email, Password: HashPassword(password)}
 }
 
-func hashPassword(password string) string {
+func HashPassword(password string) string {
 	return fmt.Sprintf("%x", md5.Sum([]byte(password)))
 }
 
@@ -58,7 +58,7 @@ func (user *User) IsEmpty() bool {
 }
 
 func (user *User) IsCorrectPassword(password string) bool {
-	return user.Password == hashPassword(password)
+	return user.Password == HashPassword(password)
 }
 
 func GetAgeFromDate(date string) (string, error) {
@@ -112,31 +112,19 @@ type UserRepository interface {
 	GetUser(ctx context.Context, email string) (*User, error)
 	GetUserByID(ctx context.Context, userID uint64) (*User, error)
 	CreateUser(ctx context.Context, logUserData *LoginUser) (*User, error)
-	UpdateUser(ctx context.Context, newUserData *User) error
-	AddSwipedUsers(ctx context.Context, currentUserId uint64, swipedUserId uint64, type_name string) error
-	GetNextUserForSwipe(ctx context.Context, currentUserId uint64) (User, error)
-	IsSwiped(ctx context.Context, userID, swipedUserID uint64) (bool, error)
-	CreateUserAndProfile(ctx context.Context, user *User) (User, error)
-	DropUsers(ctx context.Context) error
+	CreateUserAndProfile(ctx context.Context, user User) (User, error)
+	UpdateUser(ctx context.Context, newUserData *User) (User, error)
+	DeleteUser(ctx context.Context, user User) error
+	GetTags(ctx context.Context) (map[uint64]string, error)
 	DropSwipes(ctx context.Context) error
+	DropUsers(ctx context.Context) error
+	Init()
+	GetTagsByID(ctx context.Context, id uint64) ([]string, error)
+	GetImgsByID(ctx context.Context, id uint64) ([]string, error)
 	CreateTag(ctx context.Context, tag_name string) error
-	GetTags(ctx context.Context) map[uint64]string
-
-	// GetUser(ctx context.Context, email string) (*User, error)
-	// GetUserByID(ctx context.Context, userID uint64) (*User, error)
-	// CreateUser(ctx context.Context, logUserData *LoginUser) (*User, error)
-	// CreateUserAndProfile(ctx context.Context, user User) (User, error)
-	// UpdateUser(ctx context.Context, newUserData *User) (User, error)
-	// DeleteUser(ctx context.Context, user User) error
-	// GetTags(ctx context.Context) map[uint64]string
-	// DropSwipes(ctx context.Context) error
-	// DropUsers(ctx context.Context) error
-	// GetTagsByID(ctx context.Context, id uint64) ([]string, error)
-	// GetImgsByID(ctx context.Context, id uint64) ([]string, error)
-	// CreateTag(ctx context.Context, tag_name string) error
-	// InsertTags(ctx context.Context, id uint64, tags []string) error
-	// UpdateImgs(ctx context.Context, id uint64, imgs []string) error
-	// AddSwipedUsers(ctx context.Context, currentUserId uint64, swipedUserId uint64, type_name string) error
-	// IsSwiped(ctx context.Context, userID, swipedUserID uint64) (bool, error)
-	// GetNextUserForSwipe(ctx context.Context, currentUserId uint64) ([]User, error)
+	InsertTags(ctx context.Context, id uint64, tags []string) error
+	UpdateImgs(ctx context.Context, id uint64, imgs []string) error
+	AddSwipedUsers(ctx context.Context, currentUserId uint64, swipedUserId uint64, type_name string) error
+	IsSwiped(ctx context.Context, userID, swipedUserID uint64) (bool, error)
+	GetNextUserForSwipe(ctx context.Context, currentUserId uint64) ([]User, error)
 }
