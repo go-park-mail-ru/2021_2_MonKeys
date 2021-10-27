@@ -33,8 +33,8 @@ func getAgeFromDate(date string) (string, error) {
 	return strconv.Itoa(int(age)), nil
 }
 
-func NewPostgresUserRepository(conn *sqlx.DB) PostgreUserRepo {
-	return PostgreUserRepo{conn}
+func NewPostgresUserRepository(conn *sqlx.DB) models.UserRepository {
+	return &PostgreUserRepo{conn}
 }
 
 func (p *PostgreUserRepo) GetUser(ctx context.Context, email string) (*models.User, error) {

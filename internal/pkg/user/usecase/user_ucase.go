@@ -120,7 +120,7 @@ func (h *userUsecase) EditProfile(c context.Context, newUserData models.User, r 
 		return models.User{}, StatusBadRequest
 	}
 
-	err = h.UserRepo.UpdateUser(c, &currentUser)
+	_, err = h.UserRepo.UpdateUser(c, &currentUser)
 	if err != nil {
 		log.Printf("CODE %d ERROR %s", StatusInternalServerError, err)
 		return models.User{}, StatusInternalServerError
@@ -253,7 +253,7 @@ func (h *userUsecase) NextUser(c context.Context, swipedUserData models.SwipedUs
 		return models.User{}, StatusNotFound
 	}
 	// find next user for swipe
-	nextUser, err := h.UserRepo.GetNextUserForSwipe(ctx, currentUser.ID)
+	nextUsers, err := h.UserRepo.GetNextUserForSwipe(ctx, currentUser.ID)
 	if err != nil {
 		log.Printf("CODE %d ERROR %s", StatusNotFound, err)
 		return models.User{}, StatusNotFound
@@ -261,14 +261,17 @@ func (h *userUsecase) NextUser(c context.Context, swipedUserData models.SwipedUs
 
 	log.Printf("CODE %d", StatusOK)
 
-	return nextUser, StatusOK
+	return nextUsers[0], StatusOK
 }
 
 func (h *userUsecase) GetAllTags(c context.Context, r *http.Request) (models.Tags, int) {
 	ctx, cancel := context.WithTimeout(c, h.contextTimeout)
 	defer cancel()
 
-	allTags := h.UserRepo.GetTags(ctx)
+	allTags, err := h.UserRepo.GetTags(ctx)
+	if err != nil {
+		return models.Tags{}, StatusNotFound
+	}
 	var respTag models.Tag
 	var currentAllTags = make(map[uint64]models.Tag)
 	var respAllTags models.Tags
