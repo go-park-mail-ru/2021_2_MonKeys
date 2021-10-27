@@ -7,7 +7,6 @@ import (
 	_userDelivery "dripapp/internal/pkg/user/delivery"
 	_userRepo "dripapp/internal/pkg/user/repository"
 	_userUsecase "dripapp/internal/pkg/user/usecase"
-	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -15,7 +14,6 @@ import (
 	_ "dripapp/docs"
 
 	"github.com/gorilla/mux"
-	"github.com/jmoiron/sqlx"
 )
 
 const StatusEmailAlreadyExists = 1001
@@ -47,22 +45,20 @@ func main() {
 	configs.SetConfig()
 
 	// repositories
-	connStr := fmt.Sprintf("user=%s password=%s dbname=%s sslmode=disable port=%s host=%s",
-		configs.Postgres.User,
-		configs.Postgres.Password,
-		configs.Postgres.DBName,
-		configs.Postgres.Port,
-		configs.Postgres.Host)
+	// connStr := fmt.Sprintf("user=%s password=%s dbname=%s sslmode=disable",
+	// 	configs.Postgres.User,
+	// 	configs.Postgres.Password,
+	// 	configs.Postgres.DBName)
 
-	conn, err := sqlx.Open("postgres", connStr)
-	if err != nil {
-		log.Fatal(err)
-		return
-	}
+	// conn, err := sqlx.Open("postgres", connStr)
+	// if err != nil {
+	// 	log.Fatal(err)
+	// 	return
+	// }
 
-	userRepo := _userRepo.NewPostgresUserRepository(conn)
-	// userRepo := _userRepo.NewMockDB()
-	// userRepo.MockDB()
+	// userRepo := _userRepo.NewPostgresUserRepository(conn)
+	userRepo := _userRepo.NewMockDB()
+	userRepo.MockDB()
 	// sm := session.NewSessionDB()
 	sm, err := session.NewTarantoolConnection(configs.Tarantool)
 	if err != nil {
