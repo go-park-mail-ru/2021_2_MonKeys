@@ -9,6 +9,8 @@ build
 api.ijia.me.key
 api.ijia.me.crt
 
+logs.log
+
 # golang
 go.sum
 

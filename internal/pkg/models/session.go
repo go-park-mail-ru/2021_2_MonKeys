@@ -13,6 +13,6 @@ type SessionRepository interface {
 	GetUserIDByCookie(sessionCookie string) (uint64, error)
 	NewSessionCookie(sessionCookie string, userId uint64) error
 	DeleteSessionCookie(sessionCookie string) error
-	IsSessionByUserID(userID uint64) bool
+	IsSessionByCookie(sessionCookie string) bool
 	DropCookies()
 }

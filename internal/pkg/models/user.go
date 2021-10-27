@@ -22,7 +22,7 @@ type User struct {
 	Email       string   `json:"email,omitempty"`
 	Password    string   `json:"-"`
 	Date        string   `json:"date,omitempty"`
-	Age         uint     `json:"age,omitempty"`
+	Age         string   `json:"age"`
 	Description string   `json:"description,omitempty"`
 	Imgs        []string `json:"imgSrc,omitempty"`
 	Tags        []string `json:"tags,omitempty"`
@@ -33,12 +33,11 @@ type LoginUser struct {
 	Password string `json:"password"`
 }
 
-type SwipedUser struct {
-	Id uint64 `json:"id"`
-}
+// type SwipedUser struct {
+// 	Id uint64 `json:"id"`
+// }
 
 type Tag struct {
-	Id       uint64 `json:"id"`
 	Tag_Name string `json:"tagText"`
 }
 
@@ -55,7 +54,7 @@ func MakeUser(id uint64, email string, password string) User {
 	return User{ID: id, Email: email, Password: hashPassword(password)}
 }
 
-func hashPassword(password string) string {
+func HashPassword(password string) string {
 	return fmt.Sprintf("%x", md5.Sum([]byte(password)))
 }
 
@@ -64,13 +63,13 @@ func (user *User) IsEmpty() bool {
 }
 
 func (user *User) IsCorrectPassword(password string) bool {
-	return user.Password == hashPassword(password)
+	return user.Password == HashPassword(password)
 }
 
-func GetAgeFromDate(date string) (uint, error) {
+func GetAgeFromDate(date string) (string, error) {
 	birthday, err := time.Parse("2006-01-02", date)
 	if err != nil {
-		return 0, errors.New("failed on userYear")
+		return "", errors.New("failed on userYear")
 	}
 
 	age := uint(time.Now().Year() - birthday.Year())
@@ -78,7 +77,7 @@ func GetAgeFromDate(date string) (uint, error) {
 		age -= 1
 	}
 
-	return age, nil
+	return strconv.Itoa(int(age)), nil
 }
 
 func (user *User) FillProfile(newUserData *User) (err error) {
@@ -157,7 +156,7 @@ type UserUsecase interface {
 	Login(c context.Context, logUserData LoginUser, w http.ResponseWriter) (User, int)
 	Logout(c context.Context, w http.ResponseWriter, r *http.Request) int
 	Signup(c context.Context, logUserData LoginUser, w http.ResponseWriter) int
-	NextUser(c context.Context, swipedUserData SwipedUser, r *http.Request) (User, int)
+	NextUser(c context.Context, r *http.Request) ([]User, int)
 	GetAllTags(c context.Context, r *http.Request) (Tags, int)
 }
 
@@ -175,6 +174,15 @@ type UserRepository interface {
 	CreateUserAndProfile(ctx context.Context, user User) (User, error)
 	DropUsers(ctx context.Context) error
 	DropSwipes(ctx context.Context) error
+	DropUsers(ctx context.Context) error
+	Init()
+	DeleteTags(ctx context.Context, userId uint64) error
+	GetTagsByID(ctx context.Context, id uint64) ([]string, error)
+	GetImgsByID(ctx context.Context, id uint64) ([]string, error)
 	CreateTag(ctx context.Context, tag_name string) error
-	GetTags(ctx context.Context) map[uint64]string
+	InsertTags(ctx context.Context, id uint64, tags []string) error
+	UpdateImgs(ctx context.Context, id uint64, imgs []string) error
+	AddSwipedUsers(ctx context.Context, currentUserId uint64, swipedUserId uint64, type_name string) error
+	IsSwiped(ctx context.Context, userID, swipedUserID uint64) (bool, error)
+	GetNextUserForSwipe(ctx context.Context, currentUserId uint64) ([]User, error)
 }

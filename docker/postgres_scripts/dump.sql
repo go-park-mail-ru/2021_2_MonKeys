@@ -7,16 +7,16 @@ create table if not exists profile(
   id serial not null primary key,
   create_time date default now(),
   update_time date default now(),
-  name varchar(255) null,
-  email varchar(255) null,
-  password varchar(255) null,
-  date varchar(255)  null,
-  description varchar(255) null,
-  imgs varchar(255) [] null
+  name varchar(255) default '',
+  email varchar(255) default '',
+  password varchar(255) default '',
+  date varchar(255) default '',
+  description varchar(255) default '',
+  imgs varchar(255) [] default array [] :: varchar []
 );
 create table if not exists tag(
   id serial not null primary key,
-  tag_name varchar(255) null
+  tag_name varchar(255) default ''
 );
 create table if not exists profile_tag(
   id serial not null primary key,
@@ -29,7 +29,7 @@ create table if not exists reactions(
   id serial not null primary key,
   id1 integer,
   id2 integer,
-  type varchar(255) null,
+  type varchar(255) default '',
   constraint fk_pt_profile1 foreign key (id1) REFERENCES profile (id),
   constraint fk_pt_profile2 foreign key (id2) REFERENCES profile (id)
 );

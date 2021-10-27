@@ -2,36 +2,116 @@ package repository
 
 import (
 	"context"
+	"dripapp/configs"
 	"dripapp/internal/pkg/models"
+	"errors"
 	"fmt"
 	"io"
 	"log"
 	"os"
+	"strconv"
 	"strings"
+	"time"
 
 	"github.com/jmoiron/sqlx"
 	"github.com/lib/pq"
 	_ "github.com/lib/pq"
 )
 
+const success = "Connection success (postgre) on: "
+
 type PostgreUserRepo struct {
 	conn *sqlx.DB
 }
 
-func NewPostgresUserRepository(conn *sqlx.DB) PostgreUserRepo {
-	return PostgreUserRepo{conn}
+func getAgeFromDate(date string) (string, error) {
+	birthday, err := time.Parse("2006-01-02", date)
+	if err != nil {
+		return "", errors.New("failed on userYear")
+	}
+
+	age := uint(time.Now().Year() - birthday.Year())
+	if time.Now().YearDay() < birthday.YearDay() {
+		age -= 1
+	}
+
+	return strconv.Itoa(int(age)), nil
 }
 
-func (p *PostgreUserRepo) CreateUser(ctx context.Context, loginUser models.LoginUser) (models.User, error) {
+func NewPostgresUserRepository(config configs.PostgresConfig) (models.UserRepository, error) {
+	connStr := fmt.Sprintf("user=%s password=%s dbname=%s sslmode=disable",
+		configs.Postgres.User,
+		configs.Postgres.Password,
+		configs.Postgres.DBName)
+
+	conn, err := sqlx.Open("postgres", connStr)
+	if err != nil {
+		return nil, err
+	}
+
+	log.Printf("%s%s", success, connStr)
+	return &PostgreUserRepo{conn}, nil
+}
+
+func (p *PostgreUserRepo) Init() {}
+
+func (p *PostgreUserRepo) GetUser(ctx context.Context, email string) (*models.User, error) {
+	query := `select id, name, email, password, date, description
+		from profile
+		where email = $1;`
+
+	var RespUser models.User
+	err := p.conn.GetContext(ctx, &RespUser, query, email)
+	if err != nil {
+		return &models.User{}, err
+	}
+
+	RespUser.Tags, err = p.GetTagsByID(ctx, 1)
+	if err != nil {
+		return &models.User{}, err
+	}
+	RespUser.Imgs, err = p.GetImgsByID(ctx, 1)
+	if err != nil {
+		return &models.User{}, err
+	}
+
+	return &RespUser, nil
+}
+
+func (p *PostgreUserRepo) GetUserByID(ctx context.Context, userID uint64) (*models.User, error) {
+	query := `select id, name, email, password, date, description
+		from profile
+		where id = $1;`
+
+	var RespUser models.User
+	err := p.conn.GetContext(ctx, &RespUser, query, userID)
+	if err != nil {
+		return &models.User{}, err
+	}
+
+	RespUser.Tags, err = p.GetTagsByID(ctx, 1)
+	if err != nil {
+		return &models.User{}, err
+	}
+
+	RespUser.Imgs, err = p.GetImgsByID(ctx, 1)
+	if err != nil {
+		return &models.User{}, err
+	}
+
+	return &RespUser, nil
+}
+
+func (p *PostgreUserRepo) CreateUser(ctx context.Context, logUserData *models.LoginUser) (*models.User, error) {
 	query := `INSERT into profile(
                   email, 
                   password) 
                   VALUES ($1,$2) 
-                  RETURNING email, password;`
+                  RETURNING id, email, password;`
 
 	var RespUser models.User
-	err := p.conn.GetContext(ctx, &RespUser, query, loginUser.Email, loginUser.Password)
-	return RespUser, err
+	err := p.conn.GetContext(ctx, &RespUser, query, logUserData.Email, logUserData.Password)
+	return &RespUser, err
 }
 
 func (p *PostgreUserRepo) CreateUserAndProfile(ctx context.Context, user models.User) (models.User, error) {
@@ -46,22 +126,22 @@ func (p *PostgreUserRepo) CreateUserAndProfile(ctx context.Context, user models.
 		return models.User{}, err
 	}
 
-	err = p.insertTags(ctx, RespUser.ID, user.Tags)
+	err = p.InsertTags(ctx, RespUser.ID, user.Tags)
 	if err != nil {
 		return models.User{}, err
 	}
 
-	RespUser.Imgs, err = p.getImgs(ctx, RespUser.ID)
+	RespUser.Imgs, err = p.GetImgsByID(ctx, RespUser.ID)
 	if err != nil {
 		return models.User{}, err
 	}
 
-	RespUser.Age, err = models.GetAgeFromDate(RespUser.Date)
+	RespUser.Age, err = getAgeFromDate(RespUser.Date)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	RespUser.Tags, err = p.getTagsByID(ctx, RespUser.ID)
+	RespUser.Tags, err = p.GetTagsByID(ctx, RespUser.ID)
 	if err != nil {
 		return models.User{}, err
 	}
@@ -69,9 +149,9 @@ func (p *PostgreUserRepo) CreateUserAndProfile(ctx context.Context, user models.
 	return RespUser, err
 }
 
-func (p *PostgreUserRepo) UpdateUser(ctx context.Context, newUserData models.User) (models.User, error) {
+func (p *PostgreUserRepo) UpdateUser(ctx context.Context, newUserData *models.User) (models.User, error) {
 	query := `update profile
-		set name=$1, date=$3, description=$4, imgs=&5
+		set name=$1, date=$3, description=$4, imgs=$5
 		where email=$2
 		RETURNING id, email, password, name, email, password, date, description;`
 
@@ -79,16 +159,44 @@ func (p *PostgreUserRepo) UpdateUser(ctx context.Context, newUserData models.Use
 	err := p.conn.GetContext(ctx, &RespUser, query, newUserData.Name, newUserData.Email, newUserData.Date,
 		newUserData.Description, pq.Array(newUserData.Imgs))
 
-	RespUser.Imgs, err = p.getImgs(ctx, RespUser.ID)
-	if err != nil {
-		return models.User{}, err
+	if len(newUserData.Tags) != 0 {
+		err = p.DeleteTags(ctx, newUserData.ID)
+		if err != nil {
+			return models.User{}, err
+		}
+		err = p.InsertTags(ctx, newUserData.ID, newUserData.Tags)
+		if err != nil {
+			return models.User{}, err
+		}
 	}
-	RespUser.Tags, err = p.getTagsByID(ctx, RespUser.ID)
-	if err != nil {
-		return models.User{}, err
+
+	if len(newUserData.Imgs) != 0 {
+		RespUser.Imgs, err = p.GetImgsByID(ctx, RespUser.ID)
+		if err != nil {
+			return models.User{}, err
+		}
+	}
+
+	if len(newUserData.Tags) != 0 {
+		RespUser.Tags, err = p.GetTagsByID(ctx, RespUser.ID)
+		if err != nil {
+			return models.User{}, err
+		}
 	}
 
 	return RespUser, err
+}
+
+func (p *PostgreUserRepo) DeleteTags(ctx context.Context, userId uint64) error {
+	query := `delete from profile_tag where profile_id=$1`
+
+	stmt, _ := p.conn.Prepare(query)
+	_, err := stmt.Exec(userId)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (p *PostgreUserRepo) DeleteUser(ctx context.Context, user models.User) error {
@@ -102,7 +210,7 @@ func (p *PostgreUserRepo) DeleteUser(ctx context.Context, user models.User) erro
 }
 
 func (p *PostgreUserRepo) GetTags(ctx context.Context) (map[uint64]string, error) {
-	query := `select id, tag_name from tag;`
+	query := `select tag_name from tag;`
 
 	var tags []models.Tag
 	err := p.conn.Select(&tags, query)
@@ -112,8 +220,9 @@ func (p *PostgreUserRepo) GetTags(ctx context.Context) (map[uint64]string, error
 
 	tagsMap := make(map[uint64]string)
 
-	for _, val := range tags {
-		tagsMap[val.Id] = val.Tag_Name
+	var i uint64
+	for i = 0; i < uint64(len(tags)); i++ {
+		tagsMap[i] = tags[i].Tag_Name
 	}
 
 	return tagsMap, nil
@@ -143,54 +252,7 @@ func (p *PostgreUserRepo) DropUsers(ctx context.Context) error {
 	return nil
 }
 
-func (p *PostgreUserRepo) GetUserByID(ctx context.Context, userID uint64) (models.User, error) {
-	query := `select id, name, email, password, date, description
-		from profile
-		where id = $1;`
-
-	var RespUser models.User
-	err := p.conn.GetContext(ctx, &RespUser, query, userID)
-	if err != nil {
-		return models.User{}, err
-	}
-
-	RespUser.Tags, err = p.getTagsByID(ctx, 1)
-	if err != nil {
-		return models.User{}, err
-	}
-
-	RespUser.Imgs, err = p.getImgs(ctx, 1)
-	if err != nil {
-		return models.User{}, err
-	}
-
-	return RespUser, nil
-}
-
-func (p *PostgreUserRepo) GetUser(ctx context.Context, email string) (models.User, error) {
-	query := `select id, name, email, password, date, description
-		from profile
-		where email = $1;`
-
-	var RespUser models.User
-	err := p.conn.GetContext(ctx, &RespUser, query, email)
-	if err != nil {
-		return models.User{}, err
-	}
-
-	RespUser.Tags, err = p.getTagsByID(ctx, 1)
-	if err != nil {
-		return models.User{}, err
-	}
-	RespUser.Imgs, err = p.getImgs(ctx, 1)
-	if err != nil {
-		return models.User{}, err
-	}
-
-	return RespUser, nil
-}
-
-func (p *PostgreUserRepo) getTagsByID(ctx context.Context, id uint64) ([]string, error) {
+func (p *PostgreUserRepo) GetTagsByID(ctx context.Context, id uint64) ([]string, error) {
 	sel := `select
 				tag_name
 			from
@@ -209,17 +271,7 @@ func (p *PostgreUserRepo) getTagsByID(ctx context.Context, id uint64) ([]string,
 	return tags, nil
 }
 
-func (p *PostgreUserRepo) CreateTag(ctx context.Context, tag_name string) error {
-	sel := "insert into tag(tag_name) values($1);"
-
-	if err := p.conn.QueryRow(sel, tag_name).Scan(); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (p *PostgreUserRepo) getImgs(ctx context.Context, id uint64) ([]string, error) {
+func (p *PostgreUserRepo) GetImgsByID(ctx context.Context, id uint64) ([]string, error) {
 	sel := "SELECT imgs FROM profile WHERE id=$1;"
 
 	var imgs []string
@@ -230,12 +282,22 @@ func (p *PostgreUserRepo) getImgs(ctx context.Context, id uint64) ([]string, err
 	return imgs, nil
 }
 
-func (p *PostgreUserRepo) insertTags(ctx context.Context, id uint64, tags []string) error {
+func (p *PostgreUserRepo) CreateTag(ctx context.Context, tag_name string) error {
+	sel := "insert into tag(tag_name) values($1);"
+
+	if err := p.conn.QueryRow(sel, tag_name).Scan(); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (p *PostgreUserRepo) InsertTags(ctx context.Context, id uint64, tags []string) error {
 	if len(tags) == 0 {
 		return nil
 	}
 
-	query := "insert into profile_tag(profile_id, tag_id)\nvalues\n"
+	query := "insert into profile_tag(profile_id, tag_id) values"
 
 	vals := []interface{}{}
 	vals = append(vals, id)
@@ -253,9 +315,6 @@ func (p *PostgreUserRepo) insertTags(ctx context.Context, id uint64, tags []stri
 	sb.WriteString(strings.Join(inserts, ",\n"))
 	sb.WriteString(";")
 	query = sb.String()
-
-	fmt.Println(query)
-	fmt.Println(vals)
 
 	stmt, _ := p.conn.Prepare(query)
 	_, err := stmt.Exec(vals...)
@@ -316,6 +375,52 @@ func (p *PostgreUserRepo) IsSwiped(ctx context.Context, userID, swipedUserID uin
 	return resp, nil
 }
 
-func (p *PostgreUserRepo) GetNextUserForSwipe(ctx context.Context, currentUserId uint64) (models.User, error) {
-	return models.User{}, nil
+func (p *PostgreUserRepo) GetNextUserForSwipe(ctx context.Context, currentUserId uint64) ([]models.User, error) {
+	query := `select
+				op.id,
+				op.name,
+				op.email,
+				op.password,
+				op.date,
+				op.description
+			from
+				(
+				select
+					r.id1 as rid1,
+					r.id2 as rid2
+				from
+					reactions r
+				where
+					r.id1 = $1
+				) prevReact
+				right join profile op on prevReact.rid2 = op.id
+			where
+				prevReact.rid1 is null
+				and op.id <> $1
+				and op.name <> '' and op.date <> '' limit 5;`
+
+	var notSwipedUser []models.User
+	err := p.conn.Select(&notSwipedUser, query, currentUserId)
+	if err != nil {
+		return nil, err
+	}
+
+	for idx := range notSwipedUser {
+		notSwipedUser[idx].Age, err = getAgeFromDate(notSwipedUser[idx].Date)
+		if err != nil {
+			return nil, err
+		}
+
+		notSwipedUser[idx].Imgs, err = p.GetImgsByID(ctx, currentUserId)
+		if err != nil {
+			return nil, err
+		}
+
+		notSwipedUser[idx].Tags, err = p.GetTagsByID(ctx, currentUserId)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return notSwipedUser, nil
 }

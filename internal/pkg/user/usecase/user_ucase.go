@@ -70,8 +70,7 @@ func sendResp(resp models.JSON, w http.ResponseWriter) {
 func (h *userUsecase) getUserByCookie(c context.Context, sessionCookie string) (models.User, error) {
 	userID, err := h.Session.GetUserIDByCookie(sessionCookie)
 	if err != nil {
-		return models.User{},
-			err
+		return models.User{}, err
 	}
 
 	user, err := h.UserRepo.GetUserByID(c, userID)
@@ -124,7 +123,7 @@ func (h *userUsecase) EditProfile(c context.Context, newUserData models.User, r 
 		return models.User{}, StatusBadRequest
 	}
 
-	err = h.UserRepo.UpdateUser(c, currentUser)
+	_, err = h.UserRepo.UpdateUser(c, currentUser)
 	if err != nil {
 		log.Printf("CODE %d ERROR %s", StatusInternalServerError, err)
 		return models.User{}, StatusInternalServerError
@@ -269,8 +268,7 @@ func (h *userUsecase) Login(c context.Context, logUserData models.LoginUser, w h
 	if identifiableUser.IsCorrectPassword(logUserData.Password) {
 		cookie := createSessionCookie(logUserData)
 
-		if !h.Session.IsSessionByUserID(identifiableUser.ID) {
-			// http.SetCookie(w, &cookie)
+		if !h.Session.IsSessionByCookie(cookie.Value) {
 			err = h.Session.NewSessionCookie(cookie.Value, identifiableUser.ID)
 			if err != nil {
 				log.Printf("CODE %d ERROR %s", StatusInternalServerError, err)
@@ -279,6 +277,7 @@ func (h *userUsecase) Login(c context.Context, logUserData models.LoginUser, w h
 		}
 		http.SetCookie(w, &cookie)
 
+    log.Printf("CODE %d", StatusOK)
 		return identifiableUser, StatusOK
 	} else {
 		log.Printf("CODE %d ERROR %s", StatusNotFound, errors.New("not correct password"))
@@ -325,6 +324,7 @@ func (h *userUsecase) Signup(c context.Context, logUserData models.LoginUser, w 
 		return StatusEmailAlreadyExists
 	}
 
+	logUserData.Password = models.HashPassword(logUserData.Password)
 	user, err := h.UserRepo.CreateUser(c, logUserData)
 	if err != nil {
 		log.Printf("CODE %d ERROR %s", StatusInternalServerError, err)
@@ -337,7 +337,15 @@ func (h *userUsecase) Signup(c context.Context, logUserData models.LoginUser, w 
 	if err != nil {
 		log.Printf("CODE %d ERROR %s", StatusInternalServerError, err)
 		return StatusInternalServerError
-	}
+  }
+// =======
+// 	if !h.Session.IsSessionByCookie(cookie.Value) {
+// 		err = h.Session.NewSessionCookie(cookie.Value, user.ID)
+// 		if err != nil {
+// 			log.Printf("CODE %d ERROR %s", StatusInternalServerError, err)
+// 			return StatusInternalServerError
+// 		}
+// >>>>>>> dev
 	http.SetCookie(w, &cookie)
 
 	log.Printf("CODE %d", StatusOK)
@@ -345,7 +353,7 @@ func (h *userUsecase) Signup(c context.Context, logUserData models.LoginUser, w 
 	return StatusOK
 }
 
-func (h *userUsecase) NextUser(c context.Context, swipedUserData models.SwipedUser, r *http.Request) (models.User, int) {
+func (h *userUsecase) NextUser(c context.Context, r *http.Request) ([]models.User, int) {
 	ctx, cancel := context.WithTimeout(c, h.contextTimeout)
 	defer cancel()
 
@@ -353,44 +361,46 @@ func (h *userUsecase) NextUser(c context.Context, swipedUserData models.SwipedUs
 	session, err := r.Cookie("sessionId")
 	if err == http.ErrNoCookie {
 		log.Printf("CODE %d ERROR %s", StatusNotFound, err)
-		return models.User{}, StatusNotFound
+		return []models.User{}, StatusNotFound
 	}
 	currentUser, err := h.getUserByCookie(ctx, session.Value)
 	if err != nil {
 		log.Printf("CODE %d ERROR %s", StatusNotFound, err)
-		return models.User{}, StatusNotFound
+		return []models.User{}, StatusNotFound
 	}
 
 	// add in swaped users map for current user
-	err = h.UserRepo.AddSwipedUsers(ctx, currentUser.ID, swipedUserData.Id, "like")
-	if err != nil {
-		log.Printf("CODE %d ERROR %s", StatusNotFound, err)
-		return models.User{}, StatusNotFound
-	}
+	// err = h.UserRepo.AddSwipedUsers(ctx, currentUser.ID, swipedUserData.Id, "like")
+	// if err != nil {
+	// 	log.Printf("CODE %d ERROR %s", StatusNotFound, err)
+	// 	return models.User{}, StatusNotFound
+	// }
 	// find next user for swipe
-	nextUser, err := h.UserRepo.GetNextUserForSwipe(ctx, currentUser.ID)
+	nextUsers, err := h.UserRepo.GetNextUserForSwipe(ctx, currentUser.ID)
 	if err != nil {
 		log.Printf("CODE %d ERROR %s", StatusNotFound, err)
-		return models.User{}, StatusNotFound
+		return []models.User{}, StatusNotFound
 	}
 
 	log.Printf("CODE %d", StatusOK)
 
-	return nextUser, StatusOK
+	return nextUsers, StatusOK
 }
 
 func (h *userUsecase) GetAllTags(c context.Context, r *http.Request) (models.Tags, int) {
 	ctx, cancel := context.WithTimeout(c, h.contextTimeout)
 	defer cancel()
 
-	allTags := h.UserRepo.GetTags(ctx)
+	allTags, err := h.UserRepo.GetTags(ctx)
+	if err != nil {
+		return models.Tags{}, StatusNotFound
+	}
 	var respTag models.Tag
 	var currentAllTags = make(map[uint64]models.Tag)
 	var respAllTags models.Tags
 	counter := 0
 
-	for key, value := range allTags {
-		respTag.Id = key
+	for _, value := range allTags {
 		respTag.Tag_Name = value
 		currentAllTags[uint64(counter)] = respTag
 		counter++
