@@ -87,6 +87,10 @@ func (db *MockDB) DeleteUser(ctx context.Context, user models.User) error {
 	return nil
 }
 
+func (db *MockDB) DeleteTags(ctx context.Context, userId uint64) error {
+	return nil
+}
+
 func (db *MockDB) InsertTags(ctx context.Context, id uint64, tags []string) error {
 	return nil
 }

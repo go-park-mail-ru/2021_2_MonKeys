@@ -149,7 +149,7 @@ func (p *PostgreUserRepo) CreateUserAndProfile(ctx context.Context, user models.
 
 func (p *PostgreUserRepo) UpdateUser(ctx context.Context, newUserData *models.User) (models.User, error) {
 	query := `update profile
-		set name=$1, date=$3, description=$4, imgs=&5
+		set name=$1, date=$3, description=$4, imgs=$5
 		where email=$2
 		RETURNING id, email, password, name, email, password, date, description;`
 
@@ -157,16 +157,44 @@ func (p *PostgreUserRepo) UpdateUser(ctx context.Context, newUserData *models.Us
 	err := p.conn.GetContext(ctx, &RespUser, query, newUserData.Name, newUserData.Email, newUserData.Date,
 		newUserData.Description, pq.Array(newUserData.Imgs))
 
-	RespUser.Imgs, err = p.GetImgsByID(ctx, RespUser.ID)
-	if err != nil {
-		return models.User{}, err
+	if len(newUserData.Tags) != 0 {
+		err = p.DeleteTags(ctx, newUserData.ID)
+		if err != nil {
+			return models.User{}, err
+		}
+		err = p.InsertTags(ctx, newUserData.ID, newUserData.Tags)
+		if err != nil {
+			return models.User{}, err
+		}
 	}
-	RespUser.Tags, err = p.GetTagsByID(ctx, RespUser.ID)
-	if err != nil {
-		return models.User{}, err
+
+	if len(newUserData.Imgs) != 0 {
+		RespUser.Imgs, err = p.GetImgsByID(ctx, RespUser.ID)
+		if err != nil {
+			return models.User{}, err
+		}
+	}
+
+	if len(newUserData.Tags) != 0 {
+		RespUser.Tags, err = p.GetTagsByID(ctx, RespUser.ID)
+		if err != nil {
+			return models.User{}, err
+		}
 	}
 
 	return RespUser, err
+}
+
+func (p *PostgreUserRepo) DeleteTags(ctx context.Context, userId uint64) error {
+	query := `delete from profile_tag where profile_id=$1`
+
+	stmt, _ := p.conn.Prepare(query)
+	_, err := stmt.Exec(userId)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (p *PostgreUserRepo) DeleteUser(ctx context.Context, user models.User) error {
@@ -180,7 +208,7 @@ func (p *PostgreUserRepo) DeleteUser(ctx context.Context, user models.User) erro
 }
 
 func (p *PostgreUserRepo) GetTags(ctx context.Context) (map[uint64]string, error) {
-	query := `select id, tag_name from tag;`
+	query := `select tag_name from tag;`
 
 	var tags []models.Tag
 	err := p.conn.Select(&tags, query)
@@ -267,7 +295,7 @@ func (p *PostgreUserRepo) InsertTags(ctx context.Context, id uint64, tags []stri
 		return nil
 	}
 
-	query := "insert into profile_tag(profile_id, tag_id)\nvalues\n"
+	query := "insert into profile_tag(profile_id, tag_id) values"
 
 	vals := []interface{}{}
 	vals = append(vals, id)
@@ -285,9 +313,6 @@ func (p *PostgreUserRepo) InsertTags(ctx context.Context, id uint64, tags []stri
 	sb.WriteString(strings.Join(inserts, ",\n"))
 	sb.WriteString(";")
 	query = sb.String()
-
-	fmt.Println(query)
-	fmt.Println(vals)
 
 	stmt, _ := p.conn.Prepare(query)
 	_, err := stmt.Exec(vals...)

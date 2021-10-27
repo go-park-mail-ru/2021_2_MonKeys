@@ -119,6 +119,7 @@ type UserRepository interface {
 	DropSwipes(ctx context.Context) error
 	DropUsers(ctx context.Context) error
 	Init()
+	DeleteTags(ctx context.Context, userId uint64) error
 	GetTagsByID(ctx context.Context, id uint64) ([]string, error)
 	GetImgsByID(ctx context.Context, id uint64) ([]string, error)
 	CreateTag(ctx context.Context, tag_name string) error

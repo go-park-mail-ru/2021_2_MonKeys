@@ -295,3 +295,108 @@
 2021/10/27 10:59:39 LOG [GET] [::1]:58394, /api/v1/user/cards 1.7µs
 2021/10/27 10:59:39 CODE 200
 2021/10/27 10:59:44 LOG [GET] [::1]:58394, /api/v1/tags 3.9µs
+2021/10/27 14:01:14 LOG [GET] [::1]:58524, /api/v1/profile 1.7µs
+2021/10/27 14:01:14 CODE 404 ERROR not exixsts this cookie
+2021/10/27 14:01:32 LOG [POST] [::1]:58526, /api/v1/session 2.1µs
+2021/10/27 14:01:32 CODE 404 ERROR pq: relation "profile" does not exist
+2021/10/27 14:01:55 LOG [POST] [::1]:58536, /api/v1/session 2.4µs
+2021/10/27 14:01:55 CODE 404 ERROR pq: relation "profile" does not exist
+2021/10/27 14:02:07 LOG [POST] [::1]:58542, /api/v1/profile 3.2µs
+2021/10/27 14:02:07 CODE 500 ERROR pq: relation "profile" does not exist
+2021/10/27 14:08:12 LOG [GET] [::1]:58708, /api/v1/profile 2.6µs
+2021/10/27 14:08:12 CODE 404 ERROR http: named cookie not present
+2021/10/27 14:08:21 LOG [POST] [::1]:58710, /api/v1/profile 2µs
+2021/10/27 14:08:21 CODE 200
+2021/10/27 14:08:31 LOG [OPTIONS] [::1]:58720, /api/v1/profile 38.9µs
+2021/10/27 14:08:31 LOG [PUT] [::1]:58722, /api/v1/profile 2.4µs
+2021/10/27 14:08:31 CODE 500 ERROR sql: no rows in result set
+2021/10/27 14:10:45 LOG [GET] [::1]:58752, /api/v1/profile 2.3µs
+2021/10/27 14:10:45 CODE 404 ERROR not exixsts this cookie
+2021/10/27 14:10:57 LOG [POST] [::1]:58754, /api/v1/profile 2.3µs
+2021/10/27 14:10:57 CODE 200
+2021/10/27 14:11:02 LOG [OPTIONS] [::1]:58764, /api/v1/profile 2µs
+2021/10/27 14:11:02 LOG [PUT] [::1]:58754, /api/v1/profile 2.4µs
+2021/10/27 14:11:02 CODE 500 ERROR pq: syntax error at or near "=&"
+2021/10/27 14:11:42 LOG [GET] [::1]:58790, /api/v1/profile 3µs
+2021/10/27 14:11:42 CODE 404 ERROR not exixsts this cookie
+2021/10/27 14:11:58 LOG [POST] [::1]:58792, /api/v1/profile 1.8µs
+2021/10/27 14:11:58 CODE 200
+2021/10/27 14:12:03 LOG [OPTIONS] [::1]:58802, /api/v1/profile 6.4µs
+2021/10/27 14:12:03 LOG [PUT] [::1]:58804, /api/v1/profile 3.3µs
+2021/10/27 14:12:03 CODE 200
+2021/10/27 14:12:12 LOG [OPTIONS] [::1]:58820, /api/v1/profile 2.4µs
+2021/10/27 14:12:12 LOG [PUT] [::1]:58822, /api/v1/profile 1.5µs
+2021/10/27 14:12:12 CODE 200
+2021/10/27 14:12:14 LOG [GET] [::1]:58822, /api/v1/tags 6.5µs
+2021/10/27 14:12:15 LOG [GET] [::1]:58822, /api/v1/tags 140.4µs
+2021/10/27 14:14:58 LOG [GET] [::1]:58852, /api/v1/tags 2.7µs
+2021/10/27 14:15:42 LOG [POST] [::1]:58878, /api/v1/profile 1.5µs
+2021/10/27 14:15:42 CODE 200
+2021/10/27 14:15:50 LOG [GET] [::1]:58878, /api/v1/tags 5.3µs
+2021/10/27 14:16:04 LOG [OPTIONS] [::1]:58884, /api/v1/profile 1.8µs
+2021/10/27 14:16:04 LOG [PUT] [::1]:58878, /api/v1/profile 1.5µs
+2021/10/27 14:16:04 CODE 200
+2021/10/27 14:16:07 LOG [OPTIONS] [::1]:58884, /api/v1/profile 6.1µs
+2021/10/27 14:16:07 LOG [PUT] [::1]:58878, /api/v1/profile 5.5µs
+2021/10/27 14:16:07 CODE 200
+2021/10/27 14:16:13 LOG [OPTIONS] [::1]:58884, /api/v1/profile 6µs
+2021/10/27 14:16:13 LOG [PUT] [::1]:58878, /api/v1/profile 3.8µs
+2021/10/27 14:16:13 CODE 200
+2021/10/27 14:16:17 LOG [OPTIONS] [::1]:58884, /api/v1/profile 13.2µs
+2021/10/27 14:16:17 LOG [PUT] [::1]:58878, /api/v1/profile 3.3µs
+2021/10/27 14:16:17 CODE 200
+2021/10/27 14:24:29 LOG [POST] [::1]:58948, /api/v1/profile 1.3µs
+2021/10/27 14:24:29 CODE 200
+2021/10/27 14:24:41 LOG [GET] [::1]:58948, /api/v1/tags 4.5µs
+2021/10/27 14:24:52 LOG [OPTIONS] [::1]:58960, /api/v1/profile 3.8µs
+2021/10/27 14:24:52 LOG [PUT] [::1]:58948, /api/v1/profile 2.3µs
+2021/10/27 14:24:52 CODE 500 ERROR sql: no rows in result set
+2021/10/27 14:34:09 LOG [OPTIONS] [::1]:59008, /api/v1/profile 2.5µs
+2021/10/27 14:34:09 LOG [PUT] [::1]:59010, /api/v1/profile 1.6µs
+2021/10/27 14:34:09 CODE 404 ERROR not exixsts this cookie
+2021/10/27 14:34:18 LOG [GET] [::1]:59024, /api/v1/profile 24.1µs
+2021/10/27 14:34:18 CODE 404 ERROR http: named cookie not present
+2021/10/27 14:34:29 LOG [POST] [::1]:59024, /api/v1/profile 5.6µs
+2021/10/27 14:34:29 CODE 200
+2021/10/27 14:34:35 LOG [GET] [::1]:59024, /api/v1/tags 2.2µs
+2021/10/27 14:34:37 LOG [OPTIONS] [::1]:59032, /api/v1/profile 3µs
+2021/10/27 14:34:37 LOG [PUT] [::1]:59024, /api/v1/profile 3µs
+2021/10/27 14:34:37 CODE 500 ERROR sql: no rows in result set
+2021/10/27 14:35:22 LOG [GET] [::1]:59054, /api/v1/profile 2.2µs
+2021/10/27 14:35:22 CODE 404 ERROR not exixsts this cookie
+2021/10/27 14:35:32 LOG [POST] [::1]:59054, /api/v1/profile 5.9µs
+2021/10/27 14:35:33 CODE 200
+2021/10/27 14:35:36 LOG [GET] [::1]:59054, /api/v1/tags 5.9µs
+2021/10/27 14:35:39 LOG [OPTIONS] [::1]:59060, /api/v1/profile 2.9µs
+2021/10/27 14:35:39 LOG [PUT] [::1]:59054, /api/v1/profile 2µs
+2021/10/27 14:35:39 CODE 200
+2021/10/27 14:41:23 LOG [GET] [::1]:59114, /api/v1/profile 3.4µs
+2021/10/27 14:41:23 CODE 404 ERROR http: named cookie not present
+2021/10/27 14:41:34 LOG [POST] [::1]:59118, /api/v1/profile 2.5µs
+2021/10/27 14:41:34 CODE 200
+2021/10/27 14:41:40 LOG [GET] [::1]:59118, /api/v1/tags 2.1µs
+2021/10/27 14:41:42 LOG [OPTIONS] [::1]:59126, /api/v1/profile 2.8µs
+2021/10/27 14:41:42 LOG [PUT] [::1]:59118, /api/v1/profile 2.8µs
+2021/10/27 14:41:42 CODE 500 ERROR sql: no rows in result set
+2021/10/27 14:45:16 LOG [OPTIONS] [::1]:59156, /api/v1/profile 2.6µs
+2021/10/27 14:45:16 LOG [PUT] [::1]:59158, /api/v1/profile 1.2µs
+2021/10/27 14:45:16 CODE 404 ERROR not exixsts this cookie
+2021/10/27 14:45:26 LOG [GET] [::1]:59158, /api/v1/profile 2.3µs
+2021/10/27 14:45:26 CODE 404 ERROR not exixsts this cookie
+2021/10/27 14:45:49 LOG [POST] [::1]:59174, /api/v1/profile 3.5µs
+2021/10/27 14:45:49 CODE 200
+2021/10/27 14:46:11 LOG [GET] [::1]:59174, /api/v1/tags 5.9µs
+2021/10/27 14:46:14 LOG [OPTIONS] [::1]:59186, /api/v1/profile 2.9µs
+2021/10/27 14:46:14 LOG [PUT] [::1]:59174, /api/v1/profile 1.9µs
+2021/10/27 14:46:15 CODE 500 ERROR sql: no rows in result set
+2021/10/27 14:48:47 LOG [GET] [::1]:59220, /api/v1/profile 2.4µs
+2021/10/27 14:48:47 CODE 404 ERROR not exixsts this cookie
+2021/10/27 14:49:14 LOG [POST] [::1]:59220, /api/v1/profile 4.4µs
+2021/10/27 14:49:14 CODE 200
+2021/10/27 14:49:34 LOG [GET] [::1]:59220, /api/v1/tags 7.2µs
+2021/10/27 14:49:39 LOG [OPTIONS] [::1]:59230, /api/v1/profile 2.1µs
+2021/10/27 14:49:39 LOG [PUT] [::1]:59220, /api/v1/profile 2µs
+2021/10/27 14:49:39 CODE 200
+2021/10/27 14:50:02 LOG [OPTIONS] [::1]:59230, /api/v1/profile 7.2µs
+2021/10/27 14:50:02 LOG [PUT] [::1]:59220, /api/v1/profile 4µs
+2021/10/27 14:50:02 CODE 200
