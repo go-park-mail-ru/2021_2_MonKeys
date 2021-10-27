@@ -152,8 +152,6 @@ func (h *userUsecase) AddPhoto(c context.Context, w http.ResponseWriter, r *http
 		return
 	}
 
-
-
 	err = r.ParseMultipartForm(maxPhotoSize)
 	if err != nil {
 		resp.Status = StatusBadRequest
@@ -170,8 +168,6 @@ func (h *userUsecase) AddPhoto(c context.Context, w http.ResponseWriter, r *http
 	}
 	defer uploadedPhoto.Close()
 
-
-
 	currentUser.SaveNewPhoto()
 
 	err = h.UserRepo.AddPhoto(c, currentUser, uploadedPhoto)
@@ -181,7 +177,6 @@ func (h *userUsecase) AddPhoto(c context.Context, w http.ResponseWriter, r *http
 		log.Printf("CODE %d ERROR %s", resp.Status, err)
 		return
 	}
-
 
 	resp.Status = StatusOK
 	resp.Body = models.Photo{Title: currentUser.GetLastPhoto()}
@@ -206,9 +201,6 @@ func (h *userUsecase) DeletePhoto(c context.Context, w http.ResponseWriter, r *h
 		return
 	}
 
-
-
-
 	byteReq, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		resp.Status = StatusBadRequest
@@ -226,8 +218,6 @@ func (h *userUsecase) DeletePhoto(c context.Context, w http.ResponseWriter, r *h
 		return
 	}
 
-
-
 	if currentUser.IsHavePhoto(photo.Title) {
 		resp.Status = StatusBadRequest
 		sendResp(resp, w)
@@ -242,7 +232,6 @@ func (h *userUsecase) DeletePhoto(c context.Context, w http.ResponseWriter, r *h
 		log.Printf("CODE %d ERROR %s", resp.Status, err)
 		return
 	}
-
 
 	resp.Status = StatusOK
 	sendResp(resp, w)
@@ -277,7 +266,7 @@ func (h *userUsecase) Login(c context.Context, logUserData models.LoginUser, w h
 		}
 		http.SetCookie(w, &cookie)
 
-    log.Printf("CODE %d", StatusOK)
+		log.Printf("CODE %d", StatusOK)
 		return identifiableUser, StatusOK
 	} else {
 		log.Printf("CODE %d ERROR %s", StatusNotFound, errors.New("not correct password"))
@@ -337,15 +326,15 @@ func (h *userUsecase) Signup(c context.Context, logUserData models.LoginUser, w 
 	if err != nil {
 		log.Printf("CODE %d ERROR %s", StatusInternalServerError, err)
 		return StatusInternalServerError
-  }
-// =======
-// 	if !h.Session.IsSessionByCookie(cookie.Value) {
-// 		err = h.Session.NewSessionCookie(cookie.Value, user.ID)
-// 		if err != nil {
-// 			log.Printf("CODE %d ERROR %s", StatusInternalServerError, err)
-// 			return StatusInternalServerError
-// 		}
-// >>>>>>> dev
+	}
+	// =======
+	// 	if !h.Session.IsSessionByCookie(cookie.Value) {
+	// 		err = h.Session.NewSessionCookie(cookie.Value, user.ID)
+	// 		if err != nil {
+	// 			log.Printf("CODE %d ERROR %s", StatusInternalServerError, err)
+	// 			return StatusInternalServerError
+	// 		}
+	// >>>>>>> dev
 	http.SetCookie(w, &cookie)
 
 	log.Printf("CODE %d", StatusOK)

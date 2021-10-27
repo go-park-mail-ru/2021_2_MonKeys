@@ -82,7 +82,6 @@ func main() {
 		ReadTimeout:  http.DefaultClient.Timeout,
 	}
 
-
 	staticHandler := http.StripPrefix(
 		"/media/",
 		http.FileServer(http.Dir("./media")),
@@ -97,7 +96,6 @@ func main() {
 			log.Println("media server died:\n", err)
 		}
 	}()
-
 
 	log.Printf("STD starting server at %s\n", srv.Addr)
 

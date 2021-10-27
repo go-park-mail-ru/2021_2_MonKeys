@@ -51,7 +51,7 @@ type Photo struct {
 }
 
 func MakeUser(id uint64, email string, password string) User {
-	return User{ID: id, Email: email, Password: hashPassword(password)}
+	return User{ID: id, Email: email, Password: HashPassword(password)}
 }
 
 func HashPassword(password string) string {
@@ -114,7 +114,7 @@ func (user *User) GetNameToNewPhoto() string {
 
 	num, _ := strconv.Atoi(numStr)
 
-	return strconv.Itoa(num + 1) + ".png"
+	return strconv.Itoa(num+1) + ".png"
 }
 
 func (user *User) SaveNewPhoto() {
@@ -165,17 +165,14 @@ type UserRepository interface {
 	GetUser(ctx context.Context, email string) (User, error)
 	GetUserByID(ctx context.Context, userID uint64) (User, error)
 	CreateUser(ctx context.Context, logUserData LoginUser) (User, error)
-	UpdateUser(ctx context.Context, newUserData User) error
+	UpdateUser(ctx context.Context, newUserData User) (User, error)
 	AddPhoto(ctx context.Context, user User, newPhoto io.Reader) error
 	DeletePhoto(ctx context.Context, user User, photo string) error
-	AddSwipedUsers(ctx context.Context, currentUserId uint64, swipedUserId uint64, type_name string) error
-	GetNextUserForSwipe(ctx context.Context, currentUserId uint64) (User, error)
-	IsSwiped(ctx context.Context, userID, swipedUserID uint64) (bool, error)
 	CreateUserAndProfile(ctx context.Context, user User) (User, error)
-	DropUsers(ctx context.Context) error
 	DropSwipes(ctx context.Context) error
 	DropUsers(ctx context.Context) error
 	Init()
+	GetTags(ctx context.Context) (map[uint64]string, error)
 	DeleteTags(ctx context.Context, userId uint64) error
 	GetTagsByID(ctx context.Context, id uint64) ([]string, error)
 	GetImgsByID(ctx context.Context, id uint64) ([]string, error)

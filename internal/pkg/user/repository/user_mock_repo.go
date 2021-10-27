@@ -27,68 +27,68 @@ func NewMockDB() *MockDB {
 	return &MockDB{make(map[uint64]models.User), make(map[uint64][]uint64), make(map[uint64]string)}
 }
 
-func (newDB *MockDB) MockDB() {
-	newDB.CreateUserAndProfile(context.TODO(), models.User{
-		ID:          1,
-		Name:        "Mikhail",
-		Email:       "lol1@mail.ru",
-		Password:    "af57966e1958f52e41550e822dd8e8a4", //VBif222!
-		Date:        "2012-12-12",
-		Age:         "20",
-		Description: "Hahahahaha",
-		Imgs:        []string{"/img/Yachty-tout.jpg"},
-		Tags:        []string{"soccer", "anime"},
-	})
-	newDB.CreateUserAndProfile(context.TODO(), models.User{
-		ID:          2,
-		Name:        "Mikhail2",
-		Email:       "lol2@mail.ru",
-		Password:    "af57966e1958f52e41550e822dd8e8a4", //VBif222!
-		Date:        "2012-12-12",
-		Age:         "20",
-		Description: "Hahahahaha",
-		Imgs:        []string{"/img/Yachty-tout.jpg"},
-		Tags:        []string{"soccer", "anime"},
-	})
-	newDB.CreateUserAndProfile(context.TODO(), models.User{
-		ID:          3,
-		Name:        "Mikhail3",
-		Email:       "lol3@mail.ru",
-		Password:    "af57966e1958f52e41550e822dd8e8a4", //VBif222!
-		Date:        "2012-12-12",
-		Age:         "20",
-		Description: "Hahahahaha",
-		Imgs:        []string{"/img/Yachty-tout.jpg"},
-		Tags:        []string{"soccer", "anime"},
-	})
-	newDB.CreateUserAndProfile(context.TODO(), models.User{
-		ID:          4,
-		Name:        "Mikhail4",
-		Email:       "lol4@mail.ru",
-		Password:    "af57966e1958f52e41550e822dd8e8a4", //VBif222!
-		Date:        "2012-12-12",
-		Age:         "20",
-		Description: "Hahahahaha",
-		Imgs:        []string{"/img/Yachty-tout.jpg"},
-		Tags:        []string{"soccer", "anime"},
-	})
-	newDB.CreateTag(context.TODO(), "anime")
-	newDB.CreateTag(context.TODO(), "netflix")
-	newDB.CreateTag(context.TODO(), "games")
-	newDB.CreateTag(context.TODO(), "walk")
-	newDB.CreateTag(context.TODO(), "JS")
-	newDB.CreateTag(context.TODO(), "baumanka")
-	newDB.CreateTag(context.TODO(), "music")
-	newDB.CreateTag(context.TODO(), "sport")
-}
+// func (newDB *MockDB) MockDB() {
+// 	newDB.CreateUserAndProfile(context.TODO(), models.User{
+// 		ID:          1,
+// 		Name:        "Mikhail",
+// 		Email:       "lol1@mail.ru",
+// 		Password:    "af57966e1958f52e41550e822dd8e8a4", //VBif222!
+// 		Date:        "2012-12-12",
+// 		Age:         "20",
+// 		Description: "Hahahahaha",
+// 		Imgs:        []string{"/img/Yachty-tout.jpg"},
+// 		Tags:        []string{"soccer", "anime"},
+// 	})
+// 	newDB.CreateUserAndProfile(context.TODO(), models.User{
+// 		ID:          2,
+// 		Name:        "Mikhail2",
+// 		Email:       "lol2@mail.ru",
+// 		Password:    "af57966e1958f52e41550e822dd8e8a4", //VBif222!
+// 		Date:        "2012-12-12",
+// 		Age:         "20",
+// 		Description: "Hahahahaha",
+// 		Imgs:        []string{"/img/Yachty-tout.jpg"},
+// 		Tags:        []string{"soccer", "anime"},
+// 	})
+// 	newDB.CreateUserAndProfile(context.TODO(), models.User{
+// 		ID:          3,
+// 		Name:        "Mikhail3",
+// 		Email:       "lol3@mail.ru",
+// 		Password:    "af57966e1958f52e41550e822dd8e8a4", //VBif222!
+// 		Date:        "2012-12-12",
+// 		Age:         "20",
+// 		Description: "Hahahahaha",
+// 		Imgs:        []string{"/img/Yachty-tout.jpg"},
+// 		Tags:        []string{"soccer", "anime"},
+// 	})
+// 	newDB.CreateUserAndProfile(context.TODO(), models.User{
+// 		ID:          4,
+// 		Name:        "Mikhail4",
+// 		Email:       "lol4@mail.ru",
+// 		Password:    "af57966e1958f52e41550e822dd8e8a4", //VBif222!
+// 		Date:        "2012-12-12",
+// 		Age:         "20",
+// 		Description: "Hahahahaha",
+// 		Imgs:        []string{"/img/Yachty-tout.jpg"},
+// 		Tags:        []string{"soccer", "anime"},
+// 	})
+// 	newDB.CreateTag(context.TODO(), "anime")
+// 	newDB.CreateTag(context.TODO(), "netflix")
+// 	newDB.CreateTag(context.TODO(), "games")
+// 	newDB.CreateTag(context.TODO(), "walk")
+// 	newDB.CreateTag(context.TODO(), "JS")
+// 	newDB.CreateTag(context.TODO(), "baumanka")
+// 	newDB.CreateTag(context.TODO(), "music")
+// 	newDB.CreateTag(context.TODO(), "sport")
+// }
 
-func (db *MockDB) CreateUser(ctx context.Context, logUserData *models.LoginUser) (*models.User, error) {
-	newID := uint64(len(db.users) + 1)
+// func (db *MockDB) CreateUser(ctx context.Context, logUserData *models.LoginUser) (*models.User, error) {
+// 	newID := uint64(len(db.users) + 1)
 
-	db.users[newID] = models.NewUser(newID, logUserData.Email, logUserData.Password)
+// 	db.users[newID] = models.NewUser(newID, logUserData.Email, logUserData.Password)
 
-	return db.users[newID], nil
-}
+// 	return db.users[newID], nil
+// }
 
 func (db *MockDB) GetImgsByID(ctx context.Context, id uint64) ([]string, error) {
 	return nil, nil
@@ -138,24 +138,24 @@ func getPathUserPhoto(user models.User) string {
 	return basePhotoPath + "/" + user.Email
 }
 
-func (db *MockDB) CreateUser(ctx context.Context, logUserData models.LoginUser) (models.User, error) {
-	newID := uint64(len(db.users) + 1)
+// func (db *MockDB) CreateUser(ctx context.Context, logUserData models.LoginUser) (models.User, error) {
+// 	newID := uint64(len(db.users) + 1)
 
-	db.users[newID] = models.MakeUser(newID, logUserData.Email, logUserData.Password)
+// 	db.users[newID] = models.MakeUser(newID, logUserData.Email, logUserData.Password)
 
-	err := os.Mkdir(getPathUserPhoto(db.users[newID]), 0777)
-	if err != nil {
-		return models.User{}, err
-	}
+// 	err := os.Mkdir(getPathUserPhoto(db.users[newID]), 0777)
+// 	if err != nil {
+// 		return models.User{}, err
+// 	}
 
-	return db.users[newID], nil
-}
+// 	return db.users[newID], nil
+// }
 
-func (db *MockDB) UpdateUser(ctx context.Context, newUserData models.User) (err error) {
-	db.users[newUserData.ID] = newUserData
+// func (db *MockDB) UpdateUser(ctx context.Context, newUserData models.User) (err error) {
+// 	db.users[newUserData.ID] = newUserData
 
-	return models.User{}, nil
-}
+// 	return models.User{}, nil
+// }
 
 func (db *MockDB) AddPhoto(ctx context.Context, user models.User, newPhoto io.Reader) error {
 	photoPath := getPathUserPhoto(user) + "/" + user.GetNameToNewPhoto()
@@ -204,14 +204,14 @@ func (db *MockDB) GetNextUserForSwipe(ctx context.Context, currentUserId uint64)
 	if len(db.users) == 0 {
 		return []models.User{}, errors.New("users is empty map")
 	}
-// 	if len(db.swipedUsers) == 0 {
-// 		for key, value := range db.users {
-// 			if key != currentUserId {
-// 				return value, nil
-// 			}
-// 		}
-// 		return []models.User{}, errors.New("haven't any other users for swipe")
-// 	}
+	// 	if len(db.swipedUsers) == 0 {
+	// 		for key, value := range db.users {
+	// 			if key != currentUserId {
+	// 				return value, nil
+	// 			}
+	// 		}
+	// 		return []models.User{}, errors.New("haven't any other users for swipe")
+	// 	}
 	// if len(db.swipedUsers) == 0 {
 	// 	for key, value := range db.users {
 	// 		if key != currentUserId {
@@ -267,15 +267,15 @@ func (db *MockDB) IsSwiped(ctx context.Context, userID, swipedUserID uint64) (bo
 	return false, nil
 }
 
-func (db *MockDB) CreateUserAndProfile(ctx context.Context, user models.User) (models.User, error) {
-	newID := uint64(len(db.users) + 1)
+// func (db *MockDB) CreateUserAndProfile(ctx context.Context, user models.User) (models.User, error) {
+// 	newID := uint64(len(db.users) + 1)
 
-	user.ID = newID
+// 	user.ID = newID
 
-	db.users[newID] = &user
+// 	db.users[newID] = &user
 
-	return user, nil
-}
+// 	return user, nil
+// }
 
 func (db *MockDB) DropUsers(ctx context.Context) error {
 	db.users = make(map[uint64]models.User)
