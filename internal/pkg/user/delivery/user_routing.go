@@ -23,6 +23,9 @@ func SetRouting(router *mux.Router, us models.UserUsecase) {
 	router.HandleFunc("/api/v1/profile", userHandler.EditProfileHandler).Methods("PUT", "OPTIONS")
 	router.HandleFunc("/api/v1/profile", userHandler.SignupHandler).Methods("POST", "OPTIONS")
 
+	router.HandleFunc("/api/v1/profile/photo", userHandler.UploadPhoto).Methods("POST", "OPTIONS")
+	router.HandleFunc("/api/v1/profile/photo", userHandler.DeletePhoto).Methods("DELETE", "OPTIONS")
+
 	router.HandleFunc("/api/v1/user/cards", userHandler.NextUserHandler).Methods("GET", "OPTIONS")
 
 	router.HandleFunc("/api/v1/tags", userHandler.GetAllTags).Methods("GET", "OPTIONS")

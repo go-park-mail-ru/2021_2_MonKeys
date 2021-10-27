@@ -67,7 +67,7 @@ func TestCurrentUser(t *testing.T) {
 		UserUCase: _userUCase.NewUserUsecase(testDB, testSessionDB, timeoutContext),
 	}
 
-	_, err := testDB.CreateUser(context.TODO(), &models.LoginUser{
+	_, err := testDB.CreateUser(context.TODO(), models.LoginUser{
 		Email:    "testCurrentUser1@mail.ru",
 		Password: "123456qQ",
 	})
@@ -135,7 +135,7 @@ func TestLogin(t *testing.T) {
 		UserUCase: _userUCase.NewUserUsecase(testDB, testSessionDB, timeoutContext),
 	}
 
-	_, err := testDB.CreateUser(context.TODO(), &models.LoginUser{
+	_, err := testDB.CreateUser(context.TODO(), models.LoginUser{
 		Email:    "testLogin1@mail.ru",
 		Password: "123456qQ",
 	})
@@ -175,7 +175,7 @@ func TestSignup(t *testing.T) {
 	email := "testSignup1@mail.ru"
 	password := "123456qQ"
 
-	expectedUser := models.NewUser(2, email, password)
+	expectedUser := models.MakeUser(2, email, password)
 
 	cases := []TestCase{
 		{
@@ -208,7 +208,7 @@ func TestSignup(t *testing.T) {
 
 	for caseNum, item := range cases {
 		testDB.DropUsers(context.TODO())
-		_, err := testDB.CreateUser(context.TODO(), &models.LoginUser{
+		_, err := testDB.CreateUser(context.TODO(), models.LoginUser{
 			Email:    "firsUser@mail.ru",
 			Password: "123456qQ",
 		})
@@ -283,7 +283,7 @@ func TestLogout(t *testing.T) {
 		UserUCase: _userUCase.NewUserUsecase(testDB, testSessionDB, timeoutContext),
 	}
 
-	user, err := testDB.CreateUser(context.TODO(), &models.LoginUser{
+	user, err := testDB.CreateUser(context.TODO(), models.LoginUser{
 		Email:    "testLogout1@mail.ru",
 		Password: "123456qQ",
 	})
@@ -379,7 +379,7 @@ func TestNextUser(t *testing.T) {
 		UserUCase: _userUCase.NewUserUsecase(testDB, testSessionDB, timeoutContext),
 	}
 
-	_, err := testDB.CreateUser(context.TODO(), &models.LoginUser{
+	_, err := testDB.CreateUser(context.TODO(), models.LoginUser{
 		Email:    "testNextUser1@mail.ru",
 		Password: "123456qQ\"",
 	})
@@ -387,7 +387,7 @@ func TestNextUser(t *testing.T) {
 		t.Errorf("Create user failed")
 	}
 
-	currenUser, _ := testDB.CreateUser(context.TODO(), &models.LoginUser{
+	currenUser, _ := testDB.CreateUser(context.TODO(), models.LoginUser{
 		Email:    "testCurrUser1@mail.ru",
 		Password: "123456qQ\"",
 	})
@@ -439,7 +439,7 @@ func TestEditProfile(t *testing.T) {
 		t.Error("marshal error")
 	}
 
-	expectedUser := models.NewUser(1, "testEdit@mail.ru", "123456qQ")
+	expectedUser := models.MakeUser(1, "testEdit@mail.ru", "123456qQ")
 	err = expectedUser.FillProfile(&models.User{
 		Name:        requestUser.Name,
 		Date:        requestUser.Date,
@@ -517,7 +517,7 @@ func TestEditProfile(t *testing.T) {
 	for caseNum, item := range cases {
 		testDB.DropUsers(context.TODO())
 		testSessionDB.DropCookies()
-		currenUser, err := testDB.CreateUser(context.TODO(), &models.LoginUser{
+		currenUser, err := testDB.CreateUser(context.TODO(), models.LoginUser{
 			Email:    expectedUser.Email,
 			Password: "123456qQ",
 		})

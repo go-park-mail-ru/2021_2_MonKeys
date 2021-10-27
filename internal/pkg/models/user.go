@@ -5,6 +5,7 @@ import (
 	"crypto/md5"
 	"errors"
 	"fmt"
+	"io"
 	"net/http"
 	"strconv"
 	"time"
@@ -45,8 +46,12 @@ type Tags struct {
 	Count   uint64         `json:"tagsCount"`
 }
 
-func NewUser(id uint64, email string, password string) *User {
-	return &User{ID: id, Email: email, Password: HashPassword(password)}
+type Photo struct {
+	Title string `json:"photo"`
+}
+
+func MakeUser(id uint64, email string, password string) User {
+	return User{ID: id, Email: email, Password: hashPassword(password)}
 }
 
 func HashPassword(password string) string {
@@ -90,6 +95,52 @@ func (user *User) FillProfile(newUserData *User) (err error) {
 	return nil
 }
 
+func (user *User) GetLastPhoto() string {
+	if len(user.Imgs) == 0 {
+		return "1.png"
+	}
+
+	return user.Imgs[len(user.Imgs)-1]
+}
+
+func (user *User) GetNameToNewPhoto() string {
+	if len(user.Imgs) == 0 {
+		return "1.png"
+	}
+
+	lastPhoto := user.GetLastPhoto()
+
+	numStr := lastPhoto[:len(lastPhoto)-4]
+
+	num, _ := strconv.Atoi(numStr)
+
+	return strconv.Itoa(num + 1) + ".png"
+}
+
+func (user *User) SaveNewPhoto() {
+	user.Imgs = append(user.Imgs, user.GetNameToNewPhoto())
+}
+
+func (user *User) IsHavePhoto(photo string) bool {
+	for _, currPhoto := range user.Imgs {
+		if currPhoto == photo {
+			return true
+		}
+	}
+	return false
+}
+
+func (user *User) DeletePhoto(photo string) {
+	var photos []string
+
+	for _, currPhoto := range user.Imgs {
+		if currPhoto != photo {
+			photos = append(photos, currPhoto)
+		}
+	}
+	user.Imgs = photos
+}
+
 var (
 	ErrNoUser             = errors.New("no user found")
 	ErrBadPass            = errors.New("invalid password")
@@ -100,6 +151,8 @@ var (
 type UserUsecase interface {
 	CurrentUser(c context.Context, r *http.Request) (User, int)
 	EditProfile(c context.Context, newUserData User, r *http.Request) (User, int)
+	AddPhoto(c context.Context, w http.ResponseWriter, r *http.Request)
+	DeletePhoto(c context.Context, w http.ResponseWriter, r *http.Request)
 	Login(c context.Context, logUserData LoginUser, w http.ResponseWriter) (User, int)
 	Logout(c context.Context, w http.ResponseWriter, r *http.Request) int
 	Signup(c context.Context, logUserData LoginUser, w http.ResponseWriter) int
@@ -109,13 +162,17 @@ type UserUsecase interface {
 
 // ArticleRepository represent the article's repository contract
 type UserRepository interface {
-	GetUser(ctx context.Context, email string) (*User, error)
-	GetUserByID(ctx context.Context, userID uint64) (*User, error)
-	CreateUser(ctx context.Context, logUserData *LoginUser) (*User, error)
+	GetUser(ctx context.Context, email string) (User, error)
+	GetUserByID(ctx context.Context, userID uint64) (User, error)
+	CreateUser(ctx context.Context, logUserData LoginUser) (User, error)
+	UpdateUser(ctx context.Context, newUserData User) error
+	AddPhoto(ctx context.Context, user User, newPhoto io.Reader) error
+	DeletePhoto(ctx context.Context, user User, photo string) error
+	AddSwipedUsers(ctx context.Context, currentUserId uint64, swipedUserId uint64, type_name string) error
+	GetNextUserForSwipe(ctx context.Context, currentUserId uint64) (User, error)
+	IsSwiped(ctx context.Context, userID, swipedUserID uint64) (bool, error)
 	CreateUserAndProfile(ctx context.Context, user User) (User, error)
-	UpdateUser(ctx context.Context, newUserData *User) (User, error)
-	DeleteUser(ctx context.Context, user User) error
-	GetTags(ctx context.Context) (map[uint64]string, error)
+	DropUsers(ctx context.Context) error
 	DropSwipes(ctx context.Context) error
 	DropUsers(ctx context.Context) error
 	Init()

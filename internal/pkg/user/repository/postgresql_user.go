@@ -6,7 +6,9 @@ import (
 	"dripapp/internal/pkg/models"
 	"errors"
 	"fmt"
+	"io"
 	"log"
+	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -323,13 +325,29 @@ func (p *PostgreUserRepo) InsertTags(ctx context.Context, id uint64, tags []stri
 	return nil
 }
 
-func (p *PostgreUserRepo) UpdateImgs(ctx context.Context, id uint64, imgs []string) error {
-	query := `update profile set imgs=$2 where id=$1;`
+func (p *PostgreUserRepo) AddPhoto(ctx context.Context, user models.User, newPhoto io.Reader) error {
+	photoPath := getPathUserPhoto(user) + "/" + user.GetNameToNewPhoto()
 
-	err := p.conn.QueryRow(query, id, pq.Array(imgs))
+	savedPhoto, err := os.Create(photoPath)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
+	defer savedPhoto.Close()
+
+	_, err = io.Copy(savedPhoto, newPhoto)
+	if err != nil {
+		return err
+	}
+
+	user.SaveNewPhoto()
+
+	// TODO AddPhoto PostgreUserRepo
+	//query := `update profile set imgs=$2 where id=$1;`
+	//
+	//err = p.conn.QueryRow(query, user.ID, pq.Array(user.Imgs))
+	//if err != nil {
+	//	log.Fatal(err)
+	//}
 
 	return nil
 }

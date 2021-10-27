@@ -82,6 +82,23 @@ func main() {
 		ReadTimeout:  http.DefaultClient.Timeout,
 	}
 
+
+	staticHandler := http.StripPrefix(
+		"/media/",
+		http.FileServer(http.Dir("./media")),
+	)
+	http.Handle("/media/", staticHandler)
+
+	log.Println("starting server at :9999")
+
+	go func() {
+		err := http.ListenAndServe(":9999", nil)
+		if err != nil {
+			log.Println("media server died:\n", err)
+		}
+	}()
+
+
 	log.Printf("STD starting server at %s\n", srv.Addr)
 
 	log.Fatal(srv.ListenAndServe())
