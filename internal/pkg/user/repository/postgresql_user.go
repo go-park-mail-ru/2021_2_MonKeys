@@ -65,7 +65,7 @@ func (p PostgreUserRepo) GetUser(ctx context.Context, email string) (models.User
 		where email = $1;`
 
 	var RespUser models.User
-	err := p.conn.GetContext(ctx, RespUser, query, email)
+	err := p.conn.GetContext(ctx, &RespUser, query, email)
 	if err != nil {
 		return models.User{}, err
 	}
@@ -88,7 +88,7 @@ func (p PostgreUserRepo) GetUserByID(ctx context.Context, userID uint64) (models
 		where id = $1;`
 
 	var RespUser models.User
-	err := p.conn.GetContext(ctx, RespUser, query, userID)
+	err := p.conn.GetContext(ctx, &RespUser, query, userID)
 	if err != nil {
 		return models.User{}, err
 	}
@@ -114,7 +114,7 @@ func (p PostgreUserRepo) CreateUser(ctx context.Context, logUserData models.Logi
                   RETURNING id, email, password;`
 
 	var RespUser models.User
-	err := p.conn.GetContext(ctx, RespUser, query, logUserData.Email, logUserData.Password)
+	err := p.conn.GetContext(ctx, &RespUser, query, logUserData.Email, logUserData.Password)
 	return RespUser, err
 }
 
@@ -124,8 +124,8 @@ func (p PostgreUserRepo) CreateUserAndProfile(ctx context.Context, user models.U
 		RETURNING id, name, email, password, email, password, date, description;`
 
 	var RespUser models.User
-	err := p.conn.GetContext(ctx, RespUser, query, user.Name, user.Email, user.Password, user.Date,
-		user.Description, pq.Array(user.Imgs))
+	err := p.conn.GetContext(ctx, &RespUser, query, user.Name, user.Email, user.Password, user.Date,
+		user.Description, pq.Array(&user.Imgs))
 	if err != nil {
 		return models.User{}, err
 	}
@@ -160,8 +160,8 @@ func (p PostgreUserRepo) UpdateUser(ctx context.Context, newUserData models.User
 		RETURNING id, email, password, name, email, password, date, description;`
 
 	var RespUser models.User
-	err := p.conn.GetContext(ctx, RespUser, query, newUserData.Name, newUserData.Email, newUserData.Date,
-		newUserData.Description, pq.Array(newUserData.Imgs))
+	err := p.conn.GetContext(ctx, &RespUser, query, newUserData.Name, newUserData.Email, newUserData.Date,
+		newUserData.Description, pq.Array(&newUserData.Imgs))
 
 	if len(newUserData.Tags) != 0 {
 		err = p.DeleteTags(ctx, newUserData.ID)
@@ -217,7 +217,7 @@ func (p PostgreUserRepo) GetTags(ctx context.Context) (map[uint64]string, error)
 	query := `select tag_name from tag;`
 
 	var tags []models.Tag
-	err := p.conn.Select(tags, query)
+	err := p.conn.Select(&tags, query)
 	if err != nil {
 		return nil, err
 	}
@@ -267,7 +267,7 @@ func (p PostgreUserRepo) GetTagsByID(ctx context.Context, id uint64) ([]string, 
 				p.id = $1;`
 
 	var tags []string
-	err := p.conn.Select(tags, sel, id)
+	err := p.conn.Select(&tags, sel, id)
 	if err != nil {
 		return nil, err
 	}
@@ -279,7 +279,7 @@ func (p PostgreUserRepo) GetImgsByID(ctx context.Context, id uint64) ([]string, 
 	sel := "SELECT imgs FROM profile WHERE id=$1;"
 
 	var imgs []string
-	if err := p.conn.QueryRow(sel, id).Scan(pq.Array(imgs)); err != nil {
+	if err := p.conn.QueryRow(sel, id).Scan(pq.Array(&imgs)); err != nil {
 		return nil, err
 	}
 
@@ -351,7 +351,7 @@ func (p PostgreUserRepo) AddPhoto(ctx context.Context, user models.User, newPhot
 func (p PostgreUserRepo) UpdateImgs(ctx context.Context, id uint64, imgs []string) error {
 	query := `update profile set imgs=$2 where id=$1;`
 
-	err := p.conn.QueryRow(query, id, pq.Array(imgs))
+	err := p.conn.QueryRow(query, id, pq.Array(&imgs))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -375,7 +375,7 @@ func (p PostgreUserRepo) IsSwiped(ctx context.Context, userID, swipedUserID uint
 	query := `select exists(select id1, id2 from reactions where id1=$1 and id2=$2)`
 
 	var resp bool
-	err := p.conn.GetContext(ctx, resp, query, userID, swipedUserID)
+	err := p.conn.GetContext(ctx, &resp, query, userID, swipedUserID)
 	if err != nil {
 		return false, err
 	}
@@ -407,7 +407,7 @@ func (p PostgreUserRepo) GetNextUserForSwipe(ctx context.Context, currentUserId 
 				and op.name <> '' and op.date <> '' limit 5;`
 
 	var notSwipedUser []models.User
-	err := p.conn.Select(notSwipedUser, query, currentUserId)
+	err := p.conn.Select(&notSwipedUser, query, currentUserId)
 	if err != nil {
 		return nil, err
 	}
