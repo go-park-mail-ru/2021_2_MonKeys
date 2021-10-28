@@ -45,3 +45,14 @@ create table if not exists matches(
 insert into
   tag(tag_name)
 values('anime'),('music'),('gaming'),('sport'),('scince');
+
+insert into
+  profile(name, email, password, date, description)
+values('lol1', 'lol1@mail.ru', 'af57966e1958f52e41550e822dd8e8a4', '2000-02-20', 'ochen kryto'),
+      ('lol2', 'lol2@mail.ru', 'ahaa', '2000-02-20', 'ochen kryto'),
+      ('lol3', 'lol3@mail.ru', 'ahaa', '2000-02-20', 'ochen kryto');
+
+insert into
+  profile(email, password)
+values('lol4@mail.ru', 'ahaa'),
+      ('lol5@mail.ru', 'ahaa');
