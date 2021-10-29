@@ -414,3 +414,43 @@ func (p PostgreUserRepo) GetNextUserForSwipe(ctx context.Context, currentUserId 
 
 	return notSwipedUser, nil
 }
+
+func (p PostgreUserRepo) GetUsersMatches(ctx context.Context, currentUserId uint64) ([]models.User, error) {
+	query := `select
+				op.id,
+				op.name,
+				op.email,
+				op.password,
+				op.date,
+				op.description
+			from profile p
+			join matches m on (p.id = m.id1)
+			join matches om on (om.id1 = m.id2 and om.id2 = m.id1)
+			join profile op on (op.id = om.id1)
+			where p.id = $1`
+
+	var matchesUsers []models.User
+	err := p.conn.Select(&matchesUsers, query, currentUserId)
+	if err != nil {
+		return nil, err
+	}
+
+	for idx := range matchesUsers {
+		matchesUsers[idx].Age, err = getAgeFromDate(matchesUsers[idx].Date)
+		if err != nil {
+			return nil, err
+		}
+
+		matchesUsers[idx].Imgs, err = p.GetImgsByID(ctx, currentUserId)
+		if err != nil {
+			return nil, err
+		}
+
+		matchesUsers[idx].Tags, err = p.GetTagsByID(ctx, currentUserId)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return matchesUsers, nil
+}

@@ -30,6 +30,8 @@ func SetRouting(router *mux.Router, us models.UserUsecase, su models.SessionUsec
 
 	router.HandleFunc("/api/v1/user/cards", userHandler.NextUserHandler).Methods("GET", "OPTIONS")
 
+	router.HandleFunc("/api/v1/matches", userHandler.MatchesHandler).Methods("GET", "OPTIONS")
+
 	router.HandleFunc("/api/v1/tags", userHandler.GetAllTags).Methods("GET", "OPTIONS")
 
 	router.PathPrefix("/api/documentation/").Handler(httpSwagger.WrapHandler)
