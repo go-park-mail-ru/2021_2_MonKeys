@@ -32,18 +32,20 @@ func (h *UserHandler) EditProfileHandler(w http.ResponseWriter, r *http.Request)
 	var resp models.JSON
 	byteReq, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		resp.Status = http.StatusBadRequest
-		responses.SendResp(resp, w)
-		log.Printf("CODE %d ERROR %s", resp.Status, err)
+		responses.SendErrorResponse(w, &models.HTTPError{
+			Code:    http.StatusBadRequest,
+			Message: fmt.Sprintf("%v", err),
+		})
 		return
 	}
 
 	var newUserData models.User
 	err = json.Unmarshal(byteReq, &newUserData)
 	if err != nil {
-		resp.Status = http.StatusBadRequest
-		responses.SendResp(resp, w)
-		log.Printf("CODE %d ERROR %s", resp.Status, err)
+		responses.SendErrorResponse(w, &models.HTTPError{
+			Code:    http.StatusBadRequest,
+			Message: fmt.Sprintf("%v", err),
+		})
 		return
 	}
 
@@ -78,9 +80,10 @@ func (h *UserHandler) SignupHandler(w http.ResponseWriter, r *http.Request) {
 
 	byteReq, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		resp.Status = http.StatusBadRequest
-		responses.SendResp(resp, w)
-		log.Printf("CODE %d ERROR %s", resp.Status, err)
+		responses.SendErrorResponse(w, &models.HTTPError{
+			Code:    http.StatusBadRequest,
+			Message: fmt.Sprintf("%v", err),
+		})
 		return
 	}
 
@@ -88,8 +91,6 @@ func (h *UserHandler) SignupHandler(w http.ResponseWriter, r *http.Request) {
 	err = json.Unmarshal(byteReq, &logUserData)
 	if err != nil {
 		resp.Status = http.StatusBadRequest
-		// responses.SendResp(resp, w)
-		// log.Printf("CODE %d ERROR %s", resp.Status, err)
 		responses.SendErrorResponse(w, &models.HTTPError{
 			Code:    http.StatusBadRequest,
 			Message: fmt.Sprintf("%v", err),
@@ -109,9 +110,6 @@ func (h *UserHandler) SignupHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		err = h.SessionUcase.AddSession(r.Context(), sess)
 		if err != nil {
-			// resp.Status = StatusInternalServerError
-			// log.Printf("CODE %d ERROR %s", resp.Status, err)
-			// responses.SendResp(resp, w)
 			responses.SendErrorResponse(w, &models.HTTPError{
 				Code:    http.StatusInternalServerError,
 				Message: fmt.Sprintf("%v", err),
