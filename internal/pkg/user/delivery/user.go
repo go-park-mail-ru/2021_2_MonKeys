@@ -152,3 +152,14 @@ func (h *UserHandler) GetAllTags(w http.ResponseWriter, r *http.Request) {
 	resp.Status = status
 	sendResp(resp, w)
 }
+
+func (h *UserHandler) MatchesHandler(w http.ResponseWriter, r *http.Request) {
+	var resp models.JSON
+	matches, status := h.UserUCase.UsersMatches(r.Context(), r)
+	resp.Status = status
+	if status == StatusOK {
+		resp.Body = matches
+	}
+
+	sendResp(resp, w)
+}

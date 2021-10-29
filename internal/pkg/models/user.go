@@ -46,6 +46,11 @@ type Tags struct {
 	Count   uint64         `json:"tagsCount"`
 }
 
+type Matches struct {
+	AllUsers map[uint64]User `json:"allUsers"`
+	Count    string          `json:"matchesCount"`
+}
+
 type Photo struct {
 	Title string `json:"photo"`
 }
@@ -158,6 +163,7 @@ type UserUsecase interface {
 	Signup(c context.Context, logUserData LoginUser, w http.ResponseWriter) int
 	NextUser(c context.Context, r *http.Request) ([]User, int)
 	GetAllTags(c context.Context, r *http.Request) (Tags, int)
+	UsersMatches(c context.Context, r *http.Request) (Matches, int)
 }
 
 // ArticleRepository represent the article's repository contract
@@ -180,6 +186,7 @@ type UserRepository interface {
 	AddSwipedUsers(ctx context.Context, currentUserId uint64, swipedUserId uint64, type_name string) error
 	IsSwiped(ctx context.Context, userID, swipedUserID uint64) (bool, error)
 	GetNextUserForSwipe(ctx context.Context, currentUserId uint64) ([]User, error)
+	GetUsersMatches(ctx context.Context, currentUserId uint64) ([]User, error)
 
 	AddPhoto(ctx context.Context, user User, newPhoto io.Reader) error
 	DeletePhoto(ctx context.Context, user User, photo string) error
