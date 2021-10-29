@@ -4,14 +4,11 @@ import (
 	"context"
 	"dripapp/configs"
 	"dripapp/internal/pkg/models"
-	"errors"
 	"fmt"
 	"io"
 	"log"
 	"os"
-	"strconv"
 	"strings"
-	"time"
 
 	"github.com/jmoiron/sqlx"
 	"github.com/lib/pq"
@@ -22,20 +19,6 @@ const success = "Connection success (postgre) on: "
 
 type PostgreUserRepo struct {
 	conn sqlx.DB
-}
-
-func getAgeFromDate(date string) (string, error) {
-	birthday, err := time.Parse("2006-01-02", date)
-	if err != nil {
-		return "", errors.New("failed on userYear")
-	}
-
-	age := uint(time.Now().Year() - birthday.Year())
-	if time.Now().YearDay() < birthday.YearDay() {
-		age -= 1
-	}
-
-	return strconv.Itoa(int(age)), nil
 }
 
 func NewPostgresUserRepository(config configs.PostgresConfig) (*PostgreUserRepo, error) {
@@ -93,12 +76,12 @@ func (p PostgreUserRepo) GetUserByID(ctx context.Context, userID uint64) (models
 		return models.User{}, err
 	}
 
-	RespUser.Tags, err = p.GetTagsByID(ctx, 1)
+	RespUser.Tags, err = p.GetTagsByID(ctx, userID)
 	if err != nil {
 		return models.User{}, err
 	}
 
-	RespUser.Imgs, err = p.GetImgsByID(ctx, 1)
+	RespUser.Imgs, err = p.GetImgsByID(ctx, userID)
 	if err != nil {
 		return models.User{}, err
 	}
@@ -140,7 +123,7 @@ func (p PostgreUserRepo) CreateUserAndProfile(ctx context.Context, user models.U
 		return models.User{}, err
 	}
 
-	RespUser.Age, err = getAgeFromDate(RespUser.Date)
+	RespUser.Age, err = models.GetAgeFromDate(RespUser.Date)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -413,7 +396,7 @@ func (p PostgreUserRepo) GetNextUserForSwipe(ctx context.Context, currentUserId 
 	}
 
 	for idx := range notSwipedUser {
-		notSwipedUser[idx].Age, err = getAgeFromDate(notSwipedUser[idx].Date)
+		notSwipedUser[idx].Age, err = models.GetAgeFromDate(notSwipedUser[idx].Date)
 		if err != nil {
 			return nil, err
 		}

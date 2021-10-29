@@ -6,5 +6,6 @@ type HTTPError struct {
 }
 
 var (
-	InternalServerError500 = HTTPError{500, "InternalServerError500"}
+	InternalServerError500   = HTTPError{500, "InternalServerError500"}
+	StatusEmailAlreadyExists = 1001
 )

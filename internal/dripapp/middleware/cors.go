@@ -6,13 +6,15 @@ import (
 )
 
 var allowedOrigins = map[string]struct{}{
-	"http://127.0.0.1": {},
-	"http://localhost": {},
-	"http://ijia.me":   {},
+	"http://127.0.0.1":         {},
+	"http://localhost":         {},
+	"http://ijia.me":           {},
+	"http://192.168.1.16:8080": {},
 
-	"https://127.0.0.1": {},
-	"https://localhost": {},
-	"https://ijia.me":   {},
+	"https://192.168.1.16:8080": {},
+	"https://127.0.0.1":         {},
+	"https://localhost":         {},
+	"https://ijia.me":           {},
 }
 
 func CORS(next http.Handler) http.Handler {

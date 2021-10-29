@@ -36,14 +36,6 @@ func createSessionCookie(user models.LoginUser) http.Cookie {
 	return cookie
 }
 
-const (
-	StatusOK                  = 200
-	StatusBadRequest          = 400
-	StatusNotFound            = 404
-	StatusInternalServerError = 500
-	StatusEmailAlreadyExists  = 1001
-)
-
 // @Summary LogIn
 // @Description log in
 // @Tags login
@@ -58,7 +50,7 @@ func (h *SessionHandler) LoginHandler(w http.ResponseWriter, r *http.Request) {
 
 	byteReq, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		resp.Status = StatusBadRequest
+		resp.Status = http.StatusBadRequest
 		responses.SendResp(resp, w)
 		log.Printf("CODE %d ERROR %s", resp.Status, err)
 		return
@@ -67,14 +59,14 @@ func (h *SessionHandler) LoginHandler(w http.ResponseWriter, r *http.Request) {
 	var logUserData *models.LoginUser
 	err = json.Unmarshal(byteReq, &logUserData)
 	if err != nil {
-		resp.Status = StatusBadRequest
+		resp.Status = http.StatusBadRequest
 		responses.SendResp(resp, w)
 		log.Printf("CODE %d ERROR %s", resp.Status, err)
 		return
 	}
 	user, status := h.UserUCase.Login(r.Context(), *logUserData)
 	resp.Status = status
-	if status == StatusOK {
+	if status == http.StatusOK {
 		cookie := createSessionCookie(*logUserData)
 
 		sess := models.Session{
@@ -83,7 +75,7 @@ func (h *SessionHandler) LoginHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		err = h.SessionUcase.AddSession(r.Context(), sess)
 		if err != nil {
-			resp.Status = StatusInternalServerError
+			resp.Status = http.StatusInternalServerError
 			log.Printf("CODE %d ERROR %s", resp.Status, err)
 			responses.SendResp(resp, w)
 			return
@@ -98,17 +90,17 @@ func (h *SessionHandler) LoginHandler(w http.ResponseWriter, r *http.Request) {
 func (h *SessionHandler) LogoutHandler(w http.ResponseWriter, r *http.Request) {
 	err := h.SessionUcase.DeleteSession(r.Context())
 	if err != nil {
-		log.Printf("CODE %d ERROR %s", StatusNotFound, err)
-		responses.SendResp(models.JSON{Status: StatusNotFound}, w)
+		log.Printf("CODE %d ERROR %s", http.StatusNotFound, err)
+		responses.SendResp(models.JSON{Status: http.StatusNotFound}, w)
 	}
 	session, err := r.Cookie("sessionId")
 	if err != nil {
-		log.Printf("CODE %d ERROR %s", StatusNotFound, err)
-		responses.SendResp(models.JSON{Status: StatusNotFound}, w)
+		log.Printf("CODE %d ERROR %s", http.StatusNotFound, err)
+		responses.SendResp(models.JSON{Status: http.StatusNotFound}, w)
 	}
 
 	session.Expires = time.Now().AddDate(0, 0, -1)
 	http.SetCookie(w, session)
 
-	responses.SendResp(models.JSON{Status: StatusOK}, w)
+	responses.SendResp(models.JSON{Status: http.StatusOK}, w)
 }

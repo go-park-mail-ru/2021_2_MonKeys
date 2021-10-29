@@ -155,7 +155,6 @@ type UserUsecase interface {
 	AddPhoto(c context.Context, w http.ResponseWriter, r *http.Request)
 	DeletePhoto(c context.Context, w http.ResponseWriter, r *http.Request)
 	Login(c context.Context, logUserData LoginUser) (User, int)
-	Logout(c context.Context) int
 	Signup(c context.Context, logUserData LoginUser) (User, int)
 	NextUser(c context.Context) ([]User, int)
 	GetAllTags(c context.Context) (Tags, int)
