@@ -4,6 +4,7 @@ import (
 	"dripapp/configs"
 	"dripapp/internal/dripapp/middleware"
 	"dripapp/internal/pkg/session"
+	_sessionUcase "dripapp/internal/pkg/session/usecase"
 	_userDelivery "dripapp/internal/pkg/user/delivery"
 	_userRepo "dripapp/internal/pkg/user/repository"
 	_userUsecase "dripapp/internal/pkg/user/usecase"
@@ -66,9 +67,10 @@ func main() {
 
 	// usecase
 	userUCase := _userUsecase.NewUserUsecase(userRepo, sm, timeoutContext)
+	sessionUcase := _sessionUcase.NewSessionUsecase(sm, timeoutContext)
 
 	// delivery
-	_userDelivery.SetRouting(router, userUCase)
+	_userDelivery.SetRouting(router, userUCase, sessionUcase)
 
 	// middleware
 	middleware.NewMiddleware(router, sm, logFile)

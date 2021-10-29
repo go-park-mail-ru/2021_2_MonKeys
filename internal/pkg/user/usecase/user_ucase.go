@@ -2,7 +2,6 @@ package usecase
 
 import (
 	"context"
-	"crypto/md5"
 	"dripapp/internal/pkg/models"
 	"dripapp/internal/pkg/responses"
 	"encoding/json"
@@ -36,24 +35,6 @@ func NewUserUsecase(ur models.UserRepository, sess models.SessionRepository, tim
 		Session:        sess,
 		contextTimeout: timeout,
 	}
-}
-
-func createSessionCookie(user models.LoginUser) http.Cookie {
-	expiration := time.Now().Add(10 * time.Hour)
-
-	data := user.Password + time.Now().String()
-	md5CookieValue := fmt.Sprintf("%x", md5.Sum([]byte(data)))
-
-	cookie := http.Cookie{
-		Name:     "sessionId",
-		Value:    md5CookieValue,
-		Expires:  expiration,
-		Secure:   true,
-		HttpOnly: true,
-		SameSite: http.SameSiteNoneMode,
-	}
-
-	return cookie
 }
 
 func (h *userUsecase) CurrentUser(c context.Context) (models.User, int) {
@@ -231,7 +212,7 @@ func (h *userUsecase) DeletePhoto(c context.Context, w http.ResponseWriter, r *h
 // @Success 200 {object} JSON
 // @Failure 400,404,500
 // @Router /login [post]
-func (h *userUsecase) Login(c context.Context, logUserData models.LoginUser, w http.ResponseWriter) (models.User, int) {
+func (h *userUsecase) Login(c context.Context, logUserData models.LoginUser) (models.User, int) {
 
 	identifiableUser, err := h.UserRepo.GetUser(c, logUserData.Email)
 	if err != nil {
@@ -240,17 +221,6 @@ func (h *userUsecase) Login(c context.Context, logUserData models.LoginUser, w h
 	}
 
 	if identifiableUser.IsCorrectPassword(logUserData.Password) {
-		cookie := createSessionCookie(logUserData)
-
-		if !h.Session.IsSessionByCookie(cookie.Value) {
-			err = h.Session.NewSessionCookie(cookie.Value, identifiableUser.ID)
-			if err != nil {
-				log.Printf("CODE %d ERROR %s", StatusInternalServerError, err)
-				return models.User{}, StatusInternalServerError
-			}
-		}
-		http.SetCookie(w, &cookie)
-
 		log.Printf("CODE %d", StatusOK)
 		return identifiableUser, StatusOK
 	} else {
@@ -293,36 +263,26 @@ func (h *userUsecase) Logout(c context.Context) int {
 // @Success 200 {object} JSON
 // @Failure 400,404,500
 // @Router /signup [post]
-func (h *userUsecase) Signup(c context.Context, logUserData models.LoginUser, w http.ResponseWriter) int {
+func (h *userUsecase) Signup(c context.Context, logUserData models.LoginUser) (models.User, int) {
 	ctx, cancel := context.WithTimeout(c, h.contextTimeout)
 	defer cancel()
 
 	identifiableUser, _ := h.UserRepo.GetUser(ctx, logUserData.Email)
 	if !identifiableUser.IsEmpty() {
 		log.Printf("CODE %d ERROR %s", StatusEmailAlreadyExists, models.ErrEmailAlreadyExists)
-		return StatusEmailAlreadyExists
+		return models.User{}, StatusEmailAlreadyExists
 	}
 
 	logUserData.Password = models.HashPassword(logUserData.Password)
 	user, err := h.UserRepo.CreateUser(c, logUserData)
 	if err != nil {
 		log.Printf("CODE %d ERROR %s", StatusInternalServerError, err)
-		return StatusInternalServerError
+		return models.User{}, StatusInternalServerError
 	}
-
-	cookie := createSessionCookie(logUserData)
-
-	err = h.Session.NewSessionCookie(cookie.Value, user.ID)
-	if err != nil {
-		log.Printf("CODE %d ERROR %s", StatusInternalServerError, err)
-		return StatusInternalServerError
-	}
-
-	http.SetCookie(w, &cookie)
 
 	log.Printf("CODE %d", StatusOK)
 
-	return StatusOK
+	return user, StatusOK
 }
 
 func (h *userUsecase) NextUser(c context.Context) ([]models.User, int) {

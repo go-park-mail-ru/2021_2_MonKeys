@@ -1,5 +1,9 @@
 package models
 
+import (
+	"context"
+)
+
 type Session struct {
 	Cookie string
 	UserID uint64
@@ -15,4 +19,9 @@ type SessionRepository interface {
 	DeleteSessionCookie(sessionCookie string) error
 	IsSessionByCookie(sessionCookie string) bool
 	DropCookies()
+}
+
+type SessionUsecase interface {
+	AddSession(c context.Context, session Session) error
+	DeleteSession(c context.Context) error
 }

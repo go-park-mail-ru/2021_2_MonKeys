@@ -154,9 +154,9 @@ type UserUsecase interface {
 	EditProfile(c context.Context, newUserData User) (User, int)
 	AddPhoto(c context.Context, w http.ResponseWriter, r *http.Request)
 	DeletePhoto(c context.Context, w http.ResponseWriter, r *http.Request)
-	Login(c context.Context, logUserData LoginUser, w http.ResponseWriter) (User, int)
+	Login(c context.Context, logUserData LoginUser) (User, int)
 	Logout(c context.Context) int
-	Signup(c context.Context, logUserData LoginUser, w http.ResponseWriter) int
+	Signup(c context.Context, logUserData LoginUser) (User, int)
 	NextUser(c context.Context) ([]User, int)
 	GetAllTags(c context.Context) (Tags, int)
 }

@@ -1,11 +1,15 @@
 package delivery
 
 import (
+	"crypto/md5"
 	"dripapp/internal/pkg/models"
+	"dripapp/internal/pkg/responses"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
+	"time"
 )
 
 const (
@@ -18,19 +22,26 @@ const (
 
 type UserHandler struct {
 	// Logger    *zap.SugaredLogger
-	UserUCase models.UserUsecase
+	SessionUcase models.SessionUsecase
+	UserUCase    models.UserUsecase
 }
 
-func sendResp(resp models.JSON, w http.ResponseWriter) {
-	byteResp, err := json.Marshal(resp)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+func createSessionCookie(user models.LoginUser) http.Cookie {
+	expiration := time.Now().Add(10 * time.Hour)
+
+	data := user.Password + time.Now().String()
+	md5CookieValue := fmt.Sprintf("%x", md5.Sum([]byte(data)))
+
+	cookie := http.Cookie{
+		Name:     "sessionId",
+		Value:    md5CookieValue,
+		Expires:  expiration,
+		Secure:   true,
+		HttpOnly: true,
+		SameSite: http.SameSiteNoneMode,
 	}
-	w.WriteHeader(http.StatusOK)
-	_, err = w.Write(byteResp)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-	}
+
+	return cookie
 }
 
 func (h *UserHandler) CurrentUser(w http.ResponseWriter, r *http.Request) {
@@ -42,7 +53,7 @@ func (h *UserHandler) CurrentUser(w http.ResponseWriter, r *http.Request) {
 		resp.Body = user
 	}
 
-	sendResp(resp, w)
+	responses.SendResp(resp, w)
 }
 
 func (h *UserHandler) EditProfileHandler(w http.ResponseWriter, r *http.Request) {
@@ -50,7 +61,7 @@ func (h *UserHandler) EditProfileHandler(w http.ResponseWriter, r *http.Request)
 	byteReq, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		resp.Status = StatusBadRequest
-		sendResp(resp, w)
+		responses.SendResp(resp, w)
 		log.Printf("CODE %d ERROR %s", resp.Status, err)
 		return
 	}
@@ -59,7 +70,7 @@ func (h *UserHandler) EditProfileHandler(w http.ResponseWriter, r *http.Request)
 	err = json.Unmarshal(byteReq, &newUserData)
 	if err != nil {
 		resp.Status = StatusBadRequest
-		sendResp(resp, w)
+		responses.SendResp(resp, w)
 		log.Printf("CODE %d ERROR %s", resp.Status, err)
 		return
 	}
@@ -70,7 +81,7 @@ func (h *UserHandler) EditProfileHandler(w http.ResponseWriter, r *http.Request)
 		resp.Body = user
 	}
 
-	sendResp(resp, w)
+	responses.SendResp(resp, w)
 }
 
 func (h *UserHandler) UploadPhoto(w http.ResponseWriter, r *http.Request) {
@@ -96,7 +107,7 @@ func (h *UserHandler) SignupHandler(w http.ResponseWriter, r *http.Request) {
 	byteReq, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		resp.Status = StatusBadRequest
-		sendResp(resp, w)
+		responses.SendResp(resp, w)
 		log.Printf("CODE %d ERROR %s", resp.Status, err)
 		return
 	}
@@ -105,15 +116,33 @@ func (h *UserHandler) SignupHandler(w http.ResponseWriter, r *http.Request) {
 	err = json.Unmarshal(byteReq, &logUserData)
 	if err != nil {
 		resp.Status = StatusBadRequest
-		sendResp(resp, w)
+		responses.SendResp(resp, w)
 		log.Printf("CODE %d ERROR %s", resp.Status, err)
 		return
 	}
 
 	log.Println("Email: ", logUserData.Email, " Password: ", logUserData.Password)
-	status := h.UserUCase.Signup(r.Context(), logUserData, w)
+	user, status := h.UserUCase.Signup(r.Context(), logUserData)
 	resp.Status = status
-	sendResp(resp, w)
+	if status == StatusOK {
+		cookie := createSessionCookie(logUserData)
+
+		sess := models.Session{
+			Cookie: cookie.Value,
+			UserID: user.ID,
+		}
+		err = h.SessionUcase.AddSession(r.Context(), sess)
+		if err != nil {
+			resp.Status = StatusInternalServerError
+			log.Printf("CODE %d ERROR %s", resp.Status, err)
+			responses.SendResp(resp, w)
+			return
+		}
+		resp.Body = user
+
+		http.SetCookie(w, &cookie)
+	}
+	responses.SendResp(resp, w)
 }
 
 func (h *UserHandler) NextUserHandler(w http.ResponseWriter, r *http.Request) {
@@ -123,7 +152,7 @@ func (h *UserHandler) NextUserHandler(w http.ResponseWriter, r *http.Request) {
 	// byteReq, err := ioutil.ReadAll(r.Body)
 	// if err != nil {
 	// 	resp.Status = StatusBadRequest
-	// 	sendResp(resp, w)
+	// 	responses.SendResp(resp, w)
 	// 	log.Printf("CODE %d ERROR %s", resp.Status, err)
 	// 	return
 	// }
@@ -132,7 +161,7 @@ func (h *UserHandler) NextUserHandler(w http.ResponseWriter, r *http.Request) {
 	// err := json.Unmarshal(byteReq, &swipedUserData)
 	// if err != nil {
 	// 	resp.Status = StatusBadRequest
-	// 	sendResp(resp, w)
+	// 	responses.SendResp(resp, w)
 	// 	log.Printf("CODE %d ERROR %s", resp.Status, err)
 	// 	return
 	// }
@@ -142,7 +171,7 @@ func (h *UserHandler) NextUserHandler(w http.ResponseWriter, r *http.Request) {
 		resp.Body = nextUser
 	}
 
-	sendResp(resp, w)
+	responses.SendResp(resp, w)
 }
 
 func (h *UserHandler) GetAllTags(w http.ResponseWriter, r *http.Request) {
@@ -150,5 +179,5 @@ func (h *UserHandler) GetAllTags(w http.ResponseWriter, r *http.Request) {
 	allTags, status := h.UserUCase.GetAllTags(r.Context())
 	resp.Body = allTags
 	resp.Status = status
-	sendResp(resp, w)
+	responses.SendResp(resp, w)
 }
