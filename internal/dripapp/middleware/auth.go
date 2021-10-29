@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"context"
+	"dripapp/configs"
 	"dripapp/internal/pkg/models"
 	"log"
 	"net/http"
@@ -31,7 +32,7 @@ func (s *sessionMiddleware) SessionMiddleware(next http.Handler) http.Handler {
 				log.Printf("CODE %d ERROR %s", http.StatusNotFound, err)
 			}
 		}
-		r = r.WithContext(context.WithValue(r.Context(), "userID", userSession))
+		r = r.WithContext(context.WithValue(r.Context(), configs.ForContext, userSession))
 		next.ServeHTTP(w, r)
 	})
 }

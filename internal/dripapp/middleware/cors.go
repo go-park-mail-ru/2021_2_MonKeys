@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"log"
 	"net/http"
 	"strings"
 )
@@ -19,15 +20,15 @@ var allowedOrigins = map[string]struct{}{
 
 func CORS(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// origin := r.Header.Get("Origin")
-		// _, isIn := allowedOrigins[origin]
-		// if isIn {
-		// 	w.Header().Set("Access-Control-Allow-Origin", origin)
-		// } else {
-		// 	log.Println("unknown origin", `"`+origin+`"`)
-		// 	http.Error(w, "Access denied", http.StatusForbidden)
-		// }
-		w.Header().Set("Access-Control-Allow-Origin", r.Header.Get("Origin"))
+		origin := r.Header.Get("Origin")
+		_, isIn := allowedOrigins[origin]
+		if isIn {
+			w.Header().Set("Access-Control-Allow-Origin", origin)
+		} else {
+			log.Println("unknown origin", `"`+origin+`"`)
+			http.Error(w, "Access denied", http.StatusForbidden)
+		}
+		// w.Header().Set("Access-Control-Allow-Origin", r.Header.Get("Origin"))
 		w.Header().Set("Access-Control-Allow-Credentials", "true")
 		w.Header().Set("Access-Control-Allow-Methods", "POST, GET, DELETE, PUT, OPTIONS")
 		var sb strings.Builder

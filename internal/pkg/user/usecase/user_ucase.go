@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"dripapp/configs"
 	"dripapp/internal/pkg/models"
 	"dripapp/internal/pkg/responses"
 	"encoding/json"
@@ -33,7 +34,7 @@ func (h *userUsecase) CurrentUser(c context.Context) (models.User, int) {
 	ctx, cancel := context.WithTimeout(c, h.contextTimeout)
 	defer cancel()
 
-	ctxSession := ctx.Value("userID")
+	ctxSession := ctx.Value(configs.ForContext)
 	if ctxSession == nil {
 		log.Printf("CODE %d ERROR %s", http.StatusNotFound, errors.New("context nil error"))
 		return models.User{}, http.StatusNotFound
@@ -58,7 +59,7 @@ func (h *userUsecase) EditProfile(c context.Context, newUserData models.User) (m
 	ctx, cancel := context.WithTimeout(c, h.contextTimeout)
 	defer cancel()
 
-	ctxSession := ctx.Value("userID")
+	ctxSession := ctx.Value(configs.ForContext)
 	if ctxSession == nil {
 		log.Printf("CODE %d ERROR %s", http.StatusNotFound, errors.New("context nil error"))
 		return models.User{}, http.StatusNotFound
@@ -97,7 +98,7 @@ func (h *userUsecase) AddPhoto(c context.Context, w http.ResponseWriter, r *http
 	ctx, cancel := context.WithTimeout(c, h.contextTimeout)
 	defer cancel()
 
-	currentUserId := ctx.Value("userID")
+	currentUserId := ctx.Value(configs.ForContext)
 	if currentUserId == nil {
 		log.Printf("CODE %d ERROR %s", http.StatusNotFound, errors.New("context nil error"))
 		return
@@ -146,7 +147,7 @@ func (h *userUsecase) DeletePhoto(c context.Context, w http.ResponseWriter, r *h
 	ctx, cancel := context.WithTimeout(c, h.contextTimeout)
 	defer cancel()
 
-	currentUserId := ctx.Value("userID")
+	currentUserId := ctx.Value(configs.ForContext)
 	if currentUserId == nil {
 		log.Printf("CODE %d ERROR %s", http.StatusNotFound, errors.New("context nil error"))
 		return
@@ -256,7 +257,7 @@ func (h *userUsecase) NextUser(c context.Context) ([]models.User, int) {
 	ctx, cancel := context.WithTimeout(c, h.contextTimeout)
 	defer cancel()
 
-	ctxSession := ctx.Value("userID")
+	ctxSession := ctx.Value(configs.ForContext)
 	if ctxSession == nil {
 		log.Printf("CODE %d ERROR %s", http.StatusNotFound, errors.New("context nil error"))
 		return nil, http.StatusNotFound
@@ -294,7 +295,7 @@ func (h *userUsecase) GetAllTags(c context.Context) (models.Tags, int) {
 	ctx, cancel := context.WithTimeout(c, h.contextTimeout)
 	defer cancel()
 
-	ctxSession := ctx.Value("userID")
+	ctxSession := ctx.Value(configs.ForContext)
 	if ctxSession == nil {
 		log.Printf("CODE %d ERROR %s", http.StatusNotFound, errors.New("context nil error"))
 		return models.Tags{}, http.StatusNotFound
