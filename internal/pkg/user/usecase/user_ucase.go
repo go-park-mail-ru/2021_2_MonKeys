@@ -7,7 +7,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
 	"time"
@@ -16,6 +16,7 @@ import (
 type userUsecase struct {
 	UserRepo       models.UserRepository
 	Session        models.SessionRepository
+	File           models.FileRepository
 	contextTimeout time.Duration
 }
 
@@ -27,12 +28,15 @@ const (
 	StatusEmailAlreadyExists  = 1001
 )
 
-const maxPhotoSize = 20 * 1024 * 1025 // - это из доставки. Пока пусть будет здесь для AddPhoto()
-
-func NewUserUsecase(ur models.UserRepository, sess models.SessionRepository, timeout time.Duration) models.UserUsecase {
+func NewUserUsecase(
+	ur models.UserRepository,
+	sess models.SessionRepository,
+	fileManager models.FileRepository,
+	timeout time.Duration) models.UserUsecase {
 	return &userUsecase{
 		UserRepo:       ur,
 		Session:        sess,
+		File:           fileManager,
 		contextTimeout: timeout,
 	}
 }
@@ -134,107 +138,64 @@ func (h *userUsecase) EditProfile(c context.Context, newUserData models.User, r 
 	return currentUser, StatusOK
 }
 
-func (h *userUsecase) AddPhoto(c context.Context, w http.ResponseWriter, r *http.Request) {
-	var resp models.JSON
+func (h *userUsecase) AddPhoto(c context.Context, photo io.Reader, r *http.Request) (photoPath string, status int) {
 	session, err := r.Cookie("sessionId")
 	if err != nil {
-		resp.Status = StatusNotFound
-		sendResp(resp, w)
-		log.Printf("CODE %d ERROR %s", resp.Status, err)
+		status = StatusNotFound
 		return
 	}
 
-	currentUser, err := h.getUserByCookie(c, session.Value)
+	user, err := h.getUserByCookie(c, session.Value)
 	if err != nil {
-		resp.Status = StatusNotFound
-		sendResp(resp, w)
-		log.Printf("CODE %d ERROR %s", resp.Status, err)
+		status = StatusNotFound
 		return
 	}
 
-	err = r.ParseMultipartForm(maxPhotoSize)
+	photoPath, err = h.File.SaveUserPhoto(c, user, photo)
 	if err != nil {
-		resp.Status = StatusBadRequest
-		sendResp(resp, w)
-		log.Printf("CODE %d ERROR %s", resp.Status, err)
+		status = StatusInternalServerError
 		return
 	}
 
-	uploadedPhoto, _, err := r.FormFile("photo")
+	user.AddNewPhoto(photoPath)
+
+	err = h.UserRepo.UpdateImgs(c, user.ID, user.Imgs)
 	if err != nil {
-		fmt.Println(err)
-		w.WriteHeader(500)
-		return
-	}
-	defer uploadedPhoto.Close()
-
-	currentUser.SaveNewPhoto()
-
-	err = h.UserRepo.AddPhoto(c, currentUser, uploadedPhoto)
-	if err != nil {
-		resp.Status = StatusInternalServerError
-		sendResp(resp, w)
-		log.Printf("CODE %d ERROR %s", resp.Status, err)
+		status = StatusInternalServerError
 		return
 	}
 
-	resp.Status = StatusOK
-	resp.Body = models.Photo{Title: currentUser.GetLastPhoto()}
-	sendResp(resp, w)
+	status = StatusOK
+	return
 }
 
-func (h *userUsecase) DeletePhoto(c context.Context, w http.ResponseWriter, r *http.Request) {
-	var resp models.JSON
+func (h *userUsecase) DeletePhoto(c context.Context, photo models.Photo, r *http.Request) (status int) {
 	session, err := r.Cookie("sessionId")
 	if err != nil {
-		resp.Status = StatusNotFound
-		sendResp(resp, w)
-		log.Printf("CODE %d ERROR %s", resp.Status, err)
-		return
+		return StatusNotFound
 	}
 
-	currentUser, err := h.getUserByCookie(c, session.Value)
+	user, err := h.getUserByCookie(c, session.Value)
 	if err != nil {
-		resp.Status = StatusNotFound
-		sendResp(resp, w)
-		log.Printf("CODE %d ERROR %s", resp.Status, err)
-		return
+		return StatusNotFound
 	}
 
-	byteReq, err := ioutil.ReadAll(r.Body)
+	err = user.DeletePhoto(photo)
 	if err != nil {
-		resp.Status = StatusBadRequest
-		sendResp(resp, w)
-		log.Printf("CODE %d ERROR %s", resp.Status, err)
-		return
+		return StatusBadRequest
 	}
 
-	var photo *models.Photo
-	err = json.Unmarshal(byteReq, &photo)
+	err = h.UserRepo.UpdateImgs(c, user.ID, user.Imgs)
 	if err != nil {
-		resp.Status = StatusBadRequest
-		sendResp(resp, w)
-		log.Printf("CODE %d ERROR %s", resp.Status, err)
-		return
+		return StatusInternalServerError
 	}
 
-	if currentUser.IsHavePhoto(photo.Title) {
-		resp.Status = StatusBadRequest
-		sendResp(resp, w)
-		log.Printf("CODE %d ERROR %s", resp.Status, err)
-		return
-	}
-
-	err = h.UserRepo.DeletePhoto(c, currentUser, photo.Title)
+	err = h.File.Delete(c, photo.Path)
 	if err != nil {
-		resp.Status = StatusInternalServerError
-		sendResp(resp, w)
-		log.Printf("CODE %d ERROR %s", resp.Status, err)
-		return
+		return StatusInternalServerError
 	}
 
-	resp.Status = StatusOK
-	sendResp(resp, w)
+	return StatusOK
 }
 
 // @Summary LogIn
@@ -319,6 +280,8 @@ func (h *userUsecase) Signup(c context.Context, logUserData models.LoginUser, w 
 		log.Printf("CODE %d ERROR %s", StatusInternalServerError, err)
 		return StatusInternalServerError
 	}
+
+	h.File.CreateFoldersForNewUser(user)
 
 	cookie := createSessionCookie(logUserData)
 

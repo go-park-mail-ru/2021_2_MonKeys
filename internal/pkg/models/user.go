@@ -47,7 +47,7 @@ type Tags struct {
 }
 
 type Photo struct {
-	Title string `json:"photo"`
+	Path string `json:"photo"`
 }
 
 func MakeUser(id uint64, email string, password string) User {
@@ -117,42 +117,38 @@ func (user *User) GetNameToNewPhoto() string {
 	return strconv.Itoa(num+1) + ".png"
 }
 
-func (user *User) SaveNewPhoto() {
-	user.Imgs = append(user.Imgs, user.GetNameToNewPhoto())
+func (user *User) AddNewPhoto(photoPath string) {
+	user.Imgs = append(user.Imgs, photoPath)
 }
 
-func (user *User) IsHavePhoto(photo string) bool {
-	for _, currPhoto := range user.Imgs {
-		if currPhoto == photo {
-			return true
-		}
-	}
-	return false
-}
-
-func (user *User) DeletePhoto(photo string) {
+func (user *User) DeletePhoto(photo Photo) (err error) {
 	var photos []string
 
+	err = ErrNoSuchPhoto
 	for _, currPhoto := range user.Imgs {
-		if currPhoto != photo {
+		if currPhoto != photo.Path {
 			photos = append(photos, currPhoto)
+			err = nil
 		}
 	}
 	user.Imgs = photos
+
+	return
 }
 
 var (
 	ErrNoUser             = errors.New("no user found")
 	ErrBadPass            = errors.New("invalid password")
 	ErrEmailAlreadyExists = errors.New("email already exists")
+	ErrNoSuchPhoto        = errors.New("user does not have such a photo")
 )
 
 // ArticleUsecase represent the article's usecases
 type UserUsecase interface {
 	CurrentUser(c context.Context, r *http.Request) (User, int)
 	EditProfile(c context.Context, newUserData User, r *http.Request) (User, int)
-	AddPhoto(c context.Context, w http.ResponseWriter, r *http.Request)
-	DeletePhoto(c context.Context, w http.ResponseWriter, r *http.Request)
+	AddPhoto(c context.Context, photo io.Reader, r *http.Request) (photoPath string, status int)
+	DeletePhoto(c context.Context, photo Photo, r *http.Request) (status int)
 	Login(c context.Context, logUserData LoginUser, w http.ResponseWriter) (User, int)
 	Logout(c context.Context, w http.ResponseWriter, r *http.Request) int
 	Signup(c context.Context, logUserData LoginUser, w http.ResponseWriter) int
@@ -180,7 +176,4 @@ type UserRepository interface {
 	AddSwipedUsers(ctx context.Context, currentUserId uint64, swipedUserId uint64, type_name string) error
 	IsSwiped(ctx context.Context, userID, swipedUserID uint64) (bool, error)
 	GetNextUserForSwipe(ctx context.Context, currentUserId uint64) ([]User, error)
-
-	AddPhoto(ctx context.Context, user User, newPhoto io.Reader) error
-	DeletePhoto(ctx context.Context, user User, photo string) error
 }

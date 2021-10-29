@@ -6,9 +6,7 @@ import (
 	"dripapp/internal/pkg/models"
 	"errors"
 	"fmt"
-	"io"
 	"log"
-	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -54,10 +52,6 @@ func NewPostgresUserRepository(config configs.PostgresConfig) (*PostgreUserRepo,
 }
 
 func (p PostgreUserRepo) Init() {}
-
-func (p PostgreUserRepo) DeletePhoto(ctx context.Context, user models.User, photo string) error {
-	return nil
-}
 
 func (p PostgreUserRepo) GetUser(ctx context.Context, email string) (models.User, error) {
 	query := `select id, name, email, password, date, description
@@ -325,25 +319,6 @@ func (p PostgreUserRepo) InsertTags(ctx context.Context, id uint64, tags []strin
 	if err != nil {
 		return err
 	}
-
-	return nil
-}
-
-func (p PostgreUserRepo) AddPhoto(ctx context.Context, user models.User, newPhoto io.Reader) error {
-	photoPath := getPathUserPhoto(user) + "/" + user.GetNameToNewPhoto()
-
-	savedPhoto, err := os.Create(photoPath)
-	if err != nil {
-		return err
-	}
-	defer savedPhoto.Close()
-
-	_, err = io.Copy(savedPhoto, newPhoto)
-	if err != nil {
-		return err
-	}
-
-	user.SaveNewPhoto()
 
 	return nil
 }

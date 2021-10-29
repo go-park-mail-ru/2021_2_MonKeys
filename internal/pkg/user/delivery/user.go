@@ -16,6 +16,8 @@ const (
 	StatusEmailAlreadyExists  = 1001
 )
 
+const maxPhotoSize = 20 * 1024 * 1025
+
 type UserHandler struct {
 	// Logger    *zap.SugaredLogger
 	UserUCase models.UserUsecase
@@ -74,11 +76,66 @@ func (h *UserHandler) EditProfileHandler(w http.ResponseWriter, r *http.Request)
 }
 
 func (h *UserHandler) UploadPhoto(w http.ResponseWriter, r *http.Request) {
-	h.UserUCase.AddPhoto(r.Context(), w, r)
+	var resp models.JSON
+
+	err := r.ParseMultipartForm(maxPhotoSize)
+	if err != nil {
+		resp.Status = StatusBadRequest
+		sendResp(resp, w)
+		log.Printf("CODE %d ERROR %s", resp.Status, err)
+		return
+	}
+
+	uploadedPhoto, _, err := r.FormFile("photo")
+	if err != nil {
+		resp.Status = StatusBadRequest
+		sendResp(resp, w)
+		log.Printf("CODE %d ERROR %s", resp.Status, err)
+		return
+	}
+	defer uploadedPhoto.Close()
+
+	var photo models.Photo
+
+	photo.Path, resp.Status = h.UserUCase.AddPhoto(r.Context(), uploadedPhoto, r)
+	if resp.Status != StatusOK {
+		log.Printf("CODE %d ERROR %s", resp.Status, err)
+		sendResp(resp, w)
+		return
+	}
+
+	resp.Body = photo
+	sendResp(resp, w)
 }
 
 func (h *UserHandler) DeletePhoto(w http.ResponseWriter, r *http.Request) {
-	h.UserUCase.DeletePhoto(r.Context(), w, r)
+	var resp models.JSON
+
+	byteReq, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		resp.Status = StatusBadRequest
+		sendResp(resp, w)
+		log.Printf("CODE %d ERROR %s", resp.Status, err)
+		return
+	}
+
+	var photo models.Photo
+	err = json.Unmarshal(byteReq, &photo)
+	if err != nil {
+		resp.Status = StatusBadRequest
+		sendResp(resp, w)
+		log.Printf("CODE %d ERROR %s", resp.Status, err)
+		return
+	}
+
+	resp.Status = h.UserUCase.DeletePhoto(r.Context(), photo, r)
+	if resp.Status != StatusOK {
+		log.Printf("CODE %d ERROR %s", resp.Status, err)
+		sendResp(resp, w)
+		return
+	}
+
+	sendResp(resp, w)
 }
 
 // @Summary SignUp
@@ -110,7 +167,6 @@ func (h *UserHandler) SignupHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Println("Email: ", logUserData.Email, " Password: ", logUserData.Password)
 	status := h.UserUCase.Signup(r.Context(), logUserData, w)
 	resp.Status = status
 	sendResp(resp, w)
