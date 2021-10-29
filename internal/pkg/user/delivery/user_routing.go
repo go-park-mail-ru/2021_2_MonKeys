@@ -8,12 +8,14 @@ import (
 	httpSwagger "github.com/swaggo/http-swagger"
 )
 
-func SetRouting(router *mux.Router, us models.UserUsecase) {
+func SetRouting(router *mux.Router, us models.UserUsecase, su models.SessionUsecase) {
 	userHandler := &UserHandler{
-		UserUCase: us,
+		UserUCase:    us,
+		SessionUcase: su,
 	}
 	sessionHandler := &_sessionDelivery.SessionHandler{
-		UserUCase: us,
+		UserUCase:    us,
+		SessionUcase: su,
 	}
 
 	router.HandleFunc("/api/v1/session", sessionHandler.LoginHandler).Methods("POST", "OPTIONS")

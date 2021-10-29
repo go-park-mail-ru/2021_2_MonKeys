@@ -2,8 +2,9 @@ package usecase
 
 import (
 	"context"
-	"crypto/md5"
+	"dripapp/configs"
 	"dripapp/internal/pkg/models"
+	"dripapp/internal/pkg/responses"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -20,14 +21,6 @@ type userUsecase struct {
 	contextTimeout time.Duration
 }
 
-const (
-	StatusOK                  = 200
-	StatusBadRequest          = 400
-	StatusNotFound            = 404
-	StatusInternalServerError = 500
-	StatusEmailAlreadyExists  = 1001
-)
-
 const maxPhotoSize = 20 * 1024 * 1025 // - это из доставки. Пока пусть будет здесь для AddPhoto()
 
 func NewUserUsecase(ur models.UserRepository, sess models.SessionRepository, timeout time.Duration) models.UserUsecase {
@@ -38,125 +31,91 @@ func NewUserUsecase(ur models.UserRepository, sess models.SessionRepository, tim
 	}
 }
 
-func createSessionCookie(user models.LoginUser) http.Cookie {
-	expiration := time.Now().Add(10 * time.Hour)
-
-	data := user.Password + time.Now().String()
-	md5CookieValue := fmt.Sprintf("%x", md5.Sum([]byte(data)))
-
-	cookie := http.Cookie{
-		Name:     "sessionId",
-		Value:    md5CookieValue,
-		Expires:  expiration,
-		Secure:   true,
-		HttpOnly: true,
-		SameSite: http.SameSiteNoneMode,
-	}
-
-	return cookie
-}
-
-func sendResp(resp models.JSON, w http.ResponseWriter) {
-	byteResp, err := json.Marshal(resp)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-	}
-	w.WriteHeader(http.StatusOK)
-	_, err = w.Write(byteResp)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-	}
-}
-
-func (h *userUsecase) getUserByCookie(c context.Context, sessionCookie string) (models.User, error) {
-	userID, err := h.Session.GetUserIDByCookie(sessionCookie)
-	if err != nil {
-		return models.User{}, err
-	}
-
-	user, err := h.UserRepo.GetUserByID(c, userID)
-	if err != nil {
-		return models.User{}, errors.New("error db: getUserByID")
-	}
-
-	return user, nil
-}
-
-func (h *userUsecase) CurrentUser(c context.Context, r *http.Request) (models.User, int) {
+func (h *userUsecase) CurrentUser(c context.Context) (models.User, int) {
 	ctx, cancel := context.WithTimeout(c, h.contextTimeout)
 	defer cancel()
 
-	session, err := r.Cookie("sessionId")
-	if err != nil {
-		log.Printf("CODE %d ERROR %s", StatusNotFound, err)
-		return models.User{}, StatusNotFound
+	ctxSession := ctx.Value(configs.ForContext)
+	if ctxSession == nil {
+		log.Printf("CODE %d ERROR %s", http.StatusNotFound, errors.New("context nil error"))
+		return models.User{}, http.StatusNotFound
+	}
+	currentSession, ok := ctxSession.(models.Session)
+	if !ok {
+		log.Printf("CODE %d ERROR %s", http.StatusNotFound, errors.New("convert to model session error"))
+		return models.User{}, http.StatusNotFound
 	}
 
-	currentUser, err := h.getUserByCookie(ctx, session.Value)
+	currentUser, err := h.UserRepo.GetUserByID(c, currentSession.UserID)
 	if err != nil {
-		log.Printf("CODE %d ERROR %s", StatusNotFound, err)
-		return models.User{}, StatusNotFound
+		log.Printf("CODE %d ERROR %s", http.StatusNotFound, err)
+		return models.User{}, http.StatusNotFound
 	}
 
-	log.Printf("CODE %d", StatusOK)
-	return currentUser, StatusOK
+	log.Printf("CODE %d", http.StatusOK)
+	return currentUser, http.StatusOK
 }
 
-func (h *userUsecase) EditProfile(c context.Context, newUserData models.User, r *http.Request) (models.User, int) {
+func (h *userUsecase) EditProfile(c context.Context, newUserData models.User) (models.User, int) {
 	ctx, cancel := context.WithTimeout(c, h.contextTimeout)
 	defer cancel()
 
-	session, err := r.Cookie("sessionId")
-	if err != nil {
-		log.Printf("CODE %d ERROR %s", StatusNotFound, err)
-		return models.User{}, StatusNotFound
+	ctxSession := ctx.Value(configs.ForContext)
+	if ctxSession == nil {
+		log.Printf("CODE %d ERROR %s", http.StatusNotFound, errors.New("context nil error"))
+		return models.User{}, http.StatusNotFound
+	}
+	currentSession, ok := ctxSession.(models.Session)
+	if !ok {
+		log.Printf("CODE %d ERROR %s", http.StatusNotFound, errors.New("convert to model session error"))
+		return models.User{}, http.StatusNotFound
 	}
 
-	currentUser, err := h.getUserByCookie(ctx, session.Value)
+	currentUser, err := h.UserRepo.GetUserByID(c, currentSession.UserID)
 	if err != nil {
-		log.Printf("CODE %d ERROR %s", StatusNotFound, err)
-		return models.User{}, StatusNotFound
+		log.Printf("CODE %d ERROR %s", http.StatusNotFound, err)
+		return models.User{}, http.StatusNotFound
 	}
 
 	err = currentUser.FillProfile(&newUserData)
 	if err != nil {
-		log.Printf("CODE %d ERROR %s", StatusBadRequest, err)
-		return models.User{}, StatusBadRequest
+		log.Printf("CODE %d ERROR %s", http.StatusBadRequest, err)
+		return models.User{}, http.StatusBadRequest
 	}
 
 	_, err = h.UserRepo.UpdateUser(c, currentUser)
 	if err != nil {
-		log.Printf("CODE %d ERROR %s", StatusInternalServerError, err)
-		return models.User{}, StatusInternalServerError
+		log.Printf("CODE %d ERROR %s", http.StatusInternalServerError, err)
+		return models.User{}, http.StatusInternalServerError
 	}
 
-	log.Printf("CODE %d", StatusOK)
+	log.Printf("CODE %d", http.StatusOK)
 
-	return currentUser, StatusOK
+	return currentUser, http.StatusOK
 }
 
 func (h *userUsecase) AddPhoto(c context.Context, w http.ResponseWriter, r *http.Request) {
 	var resp models.JSON
-	session, err := r.Cookie("sessionId")
-	if err != nil {
-		resp.Status = StatusNotFound
-		sendResp(resp, w)
-		log.Printf("CODE %d ERROR %s", resp.Status, err)
+	ctx, cancel := context.WithTimeout(c, h.contextTimeout)
+	defer cancel()
+
+	currentUserId := ctx.Value(configs.ForContext)
+	if currentUserId == nil {
+		log.Printf("CODE %d ERROR %s", http.StatusNotFound, errors.New("context nil error"))
 		return
 	}
+	userId := currentUserId.(uint64)
 
-	currentUser, err := h.getUserByCookie(c, session.Value)
+	currentUser, err := h.UserRepo.GetUserByID(c, userId)
 	if err != nil {
-		resp.Status = StatusNotFound
-		sendResp(resp, w)
-		log.Printf("CODE %d ERROR %s", resp.Status, err)
+		log.Printf("CODE %d ERROR %s", http.StatusNotFound, err)
 		return
 	}
 
 	err = r.ParseMultipartForm(maxPhotoSize)
 	if err != nil {
-		resp.Status = StatusBadRequest
-		sendResp(resp, w)
+		resp.Status = http.StatusBadRequest
+		responses.SendResp(resp, w)
 		log.Printf("CODE %d ERROR %s", resp.Status, err)
 		return
 	}
@@ -173,39 +132,39 @@ func (h *userUsecase) AddPhoto(c context.Context, w http.ResponseWriter, r *http
 
 	err = h.UserRepo.AddPhoto(c, currentUser, uploadedPhoto)
 	if err != nil {
-		resp.Status = StatusInternalServerError
-		sendResp(resp, w)
+		resp.Status = http.StatusInternalServerError
+		responses.SendResp(resp, w)
 		log.Printf("CODE %d ERROR %s", resp.Status, err)
 		return
 	}
 
-	resp.Status = StatusOK
+	resp.Status = http.StatusOK
 	resp.Body = models.Photo{Title: currentUser.GetLastPhoto()}
-	sendResp(resp, w)
+	responses.SendResp(resp, w)
 }
 
 func (h *userUsecase) DeletePhoto(c context.Context, w http.ResponseWriter, r *http.Request) {
 	var resp models.JSON
-	session, err := r.Cookie("sessionId")
-	if err != nil {
-		resp.Status = StatusNotFound
-		sendResp(resp, w)
-		log.Printf("CODE %d ERROR %s", resp.Status, err)
+	ctx, cancel := context.WithTimeout(c, h.contextTimeout)
+	defer cancel()
+
+	currentUserId := ctx.Value(configs.ForContext)
+	if currentUserId == nil {
+		log.Printf("CODE %d ERROR %s", http.StatusNotFound, errors.New("context nil error"))
 		return
 	}
+	userId := currentUserId.(uint64)
 
-	currentUser, err := h.getUserByCookie(c, session.Value)
+	currentUser, err := h.UserRepo.GetUserByID(c, userId)
 	if err != nil {
-		resp.Status = StatusNotFound
-		sendResp(resp, w)
-		log.Printf("CODE %d ERROR %s", resp.Status, err)
+		log.Printf("CODE %d ERROR %s", http.StatusNotFound, err)
 		return
 	}
 
 	byteReq, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		resp.Status = StatusBadRequest
-		sendResp(resp, w)
+		resp.Status = http.StatusBadRequest
+		responses.SendResp(resp, w)
 		log.Printf("CODE %d ERROR %s", resp.Status, err)
 		return
 	}
@@ -213,29 +172,29 @@ func (h *userUsecase) DeletePhoto(c context.Context, w http.ResponseWriter, r *h
 	var photo *models.Photo
 	err = json.Unmarshal(byteReq, &photo)
 	if err != nil {
-		resp.Status = StatusBadRequest
-		sendResp(resp, w)
+		resp.Status = http.StatusBadRequest
+		responses.SendResp(resp, w)
 		log.Printf("CODE %d ERROR %s", resp.Status, err)
 		return
 	}
 
 	if currentUser.IsHavePhoto(photo.Title) {
-		resp.Status = StatusBadRequest
-		sendResp(resp, w)
+		resp.Status = http.StatusBadRequest
+		responses.SendResp(resp, w)
 		log.Printf("CODE %d ERROR %s", resp.Status, err)
 		return
 	}
 
 	err = h.UserRepo.DeletePhoto(c, currentUser, photo.Title)
 	if err != nil {
-		resp.Status = StatusInternalServerError
-		sendResp(resp, w)
+		resp.Status = http.StatusInternalServerError
+		responses.SendResp(resp, w)
 		log.Printf("CODE %d ERROR %s", resp.Status, err)
 		return
 	}
 
-	resp.Status = StatusOK
-	sendResp(resp, w)
+	resp.Status = http.StatusOK
+	responses.SendResp(resp, w)
 }
 
 // @Summary LogIn
@@ -247,52 +206,21 @@ func (h *userUsecase) DeletePhoto(c context.Context, w http.ResponseWriter, r *h
 // @Success 200 {object} JSON
 // @Failure 400,404,500
 // @Router /login [post]
-func (h *userUsecase) Login(c context.Context, logUserData models.LoginUser, w http.ResponseWriter) (models.User, int) {
+func (h *userUsecase) Login(c context.Context, logUserData models.LoginUser) (models.User, int) {
 
 	identifiableUser, err := h.UserRepo.GetUser(c, logUserData.Email)
 	if err != nil {
-		log.Printf("CODE %d ERROR %s", StatusNotFound, err)
-		return models.User{}, StatusNotFound
+		log.Printf("CODE %d ERROR %s", http.StatusNotFound, err)
+		return models.User{}, http.StatusNotFound
 	}
 
 	if identifiableUser.IsCorrectPassword(logUserData.Password) {
-		cookie := createSessionCookie(logUserData)
-
-		if !h.Session.IsSessionByCookie(cookie.Value) {
-			err = h.Session.NewSessionCookie(cookie.Value, identifiableUser.ID)
-			if err != nil {
-				log.Printf("CODE %d ERROR %s", StatusInternalServerError, err)
-				return models.User{}, StatusInternalServerError
-			}
-		}
-		http.SetCookie(w, &cookie)
-
-		log.Printf("CODE %d", StatusOK)
-		return identifiableUser, StatusOK
+		log.Printf("CODE %d", http.StatusOK)
+		return identifiableUser, http.StatusOK
 	} else {
-		log.Printf("CODE %d ERROR %s", StatusNotFound, errors.New("not correct password"))
-		return models.User{}, StatusNotFound
+		log.Printf("CODE %d ERROR %s", http.StatusNotFound, errors.New("not correct password"))
+		return models.User{}, http.StatusNotFound
 	}
-}
-
-func (h *userUsecase) Logout(c context.Context, w http.ResponseWriter, r *http.Request) int {
-	session, err := r.Cookie("sessionId")
-	if err != nil {
-		log.Printf("CODE %d ERROR %s", StatusNotFound, err)
-		return StatusNotFound
-	}
-
-	err = h.Session.DeleteSessionCookie(session.Value)
-	if err != nil {
-		log.Printf("CODE %d ERROR %s", StatusInternalServerError, err)
-		return StatusInternalServerError
-	}
-
-	session.Expires = time.Now().AddDate(0, 0, -1)
-	http.SetCookie(w, session)
-
-	log.Printf("CODE %d", StatusOK)
-	return StatusOK
 }
 
 // @Summary SignUp
@@ -304,128 +232,90 @@ func (h *userUsecase) Logout(c context.Context, w http.ResponseWriter, r *http.R
 // @Success 200 {object} JSON
 // @Failure 400,404,500
 // @Router /signup [post]
-func (h *userUsecase) Signup(c context.Context, logUserData models.LoginUser, w http.ResponseWriter) int {
+func (h *userUsecase) Signup(c context.Context, logUserData models.LoginUser) (models.User, int) {
 	ctx, cancel := context.WithTimeout(c, h.contextTimeout)
 	defer cancel()
 
 	identifiableUser, _ := h.UserRepo.GetUser(ctx, logUserData.Email)
 	if !identifiableUser.IsEmpty() {
-		log.Printf("CODE %d ERROR %s", StatusEmailAlreadyExists, models.ErrEmailAlreadyExists)
-		return StatusEmailAlreadyExists
+		log.Printf("CODE %d ERROR %s", models.StatusEmailAlreadyExists, models.ErrEmailAlreadyExists)
+		return models.User{}, models.StatusEmailAlreadyExists
 	}
 
 	logUserData.Password = models.HashPassword(logUserData.Password)
 	user, err := h.UserRepo.CreateUser(c, logUserData)
 	if err != nil {
-		log.Printf("CODE %d ERROR %s", StatusInternalServerError, err)
-		return StatusInternalServerError
+		log.Printf("CODE %d ERROR %s", http.StatusInternalServerError, err)
+		return models.User{}, http.StatusInternalServerError
 	}
 
-	cookie := createSessionCookie(logUserData)
+	log.Printf("CODE %d", http.StatusOK)
 
-	err = h.Session.NewSessionCookie(cookie.Value, user.ID)
-	if err != nil {
-		log.Printf("CODE %d ERROR %s", StatusInternalServerError, err)
-		return StatusInternalServerError
-	}
-	// =======
-	// 	if !h.Session.IsSessionByCookie(cookie.Value) {
-	// 		err = h.Session.NewSessionCookie(cookie.Value, user.ID)
-	// 		if err != nil {
-	// 			log.Printf("CODE %d ERROR %s", StatusInternalServerError, err)
-	// 			return StatusInternalServerError
-	// 		}
-	// >>>>>>> dev
-	http.SetCookie(w, &cookie)
-
-	log.Printf("CODE %d", StatusOK)
-
-	return StatusOK
+	return user, http.StatusOK
 }
 
-func (h *userUsecase) NextUser(c context.Context, r *http.Request) ([]models.User, int) {
+func (h *userUsecase) NextUser(c context.Context) ([]models.User, int) {
 	ctx, cancel := context.WithTimeout(c, h.contextTimeout)
 	defer cancel()
 
-	// get current user by cookie
-	session, err := r.Cookie("sessionId")
-	if err == http.ErrNoCookie {
-		log.Printf("CODE %d ERROR %s", StatusNotFound, err)
-		return []models.User{}, StatusNotFound
+	ctxSession := ctx.Value(configs.ForContext)
+	if ctxSession == nil {
+		log.Printf("CODE %d ERROR %s", http.StatusNotFound, errors.New("context nil error"))
+		return nil, http.StatusNotFound
 	}
-	currentUser, err := h.getUserByCookie(ctx, session.Value)
+	currentSession, ok := ctxSession.(models.Session)
+	if !ok {
+		log.Printf("CODE %d ERROR %s", http.StatusNotFound, errors.New("convert to model session error"))
+		return nil, http.StatusNotFound
+	}
+
+	currentUser, err := h.UserRepo.GetUserByID(c, currentSession.UserID)
 	if err != nil {
-		log.Printf("CODE %d ERROR %s", StatusNotFound, err)
-		return []models.User{}, StatusNotFound
+		log.Printf("CODE %d ERROR %s", http.StatusNotFound, err)
+		return []models.User{}, http.StatusNotFound
 	}
 
 	// add in swaped users map for current user
 	// err = h.UserRepo.AddSwipedUsers(ctx, currentUser.ID, swipedUserData.Id, "like")
 	// if err != nil {
-	// 	log.Printf("CODE %d ERROR %s", StatusNotFound, err)
-	// 	return models.User{}, StatusNotFound
+	// 	log.Printf("CODE %d ERROR %s", http.StatusNotFound, err)
+	// 	return models.User{}, http.StatusNotFound
 	// }
-	// find next user for swipe
 	nextUsers, err := h.UserRepo.GetNextUserForSwipe(ctx, currentUser.ID)
 	if err != nil {
-		log.Printf("CODE %d ERROR %s", StatusNotFound, err)
-		return []models.User{}, StatusNotFound
+		log.Printf("CODE %d ERROR %s", http.StatusNotFound, err)
+		return []models.User{}, http.StatusNotFound
 	}
 
-	log.Printf("CODE %d", StatusOK)
+	log.Printf("CODE %d", http.StatusOK)
 
-	return nextUsers, StatusOK
+	return nextUsers, http.StatusOK
 }
 
-func (h *userUsecase) UsersMatches(c context.Context, r *http.Request) (models.Matches, int) {
+func (h *userUsecase) GetAllTags(c context.Context) (models.Tags, int) {
 	ctx, cancel := context.WithTimeout(c, h.contextTimeout)
 	defer cancel()
 
-	// read cookies
-	session, err := r.Cookie("sessionId")
-	if err == http.ErrNoCookie {
-		log.Printf("CODE %d ERROR %s", StatusNotFound, err)
-		return models.Matches{}, StatusNotFound
+	ctxSession := ctx.Value(configs.ForContext)
+	if ctxSession == nil {
+		log.Printf("CODE %d ERROR %s", http.StatusNotFound, errors.New("context nil error"))
+		return models.Tags{}, http.StatusNotFound
+	}
+	currentSession, ok := ctxSession.(models.Session)
+	if !ok {
+		log.Printf("CODE %d ERROR %s", http.StatusNotFound, errors.New("convert to model session error"))
+		return models.Tags{}, http.StatusNotFound
 	}
 
-	// get current user by cookie
-	currentUser, err := h.getUserByCookie(ctx, session.Value)
+	_, err := h.UserRepo.GetUserByID(c, currentSession.UserID)
 	if err != nil {
-		log.Printf("CODE %d ERROR %s", StatusNotFound, err)
-		return models.Matches{}, StatusNotFound
+		log.Printf("CODE %d ERROR %s", http.StatusNotFound, err)
+		return models.Tags{}, http.StatusNotFound
 	}
-
-	// find matches
-	mathes, err := h.UserRepo.GetUsersMatches(ctx, currentUser.ID)
-	if err != nil {
-		log.Printf("CODE %d ERROR %s", StatusNotFound, err)
-		return models.Matches{}, StatusNotFound
-	}
-
-	// count
-	counter := 0
-	var allMathesMap = make(map[uint64]models.User)
-	for _, value := range mathes {
-		allMathesMap[uint64(counter)] = value
-		counter++
-	}
-
-	var allMatches models.Matches
-	allMatches.AllUsers = allMathesMap
-	allMatches.Count = strconv.Itoa(counter)
-
-	log.Printf("CODE %d", StatusOK)
-
-	return allMatches, StatusOK
-}
-
-func (h *userUsecase) GetAllTags(c context.Context, r *http.Request) (models.Tags, int) {
-	ctx, cancel := context.WithTimeout(c, h.contextTimeout)
-	defer cancel()
 
 	allTags, err := h.UserRepo.GetTags(ctx)
 	if err != nil {
-		return models.Tags{}, StatusNotFound
+		return models.Tags{}, http.StatusNotFound
 	}
 	var respTag models.Tag
 	var currentAllTags = make(map[uint64]models.Tag)
@@ -441,5 +331,5 @@ func (h *userUsecase) GetAllTags(c context.Context, r *http.Request) (models.Tag
 	respAllTags.AllTags = currentAllTags
 	respAllTags.Count = uint64(counter)
 
-	return respAllTags, StatusOK
+	return respAllTags, http.StatusOK
 }

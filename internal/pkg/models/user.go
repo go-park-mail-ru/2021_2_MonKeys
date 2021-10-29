@@ -69,6 +69,7 @@ func (user *User) IsEmpty() bool {
 
 func (user *User) IsCorrectPassword(password string) bool {
 	return user.Password == HashPassword(password)
+	// return user.Password == password
 }
 
 func GetAgeFromDate(date string) (string, error) {
@@ -154,15 +155,14 @@ var (
 
 // ArticleUsecase represent the article's usecases
 type UserUsecase interface {
-	CurrentUser(c context.Context, r *http.Request) (User, int)
-	EditProfile(c context.Context, newUserData User, r *http.Request) (User, int)
+	CurrentUser(c context.Context) (User, int)
+	EditProfile(c context.Context, newUserData User) (User, int)
 	AddPhoto(c context.Context, w http.ResponseWriter, r *http.Request)
 	DeletePhoto(c context.Context, w http.ResponseWriter, r *http.Request)
-	Login(c context.Context, logUserData LoginUser, w http.ResponseWriter) (User, int)
-	Logout(c context.Context, w http.ResponseWriter, r *http.Request) int
-	Signup(c context.Context, logUserData LoginUser, w http.ResponseWriter) int
-	NextUser(c context.Context, r *http.Request) ([]User, int)
-	GetAllTags(c context.Context, r *http.Request) (Tags, int)
+	Login(c context.Context, logUserData LoginUser) (User, int)
+	Signup(c context.Context, logUserData LoginUser) (User, int)
+	NextUser(c context.Context) ([]User, int)
+	GetAllTags(c context.Context) (Tags, int)
 	UsersMatches(c context.Context, r *http.Request) (Matches, int)
 }
 

@@ -1,6 +1,7 @@
 package session
 
 import (
+	"dripapp/internal/pkg/models"
 	"errors"
 )
 
@@ -12,17 +13,17 @@ func NewSessionDB() *MockSessionDB {
 	return &MockSessionDB{make(map[string]uint64)}
 }
 
-func (db MockSessionDB) GetUserIDByCookie(sessionCookie string) (userID uint64, err error) {
+func (db MockSessionDB) GetSessionByCookie(sessionCookie string) (session models.Session, err error) {
 	if len(db.cookies) == 0 {
-		return userID, errors.New("cookies is empty map")
+		return models.Session{}, errors.New("cookies is empty map")
 	}
 
 	userID, okCookie := db.cookies[sessionCookie]
 	if !okCookie {
-		return userID, errors.New("cookie not found")
+		return models.Session{}, errors.New("cookie not found")
 	}
 
-	return userID, nil
+	return models.Session{UserID: userID, Cookie: sessionCookie}, nil
 }
 
 func (db *MockSessionDB) NewSessionCookie(sessionCookie string, userId uint64) error {

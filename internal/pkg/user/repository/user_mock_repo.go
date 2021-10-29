@@ -19,8 +19,11 @@ const dirMedia = "./media"
 const basePhotoPath = dirMedia + "/profile_photos"
 
 func NewMockDB() *MockDB {
-	os.Mkdir(dirMedia, 0777)
-	err := os.Mkdir(basePhotoPath, 0777)
+	err := os.Mkdir(dirMedia, 0777)
+	if err != nil {
+		log.Println("mkdir: ", err)
+	}
+	err = os.Mkdir(basePhotoPath, 0777)
 	if err != nil {
 		log.Println("mkdir: ", err)
 	}
