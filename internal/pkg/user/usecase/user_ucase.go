@@ -10,6 +10,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strconv"
 	"time"
 )
 
@@ -374,6 +375,48 @@ func (h *userUsecase) NextUser(c context.Context, r *http.Request) ([]models.Use
 	log.Printf("CODE %d", StatusOK)
 
 	return nextUsers, StatusOK
+}
+
+func (h *userUsecase) UsersMatches(c context.Context, r *http.Request) (models.Matches, int) {
+	ctx, cancel := context.WithTimeout(c, h.contextTimeout)
+	defer cancel()
+
+	// read cookies
+	session, err := r.Cookie("sessionId")
+	if err == http.ErrNoCookie {
+		log.Printf("CODE %d ERROR %s", StatusNotFound, err)
+		return models.Matches{}, StatusNotFound
+	}
+
+	// get current user by cookie
+	currentUser, err := h.getUserByCookie(ctx, session.Value)
+	if err != nil {
+		log.Printf("CODE %d ERROR %s", StatusNotFound, err)
+		return models.Matches{}, StatusNotFound
+	}
+
+	// find matches
+	mathes, err := h.UserRepo.GetUsersMatches(ctx, currentUser.ID)
+	if err != nil {
+		log.Printf("CODE %d ERROR %s", StatusNotFound, err)
+		return models.Matches{}, StatusNotFound
+	}
+
+	// count
+	counter := 0
+	var allMathesMap = make(map[uint64]models.User)
+	for _, value := range mathes {
+		allMathesMap[uint64(counter)] = value
+		counter++
+	}
+
+	var allMatches models.Matches
+	allMatches.AllUsers = allMathesMap
+	allMatches.Count = strconv.Itoa(counter)
+
+	log.Printf("CODE %d", StatusOK)
+
+	return allMatches, StatusOK
 }
 
 func (h *userUsecase) GetAllTags(c context.Context, r *http.Request) (models.Tags, int) {

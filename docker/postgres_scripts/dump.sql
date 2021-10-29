@@ -56,3 +56,10 @@ insert into
   profile(email, password)
 values('lol4@mail.ru', 'ahaa'),
       ('lol5@mail.ru', 'ahaa');
+
+insert into
+  matches(id1, id2)
+values(1, 2),
+      (2, 1),
+      (1, 3),
+      (3, 2);
