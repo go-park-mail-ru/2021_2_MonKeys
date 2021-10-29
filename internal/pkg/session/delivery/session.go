@@ -3,9 +3,11 @@ package delivery
 import (
 	"dripapp/internal/pkg/models"
 	"encoding/json"
+	"errors"
 	"io/ioutil"
 	"log"
 	"net/http"
+	"time"
 )
 
 type SessionHandler struct {
@@ -71,6 +73,19 @@ func (h *SessionHandler) LoginHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *SessionHandler) LogoutHandler(w http.ResponseWriter, r *http.Request) {
-	status := h.UserUCase.Logout(r.Context(), w, r)
+	status := h.UserUCase.Logout(r.Context())
+	if status != StatusOK {
+		log.Printf("CODE %d ERROR %s", StatusNotFound, errors.New("lol"))
+		sendResp(models.JSON{Status: status}, w)
+	}
+	session, err := r.Cookie("sessionId")
+	if err != nil {
+		log.Printf("CODE %d ERROR %s", StatusNotFound, err)
+		sendResp(models.JSON{Status: status}, w)
+	}
+
+	session.Expires = time.Now().AddDate(0, 0, -1)
+	http.SetCookie(w, session)
+
 	sendResp(models.JSON{Status: status}, w)
 }

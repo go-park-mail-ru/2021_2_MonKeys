@@ -2,6 +2,7 @@ package session
 
 import (
 	"dripapp/configs"
+	"dripapp/internal/pkg/models"
 	"errors"
 	"fmt"
 	"log"
@@ -15,7 +16,7 @@ type SessionManager struct {
 	TarantoolConn *tarantool.Connection
 }
 
-func NewTarantoolConnection(tntConfig configs.TarantoolConfig) (*SessionManager, error) {
+func NewTarantoolConnection(tntConfig configs.TarantoolConfig) (models.SessionRepository, error) {
 	addrPort := fmt.Sprintf("%s%s", tntConfig.Host, tntConfig.Port)
 	conn, err := tarantool.Connect(addrPort, tarantool.Opts{
 		User: "guest",
@@ -41,49 +42,48 @@ func NewTarantoolConnection(tntConfig configs.TarantoolConfig) (*SessionManager,
 	return &seesManager, nil
 }
 
-func (conn *SessionManager) GetUserIDByCookie(sessionCookie string) (userID uint64, err error) {
-	// resp, err := conn.TarantoolConn.Select("sessions", "primary", 0, 1, tarantool.IterEq, []interface{}{sessionCookie})
-	// if err != nil {
-	// 	return 0, err
-	// }
-
+func (conn *SessionManager) GetSessionByCookie(sessionCookie string) (session models.Session, err error) {
 	resp, err := conn.TarantoolConn.Call("check_session", []interface{}{sessionCookie})
 	if err != nil {
 		fmt.Println("cannot check session", err)
-		return 0, err
+		return models.Session{}, err
 	}
 
 	if len(resp.Data) == 0 {
-		return 0, errors.New("not exixsts this cookie")
+		return models.Session{}, errors.New("not exixsts this cookie")
 	}
 
 	data := resp.Data[0]
 	if data == nil {
-		return 0, nil
+		return models.Session{}, nil
 	}
 
 	sessionDataSlice, ok := data.([]interface{})
 	if !ok {
-		return 0, fmt.Errorf("cannot cast data: %v", sessionDataSlice)
+		return models.Session{}, fmt.Errorf("cannot cast data: %v", sessionDataSlice)
 	}
 
 	if len(sessionDataSlice) == 0 {
-		return 0, errors.New("not exixsts this cookie")
-	}
-	if sessionDataSlice[0] == nil {
-		return 0, nil
+		return models.Session{}, nil
 	}
 
-	sessionData, ok := sessionDataSlice[1].(uint64)
+	cookie, ok := sessionDataSlice[0].(string)
 	if !ok {
-		return 0, fmt.Errorf("cannot cast data: %v", sessionDataSlice[0])
+		return models.Session{}, fmt.Errorf("cannot cast data: %v", sessionDataSlice)
 	}
+	userId, ok := sessionDataSlice[1].(uint64)
+	if !ok {
+		return models.Session{}, fmt.Errorf("cannot cast data: %v", sessionDataSlice)
+	}
+	// userId, ok := sessionDataSlice.(interface{}).(*models.Session)
+	// if !ok {
+	// 	return models.Session{}, fmt.Errorf("cannot cast data: %v", sessionDataSlice)
+	// }
 
-	return sessionData, nil
+	return models.Session{Cookie: cookie, UserID: userId}, nil
 }
 
 func (conn *SessionManager) NewSessionCookie(sessionCookie string, id uint64) error {
-	// resp, err := conn.TarantoolConn.Insert("sessions", []interface{}{"sessionCookie", 3})
 	resp, err := conn.TarantoolConn.Call("new_session", []interface{}{sessionCookie, id})
 	if err != nil {
 		return err
@@ -96,7 +96,6 @@ func (conn *SessionManager) NewSessionCookie(sessionCookie string, id uint64) er
 }
 
 func (conn *SessionManager) DeleteSessionCookie(sessionCookie string) error {
-	// _, err := conn.TarantoolConn.Delete("sessions", "primary", []interface{}{sessionCookie})
 	resp, err := conn.TarantoolConn.Call("delete_session", []interface{}{sessionCookie})
 	if err != nil {
 		return err
@@ -105,8 +104,6 @@ func (conn *SessionManager) DeleteSessionCookie(sessionCookie string) error {
 	if len(resp.Data) == 0 {
 		return errors.New("this cookie is not exists")
 	}
-
-	fmt.Println(resp)
 
 	return nil
 }

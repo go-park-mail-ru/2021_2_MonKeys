@@ -47,11 +47,6 @@ func main() {
 	// router
 	router := mux.NewRouter()
 
-	// middleware
-	router.Use(middleware.Logger(logFile))
-	router.Use(middleware.CORS)
-	router.Use(middleware.PanicRecovery)
-
 	// repository
 	userRepo, err := _userRepo.NewPostgresUserRepository(configs.Postgres)
 	if err != nil {
@@ -74,6 +69,9 @@ func main() {
 
 	// delivery
 	_userDelivery.SetRouting(router, userUCase)
+
+	// middleware
+	middleware.NewMiddleware(router, sm, logFile)
 
 	srv := &http.Server{
 		Handler:      router,

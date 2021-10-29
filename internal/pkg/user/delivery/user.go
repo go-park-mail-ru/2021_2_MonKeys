@@ -36,7 +36,7 @@ func sendResp(resp models.JSON, w http.ResponseWriter) {
 func (h *UserHandler) CurrentUser(w http.ResponseWriter, r *http.Request) {
 	var resp models.JSON
 
-	user, status := h.UserUCase.CurrentUser(r.Context(), r)
+	user, status := h.UserUCase.CurrentUser(r.Context())
 	resp.Status = status
 	if status == StatusOK {
 		resp.Body = user
@@ -64,7 +64,7 @@ func (h *UserHandler) EditProfileHandler(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	user, status := h.UserUCase.EditProfile(r.Context(), newUserData, r)
+	user, status := h.UserUCase.EditProfile(r.Context(), newUserData)
 	resp.Status = status
 	if status == StatusOK {
 		resp.Body = user
@@ -136,7 +136,7 @@ func (h *UserHandler) NextUserHandler(w http.ResponseWriter, r *http.Request) {
 	// 	log.Printf("CODE %d ERROR %s", resp.Status, err)
 	// 	return
 	// }
-	nextUser, status := h.UserUCase.NextUser(r.Context(), r)
+	nextUser, status := h.UserUCase.NextUser(r.Context())
 	resp.Status = status
 	if status == StatusOK {
 		resp.Body = nextUser
@@ -147,7 +147,7 @@ func (h *UserHandler) NextUserHandler(w http.ResponseWriter, r *http.Request) {
 
 func (h *UserHandler) GetAllTags(w http.ResponseWriter, r *http.Request) {
 	var resp models.JSON
-	allTags, status := h.UserUCase.GetAllTags(r.Context(), r)
+	allTags, status := h.UserUCase.GetAllTags(r.Context())
 	resp.Body = allTags
 	resp.Status = status
 	sendResp(resp, w)
