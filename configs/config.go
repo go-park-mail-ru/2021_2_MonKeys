@@ -33,13 +33,19 @@ type TimeoutsConfig struct {
 	ContextTimeout time.Duration
 }
 
-var Postgres PostgresConfig
+type contextID string
 
-var Tarantool TarantoolConfig
+var (
+	Postgres PostgresConfig
 
-var Server ServerConfig
+	Tarantool TarantoolConfig
 
-var Timeouts TimeoutsConfig
+	Server ServerConfig
+
+	Timeouts TimeoutsConfig
+
+	ForContext contextID
+)
 
 func SetConfig() {
 	// viper.SetConfigFile("config.json")
@@ -94,4 +100,6 @@ func SetConfig() {
 		ReadTimeout:    15 * time.Second,
 		ContextTimeout: time.Second * 2,
 	}
+
+	ForContext = "userID"
 }

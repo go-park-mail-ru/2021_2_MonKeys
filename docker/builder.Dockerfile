@@ -4,4 +4,5 @@ WORKDIR /dripapp
 
 COPY . .
 
+# RUN make linter && make build-go
 RUN make build-go
