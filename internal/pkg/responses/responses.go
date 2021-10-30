@@ -29,7 +29,6 @@ func SendResp(resp models.JSON, w http.ResponseWriter) {
 }
 
 func SendErrorResponse(w http.ResponseWriter, error *models.HTTPError) {
-	log.Printf("CODE %d ERROR %s", error.Code, error.Message)
 	w.WriteHeader(error.Code)
 	body, err := json.Marshal(error)
 	if err != nil {
@@ -40,4 +39,5 @@ func SendErrorResponse(w http.ResponseWriter, error *models.HTTPError) {
 		return
 	}
 	_, _ = w.Write(body)
+	log.Printf("CODE %d ERROR %s", error.Code, error.Message)
 }

@@ -436,7 +436,7 @@ func (p PostgreUserRepo) GetUsersMatches(ctx context.Context, currentUserId uint
 	}
 
 	for idx := range matchesUsers {
-		matchesUsers[idx].Age, err = getAgeFromDate(matchesUsers[idx].Date)
+		matchesUsers[idx].Age, err = models.GetAgeFromDate(matchesUsers[idx].Date)
 		if err != nil {
 			return nil, err
 		}

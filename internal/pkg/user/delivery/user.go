@@ -164,9 +164,9 @@ func (h *UserHandler) MatchesHandler(w http.ResponseWriter, r *http.Request) {
 	var resp models.JSON
 	matches, status := h.UserUCase.UsersMatches(r.Context(), r)
 	resp.Status = status
-	if status == StatusOK {
+	if status == http.StatusOK {
 		resp.Body = matches
 	}
 
-	sendResp(resp, w)
+	responses.SendResp(resp, w)
 }

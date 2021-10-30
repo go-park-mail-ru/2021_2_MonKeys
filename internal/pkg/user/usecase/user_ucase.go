@@ -333,3 +333,42 @@ func (h *userUsecase) GetAllTags(c context.Context) (models.Tags, int) {
 
 	return respAllTags, http.StatusOK
 }
+
+func (h *userUsecase) UsersMatches(c context.Context, r *http.Request) (models.Matches, int) {
+	ctx, cancel := context.WithTimeout(c, h.contextTimeout)
+	defer cancel()
+
+	ctxSession := ctx.Value(configs.ForContext)
+	if ctxSession == nil {
+		log.Printf("CODE %d ERROR %s", http.StatusNotFound, errors.New("context nil error"))
+		return models.Matches{}, http.StatusNotFound
+	}
+	currentSession, ok := ctxSession.(models.Session)
+	if !ok {
+		log.Printf("CODE %d ERROR %s", http.StatusNotFound, errors.New("convert to model session error"))
+		return models.Matches{}, http.StatusNotFound
+	}
+
+	// find matches
+	mathes, err := h.UserRepo.GetUsersMatches(ctx, currentSession.UserID)
+	if err != nil {
+		log.Printf("CODE %d ERROR %s", http.StatusNotFound, err)
+		return models.Matches{}, http.StatusNotFound
+	}
+
+	// count
+	counter := 0
+	var allMathesMap = make(map[uint64]models.User)
+	for _, value := range mathes {
+		allMathesMap[uint64(counter)] = value
+		counter++
+	}
+
+	var allMatches models.Matches
+	allMatches.AllUsers = allMathesMap
+	allMatches.Count = strconv.Itoa(counter)
+
+	log.Printf("CODE %d", http.StatusOK)
+
+	return allMatches, http.StatusOK
+}
