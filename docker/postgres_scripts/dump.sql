@@ -11,7 +11,7 @@ create table if not exists profile(
   email varchar(255) default '',
   password varchar(255) default '',
   date varchar(255) default '',
-  description varchar(255) default '',
+  description varchar(1000) default '',
   imgs varchar(255) [] default array [] :: varchar []
 );
 create table if not exists tag(
@@ -50,7 +50,17 @@ insert into
   profile(name, email, password, date, description)
 values('lol1', 'lol1@mail.ru', 'af57966e1958f52e41550e822dd8e8a4', '2000-02-20', 'ochen kryto'),
       ('lol2', 'lol2@mail.ru', 'af57966e1958f52e41550e822dd8e8a4', '2000-02-20', 'ochen kryto'),
-      ('lol3', 'lol3@mail.ru', 'af57966e1958f52e41550e822dd8e8a4', '2000-02-20', 'ochen kryto');
+      ('lol3', 'lol3@mail.ru', 'af57966e1958f52e41550e822dd8e8a4', '2000-02-20', 'ochen kryto'),
+      ('lol4', 'lol4@mail.ru', 'af57966e1958f52e41550e822dd8e8a4', '2000-02-20', 'ochen kryto'),
+      ('lol5', 'lol5@mail.ru', 'af57966e1958f52e41550e822dd8e8a4', '2000-02-20', 'ochen kryto'),
+      ('lol6', 'lol6@mail.ru', 'af57966e1958f52e41550e822dd8e8a4', '2000-02-20', 'ochen kryto'),
+      ('lol7', 'lol7@mail.ru', 'af57966e1958f52e41550e822dd8e8a4', '2000-02-20', 'ochen kryto'),
+      ('lol8', 'lol8@mail.ru', 'af57966e1958f52e41550e822dd8e8a4', '2000-02-20', 'ochen kryto'),
+      ('lol9', 'lol9@mail.ru', 'af57966e1958f52e41550e822dd8e8a4', '2000-02-20', 'ochen kryto'),
+      ('lol10', 'lol10@mail.ru', 'af57966e1958f52e41550e822dd8e8a4', '2000-02-20', 'ochen kryto'),
+      ('lol11', 'lol11@mail.ru', 'af57966e1958f52e41550e822dd8e8a4', '2000-02-20', 'ochen kryto'),
+      ('lol12', 'lol12@mail.ru', 'af57966e1958f52e41550e822dd8e8a4', '2000-02-20', 'ochen kryto'),
+      ('lol13', 'lol13@mail.ru', 'af57966e1958f52e41550e822dd8e8a4', '2000-02-20', 'ochen kryto');
 
 insert into
   profile(email, password)

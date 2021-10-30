@@ -373,21 +373,17 @@ func (p PostgreUserRepo) GetNextUserForSwipe(ctx context.Context, currentUserId 
 				op.password,
 				op.date,
 				op.description
-			from
-				(
-				select
-					r.id1 as rid1,
-					r.id2 as rid2
-				from
-					reactions r
-				where
-					r.id1 = $1
-				) prevReact
-				right join profile op on prevReact.rid2 = op.id
+			from profile p
+			join reactions r on (r.id1 = $1)
+			right join profile op on (op.id = r.id2)
+			left join matches m on (m.id1 = op.id)
 			where
-				prevReact.rid1 is null
+				op.name <> ''
+				and op.date <> ''
+				and r.id1 is null
 				and op.id <> $1
-				and op.name <> '' and op.date <> '' limit 5;`
+				and (m.id2 is null or m.id2 <> $1)
+			limit 5;`
 
 	var notSwipedUser []models.User
 	err := p.conn.Select(&notSwipedUser, query, currentUserId)
