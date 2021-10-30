@@ -92,14 +92,19 @@ func (h *SessionHandler) LogoutHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Printf("CODE %d ERROR %s", http.StatusNotFound, err)
 		responses.SendResp(models.JSON{Status: http.StatusNotFound}, w)
+		return
 	}
 	session, err := r.Cookie("sessionId")
 	if err != nil {
 		log.Printf("CODE %d ERROR %s", http.StatusNotFound, err)
 		responses.SendResp(models.JSON{Status: http.StatusNotFound}, w)
+		return
 	}
 
 	session.Expires = time.Now().AddDate(0, 0, -1)
+	session.Secure = true
+	session.HttpOnly = true
+	session.SameSite = http.SameSiteNoneMode
 	http.SetCookie(w, session)
 
 	responses.SendResp(models.JSON{Status: http.StatusOK}, w)

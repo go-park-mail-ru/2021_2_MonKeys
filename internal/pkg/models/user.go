@@ -33,6 +33,15 @@ type LoginUser struct {
 	Password string `json:"password"`
 }
 
+type UserReaction struct {
+	Id       uint64 `json:"id"`
+	Reaction uint64 `json:"reaction"`
+}
+
+type Match struct {
+	Match bool `json:"match"`
+}
+
 // type SwipedUser struct {
 // 	Id uint64 `json:"id"`
 // }
@@ -164,6 +173,7 @@ type UserUsecase interface {
 	NextUser(c context.Context) ([]User, int)
 	GetAllTags(c context.Context) (Tags, int)
 	UsersMatches(c context.Context) (Matches, int)
+	Reaction(c context.Context, reactionData UserReaction) (Match, int)
 }
 
 // ArticleRepository represent the article's repository contract
@@ -183,10 +193,13 @@ type UserRepository interface {
 	CreateTag(ctx context.Context, tag_name string) error
 	InsertTags(ctx context.Context, id uint64, tags []string) error
 	UpdateImgs(ctx context.Context, id uint64, imgs []string) error
-	AddSwipedUsers(ctx context.Context, currentUserId uint64, swipedUserId uint64, type_name string) error
+	AddReaction(ctx context.Context, currentUserId uint64, swipedUserId uint64, reactionType uint64) error
 	IsSwiped(ctx context.Context, userID, swipedUserID uint64) (bool, error)
 	GetNextUserForSwipe(ctx context.Context, currentUserId uint64) ([]User, error)
 	GetUsersMatches(ctx context.Context, currentUserId uint64) ([]User, error)
+	GetLikes(ctx context.Context, currentUserId uint64) ([]uint64, error)
+	DeleteLike(ctx context.Context, firstUser uint64, secondUser uint64) error
+	AddMatch(ctx context.Context, firstUser uint64, secondUser uint64) error
 
 	AddPhoto(ctx context.Context, user User, newPhoto io.Reader) error
 	DeletePhoto(ctx context.Context, user User, photo string) error

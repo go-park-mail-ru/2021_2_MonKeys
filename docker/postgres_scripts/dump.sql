@@ -29,7 +29,7 @@ create table if not exists reactions(
   id serial not null primary key,
   id1 integer,
   id2 integer,
-  type varchar(255) default '',
+  type integer,
   constraint fk_pt_profile1 foreign key (id1) REFERENCES profile (id),
   constraint fk_pt_profile2 foreign key (id2) REFERENCES profile (id)
 );
@@ -49,17 +49,17 @@ values('anime'),('music'),('gaming'),('sport'),('scince');
 insert into
   profile(name, email, password, date, description)
 values('lol1', 'lol1@mail.ru', 'af57966e1958f52e41550e822dd8e8a4', '2000-02-20', 'ochen kryto'),
-      ('lol2', 'lol2@mail.ru', 'ahaa', '2000-02-20', 'ochen kryto'),
-      ('lol3', 'lol3@mail.ru', 'ahaa', '2000-02-20', 'ochen kryto');
+      ('lol2', 'lol2@mail.ru', 'af57966e1958f52e41550e822dd8e8a4', '2000-02-20', 'ochen kryto'),
+      ('lol3', 'lol3@mail.ru', 'af57966e1958f52e41550e822dd8e8a4', '2000-02-20', 'ochen kryto');
 
 insert into
   profile(email, password)
-values('lol4@mail.ru', 'ahaa'),
-      ('lol5@mail.ru', 'ahaa');
+values('lol4@mail.ru', 'af57966e1958f52e41550e822dd8e8a4'),
+      ('lol5@mail.ru', 'af57966e1958f52e41550e822dd8e8a4');
 
-insert into
-  matches(id1, id2)
-values(1, 2),
-      (2, 1),
-      (1, 3),
-      (3, 2);
+-- insert into
+--   matches(id1, id2)
+-- values(1, 2),
+--       (2, 1),
+--       (1, 3),
+--       (3, 2);

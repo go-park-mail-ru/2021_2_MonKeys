@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"dripapp/configs"
 	"dripapp/internal/pkg/models"
 	"errors"
 	"time"
@@ -31,7 +32,7 @@ func (s *sessionUsecase) DeleteSession(c context.Context) error {
 	ctx, cancel := context.WithTimeout(c, s.contextTimeout)
 	defer cancel()
 
-	ctxSession := ctx.Value("userID")
+	ctxSession := ctx.Value(configs.ForContext)
 	if ctxSession == nil {
 		return errors.New("context nil error")
 	}
