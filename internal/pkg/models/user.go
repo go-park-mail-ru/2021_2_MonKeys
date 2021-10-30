@@ -175,7 +175,7 @@ type UserRepository interface {
 	CreateUserAndProfile(ctx context.Context, user User) (User, error)
 	DropSwipes(ctx context.Context) error
 	DropUsers(ctx context.Context) error
-	Init()
+	Init() error
 	GetTags(ctx context.Context) (map[uint64]string, error)
 	DeleteTags(ctx context.Context, userId uint64) error
 	GetTagsByID(ctx context.Context, id uint64) ([]string, error)

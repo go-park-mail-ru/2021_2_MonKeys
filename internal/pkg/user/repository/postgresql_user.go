@@ -6,6 +6,7 @@ import (
 	"dripapp/internal/pkg/models"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"log"
 	"os"
 	"strings"
@@ -32,11 +33,32 @@ func NewPostgresUserRepository(config configs.PostgresConfig) (*PostgreUserRepo,
 		return nil, err
 	}
 
+	// query, err := ioutil.ReadFile("docker/postgres_scripts/dump.sql")
+	// if err != nil {
+	// 	return nil, err
+	// }
+	// strQuery := string(query)
+	// if _, err := conn.Exec(strQuery); err != nil {
+	// 	return nil, err
+	// }
+
 	log.Printf("%s%s", success, connStr)
 	return &PostgreUserRepo{*conn}, nil
 }
 
-func (p PostgreUserRepo) Init() {}
+func (p PostgreUserRepo) Init() error {
+	query, err := ioutil.ReadFile("docker/postgres_scripts/dump.sql")
+	if err != nil {
+		return err
+	}
+	strQuery := string(query)
+	fmt.Println(strQuery)
+	if _, err := p.conn.Exec(strQuery); err != nil {
+		return err
+	}
+
+	return nil
+}
 
 func (p PostgreUserRepo) DeletePhoto(ctx context.Context, user models.User, photo string) error {
 	return nil

@@ -53,6 +53,10 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	// err = userRepo.Init()
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
 
 	// userRepo := _userRepo.NewMockDB()
 	// userRepo.Init()

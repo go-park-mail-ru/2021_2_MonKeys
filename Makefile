@@ -26,7 +26,7 @@ test-coverage:
 
 ## test: launch all tests
 test:
-	go test ./...
+	go test -coverprofile=coverage.out.tmp ./...
 
 ## run-background: run process in background(available after build)
 run-background:
