@@ -334,7 +334,7 @@ func (h *userUsecase) GetAllTags(c context.Context) (models.Tags, int) {
 	return respAllTags, http.StatusOK
 }
 
-func (h *userUsecase) UsersMatches(c context.Context, r *http.Request) (models.Matches, int) {
+func (h *userUsecase) UsersMatches(c context.Context) (models.Matches, int) {
 	ctx, cancel := context.WithTimeout(c, h.contextTimeout)
 	defer cancel()
 

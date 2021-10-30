@@ -162,7 +162,7 @@ func (h *UserHandler) GetAllTags(w http.ResponseWriter, r *http.Request) {
 
 func (h *UserHandler) MatchesHandler(w http.ResponseWriter, r *http.Request) {
 	var resp models.JSON
-	matches, status := h.UserUCase.UsersMatches(r.Context(), r)
+	matches, status := h.UserUCase.UsersMatches(r.Context())
 	resp.Status = status
 	if status == http.StatusOK {
 		resp.Body = matches

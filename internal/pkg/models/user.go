@@ -163,7 +163,7 @@ type UserUsecase interface {
 	Signup(c context.Context, logUserData LoginUser) (User, int)
 	NextUser(c context.Context) ([]User, int)
 	GetAllTags(c context.Context) (Tags, int)
-	UsersMatches(c context.Context, r *http.Request) (Matches, int)
+	UsersMatches(c context.Context) (Matches, int)
 }
 
 // ArticleRepository represent the article's repository contract
