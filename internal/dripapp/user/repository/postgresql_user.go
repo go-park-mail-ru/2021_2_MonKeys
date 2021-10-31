@@ -290,12 +290,12 @@ func (p PostgreUserRepo) GetNextUserForSwipe(ctx context.Context, currentUserId 
 			return nil, err
 		}
 
-		notSwipedUser[idx].Imgs, err = p.getImgsByID(ctx, currentUserId)
+		notSwipedUser[idx].Imgs, err = p.getImgsByID(ctx, notSwipedUser[idx].ID)
 		if err != nil {
 			return nil, err
 		}
 
-		notSwipedUser[idx].Tags, err = p.getTagsByID(ctx, currentUserId)
+		notSwipedUser[idx].Tags, err = p.getTagsByID(ctx, notSwipedUser[idx].ID)
 		if err != nil {
 			return nil, err
 		}
