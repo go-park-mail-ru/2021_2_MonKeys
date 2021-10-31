@@ -87,12 +87,12 @@ func (p PostgreUserRepo) GetUserByID(ctx context.Context, userID uint64) (models
 		return models.User{}, err
 	}
 
-	RespUser.Tags, err = p.GetTagsByID(ctx, 1)
+	RespUser.Tags, err = p.GetTagsByID(ctx, userID)
 	if err != nil {
 		return models.User{}, err
 	}
 
-	RespUser.Imgs, err = p.GetImgsByID(ctx, 1)
+	RespUser.Imgs, err = p.GetImgsByID(ctx, userID)
 	if err != nil {
 		return models.User{}, err
 	}
@@ -324,11 +324,12 @@ func (p PostgreUserRepo) InsertTags(ctx context.Context, id uint64, tags []strin
 }
 
 func (p PostgreUserRepo) UpdateImgs(ctx context.Context, id uint64, imgs []string) error {
-	query := `update profile set imgs=$2 where id=$1;`
+	query := `update profile set imgs=$2 where id=$1 returning id;`
 
-	err := p.conn.QueryRow(query, id, pq.Array(&imgs))
+	var user_id uint64
+	err := p.conn.QueryRow(query, id, pq.Array(&imgs)).Scan(&user_id)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	return nil

@@ -4,9 +4,9 @@ import (
 	"dripapp/configs"
 	"dripapp/internal/dripapp/middleware"
 	"dripapp/internal/pkg/file"
+	_fileDelivery "dripapp/internal/pkg/file/delivery"
 	"dripapp/internal/pkg/session"
 	_userDelivery "dripapp/internal/pkg/user/delivery"
-	_fileDelivery "dripapp/internal/pkg/file/delivery"
 	_userRepo "dripapp/internal/pkg/user/repository"
 	_userUsecase "dripapp/internal/pkg/user/usecase"
 	"log"
@@ -71,7 +71,7 @@ func main() {
 
 	fileManager, err := file.NewFileManager(configs.FileStorage)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 
 	timeoutContext := configs.Timeouts.ContextTimeout

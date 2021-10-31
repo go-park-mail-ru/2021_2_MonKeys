@@ -151,7 +151,7 @@ func (h *userUsecase) AddPhoto(c context.Context, photo io.Reader, r *http.Reque
 		return
 	}
 
-	photoPath, err = h.File.SaveUserPhoto(c, user, photo)
+	photoPath, err = h.File.SaveUserPhoto(user, photo)
 	if err != nil {
 		status = StatusInternalServerError
 		return
@@ -190,7 +190,7 @@ func (h *userUsecase) DeletePhoto(c context.Context, photo models.Photo, r *http
 		return StatusInternalServerError
 	}
 
-	err = h.File.Delete(c, photo.Path)
+	err = h.File.Delete(photo.Path)
 	if err != nil {
 		return StatusInternalServerError
 	}

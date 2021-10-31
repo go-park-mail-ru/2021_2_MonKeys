@@ -58,11 +58,11 @@ func HashPassword(password string) string {
 	return fmt.Sprintf("%x", md5.Sum([]byte(password)))
 }
 
-func (user *User) IsEmpty() bool {
+func (user User) IsEmpty() bool {
 	return len(user.Email) == 0
 }
 
-func (user *User) IsCorrectPassword(password string) bool {
+func (user User) IsCorrectPassword(password string) bool {
 	return user.Password == HashPassword(password)
 }
 
@@ -95,26 +95,12 @@ func (user *User) FillProfile(newUserData *User) (err error) {
 	return nil
 }
 
-func (user *User) GetLastPhoto() string {
+func (user User) GetLastPhoto() string {
 	if len(user.Imgs) == 0 {
-		return "1.png"
+		return ""
 	}
 
 	return user.Imgs[len(user.Imgs)-1]
-}
-
-func (user *User) GetNameToNewPhoto() string {
-	if len(user.Imgs) == 0 {
-		return "1.png"
-	}
-
-	lastPhoto := user.GetLastPhoto()
-
-	numStr := lastPhoto[:len(lastPhoto)-4]
-
-	num, _ := strconv.Atoi(numStr)
-
-	return strconv.Itoa(num+1) + ".png"
 }
 
 func (user *User) AddNewPhoto(photoPath string) {

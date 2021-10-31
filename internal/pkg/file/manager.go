@@ -1,12 +1,12 @@
 package file
 
 import (
-	"context"
 	"dripapp/configs"
 	"dripapp/internal/pkg/models"
 	"fmt"
 	"io"
 	"os"
+	"strconv"
 )
 
 type FileManager struct {
@@ -14,26 +14,45 @@ type FileManager struct {
 	PhotoFolder string
 }
 
-func NewFileManager(config configs.FileStorageConfig) (*FileManager, error) {
-	fm := FileManager{
-		RootFolder:  config.RootFolder,
-		PhotoFolder: config.RootFolder + "/" + config.ProfilePhotoPath,
+func NewFileManager(config configs.FileStorageConfig) (fm *FileManager, err error) {
+	rootFolder := config.RootFolder
+	photoFolder := fmt.Sprintf("%s/%s", rootFolder, config.ProfilePhotoPath)
+
+	fm = &FileManager{
+		RootFolder:  rootFolder,
+		PhotoFolder: photoFolder,
 	}
 
-	err := fm.CreateFolder(fm.RootFolder)
+	err = fm.createFolder(fm.RootFolder)
 
-	return &fm, err
-}
+	err = fm.createFolder(fm.PhotoFolder)
 
-func (FileManager) CreateFolder(title string) error {
-	return os.Mkdir(title, 0777)
+	return fm, err
 }
 
 func (fm FileManager) CreateFoldersForNewUser(user models.User) error {
-	return os.Mkdir(fmt.Sprintf("%s/%s", fm.PhotoFolder, user.Email), 0777)
+	return fm.createFolder(fm.getPathToUserPhoto(user))
 }
 
-func (FileManager) Save(ctx context.Context, path string, file io.Reader) error {
+func (fm FileManager) SaveUserPhoto(user models.User, file io.Reader) (path string, err error) {
+	path, err = fm.getPathToNewPhoto(user)
+	if err != nil {
+		return
+	}
+
+	err = fm.save(path, file)
+	return
+}
+
+func (FileManager) Delete(filePath string) error {
+	return os.Remove(filePath)
+}
+
+func (FileManager) createFolder(title string) error {
+	return os.Mkdir(title, 0777)
+}
+
+func (FileManager) save(path string, file io.Reader) error {
 	saved, err := os.Create(path)
 	if err != nil {
 		return err
@@ -48,16 +67,33 @@ func (FileManager) Save(ctx context.Context, path string, file io.Reader) error 
 	return nil
 }
 
-func (fm FileManager) getNewPathForUser(user models.User) string {
-	return fmt.Sprintf("%s/%s/%s", fm.PhotoFolder, user.Email, user.GetNameToNewPhoto())
+func (fm FileManager) getPathToUserPhoto(user models.User) string {
+	return fmt.Sprintf("%s/%s", fm.PhotoFolder, user.Email)
 }
 
-func (fm FileManager) SaveUserPhoto(ctx context.Context, user models.User, file io.Reader) (path string, err error) {
-	path = fm.getNewPathForUser(user)
-	err = fm.Save(ctx, path, file)
+func (fm FileManager) getPathToNewPhoto(user models.User) (pathToNewPhoto string, err error) {
+	newPhoto, err := fm.createNameToNewPhoto(user)
+	if err != nil {
+		return
+	}
+
+	pathToNewPhoto = fmt.Sprintf("%s/%s", fm.getPathToUserPhoto(user), newPhoto)
+
 	return
 }
 
-func (FileManager) Delete(ctx context.Context, filePath string) error {
-	return os.Remove(filePath)
+func (fm FileManager) createNameToNewPhoto(user models.User) (string, error) {
+	lastPhoto := user.GetLastPhoto()
+	if lastPhoto == "" {
+		return "1.png", nil
+	}
+
+	numStr := lastPhoto[len(fm.getPathToUserPhoto(user)) + 1:len(lastPhoto)-4]
+
+	num, err := strconv.Atoi(numStr)
+	if err != nil {
+		return "", err
+	}
+
+	return strconv.Itoa(num+1) + ".png", nil
 }
