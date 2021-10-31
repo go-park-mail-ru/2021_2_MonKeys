@@ -19,8 +19,6 @@ import (
 	"github.com/gorilla/mux"
 )
 
-const StatusEmailAlreadyExists = 1001
-
 // @title Drip API
 // @version 1.0
 // @description API for Drip.

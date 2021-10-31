@@ -8,14 +8,6 @@ import (
 	"net/http"
 )
 
-const (
-	StatusOK                  = 200
-	StatusBadRequest          = 400
-	StatusNotFound            = 404
-	StatusInternalServerError = 500
-	StatusEmailAlreadyExists  = 1001
-)
-
 const maxPhotoSize = 20 * 1024 * 1025
 
 type UserHandler struct {
@@ -74,7 +66,7 @@ func (h *UserHandler) UploadPhoto(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseMultipartForm(maxPhotoSize)
 	if err != nil {
 		responses.SendErrorResponse(w, models.HTTPError{
-			Code:    StatusBadRequest,
+			Code:    http.StatusBadRequest,
 			Message: err.Error(),
 		})
 		return
@@ -83,7 +75,7 @@ func (h *UserHandler) UploadPhoto(w http.ResponseWriter, r *http.Request) {
 	uploadedPhoto, _, err := r.FormFile("photo")
 	if err != nil {
 		responses.SendErrorResponse(w, models.HTTPError{
-			Code:    StatusBadRequest,
+			Code:    http.StatusBadRequest,
 			Message: err.Error(),
 		})
 		return
@@ -95,7 +87,7 @@ func (h *UserHandler) UploadPhoto(w http.ResponseWriter, r *http.Request) {
 
 	photo.Path, status = h.UserUCase.AddPhoto(r.Context(), uploadedPhoto)
 	resp.Status = status.Code
-	if resp.Status != StatusOK {
+	if resp.Status != http.StatusOK {
 		responses.SendErrorResponse(w, models.HTTPError{
 			Code:    resp.Status,
 			Message: err.Error(),
@@ -113,7 +105,7 @@ func (h *UserHandler) DeletePhoto(w http.ResponseWriter, r *http.Request) {
 	byteReq, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		responses.SendErrorResponse(w, models.HTTPError{
-			Code:    StatusBadRequest,
+			Code:    http.StatusBadRequest,
 			Message: err.Error(),
 		})
 		return
@@ -123,7 +115,7 @@ func (h *UserHandler) DeletePhoto(w http.ResponseWriter, r *http.Request) {
 	err = json.Unmarshal(byteReq, &photo)
 	if err != nil {
 		responses.SendErrorResponse(w, models.HTTPError{
-			Code:    StatusBadRequest,
+			Code:    http.StatusBadRequest,
 			Message: err.Error(),
 		})
 		return
@@ -131,7 +123,7 @@ func (h *UserHandler) DeletePhoto(w http.ResponseWriter, r *http.Request) {
 
 	status := h.UserUCase.DeletePhoto(r.Context(), photo)
 	resp.Status = status.Code
-	if status.Code != StatusOK {
+	if status.Code != http.StatusOK {
 		responses.SendErrorResponse(w, models.HTTPError{
 			Code:    resp.Status,
 			Message: err.Error(),
