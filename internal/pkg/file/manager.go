@@ -2,7 +2,7 @@ package file
 
 import (
 	"dripapp/configs"
-	"dripapp/internal/pkg/models"
+	"dripapp/internal/dripapp/models"
 	"fmt"
 	"io"
 	"os"
@@ -88,7 +88,7 @@ func (fm FileManager) createNameToNewPhoto(user models.User) (string, error) {
 		return "1.png", nil
 	}
 
-	numStr := lastPhoto[len(fm.getPathToUserPhoto(user)) + 1:len(lastPhoto)-4]
+	numStr := lastPhoto[len(fm.getPathToUserPhoto(user))+1 : len(lastPhoto)-4]
 
 	num, err := strconv.Atoi(numStr)
 	if err != nil {

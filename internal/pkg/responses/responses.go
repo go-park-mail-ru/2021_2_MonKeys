@@ -1,7 +1,7 @@
 package responses
 
 import (
-	"dripapp/internal/pkg/models"
+	"dripapp/internal/dripapp/models"
 	"encoding/json"
 	"log"
 	"net/http"

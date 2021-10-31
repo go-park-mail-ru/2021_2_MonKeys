@@ -2,7 +2,7 @@ package permissions
 
 import (
 	"dripapp/configs"
-	"dripapp/internal/pkg/models"
+	"dripapp/internal/dripapp/models"
 	"dripapp/internal/pkg/responses"
 
 	"net/http"

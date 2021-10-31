@@ -1,8 +1,8 @@
 package delivery
 
 import (
+	"dripapp/internal/dripapp/models"
 	_sessionDelivery "dripapp/internal/dripapp/session/delivery"
-	"dripapp/internal/pkg/models"
 	"dripapp/internal/pkg/permissions"
 
 	"github.com/gorilla/mux"

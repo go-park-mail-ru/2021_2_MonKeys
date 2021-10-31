@@ -1,7 +1,7 @@
 package delivery
 
 import (
-	"dripapp/internal/pkg/models"
+	"dripapp/internal/dripapp/models"
 	"dripapp/internal/pkg/responses"
 	"encoding/json"
 	"io/ioutil"

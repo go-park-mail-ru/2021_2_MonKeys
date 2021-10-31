@@ -3,7 +3,7 @@ package middleware
 import (
 	"context"
 	"dripapp/configs"
-	"dripapp/internal/pkg/models"
+	"dripapp/internal/dripapp/models"
 	"net/http"
 )
 

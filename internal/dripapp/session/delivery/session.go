@@ -2,7 +2,7 @@ package delivery
 
 import (
 	"crypto/md5"
-	"dripapp/internal/pkg/models"
+	"dripapp/internal/dripapp/models"
 	"dripapp/internal/pkg/responses"
 	"encoding/json"
 	"fmt"

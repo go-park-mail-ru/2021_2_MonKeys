@@ -1,7 +1,7 @@
 package middleware
 
 import (
-	"dripapp/internal/pkg/models"
+	"dripapp/internal/dripapp/models"
 	"os"
 
 	"github.com/gorilla/mux"

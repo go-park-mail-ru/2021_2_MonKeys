@@ -2,7 +2,7 @@ package repository
 
 import (
 	"context"
-	"dripapp/internal/pkg/models"
+	"dripapp/internal/dripapp/models"
 	"errors"
 )
 

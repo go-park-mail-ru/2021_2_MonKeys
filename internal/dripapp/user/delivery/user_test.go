@@ -4,7 +4,7 @@ package delivery
 // 	"bytes"
 // 	"context"
 // 	"dripapp/configs"
-// 	"dripapp/internal/pkg/models"
+// 	"dripapp/internal/dripapp/models"
 // 	"dripapp/internal/pkg/session"
 // 	_sessionDelivery "dripapp/internal/pkg/session/delivery"
 // 	_userRepo "dripapp/internal/dripapp/user/repository"

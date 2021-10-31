@@ -2,7 +2,7 @@ package session
 
 import (
 	"dripapp/configs"
-	"dripapp/internal/pkg/models"
+	"dripapp/internal/dripapp/models"
 	"errors"
 	"fmt"
 	"log"

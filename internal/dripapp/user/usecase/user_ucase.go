@@ -3,8 +3,8 @@ package usecase
 import (
 	"context"
 	"dripapp/configs"
+	"dripapp/internal/dripapp/models"
 	"dripapp/internal/pkg/hasher"
-	"dripapp/internal/pkg/models"
 	"io"
 	"net/http"
 	"strconv"
