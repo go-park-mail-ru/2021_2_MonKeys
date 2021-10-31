@@ -147,8 +147,6 @@ type UserRepository interface {
 	CreateUser(ctx context.Context, logUserData LoginUser) (User, error)
 	UpdateUser(ctx context.Context, newUserData User) (User, error)
 	GetTags(ctx context.Context) (map[uint64]string, error)
-	GetTagsByID(ctx context.Context, id uint64) ([]string, error)
-	GetImgsByID(ctx context.Context, id uint64) ([]string, error)
 	UpdateImgs(ctx context.Context, id uint64, imgs []string) error
 	AddReaction(ctx context.Context, currentUserId uint64, swipedUserId uint64, reactionType uint64) error
 	GetNextUserForSwipe(ctx context.Context, currentUserId uint64) ([]User, error)
@@ -160,7 +158,6 @@ type UserRepository interface {
 	// CreateUserAndProfile(ctx context.Context, user User) (User, error)
 	// IsSwiped(ctx context.Context, userID, swipedUserID uint64) (bool, error)
 	// CreateTag(ctx context.Context, tag_name string) error
-	// InsertTags(ctx context.Context, id uint64, tags []string) error
 	// Init() error
 	// DropSwipes(ctx context.Context) error
 	// DropUsers(ctx context.Context) error

@@ -79,7 +79,7 @@ func NewMockDB() *MockDB {
 // 	return db.users[newID], nil
 // }
 
-func (db *MockDB) GetImgsByID(ctx context.Context, id uint64) ([]string, error) {
+func (db *MockDB) getImgsByID(ctx context.Context, id uint64) ([]string, error) {
 	return nil, nil
 }
 
@@ -250,7 +250,7 @@ func (db *MockDB) GetTags(ctx context.Context) (map[uint64]string, error) {
 	return db.tags, nil
 }
 
-func (db *MockDB) GetTagsByID(ctx context.Context, id uint64) ([]string, error) {
+func (db *MockDB) getTagsByID(ctx context.Context, id uint64) ([]string, error) {
 	return nil, nil
 }
 
