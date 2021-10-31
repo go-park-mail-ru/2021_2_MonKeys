@@ -17,7 +17,7 @@ type User struct {
 	Date        string   `json:"date,omitempty"`
 	Age         string   `json:"age"`
 	Description string   `json:"description,omitempty"`
-	Imgs        []string `json:"imgSrc,omitempty"`
+	Imgs        []string `json:"imgs,omitempty"`
 	Tags        []string `json:"tags,omitempty"`
 }
 
@@ -76,7 +76,7 @@ func GetAgeFromDate(date string) (string, error) {
 	return strconv.Itoa(int(age)), nil
 }
 
-func (user *User) FillProfile(newUserData *User) (err error) {
+func (user *User) FillProfile(newUserData User) (err error) {
 	user.Name = newUserData.Name
 	user.Date = newUserData.Date
 	user.Age, err = GetAgeFromDate(newUserData.Date)

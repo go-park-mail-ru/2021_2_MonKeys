@@ -98,7 +98,7 @@ func (h *userUsecase) EditProfile(c context.Context, newUserData models.User) (m
 		}
 	}
 
-	err = currentUser.FillProfile(&newUserData)
+	err = currentUser.FillProfile(newUserData)
 	if err != nil {
 		return models.User{}, models.HTTPError{
 			Code:    http.StatusBadRequest,
