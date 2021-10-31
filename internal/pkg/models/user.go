@@ -133,12 +133,12 @@ type UserUsecase interface {
 	EditProfile(c context.Context, newUserData User) (User, HTTPError)
 	AddPhoto(c context.Context, photo io.Reader, r *http.Request) (string, HTTPError)
 	DeletePhoto(c context.Context, photo Photo, r *http.Request) HTTPError
-	Login(c context.Context, logUserData LoginUser) (User, int)
+	Login(c context.Context, logUserData LoginUser) (User, HTTPError)
 	Signup(c context.Context, logUserData LoginUser) (User, HTTPError)
-	NextUser(c context.Context) ([]User, int)
-	GetAllTags(c context.Context) (Tags, int)
-	UsersMatches(c context.Context) (Matches, int)
-	Reaction(c context.Context, reactionData UserReaction) (Match, int)
+	NextUser(c context.Context) ([]User, HTTPError)
+	GetAllTags(c context.Context) (Tags, HTTPError)
+	UsersMatches(c context.Context) (Matches, HTTPError)
+	Reaction(c context.Context, reactionData UserReaction) (Match, HTTPError)
 }
 
 // ArticleRepository represent the article's repository contract

@@ -5,9 +5,7 @@ import (
 	"dripapp/configs"
 	"dripapp/internal/pkg/hasher"
 	"dripapp/internal/pkg/models"
-	"errors"
 	"io"
-	"log"
 	"net/http"
 	"strconv"
 	"time"
@@ -110,7 +108,6 @@ func (h *userUsecase) EditProfile(c context.Context, newUserData models.User) (m
 
 	_, err = h.UserRepo.UpdateUser(c, currentUser)
 	if err != nil {
-		log.Printf("CODE %d ERROR %s", http.StatusInternalServerError, err)
 		return models.User{}, models.HTTPError{
 			Code:    http.StatusInternalServerError,
 			Message: err.Error(),
@@ -232,20 +229,23 @@ func (h *userUsecase) DeletePhoto(c context.Context, photo models.Photo, r *http
 // @Success 200 {object} JSON
 // @Failure 400,404,500
 // @Router /login [post]
-func (h *userUsecase) Login(c context.Context, logUserData models.LoginUser) (models.User, int) {
+func (h *userUsecase) Login(c context.Context, logUserData models.LoginUser) (models.User, models.HTTPError) {
 
 	identifiableUser, err := h.UserRepo.GetUser(c, logUserData.Email)
 	if err != nil {
-		log.Printf("CODE %d ERROR %s", http.StatusNotFound, err)
-		return models.User{}, http.StatusNotFound
+		return models.User{}, models.HTTPError{
+			Code:    http.StatusNotFound,
+			Message: err.Error(),
+		}
 	}
 
 	if hasher.CheckWithHash(identifiableUser.Password, logUserData.Password) {
-		log.Printf("CODE %d", http.StatusOK)
-		return identifiableUser, http.StatusOK
+		return identifiableUser, models.StatusOk200
 	} else {
-		log.Printf("CODE %d ERROR %s", http.StatusNotFound, errors.New("not correct password"))
-		return models.User{}, http.StatusNotFound
+		return models.User{}, models.HTTPError{
+			Code:    http.StatusNotFound,
+			Message: err.Error(),
+		}
 	}
 }
 
@@ -290,66 +290,77 @@ func (h *userUsecase) Signup(c context.Context, logUserData models.LoginUser) (m
 	return user, models.StatusOk200
 }
 
-func (h *userUsecase) NextUser(c context.Context) ([]models.User, int) {
+func (h *userUsecase) NextUser(c context.Context) ([]models.User, models.HTTPError) {
 	ctx, cancel := context.WithTimeout(c, h.contextTimeout)
 	defer cancel()
 
 	ctxSession := ctx.Value(configs.ForContext)
 	if ctxSession == nil {
-		log.Printf("CODE %d ERROR %s", http.StatusNotFound, errors.New("context nil error"))
-		return nil, http.StatusNotFound
+		return nil, models.HTTPError{
+			Code:    http.StatusNotFound,
+			Message: models.ErrContextNilError,
+		}
 	}
 	currentSession, ok := ctxSession.(models.Session)
 	if !ok {
-		log.Printf("CODE %d ERROR %s", http.StatusNotFound, errors.New("convert to model session error"))
-		return nil, http.StatusNotFound
+		return nil, models.HTTPError{
+			Code:    http.StatusNotFound,
+			Message: models.ErrConvertToSession,
+		}
 	}
 
 	currentUser, err := h.UserRepo.GetUserByID(c, currentSession.UserID)
 	if err != nil {
-		log.Printf("CODE %d ERROR %s", http.StatusNotFound, err)
-		return []models.User{}, http.StatusNotFound
+		return nil, models.HTTPError{
+			Code:    http.StatusNotFound,
+			Message: err.Error(),
+		}
 	}
 
-	// add in swaped users map for current user
-	// err = h.UserRepo.AddSwipedUsers(ctx, currentUser.ID, swipedUserData.Id, "like")
-	// if err != nil {
-	// 	log.Printf("CODE %d ERROR %s", http.StatusNotFound, err)
-	// 	return models.User{}, http.StatusNotFound
-	// }
 	nextUsers, err := h.UserRepo.GetNextUserForSwipe(ctx, currentUser.ID)
 	if err != nil {
-		log.Printf("CODE %d ERROR %s", http.StatusNotFound, err)
-		return []models.User{}, http.StatusNotFound
+		return nil, models.HTTPError{
+			Code:    http.StatusNotFound,
+			Message: models.ErrContextNilError,
+		}
 	}
 
-	return nextUsers, http.StatusOK
+	return nextUsers, models.StatusOk200
 }
 
-func (h *userUsecase) GetAllTags(c context.Context) (models.Tags, int) {
+func (h *userUsecase) GetAllTags(c context.Context) (models.Tags, models.HTTPError) {
 	ctx, cancel := context.WithTimeout(c, h.contextTimeout)
 	defer cancel()
 
 	ctxSession := ctx.Value(configs.ForContext)
 	if ctxSession == nil {
-		log.Printf("CODE %d ERROR %s", http.StatusNotFound, errors.New("context nil error"))
-		return models.Tags{}, http.StatusNotFound
+		return models.Tags{}, models.HTTPError{
+			Code:    http.StatusNotFound,
+			Message: models.ErrContextNilError,
+		}
 	}
 	currentSession, ok := ctxSession.(models.Session)
 	if !ok {
-		log.Printf("CODE %d ERROR %s", http.StatusNotFound, errors.New("convert to model session error"))
-		return models.Tags{}, http.StatusNotFound
+		return models.Tags{}, models.HTTPError{
+			Code:    http.StatusNotFound,
+			Message: models.ErrConvertToSession,
+		}
 	}
 
 	_, err := h.UserRepo.GetUserByID(c, currentSession.UserID)
 	if err != nil {
-		log.Printf("CODE %d ERROR %s", http.StatusNotFound, err)
-		return models.Tags{}, http.StatusNotFound
+		return models.Tags{}, models.HTTPError{
+			Code:    http.StatusNotFound,
+			Message: err.Error(),
+		}
 	}
 
 	allTags, err := h.UserRepo.GetTags(ctx)
 	if err != nil {
-		return models.Tags{}, http.StatusNotFound
+		return models.Tags{}, models.HTTPError{
+			Code:    http.StatusNotFound,
+			Message: err.Error(),
+		}
 	}
 	var respTag models.Tag
 	var currentAllTags = make(map[uint64]models.Tag)
@@ -365,29 +376,35 @@ func (h *userUsecase) GetAllTags(c context.Context) (models.Tags, int) {
 	respAllTags.AllTags = currentAllTags
 	respAllTags.Count = uint64(counter)
 
-	return respAllTags, http.StatusOK
+	return respAllTags, models.StatusOk200
 }
 
-func (h *userUsecase) UsersMatches(c context.Context) (models.Matches, int) {
+func (h *userUsecase) UsersMatches(c context.Context) (models.Matches, models.HTTPError) {
 	ctx, cancel := context.WithTimeout(c, h.contextTimeout)
 	defer cancel()
 
 	ctxSession := ctx.Value(configs.ForContext)
 	if ctxSession == nil {
-		log.Printf("CODE %d ERROR %s", http.StatusNotFound, errors.New("context nil error"))
-		return models.Matches{}, http.StatusNotFound
+		return models.Matches{}, models.HTTPError{
+			Code:    http.StatusNotFound,
+			Message: models.ErrContextNilError,
+		}
 	}
 	currentSession, ok := ctxSession.(models.Session)
 	if !ok {
-		log.Printf("CODE %d ERROR %s", http.StatusNotFound, errors.New("convert to model session error"))
-		return models.Matches{}, http.StatusNotFound
+		return models.Matches{}, models.HTTPError{
+			Code:    http.StatusNotFound,
+			Message: models.ErrConvertToSession,
+		}
 	}
 
 	// find matches
 	mathes, err := h.UserRepo.GetUsersMatches(ctx, currentSession.UserID)
 	if err != nil {
-		log.Printf("CODE %d ERROR %s", http.StatusNotFound, err)
-		return models.Matches{}, http.StatusNotFound
+		return models.Matches{}, models.HTTPError{
+			Code:    http.StatusNotFound,
+			Message: err.Error(),
+		}
 	}
 
 	// count
@@ -402,37 +419,45 @@ func (h *userUsecase) UsersMatches(c context.Context) (models.Matches, int) {
 	allMatches.AllUsers = allMathesMap
 	allMatches.Count = strconv.Itoa(counter)
 
-	return allMatches, http.StatusOK
+	return allMatches, models.StatusOk200
 }
 
-func (h *userUsecase) Reaction(c context.Context, reactionData models.UserReaction) (models.Match, int) {
+func (h *userUsecase) Reaction(c context.Context, reactionData models.UserReaction) (models.Match, models.HTTPError) {
 	ctx, cancel := context.WithTimeout(c, h.contextTimeout)
 	defer cancel()
 
 	ctxSession := ctx.Value(configs.ForContext)
 	if ctxSession == nil {
-		log.Printf("CODE %d ERROR %s", http.StatusNotFound, errors.New("context nil error"))
-		return models.Match{}, http.StatusNotFound
+		return models.Match{}, models.HTTPError{
+			Code:    http.StatusNotFound,
+			Message: models.ErrContextNilError,
+		}
 	}
 	currentSession, ok := ctxSession.(models.Session)
 	if !ok {
-		log.Printf("CODE %d ERROR %s", http.StatusNotFound, errors.New("convert to model session error"))
-		return models.Match{}, http.StatusNotFound
+		return models.Match{}, models.HTTPError{
+			Code:    http.StatusNotFound,
+			Message: models.ErrConvertToSession,
+		}
 	}
 
 	// added reaction in db
 	err := h.UserRepo.AddReaction(ctx, currentSession.UserID, reactionData.Id, reactionData.Reaction)
 	if err != nil {
-		log.Printf("CODE %d ERROR %s", http.StatusInternalServerError, err)
-		return models.Match{}, http.StatusInternalServerError
+		return models.Match{}, models.HTTPError{
+			Code:    http.StatusInternalServerError,
+			Message: err.Error(),
+		}
 	}
 
 	// get users who liked current user
 	var likes []uint64
 	likes, err = h.UserRepo.GetLikes(ctx, currentSession.UserID)
 	if err != nil {
-		log.Printf("CODE %d ERROR %s", http.StatusInternalServerError, err)
-		return models.Match{}, http.StatusInternalServerError
+		return models.Match{}, models.HTTPError{
+			Code:    http.StatusNotFound,
+			Message: err.Error(),
+		}
 	}
 
 	var currMath models.Match
@@ -442,16 +467,20 @@ func (h *userUsecase) Reaction(c context.Context, reactionData models.UserReacti
 			currMath.Match = true
 			err = h.UserRepo.DeleteLike(ctx, currentSession.UserID, reactionData.Id)
 			if err != nil {
-				log.Printf("CODE %d ERROR %s", http.StatusInternalServerError, err)
-				return models.Match{}, http.StatusInternalServerError
+				return models.Match{}, models.HTTPError{
+					Code:    http.StatusInternalServerError,
+					Message: err.Error(),
+				}
 			}
 			err = h.UserRepo.AddMatch(ctx, currentSession.UserID, reactionData.Id)
 			if err != nil {
-				log.Printf("CODE %d ERROR %s", http.StatusInternalServerError, err)
-				return models.Match{}, http.StatusInternalServerError
+				return models.Match{}, models.HTTPError{
+					Code:    http.StatusInternalServerError,
+					Message: err.Error(),
+				}
 			}
 		}
 	}
 
-	return currMath, http.StatusOK
+	return currMath, models.StatusOk200
 }

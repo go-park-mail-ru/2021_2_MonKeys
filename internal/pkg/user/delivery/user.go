@@ -204,26 +204,9 @@ func (h *UserHandler) SignupHandler(w http.ResponseWriter, r *http.Request) {
 func (h *UserHandler) NextUserHandler(w http.ResponseWriter, r *http.Request) {
 	var resp responses.JSON
 
-	// get swiped usedata for registrationr id from json
-	// byteReq, err := ioutil.ReadAll(r.Body)
-	// if err != nil {
-	// 	resp.Status = http.StatusBadRequest
-	// 	responses.SendResp(resp, w)
-	// 	log.Printf("CODE %d ERROR %s", resp.Status, err)
-	// 	return
-	// }
-	// var swipedUserData models.SwipedUser
-	// var byteReq []byte
-	// err := json.Unmarshal(byteReq, &swipedUserData)
-	// if err != nil {
-	// 	resp.Status = http.StatusBadRequest
-	// 	responses.SendResp(resp, w)
-	// 	log.Printf("CODE %d ERROR %s", resp.Status, err)
-	// 	return
-	// }
 	nextUser, status := h.UserUCase.NextUser(r.Context())
-	resp.Status = status
-	if status == http.StatusOK {
+	resp.Status = status.Code
+	if status.Code == http.StatusOK {
 		resp.Body = nextUser
 	}
 
@@ -234,15 +217,15 @@ func (h *UserHandler) GetAllTags(w http.ResponseWriter, r *http.Request) {
 	var resp responses.JSON
 	allTags, status := h.UserUCase.GetAllTags(r.Context())
 	resp.Body = allTags
-	resp.Status = status
+	resp.Status = status.Code
 	responses.SendResp(resp, w)
 }
 
 func (h *UserHandler) MatchesHandler(w http.ResponseWriter, r *http.Request) {
 	var resp responses.JSON
 	matches, status := h.UserUCase.UsersMatches(r.Context())
-	resp.Status = status
-	if status == http.StatusOK {
+	resp.Status = status.Code
+	if status.Code == http.StatusOK {
 		resp.Body = matches
 	}
 
@@ -274,8 +257,8 @@ func (h *UserHandler) ReactionHandler(w http.ResponseWriter, r *http.Request) {
 
 	match, status := h.UserUCase.Reaction(r.Context(), reactionData)
 
-	resp.Status = status
-	if status == http.StatusOK {
+	resp.Status = status.Code
+	if status.Code == http.StatusOK {
 		resp.Body = match
 	}
 

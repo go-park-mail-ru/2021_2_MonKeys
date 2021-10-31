@@ -7,7 +7,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"time"
 )
@@ -50,23 +49,25 @@ func (h *SessionHandler) LoginHandler(w http.ResponseWriter, r *http.Request) {
 
 	byteReq, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		resp.Status = http.StatusBadRequest
-		responses.SendResp(resp, w)
-		log.Printf("CODE %d ERROR %s", resp.Status, err)
+		responses.SendErrorResponse(w, models.HTTPError{
+			Code:    http.StatusBadRequest,
+			Message: err.Error(),
+		})
 		return
 	}
 
 	var logUserData *models.LoginUser
 	err = json.Unmarshal(byteReq, &logUserData)
 	if err != nil {
-		resp.Status = http.StatusBadRequest
-		responses.SendResp(resp, w)
-		log.Printf("CODE %d ERROR %s", resp.Status, err)
+		responses.SendErrorResponse(w, models.HTTPError{
+			Code:    http.StatusBadRequest,
+			Message: err.Error(),
+		})
 		return
 	}
 	user, status := h.UserUCase.Login(r.Context(), *logUserData)
-	resp.Status = status
-	if status == http.StatusOK {
+	resp.Status = status.Code
+	if status.Code == http.StatusOK {
 		cookie := createSessionCookie(*logUserData)
 
 		sess := models.Session{
@@ -75,9 +76,10 @@ func (h *SessionHandler) LoginHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		err = h.SessionUcase.AddSession(r.Context(), sess)
 		if err != nil {
-			resp.Status = http.StatusInternalServerError
-			log.Printf("CODE %d ERROR %s", resp.Status, err)
-			responses.SendResp(resp, w)
+			responses.SendErrorResponse(w, models.HTTPError{
+				Code:    http.StatusInternalServerError,
+				Message: err.Error(),
+			})
 			return
 		}
 		resp.Body = user
@@ -90,14 +92,18 @@ func (h *SessionHandler) LoginHandler(w http.ResponseWriter, r *http.Request) {
 func (h *SessionHandler) LogoutHandler(w http.ResponseWriter, r *http.Request) {
 	err := h.SessionUcase.DeleteSession(r.Context())
 	if err != nil {
-		log.Printf("CODE %d ERROR %s", http.StatusNotFound, err)
-		responses.SendResp(responses.JSON{Status: http.StatusNotFound}, w)
+		responses.SendErrorResponse(w, models.HTTPError{
+			Code:    http.StatusNotFound,
+			Message: err.Error(),
+		})
 		return
 	}
 	session, err := r.Cookie("sessionId")
 	if err != nil {
-		log.Printf("CODE %d ERROR %s", http.StatusNotFound, err)
-		responses.SendResp(responses.JSON{Status: http.StatusNotFound}, w)
+		responses.SendErrorResponse(w, models.HTTPError{
+			Code:    http.StatusNotFound,
+			Message: err.Error(),
+		})
 		return
 	}
 

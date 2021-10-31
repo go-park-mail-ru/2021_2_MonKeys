@@ -20,7 +20,6 @@ func (s *sessionMiddleware) SessionMiddleware(next http.Handler) http.Handler {
 				UserID: 0,
 				Cookie: "",
 			}
-			// log.Printf("CODE %d ERROR %s", http.StatusNotFound, err)
 		} else {
 			userSession, err = s.sessionRepo.GetSessionByCookie(session.Value)
 			if err != nil {
@@ -28,7 +27,6 @@ func (s *sessionMiddleware) SessionMiddleware(next http.Handler) http.Handler {
 					UserID: 0,
 					Cookie: "",
 				}
-				// log.Printf("CODE %d ERROR %s", http.StatusNotFound, err)
 			}
 		}
 		r = r.WithContext(context.WithValue(r.Context(), configs.ForContext, userSession))
