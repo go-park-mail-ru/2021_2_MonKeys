@@ -170,3 +170,36 @@ func (h *UserHandler) MatchesHandler(w http.ResponseWriter, r *http.Request) {
 
 	responses.SendResp(resp, w)
 }
+
+func (h *UserHandler) ReactionHandler(w http.ResponseWriter, r *http.Request) {
+	var resp models.JSON
+
+	byteReq, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		responses.SendErrorResponse(w, &models.HTTPError{
+			Code:    http.StatusBadRequest,
+			Message: fmt.Sprintf("%v", err),
+		})
+		return
+	}
+
+	var reactionData models.UserReaction
+	err = json.Unmarshal(byteReq, &reactionData)
+	if err != nil {
+		resp.Status = http.StatusBadRequest
+		responses.SendErrorResponse(w, &models.HTTPError{
+			Code:    http.StatusBadRequest,
+			Message: fmt.Sprintf("%v", err),
+		})
+		return
+	}
+
+	match, status := h.UserUCase.Reaction(r.Context(), reactionData)
+
+	resp.Status = status
+	if status == http.StatusOK {
+		resp.Body = match
+	}
+
+	responses.SendResp(resp, w)
+}

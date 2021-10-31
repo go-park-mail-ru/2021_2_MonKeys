@@ -372,3 +372,54 @@ func (h *userUsecase) UsersMatches(c context.Context) (models.Matches, int) {
 
 	return allMatches, http.StatusOK
 }
+
+func (h *userUsecase) Reaction(c context.Context, reactionData models.UserReaction) (models.Match, int) {
+	ctx, cancel := context.WithTimeout(c, h.contextTimeout)
+	defer cancel()
+
+	ctxSession := ctx.Value(configs.ForContext)
+	if ctxSession == nil {
+		log.Printf("CODE %d ERROR %s", http.StatusNotFound, errors.New("context nil error"))
+		return models.Match{}, http.StatusNotFound
+	}
+	currentSession, ok := ctxSession.(models.Session)
+	if !ok {
+		log.Printf("CODE %d ERROR %s", http.StatusNotFound, errors.New("convert to model session error"))
+		return models.Match{}, http.StatusNotFound
+	}
+
+	// added reaction in db
+	err := h.UserRepo.AddReaction(ctx, currentSession.UserID, reactionData.Id, reactionData.Reaction)
+	if err != nil {
+		log.Printf("CODE %d ERROR %s", http.StatusInternalServerError, err)
+		return models.Match{}, http.StatusInternalServerError
+	}
+
+	// get users who liked current user
+	var likes []uint64
+	likes, err = h.UserRepo.GetLikes(ctx, currentSession.UserID)
+	if err != nil {
+		log.Printf("CODE %d ERROR %s", http.StatusInternalServerError, err)
+		return models.Match{}, http.StatusInternalServerError
+	}
+
+	var currMath models.Match
+	currMath.Match = false
+	for _, value := range likes {
+		if value == reactionData.Id {
+			currMath.Match = true
+			err = h.UserRepo.DeleteLike(ctx, currentSession.UserID, reactionData.Id)
+			if err != nil {
+				log.Printf("CODE %d ERROR %s", http.StatusInternalServerError, err)
+				return models.Match{}, http.StatusInternalServerError
+			}
+			err = h.UserRepo.AddMatch(ctx, currentSession.UserID, reactionData.Id)
+			if err != nil {
+				log.Printf("CODE %d ERROR %s", http.StatusInternalServerError, err)
+				return models.Match{}, http.StatusInternalServerError
+			}
+		}
+	}
+
+	return currMath, http.StatusOK
+}

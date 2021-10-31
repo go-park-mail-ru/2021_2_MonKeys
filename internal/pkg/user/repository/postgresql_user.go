@@ -364,11 +364,11 @@ func (p PostgreUserRepo) UpdateImgs(ctx context.Context, id uint64, imgs []strin
 	return nil
 }
 
-func (p PostgreUserRepo) AddSwipedUsers(ctx context.Context, currentUserId uint64, swipedUserId uint64, type_name string) error {
+func (p PostgreUserRepo) AddReaction(ctx context.Context, currentUserId uint64, swipedUserId uint64, reactionType uint64) error {
 	query := "insert into reactions(id1, id2, type) values ($1,$2,$3);"
 
 	stmt, _ := p.conn.Prepare(query)
-	_, err := stmt.Exec(currentUserId, swipedUserId, type_name)
+	_, err := stmt.Exec(currentUserId, swipedUserId, reactionType)
 	if err != nil {
 		return err
 	}
@@ -395,21 +395,17 @@ func (p PostgreUserRepo) GetNextUserForSwipe(ctx context.Context, currentUserId 
 				op.password,
 				op.date,
 				op.description
-			from
-				(
-				select
-					r.id1 as rid1,
-					r.id2 as rid2
-				from
-					reactions r
-				where
-					r.id1 = $1
-				) prevReact
-				right join profile op on prevReact.rid2 = op.id
+			from profile p
+			join reactions r on (r.id1 = $1)
+			right join profile op on (op.id = r.id2)
+			left join matches m on (m.id1 = op.id)
 			where
-				prevReact.rid1 is null
+				op.name <> ''
+				and op.date <> ''
+				and r.id1 is null
 				and op.id <> $1
-				and op.name <> '' and op.date <> '' limit 5;`
+				and (m.id2 is null or m.id2 <> $1)
+			limit 5;`
 
 	var notSwipedUser []models.User
 	err := p.conn.Select(&notSwipedUser, query, currentUserId)
@@ -449,7 +445,7 @@ func (p PostgreUserRepo) GetUsersMatches(ctx context.Context, currentUserId uint
 			join matches m on (p.id = m.id1)
 			join matches om on (om.id1 = m.id2 and om.id2 = m.id1)
 			join profile op on (op.id = om.id1)
-			where p.id = $1`
+			where p.id = $1;`
 
 	var matchesUsers []models.User
 	err := p.conn.Select(&matchesUsers, query, currentUserId)
@@ -475,4 +471,41 @@ func (p PostgreUserRepo) GetUsersMatches(ctx context.Context, currentUserId uint
 	}
 
 	return matchesUsers, nil
+}
+
+func (p PostgreUserRepo) GetLikes(ctx context.Context, currentUserId uint64) ([]uint64, error) {
+	// type = 1 is like (dislike - 2)
+	query := `select r.id1 from reactions r where r.id2 = $1 and r.type = 1;`
+
+	var likes []uint64
+	err := p.conn.Select(&likes, query, currentUserId)
+	if err != nil {
+		return nil, err
+	}
+
+	return likes, nil
+}
+
+func (p PostgreUserRepo) DeleteLike(ctx context.Context, firstUser uint64, secondUser uint64) error {
+	query := `delete from reactions r where ((r.id1=$1 and r.id2=$2) or (r.id1=$2 and r.id2=$1));`
+
+	stmt, _ := p.conn.Prepare(query)
+	_, err := stmt.Exec(firstUser, secondUser)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (p PostgreUserRepo) AddMatch(ctx context.Context, firstUser uint64, secondUser uint64) error {
+	query := "insert into matches(id1, id2) values ($1,$2),($2,$1);"
+
+	stmt, _ := p.conn.Prepare(query)
+	_, err := stmt.Exec(firstUser, secondUser)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
