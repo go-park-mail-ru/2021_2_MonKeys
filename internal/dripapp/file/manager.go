@@ -62,6 +62,9 @@ func (fm FileManager) SaveUserPhoto(user models.User, file io.Reader, fileName s
 	}
 
 	err = validImgType(fileType)
+	if err != nil {
+		return
+	}
 
 	newPhoto, err := createNameToNewPhoto(fileType)
 	if err != nil {
@@ -108,7 +111,9 @@ func getFileType(fileName string) (string, error) {
 		return "", err
 	}
 
-	return separatedFilename[len(separatedFilename)-1], nil
+	fileType := separatedFilename[len(separatedFilename)-1]
+
+	return strings.ToLower(fileType), nil
 }
 
 func createNameToNewPhoto(fileType string) (string, error) {
@@ -135,11 +140,10 @@ func isNotExists(path string) (bool, error) {
 }
 
 func validImgType(fileType string) error {
-	fileTypeL := strings.ToLower(fileType)
-	if fileTypeL != "png" &&
-		fileTypeL != "jpg" &&
-		fileTypeL != "jpeg" &&
-		fileTypeL != "gif" {
+	if fileType != "png" &&
+		fileType != "jpg" &&
+		fileType != "jpeg" &&
+		fileType != "gif" {
 		return errors.New("wrong file type")
 	}
 
