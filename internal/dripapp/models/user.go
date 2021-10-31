@@ -36,10 +36,6 @@ type Match struct {
 	Match bool `json:"match"`
 }
 
-// type SwipedUser struct {
-// 	Id uint64 `json:"id"`
-// }
-
 type Tag struct {
 	Tag_Name string `json:"tagText"`
 }
@@ -52,10 +48,6 @@ type Tags struct {
 type Matches struct {
 	AllUsers map[uint64]User `json:"allUsers"`
 	Count    string          `json:"matchesCount"`
-}
-
-type Photo struct {
-	Path string `json:"photo"`
 }
 
 func MakeUser(id uint64, email string, password string) (User, error) {
@@ -97,33 +89,6 @@ func (user *User) FillProfile(newUserData *User) (err error) {
 	user.Tags = newUserData.Tags
 
 	return nil
-}
-
-func (user User) GetLastPhoto() string {
-	if len(user.Imgs) == 0 {
-		return ""
-	}
-
-	return user.Imgs[len(user.Imgs)-1]
-}
-
-func (user *User) AddNewPhoto(photoPath string) {
-	user.Imgs = append(user.Imgs, photoPath)
-}
-
-func (user *User) DeletePhoto(photo Photo) (err error) {
-	var photos []string
-
-	err = ErrNoSuchPhoto
-	for _, currPhoto := range user.Imgs {
-		if currPhoto != photo.Path {
-			photos = append(photos, currPhoto)
-			err = nil
-		}
-	}
-	user.Imgs = photos
-
-	return
 }
 
 // ArticleUsecase represent the article's usecases

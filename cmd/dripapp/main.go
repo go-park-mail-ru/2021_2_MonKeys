@@ -2,14 +2,14 @@ package main
 
 import (
 	"dripapp/configs"
+	"dripapp/internal/dripapp/file"
+	_fileDelivery "dripapp/internal/dripapp/file/delivery"
 	"dripapp/internal/dripapp/middleware"
 	"dripapp/internal/dripapp/session"
 	_sessionUcase "dripapp/internal/dripapp/session/usecase"
 	_userDelivery "dripapp/internal/dripapp/user/delivery"
 	_userRepo "dripapp/internal/dripapp/user/repository"
 	_userUsecase "dripapp/internal/dripapp/user/usecase"
-	"dripapp/internal/pkg/file"
-	_fileDelivery "dripapp/internal/pkg/file/delivery"
 	"log"
 	"net/http"
 	"os"
