@@ -24,8 +24,14 @@ func NewFileManager(config configs.FileStorageConfig) (fm *FileManager, err erro
 	}
 
 	err = fm.createFolder(fm.RootFolder)
+	if err != nil {
+		return nil, err
+	}
 
 	err = fm.createFolder(fm.PhotoFolder)
+	if err != nil {
+		return nil, err
+	}
 
 	return fm, err
 }

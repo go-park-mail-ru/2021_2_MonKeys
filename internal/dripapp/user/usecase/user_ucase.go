@@ -18,8 +18,6 @@ type userUsecase struct {
 	contextTimeout time.Duration
 }
 
-const maxPhotoSize = 20 * 1024 * 1025 // - это из доставки. Пока пусть будет здесь для AddPhoto()
-
 const (
 	StatusOK                  = 200
 	StatusBadRequest          = 400
@@ -107,13 +105,13 @@ func (h *userUsecase) EditProfile(c context.Context, newUserData models.User) (m
 	}
 
 	user, err := h.UserRepo.UpdateUser(c, currentUser)
-	user.Age, err = models.GetAgeFromDate(user.Date)
 	if err != nil {
 		return models.User{}, models.HTTPError{
 			Code:    http.StatusInternalServerError,
 			Message: err.Error(),
 		}
 	}
+	user.Age, err = models.GetAgeFromDate(user.Date)
 	if err != nil {
 		return models.User{}, models.HTTPError{
 			Code:    http.StatusInternalServerError,
@@ -292,7 +290,13 @@ func (h *userUsecase) Signup(c context.Context, logUserData models.LoginUser) (m
 		}
 	}
 
-	h.File.CreateFoldersForNewUser(user)
+	err = h.File.CreateFoldersForNewUser(user)
+	if err != nil {
+		return models.User{}, models.HTTPError{
+			Code:    http.StatusInternalServerError,
+			Message: err.Error(),
+		}
+	}
 
 	return user, models.StatusOk200
 }
