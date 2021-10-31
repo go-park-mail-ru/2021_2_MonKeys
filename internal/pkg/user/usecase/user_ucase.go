@@ -32,68 +32,85 @@ func NewUserUsecase(ur models.UserRepository, sess models.SessionRepository, tim
 	}
 }
 
-func (h *userUsecase) CurrentUser(c context.Context) (models.User, int) {
+func (h *userUsecase) CurrentUser(c context.Context) (models.User, models.HTTPError) {
 	ctx, cancel := context.WithTimeout(c, h.contextTimeout)
 	defer cancel()
 
 	ctxSession := ctx.Value(configs.ForContext)
 	if ctxSession == nil {
-		log.Printf("CODE %d ERROR %s", http.StatusNotFound, errors.New("context nil error"))
-		return models.User{}, http.StatusNotFound
+		return models.User{}, models.HTTPError{
+			Code:    http.StatusNotFound,
+			Message: models.ErrContextNilError,
+		}
 	}
 	currentSession, ok := ctxSession.(models.Session)
 	if !ok {
-		log.Printf("CODE %d ERROR %s", http.StatusNotFound, errors.New("convert to model session error"))
-		return models.User{}, http.StatusNotFound
+		return models.User{}, models.HTTPError{
+			Code:    http.StatusNotFound,
+			Message: models.ErrConvertToSession,
+		}
 	}
 
 	currentUser, err := h.UserRepo.GetUserByID(c, currentSession.UserID)
 	if err != nil {
-		log.Printf("CODE %d ERROR %s", http.StatusNotFound, err)
-		return models.User{}, http.StatusNotFound
+		return models.User{}, models.HTTPError{
+			Code:    http.StatusNotFound,
+			Message: err.Error(),
+		}
 	}
 
-	return currentUser, http.StatusOK
+	return currentUser, models.StatusOk200
 }
 
-func (h *userUsecase) EditProfile(c context.Context, newUserData models.User) (models.User, int) {
+func (h *userUsecase) EditProfile(c context.Context, newUserData models.User) (models.User, models.HTTPError) {
 	ctx, cancel := context.WithTimeout(c, h.contextTimeout)
 	defer cancel()
 
 	ctxSession := ctx.Value(configs.ForContext)
 	if ctxSession == nil {
-		log.Printf("CODE %d ERROR %s", http.StatusNotFound, errors.New("context nil error"))
-		return models.User{}, http.StatusNotFound
+		return models.User{}, models.HTTPError{
+			Code:    http.StatusNotFound,
+			Message: models.ErrContextNilError,
+		}
 	}
 	currentSession, ok := ctxSession.(models.Session)
 	if !ok {
-		log.Printf("CODE %d ERROR %s", http.StatusNotFound, errors.New("convert to model session error"))
-		return models.User{}, http.StatusNotFound
+		return models.User{}, models.HTTPError{
+			Code:    http.StatusNotFound,
+			Message: models.ErrConvertToSession,
+		}
 	}
 
 	currentUser, err := h.UserRepo.GetUserByID(c, currentSession.UserID)
 	if err != nil {
-		log.Printf("CODE %d ERROR %s", http.StatusNotFound, err)
-		return models.User{}, http.StatusNotFound
+		return models.User{}, models.HTTPError{
+			Code:    http.StatusNotFound,
+			Message: err.Error(),
+		}
 	}
 
 	err = currentUser.FillProfile(&newUserData)
 	if err != nil {
-		log.Printf("CODE %d ERROR %s", http.StatusBadRequest, err)
-		return models.User{}, http.StatusBadRequest
+		return models.User{}, models.HTTPError{
+			Code:    http.StatusBadRequest,
+			Message: err.Error(),
+		}
 	}
 
 	_, err = h.UserRepo.UpdateUser(c, currentUser)
 	if err != nil {
 		log.Printf("CODE %d ERROR %s", http.StatusInternalServerError, err)
-		return models.User{}, http.StatusInternalServerError
+		return models.User{}, models.HTTPError{
+			Code:    http.StatusInternalServerError,
+			Message: err.Error(),
+		}
 	}
 
-	return currentUser, http.StatusOK
+	return currentUser, models.StatusOk200
 }
 
 func (h *userUsecase) AddPhoto(c context.Context, w http.ResponseWriter, r *http.Request) {
-	var resp models.JSON
+	var resp responses.JSON
 	ctx, cancel := context.WithTimeout(c, h.contextTimeout)
 	defer cancel()
 
@@ -142,7 +159,7 @@ func (h *userUsecase) AddPhoto(c context.Context, w http.ResponseWriter, r *http
 }
 
 func (h *userUsecase) DeletePhoto(c context.Context, w http.ResponseWriter, r *http.Request) {
-	var resp models.JSON
+	var resp responses.JSON
 	ctx, cancel := context.WithTimeout(c, h.contextTimeout)
 	defer cancel()
 
@@ -230,28 +247,34 @@ func (h *userUsecase) Login(c context.Context, logUserData models.LoginUser) (mo
 // @Success 200 {object} JSON
 // @Failure 400,404,500
 // @Router /signup [post]
-func (h *userUsecase) Signup(c context.Context, logUserData models.LoginUser) (models.User, int) {
+func (h *userUsecase) Signup(c context.Context, logUserData models.LoginUser) (models.User, models.HTTPError) {
 	ctx, cancel := context.WithTimeout(c, h.contextTimeout)
 	defer cancel()
 
-	identifiableUser, _ := h.UserRepo.GetUser(ctx, logUserData.Email)
+	identifiableUser, err := h.UserRepo.GetUser(ctx, logUserData.Email)
 	if !identifiableUser.IsEmpty() {
-		log.Printf("CODE %d ERROR %s", models.StatusEmailAlreadyExists, models.ErrEmailAlreadyExists)
-		return models.User{}, models.StatusEmailAlreadyExists
+		return models.User{}, models.HTTPError{
+			Code:    models.StatusEmailAlreadyExists,
+			Message: err.Error(),
+		}
 	}
 
-	var err error
 	logUserData.Password, err = hasher.HashAndSalt(nil, logUserData.Password)
 	if err != nil {
-		return models.User{}, http.StatusNotFound
+		return models.User{}, models.HTTPError{
+			Code:    http.StatusNotFound,
+			Message: err.Error(),
+		}
 	}
 	user, err := h.UserRepo.CreateUser(c, logUserData)
 	if err != nil {
-		log.Printf("CODE %d ERROR %s", http.StatusInternalServerError, err)
-		return models.User{}, http.StatusInternalServerError
+		return models.User{}, models.HTTPError{
+			Code:    http.StatusInternalServerError,
+			Message: err.Error(),
+		}
 	}
 
-	return user, http.StatusOK
+	return user, models.StatusOk200
 }
 
 func (h *userUsecase) NextUser(c context.Context) ([]models.User, int) {

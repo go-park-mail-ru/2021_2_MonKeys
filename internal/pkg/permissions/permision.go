@@ -17,16 +17,16 @@ func CheckAuthenticated(next http.HandlerFunc) http.HandlerFunc {
 
 			session, ok := r.Context().Value(configs.ForContext).(models.Session)
 			if !ok {
-				responses.SendErrorResponse(w, &models.HTTPError{
+				responses.SendErrorResponse(w, models.HTTPError{
 					Code:    http.StatusForbidden,
-					Message: "context extract error",
+					Message: models.ErrExtractContext,
 				})
 				return
 			}
 			if session.UserID == 0 {
-				responses.SendErrorResponse(w, &models.HTTPError{
+				responses.SendErrorResponse(w, models.HTTPError{
 					Code:    http.StatusForbidden,
-					Message: "auth error",
+					Message: models.ErrAuth,
 				})
 				return
 			}
@@ -38,7 +38,7 @@ func CheckAuthenticated(next http.HandlerFunc) http.HandlerFunc {
 func generateCsrfLogic(w http.ResponseWriter) {
 	csrf, err := uuid.NewV4()
 	if err != nil {
-		responses.SendErrorResponse(w, &models.HTTPError{
+		responses.SendErrorResponse(w, models.HTTPError{
 			Code:    http.StatusForbidden,
 			Message: "no permission",
 		})
@@ -67,7 +67,7 @@ func CheckCSRF(next http.HandlerFunc) http.HandlerFunc {
 			csrfCookie, err := r.Cookie("csrf")
 
 			if err != nil || csrf == "" || csrfCookie.Value == "" || csrfCookie.Value != csrf {
-				responses.SendErrorResponse(w, &models.HTTPError{
+				responses.SendErrorResponse(w, models.HTTPError{
 					Code:    http.StatusInternalServerError,
 					Message: "csrf-protection",
 				})

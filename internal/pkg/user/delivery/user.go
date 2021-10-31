@@ -4,7 +4,6 @@ import (
 	"dripapp/internal/pkg/models"
 	"dripapp/internal/pkg/responses"
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 )
@@ -16,24 +15,25 @@ type UserHandler struct {
 }
 
 func (h *UserHandler) CurrentUser(w http.ResponseWriter, r *http.Request) {
-	var resp models.JSON
+	var resp responses.JSON
 
 	user, status := h.UserUCase.CurrentUser(r.Context())
-	resp.Status = status
-	if status == http.StatusOK {
+	resp.Status = status.Code
+	if status.Code == http.StatusOK {
 		resp.Body = user
+		responses.SendResp(resp, w)
+	} else {
+		responses.SendErrorResponse(w, status)
 	}
-
-	responses.SendResp(resp, w)
 }
 
 func (h *UserHandler) EditProfileHandler(w http.ResponseWriter, r *http.Request) {
-	var resp models.JSON
+	var resp responses.JSON
 	byteReq, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		responses.SendErrorResponse(w, &models.HTTPError{
+		responses.SendErrorResponse(w, models.HTTPError{
 			Code:    http.StatusBadRequest,
-			Message: fmt.Sprintf("%v", err),
+			Message: err.Error(),
 		})
 		return
 	}
@@ -41,20 +41,21 @@ func (h *UserHandler) EditProfileHandler(w http.ResponseWriter, r *http.Request)
 	var newUserData models.User
 	err = json.Unmarshal(byteReq, &newUserData)
 	if err != nil {
-		responses.SendErrorResponse(w, &models.HTTPError{
+		responses.SendErrorResponse(w, models.HTTPError{
 			Code:    http.StatusBadRequest,
-			Message: fmt.Sprintf("%v", err),
+			Message: err.Error(),
 		})
 		return
 	}
 
 	user, status := h.UserUCase.EditProfile(r.Context(), newUserData)
-	resp.Status = status
-	if status == http.StatusOK {
+	resp.Status = status.Code
+	if status.Code == http.StatusOK {
 		resp.Body = user
+		responses.SendResp(resp, w)
+	} else {
+		responses.SendErrorResponse(w, status)
 	}
-
-	responses.SendResp(resp, w)
 }
 
 func (h *UserHandler) UploadPhoto(w http.ResponseWriter, r *http.Request) {
@@ -75,13 +76,13 @@ func (h *UserHandler) DeletePhoto(w http.ResponseWriter, r *http.Request) {
 // @Failure 400,404,500
 // @Router /signup [post]
 func (h *UserHandler) SignupHandler(w http.ResponseWriter, r *http.Request) {
-	var resp models.JSON
+	var resp responses.JSON
 
 	byteReq, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		responses.SendErrorResponse(w, &models.HTTPError{
+		responses.SendErrorResponse(w, models.HTTPError{
 			Code:    http.StatusBadRequest,
-			Message: fmt.Sprintf("%v", err),
+			Message: err.Error(),
 		})
 		return
 	}
@@ -90,39 +91,42 @@ func (h *UserHandler) SignupHandler(w http.ResponseWriter, r *http.Request) {
 	err = json.Unmarshal(byteReq, &logUserData)
 	if err != nil {
 		resp.Status = http.StatusBadRequest
-		responses.SendErrorResponse(w, &models.HTTPError{
+		responses.SendErrorResponse(w, models.HTTPError{
 			Code:    http.StatusBadRequest,
-			Message: fmt.Sprintf("%v", err),
+			Message: err.Error(),
 		})
 		return
 	}
 
 	user, status := h.UserUCase.Signup(r.Context(), logUserData)
-	resp.Status = status
-	if status == http.StatusOK {
-		cookie := models.CreateSessionCookie(logUserData)
-
-		sess := models.Session{
-			Cookie: cookie.Value,
-			UserID: user.ID,
-		}
-		err = h.SessionUcase.AddSession(r.Context(), sess)
-		if err != nil {
-			responses.SendErrorResponse(w, &models.HTTPError{
-				Code:    http.StatusInternalServerError,
-				Message: fmt.Sprintf("%v", err),
-			})
-			return
-		}
-		resp.Body = user
-
-		http.SetCookie(w, &cookie)
+	resp.Status = status.Code
+	if status.Code != http.StatusOK {
+		responses.SendErrorResponse(w, status)
+		return
 	}
+	cookie := models.CreateSessionCookie(logUserData)
+
+	sess := models.Session{
+		Cookie: cookie.Value,
+		UserID: user.ID,
+	}
+	err = h.SessionUcase.AddSession(r.Context(), sess)
+	if err != nil {
+		responses.SendErrorResponse(w, models.HTTPError{
+			Code:    http.StatusInternalServerError,
+			Message: err.Error(),
+		})
+		return
+	}
+	resp.Body = user
+
+	http.SetCookie(w, &cookie)
+
 	responses.SendResp(resp, w)
 }
 
 func (h *UserHandler) NextUserHandler(w http.ResponseWriter, r *http.Request) {
-	var resp models.JSON
+	var resp responses.JSON
 
 	// get swiped usedata for registrationr id from json
 	// byteReq, err := ioutil.ReadAll(r.Body)
@@ -151,7 +155,7 @@ func (h *UserHandler) NextUserHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *UserHandler) GetAllTags(w http.ResponseWriter, r *http.Request) {
-	var resp models.JSON
+	var resp responses.JSON
 	allTags, status := h.UserUCase.GetAllTags(r.Context())
 	resp.Body = allTags
 	resp.Status = status
@@ -159,7 +163,7 @@ func (h *UserHandler) GetAllTags(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *UserHandler) MatchesHandler(w http.ResponseWriter, r *http.Request) {
-	var resp models.JSON
+	var resp responses.JSON
 	matches, status := h.UserUCase.UsersMatches(r.Context())
 	resp.Status = status
 	if status == http.StatusOK {
@@ -170,13 +174,13 @@ func (h *UserHandler) MatchesHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *UserHandler) ReactionHandler(w http.ResponseWriter, r *http.Request) {
-	var resp models.JSON
+	var resp responses.JSON
 
 	byteReq, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		responses.SendErrorResponse(w, &models.HTTPError{
+		responses.SendErrorResponse(w, models.HTTPError{
 			Code:    http.StatusBadRequest,
-			Message: fmt.Sprintf("%v", err),
+			Message: err.Error(),
 		})
 		return
 	}
@@ -185,9 +189,9 @@ func (h *UserHandler) ReactionHandler(w http.ResponseWriter, r *http.Request) {
 	err = json.Unmarshal(byteReq, &reactionData)
 	if err != nil {
 		resp.Status = http.StatusBadRequest
-		responses.SendErrorResponse(w, &models.HTTPError{
+		responses.SendErrorResponse(w, models.HTTPError{
 			Code:    http.StatusBadRequest,
-			Message: fmt.Sprintf("%v", err),
+			Message: err.Error(),
 		})
 		return
 	}

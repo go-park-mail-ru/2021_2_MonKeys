@@ -10,11 +10,6 @@ import (
 	"time"
 )
 
-type JSON struct {
-	Status int         `json:"status"`
-	Body   interface{} `json:"body"`
-}
-
 type User struct {
 	ID          uint64   `json:"id,omitempty"`
 	Name        string   `json:"name,omitempty"`
@@ -151,20 +146,14 @@ func (user *User) DeletePhoto(photo string) {
 	user.Imgs = photos
 }
 
-var (
-	ErrNoUser             = errors.New("no user found")
-	ErrBadPass            = errors.New("invalid password")
-	ErrEmailAlreadyExists = errors.New("email already exists")
-)
-
 // ArticleUsecase represent the article's usecases
 type UserUsecase interface {
-	CurrentUser(c context.Context) (User, int)
-	EditProfile(c context.Context, newUserData User) (User, int)
+	CurrentUser(c context.Context) (User, HTTPError)
+	EditProfile(c context.Context, newUserData User) (User, HTTPError)
 	AddPhoto(c context.Context, w http.ResponseWriter, r *http.Request)
 	DeletePhoto(c context.Context, w http.ResponseWriter, r *http.Request)
 	Login(c context.Context, logUserData LoginUser) (User, int)
-	Signup(c context.Context, logUserData LoginUser) (User, int)
+	Signup(c context.Context, logUserData LoginUser) (User, HTTPError)
 	NextUser(c context.Context) ([]User, int)
 	GetAllTags(c context.Context) (Tags, int)
 	UsersMatches(c context.Context) (Matches, int)

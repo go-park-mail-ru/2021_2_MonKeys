@@ -2,6 +2,7 @@ package delivery
 
 import (
 	"dripapp/internal/pkg/models"
+	"dripapp/internal/pkg/permissions"
 	_sessionDelivery "dripapp/internal/pkg/session/delivery"
 
 	"github.com/gorilla/mux"
@@ -47,22 +48,22 @@ func SetRouting(router *mux.Router, us models.UserUsecase, su models.SessionUsec
 	// router.PathPrefix("/api/documentation/").Handler(httpSwagger.WrapHandler)
 
 	router.HandleFunc("/api/v1/session", sessionHandler.LoginHandler).Methods("POST", "OPTIONS")
-	router.HandleFunc("/api/v1/session", sessionHandler.LogoutHandler).Methods("DELETE", "OPTIONS")
+	router.HandleFunc("/api/v1/session", permissions.CheckAuthenticated(sessionHandler.LogoutHandler)).Methods("DELETE", "OPTIONS")
 
-	router.HandleFunc("/api/v1/profile", userHandler.CurrentUser).Methods("GET", "OPTIONS")
-	router.HandleFunc("/api/v1/profile", userHandler.EditProfileHandler).Methods("PUT", "OPTIONS")
+	router.HandleFunc("/api/v1/profile", permissions.CheckAuthenticated(userHandler.CurrentUser)).Methods("GET", "OPTIONS")
+	router.HandleFunc("/api/v1/profile", permissions.CheckAuthenticated(userHandler.EditProfileHandler)).Methods("PUT", "OPTIONS")
 	router.HandleFunc("/api/v1/profile", userHandler.SignupHandler).Methods("POST", "OPTIONS")
 
 	router.HandleFunc("/api/v1/profile/photo", userHandler.UploadPhoto).Methods("POST", "OPTIONS")
 	router.HandleFunc("/api/v1/profile/photo", userHandler.DeletePhoto).Methods("DELETE", "OPTIONS")
 
-	router.HandleFunc("/api/v1/user/cards", userHandler.NextUserHandler).Methods("GET", "OPTIONS")
+	router.HandleFunc("/api/v1/user/cards", permissions.CheckAuthenticated(userHandler.NextUserHandler)).Methods("GET", "OPTIONS")
 
-	router.HandleFunc("/api/v1/matches", userHandler.MatchesHandler).Methods("GET", "OPTIONS")
+	router.HandleFunc("/api/v1/matches", permissions.CheckAuthenticated(userHandler.MatchesHandler)).Methods("GET", "OPTIONS")
 
-	router.HandleFunc("/api/v1/likes", userHandler.ReactionHandler).Methods("POST", "OPTIONS")
+	router.HandleFunc("/api/v1/likes", permissions.CheckAuthenticated(userHandler.ReactionHandler)).Methods("POST", "OPTIONS")
 
-	router.HandleFunc("/api/v1/tags", userHandler.GetAllTags).Methods("GET", "OPTIONS")
+	router.HandleFunc("/api/v1/tags", permissions.CheckAuthenticated(userHandler.GetAllTags)).Methods("GET", "OPTIONS")
 
 	router.PathPrefix("/api/documentation/").Handler(httpSwagger.WrapHandler)
 

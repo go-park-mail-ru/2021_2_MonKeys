@@ -46,7 +46,7 @@ func createSessionCookie(user models.LoginUser) http.Cookie {
 // @Failure 400,404,500
 // @Router /login [post]
 func (h *SessionHandler) LoginHandler(w http.ResponseWriter, r *http.Request) {
-	var resp models.JSON
+	var resp responses.JSON
 
 	byteReq, err := ioutil.ReadAll(r.Body)
 	if err != nil {
@@ -91,13 +91,13 @@ func (h *SessionHandler) LogoutHandler(w http.ResponseWriter, r *http.Request) {
 	err := h.SessionUcase.DeleteSession(r.Context())
 	if err != nil {
 		log.Printf("CODE %d ERROR %s", http.StatusNotFound, err)
-		responses.SendResp(models.JSON{Status: http.StatusNotFound}, w)
+		responses.SendResp(responses.JSON{Status: http.StatusNotFound}, w)
 		return
 	}
 	session, err := r.Cookie("sessionId")
 	if err != nil {
 		log.Printf("CODE %d ERROR %s", http.StatusNotFound, err)
-		responses.SendResp(models.JSON{Status: http.StatusNotFound}, w)
+		responses.SendResp(responses.JSON{Status: http.StatusNotFound}, w)
 		return
 	}
 
@@ -107,5 +107,5 @@ func (h *SessionHandler) LogoutHandler(w http.ResponseWriter, r *http.Request) {
 	session.SameSite = http.SameSiteNoneMode
 	http.SetCookie(w, session)
 
-	responses.SendResp(models.JSON{Status: http.StatusOK}, w)
+	responses.SendResp(responses.JSON{Status: http.StatusOK}, w)
 }

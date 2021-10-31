@@ -451,7 +451,7 @@ package delivery
 // 		t.Error("fill profile error")
 // 	}
 
-// 	BodyRespByte, _ := json.Marshal(models.JSON{
+// 	BodyRespByte, _ := json.Marshal(responses.JSON{
 // 		Status: StatusOK,
 // 		Body:   expectedUser,
 // 	})
