@@ -72,7 +72,7 @@ func (h *UserHandler) UploadPhoto(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	uploadedPhoto, _, err := r.FormFile("photo")
+	uploadedPhoto, fileHeader, err := r.FormFile("photo")
 	if err != nil {
 		responses.SendErrorResponse(w, models.HTTPError{
 			Code:    http.StatusBadRequest,
@@ -85,7 +85,7 @@ func (h *UserHandler) UploadPhoto(w http.ResponseWriter, r *http.Request) {
 	var photo models.Photo
 	var status models.HTTPError
 
-	photo.Path, status = h.UserUCase.AddPhoto(r.Context(), uploadedPhoto)
+	photo.Path, status = h.UserUCase.AddPhoto(r.Context(), uploadedPhoto, fileHeader.Filename)
 	resp.Status = status.Code
 	if resp.Status != http.StatusOK {
 		responses.SendErrorResponse(w, models.HTTPError{

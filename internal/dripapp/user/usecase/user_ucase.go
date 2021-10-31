@@ -122,7 +122,7 @@ func (h *userUsecase) EditProfile(c context.Context, newUserData models.User) (m
 	return currentUser, models.StatusOk200
 }
 
-func (h *userUsecase) AddPhoto(c context.Context, photo io.Reader) (string, models.HTTPError) {
+func (h *userUsecase) AddPhoto(c context.Context, photo io.Reader, fileName string) (string, models.HTTPError) {
 	ctx, cancel := context.WithTimeout(c, h.contextTimeout)
 	defer cancel()
 
@@ -150,7 +150,7 @@ func (h *userUsecase) AddPhoto(c context.Context, photo io.Reader) (string, mode
 		}
 	}
 
-	photoPath, err := h.File.SaveUserPhoto(user, photo)
+	photoPath, err := h.File.SaveUserPhoto(user, photo, fileName)
 	if err != nil {
 		return "", models.HTTPError{
 			Code:    http.StatusInternalServerError,

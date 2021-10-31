@@ -3,10 +3,13 @@ package file
 import (
 	"dripapp/configs"
 	"dripapp/internal/dripapp/models"
+	"dripapp/internal/pkg/hasher"
+	"errors"
 	"fmt"
+	uuid "github.com/nu7hatch/gouuid"
 	"io"
 	"os"
-	"strconv"
+	"strings"
 )
 
 type FileManager struct {
@@ -34,7 +37,7 @@ func NewFileManager(config configs.FileStorageConfig) (fm *FileManager, err erro
 		}
 	}
 
-	if ok, err := isNotExists(fm.RootFolder); ok {
+	if ok, err := isNotExists(fm.PhotoFolder); ok {
 		if err != nil {
 			return nil, err
 		}
@@ -52,11 +55,20 @@ func (fm FileManager) CreateFoldersForNewUser(user models.User) error {
 	return fm.createFolder(fm.getPathToUserPhoto(user))
 }
 
-func (fm FileManager) SaveUserPhoto(user models.User, file io.Reader) (path string, err error) {
-	path, err = fm.getPathToNewPhoto(user)
+func (fm FileManager) SaveUserPhoto(user models.User, file io.Reader, fileName string) (path string, err error) {
+	fileType, err := getFileType(fileName)
 	if err != nil {
 		return
 	}
+
+	err = validImgType(fileType)
+
+	newPhoto, err := createNameToNewPhoto(fileType)
+	if err != nil {
+		return
+	}
+
+	path = fmt.Sprintf("%s/%s", fm.getPathToUserPhoto(user), newPhoto)
 
 	err = fm.save(path, file)
 	return
@@ -67,7 +79,7 @@ func (FileManager) Delete(filePath string) error {
 }
 
 func (FileManager) createFolder(title string) error {
-	return os.Mkdir(title, 0777)
+	return os.Mkdir(title, os.ModePerm)
 }
 
 func (FileManager) save(path string, file io.Reader) error {
@@ -86,34 +98,26 @@ func (FileManager) save(path string, file io.Reader) error {
 }
 
 func (fm FileManager) getPathToUserPhoto(user models.User) string {
-	return fmt.Sprintf("%s/%s", fm.PhotoFolder, user.Email)
+	return fmt.Sprintf("%s/%s", fm.PhotoFolder, hasher.GetSha1([]byte(user.Email)))
 }
 
-func (fm FileManager) getPathToNewPhoto(user models.User) (pathToNewPhoto string, err error) {
-	newPhoto, err := fm.createNameToNewPhoto(user)
-	if err != nil {
-		return
+func getFileType(fileName string) (string, error) {
+	separatedFilename := strings.Split(fileName, ".")
+	if len(separatedFilename) <= 1 {
+		err := errors.New("bad filename")
+		return "", err
 	}
 
-	pathToNewPhoto = fmt.Sprintf("%s/%s", fm.getPathToUserPhoto(user), newPhoto)
-
-	return
+	return separatedFilename[len(separatedFilename)-1], nil
 }
 
-func (fm FileManager) createNameToNewPhoto(user models.User) (string, error) {
-	lastPhoto := user.GetLastPhoto()
-	if lastPhoto == "" {
-		return "1.png", nil
-	}
-
-	numStr := lastPhoto[len(fm.getPathToUserPhoto(user))+1 : len(lastPhoto)-4]
-
-	num, err := strconv.Atoi(numStr)
+func createNameToNewPhoto(fileType string) (string, error) {
+	u, err := uuid.NewV4()
 	if err != nil {
 		return "", err
 	}
 
-	return strconv.Itoa(num+1) + ".png", nil
+	return fmt.Sprintf("%s.%s", u.String(), fileType), nil
 }
 
 func isNotExists(path string) (bool, error) {
@@ -128,4 +132,16 @@ func isNotExists(path string) (bool, error) {
 	}
 
 	return false, err
+}
+
+func validImgType(fileType string) error {
+	fileTypeL := strings.ToLower(fileType)
+	if fileTypeL != "png" &&
+		fileTypeL != "jpg" &&
+		fileTypeL != "jpeg" &&
+		fileTypeL != "gif" {
+		return errors.New("wrong file type")
+	}
+
+	return nil
 }

@@ -95,7 +95,7 @@ func (user *User) FillProfile(newUserData User) (err error) {
 type UserUsecase interface {
 	CurrentUser(c context.Context) (User, HTTPError)
 	EditProfile(c context.Context, newUserData User) (User, HTTPError)
-	AddPhoto(c context.Context, photo io.Reader) (string, HTTPError)
+	AddPhoto(c context.Context, photo io.Reader, fileName string) (string, HTTPError)
 	DeletePhoto(c context.Context, photo Photo) HTTPError
 	Login(c context.Context, logUserData LoginUser) (User, HTTPError)
 	Signup(c context.Context, logUserData LoginUser) (User, HTTPError)
