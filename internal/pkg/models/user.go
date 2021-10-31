@@ -2,9 +2,8 @@ package models
 
 import (
 	"context"
-	"crypto/md5"
+	"dripapp/internal/pkg/hasher"
 	"errors"
-	"fmt"
 	"io"
 	"net/http"
 	"strconv"
@@ -29,6 +28,7 @@ type User struct {
 }
 
 type LoginUser struct {
+	ID       uint64 `json:"id,omitempty"`
 	Email    string `json:"email"`
 	Password string `json:"password"`
 }
@@ -64,21 +64,16 @@ type Photo struct {
 	Title string `json:"photo"`
 }
 
-func MakeUser(id uint64, email string, password string) User {
-	return User{ID: id, Email: email, Password: HashPassword(password)}
-}
-
-func HashPassword(password string) string {
-	return fmt.Sprintf("%x", md5.Sum([]byte(password)))
+func MakeUser(id uint64, email string, password string) (User, error) {
+	hashedPass, err := hasher.HashAndSalt(nil, password)
+	if err != nil {
+		return User{}, err
+	}
+	return User{ID: id, Email: email, Password: hashedPass}, nil
 }
 
 func (user *User) IsEmpty() bool {
 	return len(user.Email) == 0
-}
-
-func (user *User) IsCorrectPassword(password string) bool {
-	return user.Password == HashPassword(password)
-	// return user.Password == password
 }
 
 func GetAgeFromDate(date string) (string, error) {

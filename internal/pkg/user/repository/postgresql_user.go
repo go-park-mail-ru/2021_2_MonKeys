@@ -52,7 +52,7 @@ func (p PostgreUserRepo) Init() error {
 		return err
 	}
 	strQuery := string(query)
-	fmt.Println(strQuery)
+
 	if _, err := p.conn.Exec(strQuery); err != nil {
 		return err
 	}
@@ -75,11 +75,11 @@ func (p PostgreUserRepo) GetUser(ctx context.Context, email string) (models.User
 		return models.User{}, err
 	}
 
-	RespUser.Tags, err = p.GetTagsByID(ctx, 1)
+	RespUser.Tags, err = p.GetTagsByID(ctx, RespUser.ID)
 	if err != nil {
 		return models.User{}, err
 	}
-	RespUser.Imgs, err = p.GetImgsByID(ctx, 1)
+	RespUser.Imgs, err = p.GetImgsByID(ctx, RespUser.ID)
 	if err != nil {
 		return models.User{}, err
 	}
@@ -113,9 +113,9 @@ func (p PostgreUserRepo) GetUserByID(ctx context.Context, userID uint64) (models
 
 func (p PostgreUserRepo) CreateUser(ctx context.Context, logUserData models.LoginUser) (models.User, error) {
 	query := `INSERT into profile(
-                  email, 
-                  password) 
-                  VALUES ($1,$2) 
+                  email,
+                  password)
+                  VALUES ($1,$2)
                   RETURNING id, email, password;`
 
 	var RespUser models.User

@@ -4,6 +4,7 @@ go 1.17
 
 require (
 	github.com/gorilla/mux v1.8.0
+	github.com/nu7hatch/gouuid v0.0.0-20131221200532-179d4d0c4d8d
 	github.com/swaggo/http-swagger v1.1.2
 	github.com/swaggo/swag v1.7.4
 	github.com/tarantool/go-tarantool v0.0.0-20210330210617-56fe55c5fa5c

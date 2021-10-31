@@ -3,6 +3,7 @@ package usecase
 import (
 	"context"
 	"dripapp/configs"
+	"dripapp/internal/pkg/hasher"
 	"dripapp/internal/pkg/models"
 	"dripapp/internal/pkg/responses"
 	"encoding/json"
@@ -52,7 +53,6 @@ func (h *userUsecase) CurrentUser(c context.Context) (models.User, int) {
 		return models.User{}, http.StatusNotFound
 	}
 
-	log.Printf("CODE %d", http.StatusOK)
 	return currentUser, http.StatusOK
 }
 
@@ -88,8 +88,6 @@ func (h *userUsecase) EditProfile(c context.Context, newUserData models.User) (m
 		log.Printf("CODE %d ERROR %s", http.StatusInternalServerError, err)
 		return models.User{}, http.StatusInternalServerError
 	}
-
-	log.Printf("CODE %d", http.StatusOK)
 
 	return currentUser, http.StatusOK
 }
@@ -214,7 +212,7 @@ func (h *userUsecase) Login(c context.Context, logUserData models.LoginUser) (mo
 		return models.User{}, http.StatusNotFound
 	}
 
-	if identifiableUser.IsCorrectPassword(logUserData.Password) {
+	if hasher.CheckWithHash(identifiableUser.Password, logUserData.Password) {
 		log.Printf("CODE %d", http.StatusOK)
 		return identifiableUser, http.StatusOK
 	} else {
@@ -242,14 +240,16 @@ func (h *userUsecase) Signup(c context.Context, logUserData models.LoginUser) (m
 		return models.User{}, models.StatusEmailAlreadyExists
 	}
 
-	logUserData.Password = models.HashPassword(logUserData.Password)
+	var err error
+	logUserData.Password, err = hasher.HashAndSalt(nil, logUserData.Password)
+	if err != nil {
+		return models.User{}, http.StatusNotFound
+	}
 	user, err := h.UserRepo.CreateUser(c, logUserData)
 	if err != nil {
 		log.Printf("CODE %d ERROR %s", http.StatusInternalServerError, err)
 		return models.User{}, http.StatusInternalServerError
 	}
-
-	log.Printf("CODE %d", http.StatusOK)
 
 	return user, http.StatusOK
 }
@@ -286,8 +286,6 @@ func (h *userUsecase) NextUser(c context.Context) ([]models.User, int) {
 		log.Printf("CODE %d ERROR %s", http.StatusNotFound, err)
 		return []models.User{}, http.StatusNotFound
 	}
-
-	log.Printf("CODE %d", http.StatusOK)
 
 	return nextUsers, http.StatusOK
 }
@@ -367,8 +365,6 @@ func (h *userUsecase) UsersMatches(c context.Context) (models.Matches, int) {
 	var allMatches models.Matches
 	allMatches.AllUsers = allMathesMap
 	allMatches.Count = strconv.Itoa(counter)
-
-	log.Printf("CODE %d", http.StatusOK)
 
 	return allMatches, http.StatusOK
 }
