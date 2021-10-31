@@ -27,6 +27,11 @@ type ServerConfig struct {
 	KeyFile  string
 }
 
+type FileStorageConfig struct {
+	RootFolder       string
+	ProfilePhotoPath string
+}
+
 type TimeoutsConfig struct {
 	WriteTimeout   time.Duration
 	ReadTimeout    time.Duration
@@ -41,6 +46,8 @@ var (
 	Tarantool TarantoolConfig
 
 	Server ServerConfig
+
+	FileStorage FileStorageConfig
 
 	Timeouts TimeoutsConfig
 
@@ -93,6 +100,11 @@ func SetConfig() {
 		Port:     ":8000",
 		SertFile: "api.ijia.me.crt",
 		KeyFile:  "api.ijia.me.key",
+	}
+
+	FileStorage = FileStorageConfig{
+		RootFolder:       "media",
+		ProfilePhotoPath: "profile_photos",
 	}
 
 	Timeouts = TimeoutsConfig{
