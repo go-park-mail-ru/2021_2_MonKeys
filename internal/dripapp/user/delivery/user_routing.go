@@ -1,9 +1,9 @@
 package delivery
 
 import (
+	_sessionDelivery "dripapp/internal/dripapp/session/delivery"
 	"dripapp/internal/pkg/models"
 	"dripapp/internal/pkg/permissions"
-	_sessionDelivery "dripapp/internal/pkg/session/delivery"
 
 	"github.com/gorilla/mux"
 	httpSwagger "github.com/swaggo/http-swagger"
