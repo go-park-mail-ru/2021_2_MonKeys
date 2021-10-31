@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 )
 
@@ -98,7 +97,6 @@ func (h *UserHandler) SignupHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Println("Email: ", logUserData.Email, " Password: ", logUserData.Password)
 	user, status := h.UserUCase.Signup(r.Context(), logUserData)
 	resp.Status = status
 	if status == http.StatusOK {

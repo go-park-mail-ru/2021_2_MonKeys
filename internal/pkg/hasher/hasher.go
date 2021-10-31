@@ -1,27 +1,30 @@
 package hasher
 
 import (
-	"crypto/rand"
 	"crypto/sha1"
 	"encoding/hex"
-
-	"golang.org/x/crypto/argon2"
+	"fmt"
+	"math/rand"
 )
 
-func HashAndSalt(salt []byte, plainPassword string) (string, error) {
+const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+
+func HashAndSalt(salt []byte, password string) (string, error) {
 	if salt == nil {
 		salt = make([]byte, 8)
-		_, err := rand.Read(salt)
-		if err != nil {
-			return "", err
+		for i := range salt {
+			salt[i] = letterBytes[rand.Int63()%int64(len(letterBytes))]
 		}
 	}
-	hashedPass := argon2.IDKey([]byte(plainPassword), salt, 1, 64*1024, 4, 32)
+	// hashedPass := argon2.IDKey([]byte(password), salt, 1, 64*1024, 4, 32)
+	hashedPass := []byte(GetSha1([]byte(password)))
 	saltAndHash := append(salt, hashedPass...)
 	return string(saltAndHash[:]), nil
 }
 
 func CheckWithHash(hashedStr string, plainStr string) bool {
+	fmt.Println(hashedStr)
+	fmt.Println(plainStr)
 	salt := []byte(hashedStr[0:8])
 	plainStrWithHash, _ := HashAndSalt(salt, plainStr)
 	return plainStrWithHash == hashedStr

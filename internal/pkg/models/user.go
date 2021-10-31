@@ -28,6 +28,7 @@ type User struct {
 }
 
 type LoginUser struct {
+	ID       uint64 `json:"id,omitempty"`
 	Email    string `json:"email"`
 	Password string `json:"password"`
 }

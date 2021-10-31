@@ -25,7 +25,7 @@ func SendResp(resp models.JSON, w http.ResponseWriter) {
 		})
 		return
 	}
-	log.Printf("CODE %d", http.StatusOK)
+	log.Printf("CODE %d", resp.Status)
 }
 
 func SendErrorResponse(w http.ResponseWriter, error *models.HTTPError) {

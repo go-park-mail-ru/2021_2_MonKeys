@@ -26,7 +26,7 @@ func CheckAuthenticated(next http.HandlerFunc) http.HandlerFunc {
 			if session.UserID == 0 {
 				responses.SendErrorResponse(w, &models.HTTPError{
 					Code:    http.StatusForbidden,
-					Message: "auth errror",
+					Message: "auth error",
 				})
 				return
 			}
@@ -45,9 +45,9 @@ func generateCsrfLogic(w http.ResponseWriter) {
 		return
 	}
 	timeDelta := time.Now().Add(time.Hour * 24 * 30)
-	cookie1 := &http.Cookie{Name: "csrf", Value: csrf.String(), Path: "/", HttpOnly: true, Expires: timeDelta}
+	csrfCookie := &http.Cookie{Name: "csrf", Value: csrf.String(), Path: "/", HttpOnly: true, Expires: timeDelta}
 
-	http.SetCookie(w, cookie1)
+	http.SetCookie(w, csrfCookie)
 	w.Header().Set("csrf", csrf.String())
 
 }

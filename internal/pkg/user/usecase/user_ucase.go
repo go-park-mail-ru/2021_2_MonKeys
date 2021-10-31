@@ -53,7 +53,6 @@ func (h *userUsecase) CurrentUser(c context.Context) (models.User, int) {
 		return models.User{}, http.StatusNotFound
 	}
 
-	log.Printf("CODE %d", http.StatusOK)
 	return currentUser, http.StatusOK
 }
 
@@ -89,8 +88,6 @@ func (h *userUsecase) EditProfile(c context.Context, newUserData models.User) (m
 		log.Printf("CODE %d ERROR %s", http.StatusInternalServerError, err)
 		return models.User{}, http.StatusInternalServerError
 	}
-
-	log.Printf("CODE %d", http.StatusOK)
 
 	return currentUser, http.StatusOK
 }
@@ -254,8 +251,6 @@ func (h *userUsecase) Signup(c context.Context, logUserData models.LoginUser) (m
 		return models.User{}, http.StatusInternalServerError
 	}
 
-	log.Printf("CODE %d", http.StatusOK)
-
 	return user, http.StatusOK
 }
 
@@ -291,8 +286,6 @@ func (h *userUsecase) NextUser(c context.Context) ([]models.User, int) {
 		log.Printf("CODE %d ERROR %s", http.StatusNotFound, err)
 		return []models.User{}, http.StatusNotFound
 	}
-
-	log.Printf("CODE %d", http.StatusOK)
 
 	return nextUsers, http.StatusOK
 }
@@ -372,8 +365,6 @@ func (h *userUsecase) UsersMatches(c context.Context) (models.Matches, int) {
 	var allMatches models.Matches
 	allMatches.AllUsers = allMathesMap
 	allMatches.Count = strconv.Itoa(counter)
-
-	log.Printf("CODE %d", http.StatusOK)
 
 	return allMatches, http.StatusOK
 }
