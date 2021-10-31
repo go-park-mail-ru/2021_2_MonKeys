@@ -56,7 +56,7 @@ type Matches struct {
 }
 
 type Photo struct {
-	Title string `json:"photo"`
+	Path string `json:"photo"`
 }
 
 func MakeUser(id uint64, email string, password string) (User, error) {
@@ -67,7 +67,7 @@ func MakeUser(id uint64, email string, password string) (User, error) {
 	return User{ID: id, Email: email, Password: hashedPass}, nil
 }
 
-func (user *User) IsEmpty() bool {
+func (user User) IsEmpty() bool {
 	return len(user.Email) == 0
 }
 
@@ -100,58 +100,39 @@ func (user *User) FillProfile(newUserData *User) (err error) {
 	return nil
 }
 
-func (user *User) GetLastPhoto() string {
+func (user User) GetLastPhoto() string {
 	if len(user.Imgs) == 0 {
-		return "1.png"
+		return ""
 	}
 
 	return user.Imgs[len(user.Imgs)-1]
 }
 
-func (user *User) GetNameToNewPhoto() string {
-	if len(user.Imgs) == 0 {
-		return "1.png"
-	}
-
-	lastPhoto := user.GetLastPhoto()
-
-	numStr := lastPhoto[:len(lastPhoto)-4]
-
-	num, _ := strconv.Atoi(numStr)
-
-	return strconv.Itoa(num+1) + ".png"
+func (user *User) AddNewPhoto(photoPath string) {
+	user.Imgs = append(user.Imgs, photoPath)
 }
 
-func (user *User) SaveNewPhoto() {
-	user.Imgs = append(user.Imgs, user.GetNameToNewPhoto())
-}
-
-func (user *User) IsHavePhoto(photo string) bool {
-	for _, currPhoto := range user.Imgs {
-		if currPhoto == photo {
-			return true
-		}
-	}
-	return false
-}
-
-func (user *User) DeletePhoto(photo string) {
+func (user *User) DeletePhoto(photo Photo) (err error) {
 	var photos []string
 
+	err = ErrNoSuchPhoto
 	for _, currPhoto := range user.Imgs {
-		if currPhoto != photo {
+		if currPhoto != photo.Path {
 			photos = append(photos, currPhoto)
+			err = nil
 		}
 	}
 	user.Imgs = photos
+
+	return
 }
 
 // ArticleUsecase represent the article's usecases
 type UserUsecase interface {
 	CurrentUser(c context.Context) (User, HTTPError)
 	EditProfile(c context.Context, newUserData User) (User, HTTPError)
-	AddPhoto(c context.Context, w http.ResponseWriter, r *http.Request)
-	DeletePhoto(c context.Context, w http.ResponseWriter, r *http.Request)
+	AddPhoto(c context.Context, photo io.Reader, r *http.Request) (string, HTTPError)
+	DeletePhoto(c context.Context, photo Photo, r *http.Request) HTTPError
 	Login(c context.Context, logUserData LoginUser) (User, int)
 	Signup(c context.Context, logUserData LoginUser) (User, HTTPError)
 	NextUser(c context.Context) ([]User, int)
@@ -184,7 +165,4 @@ type UserRepository interface {
 	GetLikes(ctx context.Context, currentUserId uint64) ([]uint64, error)
 	DeleteLike(ctx context.Context, firstUser uint64, secondUser uint64) error
 	AddMatch(ctx context.Context, firstUser uint64, secondUser uint64) error
-
-	AddPhoto(ctx context.Context, user User, newPhoto io.Reader) error
-	DeletePhoto(ctx context.Context, user User, photo string) error
 }

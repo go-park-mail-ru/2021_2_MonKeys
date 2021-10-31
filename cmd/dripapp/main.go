@@ -3,6 +3,8 @@ package main
 import (
 	"dripapp/configs"
 	"dripapp/internal/dripapp/middleware"
+	"dripapp/internal/pkg/file"
+	_fileDelivery "dripapp/internal/pkg/file/delivery"
 	"dripapp/internal/pkg/session"
 	_sessionUcase "dripapp/internal/pkg/session/usecase"
 	_userDelivery "dripapp/internal/pkg/user/delivery"
@@ -67,11 +69,21 @@ func main() {
 		log.Fatal(err)
 	}
 
+	fileManager, err := file.NewFileManager(configs.FileStorage)
+	if err != nil {
+		log.Println(err)
+	}
+
 	timeoutContext := configs.Timeouts.ContextTimeout
 
 	// usecase
-	userUCase := _userUsecase.NewUserUsecase(userRepo, sm, timeoutContext)
 	sessionUcase := _sessionUcase.NewSessionUsecase(sm, timeoutContext)
+	userUCase := _userUsecase.NewUserUsecase(
+		userRepo,
+		sm,
+		fileManager,
+		timeoutContext,
+	)
 
 	// delivery
 	_userDelivery.SetRouting(router, userUCase, sessionUcase)
@@ -79,27 +91,14 @@ func main() {
 	// middleware
 	middleware.NewMiddleware(router, sm, logFile)
 
+	_fileDelivery.SetFileRouting(router, *fileManager)
+
 	srv := &http.Server{
 		Handler:      router,
 		Addr:         configs.Server.Port,
 		WriteTimeout: http.DefaultClient.Timeout,
 		ReadTimeout:  http.DefaultClient.Timeout,
 	}
-
-	staticHandler := http.StripPrefix(
-		"/media/",
-		http.FileServer(http.Dir("./media")),
-	)
-	http.Handle("/media/", staticHandler)
-
-	log.Println("starting server at :9999")
-
-	go func() {
-		err := http.ListenAndServe(":9999", nil)
-		if err != nil {
-			log.Println("media server died:\n", err)
-		}
-	}()
 
 	log.Printf("STD starting server at %s\n", srv.Addr)
 

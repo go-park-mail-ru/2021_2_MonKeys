@@ -5,10 +5,8 @@ import (
 	"dripapp/configs"
 	"dripapp/internal/pkg/models"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"log"
-	"os"
 	"strings"
 
 	"github.com/jmoiron/sqlx"
@@ -57,10 +55,6 @@ func (p PostgreUserRepo) Init() error {
 		return err
 	}
 
-	return nil
-}
-
-func (p PostgreUserRepo) DeletePhoto(ctx context.Context, user models.User, photo string) error {
 	return nil
 }
 
@@ -334,31 +328,13 @@ func (p PostgreUserRepo) InsertTags(ctx context.Context, id uint64, tags []strin
 	return nil
 }
 
-func (p PostgreUserRepo) AddPhoto(ctx context.Context, user models.User, newPhoto io.Reader) error {
-	photoPath := getPathUserPhoto(user) + "/" + user.GetNameToNewPhoto()
-
-	savedPhoto, err := os.Create(photoPath)
-	if err != nil {
-		return err
-	}
-	defer savedPhoto.Close()
-
-	_, err = io.Copy(savedPhoto, newPhoto)
-	if err != nil {
-		return err
-	}
-
-	user.SaveNewPhoto()
-
-	return nil
-}
-
 func (p PostgreUserRepo) UpdateImgs(ctx context.Context, id uint64, imgs []string) error {
-	query := `update profile set imgs=$2 where id=$1;`
+	query := `update profile set imgs=$2 where id=$1 returning id;`
 
-	err := p.conn.QueryRow(query, id, pq.Array(&imgs))
+	var user_id uint64
+	err := p.conn.QueryRow(query, id, pq.Array(&imgs)).Scan(&user_id)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	return nil

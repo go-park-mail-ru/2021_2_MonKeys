@@ -5,11 +5,8 @@ import (
 	"dripapp/configs"
 	"dripapp/internal/pkg/hasher"
 	"dripapp/internal/pkg/models"
-	"dripapp/internal/pkg/responses"
-	"encoding/json"
 	"errors"
-	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
 	"strconv"
@@ -19,15 +16,29 @@ import (
 type userUsecase struct {
 	UserRepo       models.UserRepository
 	Session        models.SessionRepository
+	File           models.FileRepository
 	contextTimeout time.Duration
 }
 
 const maxPhotoSize = 20 * 1024 * 1025 // - это из доставки. Пока пусть будет здесь для AddPhoto()
 
-func NewUserUsecase(ur models.UserRepository, sess models.SessionRepository, timeout time.Duration) models.UserUsecase {
+const (
+	StatusOK                  = 200
+	StatusBadRequest          = 400
+	StatusNotFound            = 404
+	StatusInternalServerError = 500
+	StatusEmailAlreadyExists  = 1001
+)
+
+func NewUserUsecase(
+	ur models.UserRepository,
+	sess models.SessionRepository,
+	fileManager models.FileRepository,
+	timeout time.Duration) models.UserUsecase {
 	return &userUsecase{
 		UserRepo:       ur,
 		Session:        sess,
+		File:           fileManager,
 		contextTimeout: timeout,
 	}
 }
@@ -109,107 +120,107 @@ func (h *userUsecase) EditProfile(c context.Context, newUserData models.User) (m
 	return currentUser, models.StatusOk200
 }
 
-func (h *userUsecase) AddPhoto(c context.Context, w http.ResponseWriter, r *http.Request) {
-	var resp responses.JSON
+func (h *userUsecase) AddPhoto(c context.Context, photo io.Reader, r *http.Request) (string, models.HTTPError) {
 	ctx, cancel := context.WithTimeout(c, h.contextTimeout)
 	defer cancel()
 
-	currentUserId := ctx.Value(configs.ForContext)
-	if currentUserId == nil {
-		log.Printf("CODE %d ERROR %s", http.StatusNotFound, errors.New("context nil error"))
-		return
+	ctxSession := ctx.Value(configs.ForContext)
+	if ctxSession == nil {
+		return "", models.HTTPError{
+			Code:    http.StatusNotFound,
+			Message: models.ErrContextNilError,
+		}
 	}
-	userId := currentUserId.(uint64)
 
-	currentUser, err := h.UserRepo.GetUserByID(c, userId)
+	currentSession, ok := ctxSession.(models.Session)
+	if !ok {
+		return "", models.HTTPError{
+			Code:    http.StatusNotFound,
+			Message: models.ErrConvertToSession,
+		}
+	}
+
+	user, err := h.UserRepo.GetUserByID(c, currentSession.UserID)
 	if err != nil {
-		log.Printf("CODE %d ERROR %s", http.StatusNotFound, err)
-		return
+		return "", models.HTTPError{
+			Code:    http.StatusNotFound,
+			Message: err.Error(),
+		}
 	}
 
-	err = r.ParseMultipartForm(maxPhotoSize)
+	photoPath, err := h.File.SaveUserPhoto(user, photo)
 	if err != nil {
-		resp.Status = http.StatusBadRequest
-		responses.SendResp(resp, w)
-		log.Printf("CODE %d ERROR %s", resp.Status, err)
-		return
+		return "", models.HTTPError{
+			Code:    http.StatusInternalServerError,
+			Message: err.Error(),
+		}
 	}
 
-	uploadedPhoto, _, err := r.FormFile("photo")
+	user.AddNewPhoto(photoPath)
+
+	err = h.UserRepo.UpdateImgs(c, user.ID, user.Imgs)
 	if err != nil {
-		fmt.Println(err)
-		w.WriteHeader(500)
-		return
-	}
-	defer uploadedPhoto.Close()
-
-	currentUser.SaveNewPhoto()
-
-	err = h.UserRepo.AddPhoto(c, currentUser, uploadedPhoto)
-	if err != nil {
-		resp.Status = http.StatusInternalServerError
-		responses.SendResp(resp, w)
-		log.Printf("CODE %d ERROR %s", resp.Status, err)
-		return
+		return "", models.HTTPError{
+			Code:    http.StatusInternalServerError,
+			Message: err.Error(),
+		}
 	}
 
-	resp.Status = http.StatusOK
-	resp.Body = models.Photo{Title: currentUser.GetLastPhoto()}
-	responses.SendResp(resp, w)
+	return photoPath, models.StatusOk200
 }
 
-func (h *userUsecase) DeletePhoto(c context.Context, w http.ResponseWriter, r *http.Request) {
-	var resp responses.JSON
+func (h *userUsecase) DeletePhoto(c context.Context, photo models.Photo, r *http.Request) models.HTTPError {
 	ctx, cancel := context.WithTimeout(c, h.contextTimeout)
 	defer cancel()
 
-	currentUserId := ctx.Value(configs.ForContext)
-	if currentUserId == nil {
-		log.Printf("CODE %d ERROR %s", http.StatusNotFound, errors.New("context nil error"))
-		return
+	ctxSession := ctx.Value(configs.ForContext)
+	if ctxSession == nil {
+		return models.HTTPError{
+			Code:    http.StatusNotFound,
+			Message: models.ErrContextNilError,
+		}
 	}
-	userId := currentUserId.(uint64)
+	currentSession, ok := ctxSession.(models.Session)
+	if !ok {
+		return models.HTTPError{
+			Code:    http.StatusNotFound,
+			Message: models.ErrConvertToSession,
+		}
+	}
 
-	currentUser, err := h.UserRepo.GetUserByID(c, userId)
+	user, err := h.UserRepo.GetUserByID(c, currentSession.UserID)
 	if err != nil {
-		log.Printf("CODE %d ERROR %s", http.StatusNotFound, err)
-		return
+		return models.HTTPError{
+			Code:    http.StatusNotFound,
+			Message: err.Error(),
+		}
 	}
 
-	byteReq, err := ioutil.ReadAll(r.Body)
+	err = user.DeletePhoto(photo)
 	if err != nil {
-		resp.Status = http.StatusBadRequest
-		responses.SendResp(resp, w)
-		log.Printf("CODE %d ERROR %s", resp.Status, err)
-		return
+		return models.HTTPError{
+			Code:    http.StatusBadRequest,
+			Message: err.Error(),
+		}
 	}
 
-	var photo *models.Photo
-	err = json.Unmarshal(byteReq, &photo)
+	err = h.UserRepo.UpdateImgs(c, user.ID, user.Imgs)
 	if err != nil {
-		resp.Status = http.StatusBadRequest
-		responses.SendResp(resp, w)
-		log.Printf("CODE %d ERROR %s", resp.Status, err)
-		return
+		return models.HTTPError{
+			Code:    http.StatusInternalServerError,
+			Message: err.Error(),
+		}
 	}
 
-	if currentUser.IsHavePhoto(photo.Title) {
-		resp.Status = http.StatusBadRequest
-		responses.SendResp(resp, w)
-		log.Printf("CODE %d ERROR %s", resp.Status, err)
-		return
-	}
-
-	err = h.UserRepo.DeletePhoto(c, currentUser, photo.Title)
+	err = h.File.Delete(photo.Path)
 	if err != nil {
-		resp.Status = http.StatusInternalServerError
-		responses.SendResp(resp, w)
-		log.Printf("CODE %d ERROR %s", resp.Status, err)
-		return
+		return models.HTTPError{
+			Code:    http.StatusInternalServerError,
+			Message: err.Error(),
+		}
 	}
 
-	resp.Status = http.StatusOK
-	responses.SendResp(resp, w)
+	return models.StatusOk200
 }
 
 // @Summary LogIn
@@ -273,6 +284,8 @@ func (h *userUsecase) Signup(c context.Context, logUserData models.LoginUser) (m
 			Message: err.Error(),
 		}
 	}
+
+	h.File.CreateFoldersForNewUser(user)
 
 	return user, models.StatusOk200
 }

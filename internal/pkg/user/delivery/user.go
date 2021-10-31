@@ -8,6 +8,16 @@ import (
 	"net/http"
 )
 
+const (
+	StatusOK                  = 200
+	StatusBadRequest          = 400
+	StatusNotFound            = 404
+	StatusInternalServerError = 500
+	StatusEmailAlreadyExists  = 1001
+)
+
+const maxPhotoSize = 20 * 1024 * 1025
+
 type UserHandler struct {
 	// Logger    *zap.SugaredLogger
 	SessionUcase models.SessionUsecase
@@ -59,11 +69,77 @@ func (h *UserHandler) EditProfileHandler(w http.ResponseWriter, r *http.Request)
 }
 
 func (h *UserHandler) UploadPhoto(w http.ResponseWriter, r *http.Request) {
-	h.UserUCase.AddPhoto(r.Context(), w, r)
+	var resp responses.JSON
+
+	err := r.ParseMultipartForm(maxPhotoSize)
+	if err != nil {
+		responses.SendErrorResponse(w, models.HTTPError{
+			Code:    StatusBadRequest,
+			Message: err.Error(),
+		})
+		return
+	}
+
+	uploadedPhoto, _, err := r.FormFile("photo")
+	if err != nil {
+		responses.SendErrorResponse(w, models.HTTPError{
+			Code:    StatusBadRequest,
+			Message: err.Error(),
+		})
+		return
+	}
+	defer uploadedPhoto.Close()
+
+	var photo models.Photo
+	var status models.HTTPError
+
+	photo.Path, status = h.UserUCase.AddPhoto(r.Context(), uploadedPhoto, r)
+	resp.Status = status.Code
+	if resp.Status != StatusOK {
+		responses.SendErrorResponse(w, models.HTTPError{
+			Code:    resp.Status,
+			Message: err.Error(),
+		})
+		return
+	}
+
+	resp.Body = photo
+	responses.SendResp(resp, w)
 }
 
 func (h *UserHandler) DeletePhoto(w http.ResponseWriter, r *http.Request) {
-	h.UserUCase.DeletePhoto(r.Context(), w, r)
+	var resp responses.JSON
+
+	byteReq, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		responses.SendErrorResponse(w, models.HTTPError{
+			Code:    StatusBadRequest,
+			Message: err.Error(),
+		})
+		return
+	}
+
+	var photo models.Photo
+	err = json.Unmarshal(byteReq, &photo)
+	if err != nil {
+		responses.SendErrorResponse(w, models.HTTPError{
+			Code:    StatusBadRequest,
+			Message: err.Error(),
+		})
+		return
+	}
+
+	status := h.UserUCase.DeletePhoto(r.Context(), photo, r)
+	resp.Status = status.Code
+	if status.Code != StatusOK {
+		responses.SendErrorResponse(w, models.HTTPError{
+			Code:    resp.Status,
+			Message: err.Error(),
+		})
+		return
+	}
+
+	responses.SendResp(resp, w)
 }
 
 // @Summary SignUp
