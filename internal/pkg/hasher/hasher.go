@@ -3,8 +3,6 @@ package hasher
 import (
 	"crypto/sha1"
 	"encoding/hex"
-	"fmt"
-	"log"
 	"math/rand"
 )
 
@@ -20,13 +18,10 @@ func HashAndSalt(salt []byte, password string) (string, error) {
 	// hashedPass := argon2.IDKey([]byte(password), salt, 1, 64*1024, 4, 32)
 	hashedPass := []byte(GetSha1([]byte(password)))
 	saltAndHash := append(salt, hashedPass...)
-	log.Println(string(saltAndHash))
 	return string(saltAndHash[:]), nil
 }
 
 func CheckWithHash(hashedStr string, plainStr string) bool {
-	fmt.Println(hashedStr)
-	fmt.Println(plainStr)
 	salt := []byte(hashedStr[0:8])
 	plainStrWithHash, _ := HashAndSalt(salt, plainStr)
 	return plainStrWithHash == hashedStr
