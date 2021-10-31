@@ -1,9 +1,9 @@
 package repository_test
 
 import (
+	"context"
 	"dripapp/internal/dripapp/models"
-	"dripapp/internal/pkg/hasher"
-	"log"
+	"dripapp/internal/dripapp/user/repository"
 	"testing"
 
 	"github.com/DATA-DOG/go-sqlmock"
@@ -12,18 +12,14 @@ import (
 )
 
 func addInsertSupport(mock sqlmock.Sqlmock) {
-	hashedPass, err := hasher.HashAndSalt(nil, "!Nagdimaev2001")
-	if err != nil {
-		log.Fatal("ahahah")
-	}
 	query := `INSERT into profile(
 		email,
 		password)
 		VALUES ($1,$2)
 		RETURNING id, email, password;`
 
-	rows := sqlmock.NewRows([]string{"id", "email", "password"}).AddRow(1, "valid@valid.ru", hashedPass)
-	mock.ExpectQuery(query).WithArgs("valid@valid.ru", hashedPass).WillReturnRows(rows)
+	rows := sqlmock.NewRows([]string{"id", "email", "password"}).AddRow(1, "valid@valid.ru", "!Nagdimaev2001")
+	mock.ExpectQuery(query).WithArgs("valid@valid.ru", "!Nagdimaev2001").WillReturnRows(rows)
 }
 
 func getDataBase() (*sqlx.DB, error) {
@@ -39,39 +35,27 @@ func getDataBase() (*sqlx.DB, error) {
 }
 
 func TestCreateUser(t *testing.T) {
-	hashedPass, err := hasher.HashAndSalt(nil, "!Nagdimaev2001")
-	if err != nil {
-		log.Fatal("hash error")
-	}
 	lu := models.LoginUser{
 		Email:    "valid@valid.ru",
-		Password: hashedPass,
+		Password: "!Nagdimaev2001",
 	}
-	// u := models.LoginUser{
-	// 	ID:       1,
-	// 	Email:    "valid@valid.ru",
-	// 	Password: "!Nagdimaev2001",
-	// }
+	u := models.User{
+		ID:       1,
+		Email:    "valid@valid.ru",
+		Password: "!Nagdimaev2001",
+	}
 	conn, err := getDataBase()
 	if err != nil {
 		t.Error(err)
 	}
-	// rep := repository.PostgreUserRepo{
-	// 	Conn: *conn,
-	// }
+	rep := repository.PostgreUserRepo{
+		Conn: *conn,
+	}
 
 	var user models.User
-	query := `INSERT into profile(
-		email,
-		password)
-		VALUES ($1,$2)
-		RETURNING id, email, password;`
-	err = conn.QueryRow(query, lu.Email, lu.Password).Scan(&user)
 
-	// user, err := rep.CreateUser(context.TODO(), lu)
+	user, err = rep.CreateUser(context.TODO(), lu)
 
-	t.Error(user)
-	// t.Error(u)
-	assert.NotNil(t, err)
-	// assert.Equal(t, u, user)
+	assert.Nil(t, err)
+	assert.Equal(t, u, user)
 }
