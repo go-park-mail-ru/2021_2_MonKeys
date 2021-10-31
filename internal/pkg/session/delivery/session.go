@@ -86,7 +86,7 @@ func (h *SessionHandler) LoginHandler(w http.ResponseWriter, r *http.Request) {
 		http.SetCookie(w, &cookie)
 	}
 
-	responses.SendResp(resp, w)
+	responses.SendOKResp(resp, w)
 }
 
 func (h *SessionHandler) LogoutHandler(w http.ResponseWriter, r *http.Request) {
@@ -113,5 +113,5 @@ func (h *SessionHandler) LogoutHandler(w http.ResponseWriter, r *http.Request) {
 	session.SameSite = http.SameSiteNoneMode
 	http.SetCookie(w, session)
 
-	responses.SendResp(responses.JSON{Status: http.StatusOK}, w)
+	responses.SendOKResp(responses.JSON{Status: http.StatusOK}, w)
 }

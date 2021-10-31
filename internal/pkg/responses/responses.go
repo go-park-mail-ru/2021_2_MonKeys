@@ -12,7 +12,7 @@ type JSON struct {
 	Body   interface{} `json:"body"`
 }
 
-func SendResp(resp JSON, w http.ResponseWriter) {
+func SendOKResp(resp JSON, w http.ResponseWriter) {
 	byteResp, err := json.Marshal(resp)
 	if err != nil {
 		SendErrorResponse(w, models.HTTPError{

@@ -29,12 +29,12 @@ func (h *UserHandler) CurrentUser(w http.ResponseWriter, r *http.Request) {
 
 	user, status := h.UserUCase.CurrentUser(r.Context())
 	resp.Status = status.Code
-	if status.Code == http.StatusOK {
-		resp.Body = user
-		responses.SendResp(resp, w)
-	} else {
+	if status.Code != http.StatusOK {
 		responses.SendErrorResponse(w, status)
 	}
+
+	resp.Body = user
+	responses.SendOKResp(resp, w)
 }
 
 func (h *UserHandler) EditProfileHandler(w http.ResponseWriter, r *http.Request) {
@@ -60,12 +60,12 @@ func (h *UserHandler) EditProfileHandler(w http.ResponseWriter, r *http.Request)
 
 	user, status := h.UserUCase.EditProfile(r.Context(), newUserData)
 	resp.Status = status.Code
-	if status.Code == http.StatusOK {
-		resp.Body = user
-		responses.SendResp(resp, w)
-	} else {
+	if status.Code != http.StatusOK {
 		responses.SendErrorResponse(w, status)
 	}
+
+	resp.Body = user
+	responses.SendOKResp(resp, w)
 }
 
 func (h *UserHandler) UploadPhoto(w http.ResponseWriter, r *http.Request) {
@@ -104,7 +104,7 @@ func (h *UserHandler) UploadPhoto(w http.ResponseWriter, r *http.Request) {
 	}
 
 	resp.Body = photo
-	responses.SendResp(resp, w)
+	responses.SendOKResp(resp, w)
 }
 
 func (h *UserHandler) DeletePhoto(w http.ResponseWriter, r *http.Request) {
@@ -139,7 +139,7 @@ func (h *UserHandler) DeletePhoto(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	responses.SendResp(resp, w)
+	responses.SendOKResp(resp, w)
 }
 
 // @Summary SignUp
@@ -198,7 +198,7 @@ func (h *UserHandler) SignupHandler(w http.ResponseWriter, r *http.Request) {
 
 	http.SetCookie(w, &cookie)
 
-	responses.SendResp(resp, w)
+	responses.SendOKResp(resp, w)
 }
 
 func (h *UserHandler) NextUserHandler(w http.ResponseWriter, r *http.Request) {
@@ -206,30 +206,36 @@ func (h *UserHandler) NextUserHandler(w http.ResponseWriter, r *http.Request) {
 
 	nextUser, status := h.UserUCase.NextUser(r.Context())
 	resp.Status = status.Code
-	if status.Code == http.StatusOK {
-		resp.Body = nextUser
+	if status.Code != http.StatusOK {
+		responses.SendErrorResponse(w, status)
 	}
 
-	responses.SendResp(resp, w)
+	resp.Body = nextUser
+	responses.SendOKResp(resp, w)
 }
 
 func (h *UserHandler) GetAllTags(w http.ResponseWriter, r *http.Request) {
 	var resp responses.JSON
 	allTags, status := h.UserUCase.GetAllTags(r.Context())
-	resp.Body = allTags
 	resp.Status = status.Code
-	responses.SendResp(resp, w)
+	if status.Code != http.StatusOK {
+		responses.SendErrorResponse(w, status)
+	}
+
+	resp.Body = allTags
+	responses.SendOKResp(resp, w)
 }
 
 func (h *UserHandler) MatchesHandler(w http.ResponseWriter, r *http.Request) {
 	var resp responses.JSON
 	matches, status := h.UserUCase.UsersMatches(r.Context())
 	resp.Status = status.Code
-	if status.Code == http.StatusOK {
-		resp.Body = matches
+	if status.Code != http.StatusOK {
+		responses.SendErrorResponse(w, status)
 	}
 
-	responses.SendResp(resp, w)
+	resp.Body = matches
+	responses.SendOKResp(resp, w)
 }
 
 func (h *UserHandler) ReactionHandler(w http.ResponseWriter, r *http.Request) {
@@ -258,9 +264,10 @@ func (h *UserHandler) ReactionHandler(w http.ResponseWriter, r *http.Request) {
 	match, status := h.UserUCase.Reaction(r.Context(), reactionData)
 
 	resp.Status = status.Code
-	if status.Code == http.StatusOK {
-		resp.Body = match
+	if status.Code != http.StatusOK {
+		responses.SendErrorResponse(w, status)
 	}
 
-	responses.SendResp(resp, w)
+	resp.Body = match
+	responses.SendOKResp(resp, w)
 }
