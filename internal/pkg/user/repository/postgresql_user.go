@@ -20,7 +20,7 @@ type PostgreUserRepo struct {
 	conn sqlx.DB
 }
 
-func NewPostgresUserRepository(config configs.PostgresConfig) (*PostgreUserRepo, error) {
+func NewPostgresUserRepository(config configs.PostgresConfig) (models.UserRepository, error) {
 	connStr := fmt.Sprintf("user=%s password=%s dbname=%s sslmode=disable",
 		configs.Postgres.User,
 		configs.Postgres.Password,
@@ -129,7 +129,7 @@ func (p PostgreUserRepo) CreateUserAndProfile(ctx context.Context, user models.U
 		return models.User{}, err
 	}
 
-	err = p.InsertTags(ctx, RespUser.ID, user.Tags)
+	err = p.insertTags(ctx, RespUser.ID, user.Tags)
 	if err != nil {
 		return models.User{}, err
 	}
@@ -167,7 +167,7 @@ func (p PostgreUserRepo) UpdateUser(ctx context.Context, newUserData models.User
 		if err != nil {
 			return models.User{}, err
 		}
-		err = p.InsertTags(ctx, newUserData.ID, newUserData.Tags)
+		err = p.insertTags(ctx, newUserData.ID, newUserData.Tags)
 		if err != nil {
 			return models.User{}, err
 		}
@@ -231,30 +231,6 @@ func (p PostgreUserRepo) GetTags(ctx context.Context) (map[uint64]string, error)
 	return tagsMap, nil
 }
 
-func (p PostgreUserRepo) DropSwipes(ctx context.Context) error {
-	query := `delete from reactions`
-
-	if err := p.conn.QueryRow(query).Scan(); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (p PostgreUserRepo) DropUsers(ctx context.Context) error {
-	query := `
-	delete from profile_tag;
-	delete from matches;
-	delete from reactions;
-	delete from profile;`
-
-	if err := p.conn.QueryRow(query).Scan(); err != nil {
-		return err
-	}
-
-	return nil
-}
-
 func (p PostgreUserRepo) GetTagsByID(ctx context.Context, id uint64) ([]string, error) {
 	sel := `select
 				tag_name
@@ -285,17 +261,7 @@ func (p PostgreUserRepo) GetImgsByID(ctx context.Context, id uint64) ([]string, 
 	return imgs, nil
 }
 
-func (p PostgreUserRepo) CreateTag(ctx context.Context, tag_name string) error {
-	sel := "insert into tag(tag_name) values($1);"
-
-	if err := p.conn.QueryRow(sel, tag_name).Scan(); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (p PostgreUserRepo) InsertTags(ctx context.Context, id uint64, tags []string) error {
+func (p PostgreUserRepo) insertTags(ctx context.Context, id uint64, tags []string) error {
 	if len(tags) == 0 {
 		return nil
 	}
@@ -350,17 +316,6 @@ func (p PostgreUserRepo) AddReaction(ctx context.Context, currentUserId uint64, 
 	}
 
 	return nil
-}
-
-func (p PostgreUserRepo) IsSwiped(ctx context.Context, userID, swipedUserID uint64) (bool, error) {
-	query := `select exists(select id1, id2 from reactions where id1=$1 and id2=$2)`
-
-	var resp bool
-	err := p.conn.GetContext(ctx, &resp, query, userID, swipedUserID)
-	if err != nil {
-		return false, err
-	}
-	return resp, nil
 }
 
 func (p PostgreUserRepo) GetNextUserForSwipe(ctx context.Context, currentUserId uint64) ([]models.User, error) {
@@ -485,3 +440,48 @@ func (p PostgreUserRepo) AddMatch(ctx context.Context, firstUser uint64, secondU
 
 	return nil
 }
+
+// func (p PostgreUserRepo) IsSwiped(ctx context.Context, userID, swipedUserID uint64) (bool, error) {
+// 	query := `select exists(select id1, id2 from reactions where id1=$1 and id2=$2)`
+
+// 	var resp bool
+// 	err := p.conn.GetContext(ctx, &resp, query, userID, swipedUserID)
+// 	if err != nil {
+// 		return false, err
+// 	}
+// 	return resp, nil
+// }
+
+// func (p PostgreUserRepo) CreateTag(ctx context.Context, tag_name string) error {
+// 	sel := "insert into tag(tag_name) values($1);"
+
+// 	if err := p.conn.QueryRow(sel, tag_name).Scan(); err != nil {
+// 		return err
+// 	}
+
+// 	return nil
+// }
+
+// func (p PostgreUserRepo) DropSwipes(ctx context.Context) error {
+// 	query := `delete from reactions`
+
+// 	if err := p.conn.QueryRow(query).Scan(); err != nil {
+// 		return err
+// 	}
+
+// 	return nil
+// }
+
+// func (p PostgreUserRepo) DropUsers(ctx context.Context) error {
+// 	query := `
+// 	delete from profile_tag;
+// 	delete from matches;
+// 	delete from reactions;
+// 	delete from profile;`
+
+// 	if err := p.conn.QueryRow(query).Scan(); err != nil {
+// 		return err
+// 	}
+
+// 	return nil
+// }

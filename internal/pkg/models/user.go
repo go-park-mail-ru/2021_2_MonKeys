@@ -5,7 +5,6 @@ import (
 	"dripapp/internal/pkg/hasher"
 	"errors"
 	"io"
-	"net/http"
 	"strconv"
 	"time"
 )
@@ -131,8 +130,8 @@ func (user *User) DeletePhoto(photo Photo) (err error) {
 type UserUsecase interface {
 	CurrentUser(c context.Context) (User, HTTPError)
 	EditProfile(c context.Context, newUserData User) (User, HTTPError)
-	AddPhoto(c context.Context, photo io.Reader, r *http.Request) (string, HTTPError)
-	DeletePhoto(c context.Context, photo Photo, r *http.Request) HTTPError
+	AddPhoto(c context.Context, photo io.Reader) (string, HTTPError)
+	DeletePhoto(c context.Context, photo Photo) HTTPError
 	Login(c context.Context, logUserData LoginUser) (User, HTTPError)
 	Signup(c context.Context, logUserData LoginUser) (User, HTTPError)
 	NextUser(c context.Context) ([]User, HTTPError)
@@ -147,22 +146,23 @@ type UserRepository interface {
 	GetUserByID(ctx context.Context, userID uint64) (User, error)
 	CreateUser(ctx context.Context, logUserData LoginUser) (User, error)
 	UpdateUser(ctx context.Context, newUserData User) (User, error)
-	CreateUserAndProfile(ctx context.Context, user User) (User, error)
-	DropSwipes(ctx context.Context) error
-	DropUsers(ctx context.Context) error
-	Init() error
 	GetTags(ctx context.Context) (map[uint64]string, error)
-	DeleteTags(ctx context.Context, userId uint64) error
 	GetTagsByID(ctx context.Context, id uint64) ([]string, error)
 	GetImgsByID(ctx context.Context, id uint64) ([]string, error)
-	CreateTag(ctx context.Context, tag_name string) error
-	InsertTags(ctx context.Context, id uint64, tags []string) error
 	UpdateImgs(ctx context.Context, id uint64, imgs []string) error
 	AddReaction(ctx context.Context, currentUserId uint64, swipedUserId uint64, reactionType uint64) error
-	IsSwiped(ctx context.Context, userID, swipedUserID uint64) (bool, error)
 	GetNextUserForSwipe(ctx context.Context, currentUserId uint64) ([]User, error)
 	GetUsersMatches(ctx context.Context, currentUserId uint64) ([]User, error)
 	GetLikes(ctx context.Context, currentUserId uint64) ([]uint64, error)
 	DeleteLike(ctx context.Context, firstUser uint64, secondUser uint64) error
 	AddMatch(ctx context.Context, firstUser uint64, secondUser uint64) error
+
+	// CreateUserAndProfile(ctx context.Context, user User) (User, error)
+	// IsSwiped(ctx context.Context, userID, swipedUserID uint64) (bool, error)
+	// CreateTag(ctx context.Context, tag_name string) error
+	// InsertTags(ctx context.Context, id uint64, tags []string) error
+	// Init() error
+	// DropSwipes(ctx context.Context) error
+	// DropUsers(ctx context.Context) error
+	// DeleteTags(ctx context.Context, userId uint64) error
 }

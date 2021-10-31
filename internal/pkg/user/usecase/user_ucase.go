@@ -106,7 +106,14 @@ func (h *userUsecase) EditProfile(c context.Context, newUserData models.User) (m
 		}
 	}
 
-	_, err = h.UserRepo.UpdateUser(c, currentUser)
+	user, err := h.UserRepo.UpdateUser(c, currentUser)
+	user.Age, err = models.GetAgeFromDate(user.Date)
+	if err != nil {
+		return models.User{}, models.HTTPError{
+			Code:    http.StatusInternalServerError,
+			Message: err.Error(),
+		}
+	}
 	if err != nil {
 		return models.User{}, models.HTTPError{
 			Code:    http.StatusInternalServerError,
@@ -117,7 +124,7 @@ func (h *userUsecase) EditProfile(c context.Context, newUserData models.User) (m
 	return currentUser, models.StatusOk200
 }
 
-func (h *userUsecase) AddPhoto(c context.Context, photo io.Reader, r *http.Request) (string, models.HTTPError) {
+func (h *userUsecase) AddPhoto(c context.Context, photo io.Reader) (string, models.HTTPError) {
 	ctx, cancel := context.WithTimeout(c, h.contextTimeout)
 	defer cancel()
 
@@ -166,7 +173,7 @@ func (h *userUsecase) AddPhoto(c context.Context, photo io.Reader, r *http.Reque
 	return photoPath, models.StatusOk200
 }
 
-func (h *userUsecase) DeletePhoto(c context.Context, photo models.Photo, r *http.Request) models.HTTPError {
+func (h *userUsecase) DeletePhoto(c context.Context, photo models.Photo) models.HTTPError {
 	ctx, cancel := context.WithTimeout(c, h.contextTimeout)
 	defer cancel()
 
