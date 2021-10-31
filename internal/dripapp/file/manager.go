@@ -23,14 +23,26 @@ func NewFileManager(config configs.FileStorageConfig) (fm *FileManager, err erro
 		PhotoFolder: photoFolder,
 	}
 
-	err = fm.createFolder(fm.RootFolder)
-	if err != nil {
-		return nil, err
+	if ok, err := isNotExists(fm.RootFolder); ok {
+		if err != nil {
+			return nil, err
+		}
+
+		err = fm.createFolder(fm.RootFolder)
+		if err != nil {
+			return nil, err
+		}
 	}
 
-	err = fm.createFolder(fm.PhotoFolder)
-	if err != nil {
-		return nil, err
+	if ok, err := isNotExists(fm.RootFolder); ok {
+		if err != nil {
+			return nil, err
+		}
+
+		err = fm.createFolder(fm.PhotoFolder)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return fm, err
@@ -102,4 +114,18 @@ func (fm FileManager) createNameToNewPhoto(user models.User) (string, error) {
 	}
 
 	return strconv.Itoa(num+1) + ".png", nil
+}
+
+func isNotExists(path string) (bool, error) {
+	_, err := os.Stat(path)
+	if err == nil {
+		return false, nil
+	}
+
+	if os.IsNotExist(err) {
+		return true, nil
+
+	}
+
+	return false, err
 }

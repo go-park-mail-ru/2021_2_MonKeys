@@ -69,7 +69,7 @@ func main() {
 
 	fileManager, err := file.NewFileManager(configs.FileStorage)
 	if err != nil {
-		log.Println(err)
+		log.Fatal(err)
 	}
 
 	timeoutContext := configs.Timeouts.ContextTimeout
