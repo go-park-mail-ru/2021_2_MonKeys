@@ -23,6 +23,7 @@ func (h *UserHandler) CurrentUser(w http.ResponseWriter, r *http.Request) {
 	resp.Status = status.Code
 	if status.Code != http.StatusOK {
 		responses.SendErrorResponse(w, status)
+		return
 	}
 
 	resp.Body = user
