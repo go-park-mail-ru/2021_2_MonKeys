@@ -17,14 +17,14 @@ type UserUsecase struct {
 }
 
 // AddPhoto provides a mock function with given fields: c, photo, fileName
-func (_m *UserUsecase) AddPhoto(c context.Context, photo io.Reader, fileName string) (string, models.HTTPError) {
+func (_m *UserUsecase) AddPhoto(c context.Context, photo io.Reader, fileName string) (models.Photo, models.HTTPError) {
 	ret := _m.Called(c, photo, fileName)
 
-	var r0 string
-	if rf, ok := ret.Get(0).(func(context.Context, io.Reader, string) string); ok {
+	var r0 models.Photo
+	if rf, ok := ret.Get(0).(func(context.Context, io.Reader, string) models.Photo); ok {
 		r0 = rf(c, photo, fileName)
 	} else {
-		r0 = ret.Get(0).(string)
+		r0 = ret.Get(0).(models.Photo)
 	}
 
 	var r1 models.HTTPError

@@ -55,6 +55,7 @@ func (h *UserHandler) EditProfileHandler(w http.ResponseWriter, r *http.Request)
 	resp.Status = status.Code
 	if status.Code != http.StatusOK {
 		responses.SendErrorResponse(w, status)
+		return
 	}
 
 	resp.Body = user
@@ -83,15 +84,11 @@ func (h *UserHandler) UploadPhoto(w http.ResponseWriter, r *http.Request) {
 	}
 	defer uploadedPhoto.Close()
 
-	var photo models.Photo
-	var status models.HTTPError
-
-	photo.Path, status = h.UserUCase.AddPhoto(r.Context(), uploadedPhoto, fileHeader.Filename)
+	photo, status := h.UserUCase.AddPhoto(r.Context(), uploadedPhoto, fileHeader.Filename)
 	resp.Status = status.Code
 	if resp.Status != http.StatusOK {
 		responses.SendErrorResponse(w, models.HTTPError{
 			Code:    resp.Status,
-			Message: err.Error(),
 		})
 		return
 	}
@@ -127,7 +124,6 @@ func (h *UserHandler) DeletePhoto(w http.ResponseWriter, r *http.Request) {
 	if status.Code != http.StatusOK {
 		responses.SendErrorResponse(w, models.HTTPError{
 			Code:    resp.Status,
-			Message: err.Error(),
 		})
 		return
 	}
@@ -201,6 +197,7 @@ func (h *UserHandler) NextUserHandler(w http.ResponseWriter, r *http.Request) {
 	resp.Status = status.Code
 	if status.Code != http.StatusOK {
 		responses.SendErrorResponse(w, status)
+		return
 	}
 
 	resp.Body = nextUser
@@ -213,6 +210,7 @@ func (h *UserHandler) GetAllTags(w http.ResponseWriter, r *http.Request) {
 	resp.Status = status.Code
 	if status.Code != http.StatusOK {
 		responses.SendErrorResponse(w, status)
+		return
 	}
 
 	resp.Body = allTags
@@ -225,6 +223,7 @@ func (h *UserHandler) MatchesHandler(w http.ResponseWriter, r *http.Request) {
 	resp.Status = status.Code
 	if status.Code != http.StatusOK {
 		responses.SendErrorResponse(w, status)
+		return
 	}
 
 	resp.Body = matches
@@ -259,6 +258,7 @@ func (h *UserHandler) ReactionHandler(w http.ResponseWriter, r *http.Request) {
 	resp.Status = status.Code
 	if status.Code != http.StatusOK {
 		responses.SendErrorResponse(w, status)
+		return
 	}
 
 	resp.Body = match
