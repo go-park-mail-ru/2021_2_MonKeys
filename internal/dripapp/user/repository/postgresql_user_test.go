@@ -12,8 +12,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func testPostgresqlUsers(t *testing.T, db *sql.DB) {
-	ctx := context.Background()
+func TestPostgresqlUsers(t *testing.T, db *sql.DB) {
 	conn, err := getDataBase()
 	if err != nil {
 		t.Error(err)
@@ -26,22 +25,27 @@ func testPostgresqlUsers(t *testing.T, db *sql.DB) {
 		Email:    "valid@valid.ru",
 		Password: "!Nagdimaev2001",
 	}
-	// lu2 := models.LoginUser{
-	// 	Email:    "valid@valid.ru",
-	// 	Password: "!Nagdimaev2001",
-	// }
-	// u := models.User{
-	// 	ID:       1,
-	// 	Email:    "valid@valid.ru",
-	// 	Password: "!Nagdimaev2001",
-	// }
+	lu2 := models.LoginUser{
+		Email:    "valid@valid.ru",
+		Password: "!Nagdimaev2001",
+	}
+	u := models.User{
+		ID:       1,
+		Email:    "valid@valid.ru",
+		Password: "!Nagdimaev2001",
+	}
 
 	_ = true &&
 
 		t.Run("create", func(t *testing.T) {
-			var err error
-			_, err = rep.CreateUser(ctx, lu)
-			assert.NoError(t, err)
+			user, err := rep.CreateUser(context.TODO(), lu)
+
+			assert.Nil(t, err)
+			assert.Equal(t, u, user)
+
+			_, err = rep.CreateUser(context.TODO(), lu2)
+
+			assert.NotNil(t, err)
 		})
 }
 
@@ -68,8 +72,8 @@ func addGetTagsByIDSupport(mock sqlmock.Sqlmock) {
 	rows := sqlmock.NewRows([]string{"tag_name"}).
 		AddRow("tag1").
 		AddRow("tag2")
-	mock.ExpectQuery(GetImgsByIDQuery).WithArgs(1).WillReturnRows(rows)
-	mock.ExpectQuery(GetImgsByIDQuery).WithArgs(0).WillReturnError(sql.ErrNoRows)
+	mock.ExpectQuery(GetTagsByIdQuery).WithArgs(1).WillReturnRows(rows)
+	mock.ExpectQuery(GetTagsByIdQuery).WithArgs(0).WillReturnError(sql.ErrNoRows)
 }
 
 func getDataBase() (*sqlx.DB, error) {
@@ -84,37 +88,37 @@ func getDataBase() (*sqlx.DB, error) {
 	return sqlxDB, err
 }
 
-func TestCreateUser(t *testing.T) {
-	lu := models.LoginUser{
-		Email:    "valid@valid.ru",
-		Password: "!Nagdimaev2001",
-	}
-	lu2 := models.LoginUser{
-		Email:    "valid@valid.ru",
-		Password: "!Nagdimaev2001",
-	}
-	u := models.User{
-		ID:       1,
-		Email:    "valid@valid.ru",
-		Password: "!Nagdimaev2001",
-	}
-	conn, err := getDataBase()
-	if err != nil {
-		t.Error(err)
-	}
-	rep := PostgreUserRepo{
-		Conn: *conn,
-	}
+// func TestCreateUser(t *testing.T) {
+// 	lu := models.LoginUser{
+// 		Email:    "valid@valid.ru",
+// 		Password: "!Nagdimaev2001",
+// 	}
+// 	lu2 := models.LoginUser{
+// 		Email:    "valid@valid.ru",
+// 		Password: "!Nagdimaev2001",
+// 	}
+// 	u := models.User{
+// 		ID:       1,
+// 		Email:    "valid@valid.ru",
+// 		Password: "!Nagdimaev2001",
+// 	}
+// 	conn, err := getDataBase()
+// 	if err != nil {
+// 		t.Error(err)
+// 	}
+// 	rep := PostgreUserRepo{
+// 		Conn: *conn,
+// 	}
 
-	user, err := rep.CreateUser(context.TODO(), lu)
+// 	user, err := rep.CreateUser(context.TODO(), lu)
 
-	assert.Nil(t, err)
-	assert.Equal(t, u, user)
+// 	assert.Nil(t, err)
+// 	assert.Equal(t, u, user)
 
-	_, err = rep.CreateUser(context.TODO(), lu2)
+// 	_, err = rep.CreateUser(context.TODO(), lu2)
 
-	assert.NotNil(t, err)
-}
+// 	assert.NotNil(t, err)
+// }
 
 func TestGetUser(t *testing.T) {
 	u := models.User{
@@ -130,12 +134,30 @@ func TestGetUser(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	rep := PostgreUserRepo{
-		Conn: *conn,
+	// rep := PostgreUserRepo{
+	// 	Conn: *conn,
+	// }
+
+	// user, err := rep.GetUser(context.TODO(), "valid@valid.ru")
+	// if err != nil {
+	// 	t.Error(err)
+	// }
+
+	var RespUser models.User
+	err = conn.GetContext(context.TODO(), &RespUser, GetUserQuery, "valid@valid.ru")
+	if err != nil {
+		t.Error(err)
 	}
 
-	user, err := rep.GetUser(context.TODO(), "valid@valid.ru")
+	// RespUser.Tags, err = conn.getTagsByID(context.TODO(), RespUser.ID)
+	// if err != nil {
+	// 	t.Error(err)
+	// }
+	// RespUser.Imgs, err = p.getImgsByID(context.TODO(), RespUser.ID)
+	// if err != nil {
+	// 	t.Error(err)
+	// }
 
 	assert.Nil(t, err)
-	assert.Equal(t, u, user)
+	assert.Equal(t, u, RespUser)
 }
