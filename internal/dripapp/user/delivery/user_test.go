@@ -1,102 +1,161 @@
 package delivery
 
-// import (
-// 	"bytes"
-// 	"context"
-// 	"dripapp/configs"
-// 	"dripapp/internal/dripapp/models"
-// 	"dripapp/internal/pkg/session"
-// 	_sessionDelivery "dripapp/internal/pkg/session/delivery"
-// 	_userRepo "dripapp/internal/dripapp/user/repository"
-// 	_userUCase "dripapp/internal/dripapp/user/usecase"
-// 	"encoding/json"
-// 	"io"
-// 	"net/http"
-// 	"net/http/httptest"
-// 	"reflect"
-// 	"testing"
-// )
+import (
+	"dripapp/internal/dripapp/models"
+	"github.com/golang/mock/gomock"
+	"io"
+	"net/http"
+	"net/http/httptest"
+	"testing"
+)
 
-// const (
-// 	correctCase = iota + 1
-// 	wrongCase
-// )
+const (
+	correctCase = iota + 1
+	wrongCase
+)
 
-// type TestCase struct {
-// 	testType   int
-// 	BodyReq    io.Reader
-// 	CookieReq  http.Cookie
-// 	StatusCode int
-// 	BodyResp   string
-// }
+type TestCase struct {
+	testType   int
+	BodyReq    io.Reader
+	CookieReq  http.Cookie
+	StatusCode int
+	BodyResp   string
+}
 
-// func TestCurrentUser(t *testing.T) {
-// 	t.Parallel()
-// 	cases := []TestCase{
-// 		{
-// 			BodyReq: nil,
-// 			CookieReq: http.Cookie{
-// 				Name:  "sessionId",
-// 				Value: "123",
-// 			},
-// 			StatusCode: http.StatusOK,
-// 			BodyResp:   `{"status":200,"body":{"id":1,"email":"testCurrentUser1@mail.ru"}}`,
-// 		},
-// 		{
-// 			BodyReq: nil,
-// 			CookieReq: http.Cookie{
-// 				Name:  "sessionId",
-// 				Value: "case wrong cookie",
-// 			},
-// 			StatusCode: http.StatusOK,
-// 			BodyResp:   `{"status":404,"body":null}`,
-// 		},
-// 		{
-// 			BodyReq:    nil,
-// 			CookieReq:  http.Cookie{},
-// 			StatusCode: http.StatusOK,
-// 			BodyResp:   `{"status":404,"body":null}`,
-// 		},
-// 	}
+func TestCurrentUser(t *testing.T) {
+	t.Parallel()
 
-// 	testDB := _userRepo.NewMockDB()
-// 	testSessionDB := session.NewSessionDB()
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
 
-// 	timeoutContext := configs.Timeouts.ContextTimeout
-// 	userHandler := &UserHandler{
-// 		UserUCase: _userUCase.NewUserUsecase(testDB, testSessionDB, timeoutContext),
-// 	}
+	mockUserUseCase := NewMockItemRepository(ctrl)
+	mockSessionUseCase := NewMockItemRepository(ctrl)
 
-// 	_, err := testDB.CreateUser(context.TODO(), models.LoginUser{
-// 		Email:    "testCurrentUser1@mail.ru",
-// 		Password: "123456qQ",
-// 	})
-// 	if err != nil {
-// 		t.Errorf("Create user error")
-// 	}
-// 	err = testSessionDB.NewSessionCookie("123", 1)
-// 	if err != nil {
-// 		t.Errorf("New session Cookie error")
-// 	}
+	userHandler := &UserHandler{
+		UserUCase:    mockUserUseCase,
+		SessionUcase: mockSessionUseCase,
+	}
 
-// 	for caseNum, item := range cases {
-// 		r := httptest.NewRequest("GET", "/api/v1/currentuser", item.BodyReq)
-// 		r.AddCookie(&item.CookieReq)
-// 		w := httptest.NewRecorder()
+	resultUser := models.User{
+		ID: 1,
+		Email: "qsw",
+	}
 
-// 		userHandler.CurrentUser(w, r)
+	cases := []TestCase{
+		{
+			BodyReq: nil,
+			CookieReq: http.Cookie{
+				Name:  "sessionId",
+				Value: "123",
+			},
+			StatusCode: http.StatusOK,
+			BodyResp:   `{"status":200,"body":{"id":1,"email":"testCurrentUser1@mail.ru"}}`,
+		},
+		{
+			BodyReq: nil,
+			CookieReq: http.Cookie{
+				Name:  "sessionId",
+				Value: "case wrong cookie",
+			},
+			StatusCode: http.StatusOK,
+			BodyResp:   `{"status":404,"body":null}`,
+		},
+		{
+			BodyReq:    nil,
+			CookieReq:  http.Cookie{},
+			StatusCode: http.StatusOK,
+			BodyResp:   `{"status":404,"body":null}`,
+		},
+	}
 
-// 		if w.Code != item.StatusCode {
-// 			t.Errorf("TestCase [%d]:\nwrongCase StatusCode: \ngot %d\nexpected %d",
-// 				caseNum+1, w.Code, item.StatusCode)
-// 		}
+	for caseNum, item := range cases {
+		mockUserUseCase.EXPECT().CurrentUser().Return(item., item.)
 
-// 		if w.Body.String() != item.BodyResp {
-// 			t.Errorf("TestCase [%d]:\nwrongCase Response: \ngot %s\nexpected %s",
-// 				caseNum+1, w.Body.String(), item.BodyResp)
-// 		}
-// 	}
-// }
+		r := httptest.NewRequest("GET", "/api/v1/currentuser", item.BodyReq)
+		r.AddCookie(&item.CookieReq)
+		w := httptest.NewRecorder()
+
+		userHandler.CurrentUser(w, r)
+
+		if w.Code != item.StatusCode {
+			t.Errorf("TestCase [%d]:\nwrongCase StatusCode: \ngot %d\nexpected %d",
+				caseNum+1, w.Code, item.StatusCode)
+		}
+
+		if w.Body.String() != item.BodyResp {
+			t.Errorf("TestCase [%d]:\nwrongCase Response: \ngot %s\nexpected %s",
+				caseNum+1, w.Body.String(), item.BodyResp)
+		}
+	}
+}
+
+/*func TestCurrentUser(t *testing.T) {
+	t.Parallel()
+	cases := []TestCase{
+		{
+			BodyReq: nil,
+			CookieReq: http.Cookie{
+				Name:  "sessionId",
+				Value: "123",
+			},
+			StatusCode: http.StatusOK,
+			BodyResp:   `{"status":200,"body":{"id":1,"email":"testCurrentUser1@mail.ru"}}`,
+		},
+		{
+			BodyReq: nil,
+			CookieReq: http.Cookie{
+				Name:  "sessionId",
+				Value: "case wrong cookie",
+			},
+			StatusCode: http.StatusOK,
+			BodyResp:   `{"status":404,"body":null}`,
+		},
+		{
+			BodyReq:    nil,
+			CookieReq:  http.Cookie{},
+			StatusCode: http.StatusOK,
+			BodyResp:   `{"status":404,"body":null}`,
+		},
+	}
+
+	testDB := _userRepo.NewMockDB()
+	testSessionDB := session.NewSessionDB()
+
+	timeoutContext := configs.Timeouts.ContextTimeout
+	userHandler := &UserHandler{
+		UserUCase: _userUCase.NewUserUsecase(testDB, testSessionDB, timeoutContext),
+	}
+
+	_, err := testDB.CreateUser(context.TODO(), models.LoginUser{
+		Email:    "testCurrentUser1@mail.ru",
+		Password: "123456qQ",
+	})
+	if err != nil {
+		t.Errorf("Create user error")
+	}
+	err = testSessionDB.NewSessionCookie("123", 1)
+	if err != nil {
+		t.Errorf("New session Cookie error")
+	}
+
+	for caseNum, item := range cases {
+		r := httptest.NewRequest("GET", "/api/v1/currentuser", item.BodyReq)
+		r.AddCookie(&item.CookieReq)
+		w := httptest.NewRecorder()
+
+		userHandler.CurrentUser(w, r)
+
+		if w.Code != item.StatusCode {
+			t.Errorf("TestCase [%d]:\nwrongCase StatusCode: \ngot %d\nexpected %d",
+				caseNum+1, w.Code, item.StatusCode)
+		}
+
+		if w.Body.String() != item.BodyResp {
+			t.Errorf("TestCase [%d]:\nwrongCase Response: \ngot %s\nexpected %s",
+				caseNum+1, w.Body.String(), item.BodyResp)
+		}
+	}
+}*/
 
 // func TestLogin(t *testing.T) {
 // 	t.Parallel()
