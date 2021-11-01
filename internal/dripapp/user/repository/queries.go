@@ -1,20 +1,20 @@
 package repository
 
 const (
-	getUserQuery = "select id, name, email, password, date, description from profile where email = $1;"
+	GetUserQuery = "select id, name, email, password, date, description from profile where email = $1;"
 
-	getUserByIdAQuery = "select id, name, email, password, date, description from profile where id = $1;"
+	GetUserByIdAQuery = "select id, name, email, password, date, description from profile where id = $1;"
 
-	createUserQuery = "INSERT into profile(email,password) VALUES($1,$2) RETURNING id, email, password;"
+	CreateUserQuery = "INSERT into profile(email,password) VALUES($1,$2) RETURNING id, email, password;"
 
-	updateUserQuery = `update profile set name=$1, date=$3, description=$4, imgs=$5 where email=$2 
+	UpdateUserQuery = `update profile set name=$1, date=$3, description=$4, imgs=$5 where email=$2 
 							RETURNING id, email, password, name, email, password, date, description;`
 
-	deleteTagsQuery = "delete from profile_tag where profile_id=$1"
+	DeleteTagsQuery = "delete from profile_tag where profile_id=$1"
 
-	getTagsQuery = "select tag_name from tag;"
+	GetTagsQuery = "select tag_name from tag;"
 
-	getTagsByIdQuery = `select
+	GetTagsByIdQuery = `select
 							tag_name
 						from
 							profile p
@@ -23,16 +23,16 @@ const (
 						where
 							p.id = $1;`
 
-	getImgsByID = "SELECT imgs FROM profile WHERE id=$1;"
+	GetImgsByIDQuery = "SELECT imgs FROM profile WHERE id=$1;"
 
-	insertTagsQueryFirstPart = "insert into profile_tag(profile_id, tag_id) values"
-	insertTagsQueryParts     = "($1, (select id from tag where tag_name=$%d))"
+	InsertTagsQueryFirstPart = "insert into profile_tag(profile_id, tag_id) values"
+	InsertTagsQueryParts     = "($1, (select id from tag where tag_name=$%d))"
 
-	updateImgsQuery = "update profile set imgs=$2 where id=$1 returning id;"
+	UpdateImgsQuery = "update profile set imgs=$2 where id=$1 returning id;"
 
-	addReactionQuery = "insert into reactions(id1, id2, type) values ($1,$2,$3);"
+	AddReactionQuery = "insert into reactions(id1, id2, type) values ($1,$2,$3);"
 
-	getNextUserForSwipeQuery = `select
+	GetNextUserForSwipeQuery = `select
 									op.id,
 									op.name,
 									op.email,
@@ -51,7 +51,7 @@ const (
 									and (m.id2 is null or m.id2 <> $1)
 								limit 5;`
 
-	getUsersForMatchesQuery = `select
+	GetUsersForMatchesQuery = `select
 									op.id,
 									op.name,
 									op.email,
@@ -64,9 +64,9 @@ const (
 								join profile op on (op.id = om.id1)
 								where p.id = $1;`
 
-	getLikesQuery = "select r.id1 from reactions r where r.id2 = $1 and r.type = 1;"
+	GetLikesQuery = "select r.id1 from reactions r where r.id2 = $1 and r.type = 1;"
 
-	deleteLikeQuery = "delete from reactions r where ((r.id1=$1 and r.id2=$2) or (r.id1=$2 and r.id2=$1));"
+	DeleteLikeQuery = "delete from reactions r where ((r.id1=$1 and r.id2=$2) or (r.id1=$2 and r.id2=$1));"
 
-	addMatchQuery = "insert into matches(id1, id2) values ($1,$2),($2,$1);"
+	AddMatchQuery = "insert into matches(id1, id2) values ($1,$2),($2,$1);"
 )

@@ -45,7 +45,7 @@ func NewPostgresUserRepository(config configs.PostgresConfig) (models.UserReposi
 
 func (p PostgreUserRepo) GetUser(ctx context.Context, email string) (models.User, error) {
 	var RespUser models.User
-	err := p.Conn.GetContext(ctx, &RespUser, getUserQuery, email)
+	err := p.Conn.GetContext(ctx, &RespUser, GetUserQuery, email)
 	if err != nil {
 		return models.User{}, err
 	}
@@ -64,7 +64,7 @@ func (p PostgreUserRepo) GetUser(ctx context.Context, email string) (models.User
 
 func (p PostgreUserRepo) GetUserByID(ctx context.Context, userID uint64) (models.User, error) {
 	var RespUser models.User
-	err := p.Conn.GetContext(ctx, &RespUser, getUserByIdAQuery, userID)
+	err := p.Conn.GetContext(ctx, &RespUser, GetUserByIdAQuery, userID)
 	if err != nil {
 		return models.User{}, err
 	}
@@ -84,13 +84,13 @@ func (p PostgreUserRepo) GetUserByID(ctx context.Context, userID uint64) (models
 
 func (p PostgreUserRepo) CreateUser(ctx context.Context, logUserData models.LoginUser) (models.User, error) {
 	var RespUser models.User
-	err := p.Conn.GetContext(ctx, &RespUser, createUserQuery, logUserData.Email, logUserData.Password)
+	err := p.Conn.GetContext(ctx, &RespUser, CreateUserQuery, logUserData.Email, logUserData.Password)
 	return RespUser, err
 }
 
 func (p PostgreUserRepo) UpdateUser(ctx context.Context, newUserData models.User) (models.User, error) {
 	var RespUser models.User
-	err := p.Conn.GetContext(ctx, &RespUser, updateUserQuery, newUserData.Name, newUserData.Email, newUserData.Date,
+	err := p.Conn.GetContext(ctx, &RespUser, UpdateUserQuery, newUserData.Name, newUserData.Email, newUserData.Date,
 		newUserData.Description, pq.Array(&newUserData.Imgs))
 
 	if len(newUserData.Tags) != 0 {
@@ -122,7 +122,7 @@ func (p PostgreUserRepo) UpdateUser(ctx context.Context, newUserData models.User
 }
 
 func (p PostgreUserRepo) deleteTags(ctx context.Context, userId uint64) error {
-	stmt, _ := p.Conn.Prepare(deleteTagsQuery)
+	stmt, _ := p.Conn.Prepare(DeleteTagsQuery)
 	_, err := stmt.Exec(userId)
 	if err != nil {
 		return err
@@ -133,7 +133,7 @@ func (p PostgreUserRepo) deleteTags(ctx context.Context, userId uint64) error {
 
 func (p PostgreUserRepo) GetTags(ctx context.Context) (map[uint64]string, error) {
 	var tags []models.Tag
-	err := p.Conn.Select(&tags, getTagsQuery)
+	err := p.Conn.Select(&tags, GetTagsQuery)
 	if err != nil {
 		return nil, err
 	}
@@ -150,7 +150,7 @@ func (p PostgreUserRepo) GetTags(ctx context.Context) (map[uint64]string, error)
 
 func (p PostgreUserRepo) getTagsByID(ctx context.Context, id uint64) ([]string, error) {
 	var tags []string
-	err := p.Conn.Select(&tags, getTagsByIdQuery, id)
+	err := p.Conn.Select(&tags, GetTagsByIdQuery, id)
 	if err != nil {
 		return nil, err
 	}
@@ -160,7 +160,7 @@ func (p PostgreUserRepo) getTagsByID(ctx context.Context, id uint64) ([]string, 
 
 func (p PostgreUserRepo) getImgsByID(ctx context.Context, id uint64) ([]string, error) {
 	var imgs []string
-	if err := p.Conn.QueryRow(getImgsByID, id).Scan(pq.Array(&imgs)); err != nil {
+	if err := p.Conn.QueryRow(GetImgsByIDQuery, id).Scan(pq.Array(&imgs)); err != nil {
 		return nil, err
 	}
 
@@ -179,10 +179,10 @@ func (p PostgreUserRepo) insertTags(ctx context.Context, id uint64, tags []strin
 	}
 
 	var sb strings.Builder
-	sb.WriteString(insertTagsQueryFirstPart)
+	sb.WriteString(InsertTagsQueryFirstPart)
 	var inserts []string
 	for idx := range tags {
-		str := fmt.Sprintf(insertTagsQueryParts, idx+2)
+		str := fmt.Sprintf(InsertTagsQueryParts, idx+2)
 		inserts = append(inserts, str)
 	}
 	sb.WriteString(strings.Join(inserts, ",\n"))
@@ -200,7 +200,7 @@ func (p PostgreUserRepo) insertTags(ctx context.Context, id uint64, tags []strin
 
 func (p PostgreUserRepo) UpdateImgs(ctx context.Context, id uint64, imgs []string) error {
 	var user_id uint64
-	err := p.Conn.QueryRow(updateImgsQuery, id, pq.Array(&imgs)).Scan(&user_id)
+	err := p.Conn.QueryRow(UpdateImgsQuery, id, pq.Array(&imgs)).Scan(&user_id)
 	if err != nil {
 		return err
 	}
@@ -209,7 +209,7 @@ func (p PostgreUserRepo) UpdateImgs(ctx context.Context, id uint64, imgs []strin
 }
 
 func (p PostgreUserRepo) AddReaction(ctx context.Context, currentUserId uint64, swipedUserId uint64, reactionType uint64) error {
-	stmt, _ := p.Conn.Prepare(addReactionQuery)
+	stmt, _ := p.Conn.Prepare(AddReactionQuery)
 	_, err := stmt.Exec(currentUserId, swipedUserId, reactionType)
 	if err != nil {
 		return err
@@ -220,7 +220,7 @@ func (p PostgreUserRepo) AddReaction(ctx context.Context, currentUserId uint64, 
 
 func (p PostgreUserRepo) GetNextUserForSwipe(ctx context.Context, currentUserId uint64) ([]models.User, error) {
 	var notSwipedUser []models.User
-	err := p.Conn.Select(&notSwipedUser, getNextUserForSwipeQuery, currentUserId)
+	err := p.Conn.Select(&notSwipedUser, GetNextUserForSwipeQuery, currentUserId)
 	if err != nil {
 		return nil, err
 	}
@@ -247,7 +247,7 @@ func (p PostgreUserRepo) GetNextUserForSwipe(ctx context.Context, currentUserId 
 
 func (p PostgreUserRepo) GetUsersMatches(ctx context.Context, currentUserId uint64) ([]models.User, error) {
 	var matchesUsers []models.User
-	err := p.Conn.Select(&matchesUsers, getUsersForMatchesQuery, currentUserId)
+	err := p.Conn.Select(&matchesUsers, GetUsersForMatchesQuery, currentUserId)
 	if err != nil {
 		return nil, err
 	}
@@ -276,7 +276,7 @@ func (p PostgreUserRepo) GetLikes(ctx context.Context, currentUserId uint64) ([]
 	// type = 1 is like (dislike - 2)
 
 	var likes []uint64
-	err := p.Conn.Select(&likes, getLikesQuery, currentUserId)
+	err := p.Conn.Select(&likes, GetLikesQuery, currentUserId)
 	if err != nil {
 		return nil, err
 	}
@@ -285,7 +285,7 @@ func (p PostgreUserRepo) GetLikes(ctx context.Context, currentUserId uint64) ([]
 }
 
 func (p PostgreUserRepo) DeleteLike(ctx context.Context, firstUser uint64, secondUser uint64) error {
-	stmt, _ := p.Conn.Prepare(deleteLikeQuery)
+	stmt, _ := p.Conn.Prepare(DeleteLikeQuery)
 	_, err := stmt.Exec(firstUser, secondUser)
 	if err != nil {
 		return err
@@ -295,7 +295,7 @@ func (p PostgreUserRepo) DeleteLike(ctx context.Context, firstUser uint64, secon
 }
 
 func (p PostgreUserRepo) AddMatch(ctx context.Context, firstUser uint64, secondUser uint64) error {
-	stmt, _ := p.Conn.Prepare(addMatchQuery)
+	stmt, _ := p.Conn.Prepare(AddMatchQuery)
 	_, err := stmt.Exec(firstUser, secondUser)
 	if err != nil {
 		return err
