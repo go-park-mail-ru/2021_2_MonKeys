@@ -235,7 +235,6 @@ func (h *userUsecase) DeletePhoto(c context.Context, photo models.Photo) models.
 // @Failure 400,404,500
 // @Router /login [post]
 func (h *userUsecase) Login(c context.Context, logUserData models.LoginUser) (models.User, models.HTTPError) {
-
 	identifiableUser, err := h.UserRepo.GetUser(c, logUserData.Email)
 	if err != nil {
 		return models.User{}, models.HTTPError{
@@ -244,14 +243,14 @@ func (h *userUsecase) Login(c context.Context, logUserData models.LoginUser) (mo
 		}
 	}
 
-	if hasher.CheckWithHash(identifiableUser.Password, logUserData.Password) {
-		return identifiableUser, models.StatusOk200
-	} else {
+	if !hasher.CheckWithHash(identifiableUser.Password, logUserData.Password) {
 		return models.User{}, models.HTTPError{
 			Code:    http.StatusNotFound,
 			Message: err.Error(),
 		}
 	}
+
+	return identifiableUser, models.StatusOk200
 }
 
 // @Summary SignUp
