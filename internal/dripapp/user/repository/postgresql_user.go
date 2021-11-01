@@ -45,19 +45,16 @@ func NewPostgresUserRepository(config configs.PostgresConfig) (models.UserReposi
 
 func (p PostgreUserRepo) GetUser(ctx context.Context, email string) (models.User, error) {
 	var RespUser models.User
-	err := p.Conn.GetContext(ctx, &RespUser, GetUserQuery, email)
+	err := p.Conn.QueryRow(GetUserQuery, email).
+		Scan(&RespUser.ID, &RespUser.Name, &RespUser.Email, &RespUser.Password, &RespUser.Date, &RespUser.Description, pq.Array(&RespUser.Imgs))
 	if err != nil {
 		return models.User{}, err
 	}
 
-	RespUser.Tags, err = p.getTagsByID(ctx, RespUser.ID)
-	if err != nil {
-		return models.User{}, err
-	}
-	RespUser.Imgs, err = p.getImgsByID(ctx, RespUser.ID)
-	if err != nil {
-		return models.User{}, err
-	}
+	// RespUser.Tags, err = p.getTagsByID(ctx, RespUser.ID)
+	// if err != nil {
+	// 	return models.User{}, err
+	// }
 
 	return RespUser, nil
 }

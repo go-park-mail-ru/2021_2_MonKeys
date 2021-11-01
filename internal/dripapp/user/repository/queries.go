@@ -1,7 +1,7 @@
 package repository
 
 const (
-	GetUserQuery = "select id, name, email, password, date, description from profile where email = $1;"
+	GetUserQuery = "select id, name, email, password, date, description, imgs from profile where email = $1;"
 
 	GetUserByIdAQuery = "select id, name, email, password, date, description from profile where id = $1;"
 
