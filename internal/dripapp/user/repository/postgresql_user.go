@@ -44,12 +44,8 @@ func NewPostgresUserRepository(config configs.PostgresConfig) (models.UserReposi
 }
 
 func (p PostgreUserRepo) GetUser(ctx context.Context, email string) (models.User, error) {
-	query := `select id, name, email, password, date, description
-		from profile
-		where email = $1;`
-
 	var RespUser models.User
-	err := p.Conn.GetContext(ctx, &RespUser, query, email)
+	err := p.Conn.GetContext(ctx, &RespUser, getUserQuery, email)
 	if err != nil {
 		return models.User{}, err
 	}
@@ -67,12 +63,8 @@ func (p PostgreUserRepo) GetUser(ctx context.Context, email string) (models.User
 }
 
 func (p PostgreUserRepo) GetUserByID(ctx context.Context, userID uint64) (models.User, error) {
-	query := `select id, name, email, password, date, description
-		from profile
-		where id = $1;`
-
 	var RespUser models.User
-	err := p.Conn.GetContext(ctx, &RespUser, query, userID)
+	err := p.Conn.GetContext(ctx, &RespUser, getUserByIdAQuery, userID)
 	if err != nil {
 		return models.User{}, err
 	}
@@ -91,25 +83,14 @@ func (p PostgreUserRepo) GetUserByID(ctx context.Context, userID uint64) (models
 }
 
 func (p PostgreUserRepo) CreateUser(ctx context.Context, logUserData models.LoginUser) (models.User, error) {
-	query := `INSERT into profile(
-                  email,
-                  password)
-                  VALUES ($1,$2)
-                  RETURNING id, email, password;`
-
 	var RespUser models.User
-	err := p.Conn.GetContext(ctx, &RespUser, query, logUserData.Email, logUserData.Password)
+	err := p.Conn.GetContext(ctx, &RespUser, createUserQuery, logUserData.Email, logUserData.Password)
 	return RespUser, err
 }
 
 func (p PostgreUserRepo) UpdateUser(ctx context.Context, newUserData models.User) (models.User, error) {
-	query := `update profile
-		set name=$1, date=$3, description=$4, imgs=$5
-		where email=$2
-		RETURNING id, email, password, name, email, password, date, description;`
-
 	var RespUser models.User
-	err := p.Conn.GetContext(ctx, &RespUser, query, newUserData.Name, newUserData.Email, newUserData.Date,
+	err := p.Conn.GetContext(ctx, &RespUser, updateUserQuery, newUserData.Name, newUserData.Email, newUserData.Date,
 		newUserData.Description, pq.Array(&newUserData.Imgs))
 
 	if len(newUserData.Tags) != 0 {
@@ -141,9 +122,7 @@ func (p PostgreUserRepo) UpdateUser(ctx context.Context, newUserData models.User
 }
 
 func (p PostgreUserRepo) deleteTags(ctx context.Context, userId uint64) error {
-	query := `delete from profile_tag where profile_id=$1`
-
-	stmt, _ := p.Conn.Prepare(query)
+	stmt, _ := p.Conn.Prepare(deleteTagsQuery)
 	_, err := stmt.Exec(userId)
 	if err != nil {
 		return err
@@ -153,10 +132,8 @@ func (p PostgreUserRepo) deleteTags(ctx context.Context, userId uint64) error {
 }
 
 func (p PostgreUserRepo) GetTags(ctx context.Context) (map[uint64]string, error) {
-	query := `select tag_name from tag;`
-
 	var tags []models.Tag
-	err := p.Conn.Select(&tags, query)
+	err := p.Conn.Select(&tags, getTagsQuery)
 	if err != nil {
 		return nil, err
 	}
@@ -172,17 +149,8 @@ func (p PostgreUserRepo) GetTags(ctx context.Context) (map[uint64]string, error)
 }
 
 func (p PostgreUserRepo) getTagsByID(ctx context.Context, id uint64) ([]string, error) {
-	sel := `select
-				tag_name
-			from
-				profile p
-				join profile_tag pt on(pt.profile_id = p.id)
-				join tag t on(pt.tag_id = t.id)
-			where
-				p.id = $1;`
-
 	var tags []string
-	err := p.Conn.Select(&tags, sel, id)
+	err := p.Conn.Select(&tags, getTagsByIdQuery, id)
 	if err != nil {
 		return nil, err
 	}
@@ -191,10 +159,8 @@ func (p PostgreUserRepo) getTagsByID(ctx context.Context, id uint64) ([]string, 
 }
 
 func (p PostgreUserRepo) getImgsByID(ctx context.Context, id uint64) ([]string, error) {
-	sel := "SELECT imgs FROM profile WHERE id=$1;"
-
 	var imgs []string
-	if err := p.Conn.QueryRow(sel, id).Scan(pq.Array(&imgs)); err != nil {
+	if err := p.Conn.QueryRow(getImgsByID, id).Scan(pq.Array(&imgs)); err != nil {
 		return nil, err
 	}
 
@@ -206,8 +172,6 @@ func (p PostgreUserRepo) insertTags(ctx context.Context, id uint64, tags []strin
 		return nil
 	}
 
-	query := "insert into profile_tag(profile_id, tag_id) values"
-
 	vals := []interface{}{}
 	vals = append(vals, id)
 	for _, val := range tags {
@@ -215,17 +179,17 @@ func (p PostgreUserRepo) insertTags(ctx context.Context, id uint64, tags []strin
 	}
 
 	var sb strings.Builder
-	sb.WriteString(query)
+	sb.WriteString(insertTagsQueryFirstPart)
 	var inserts []string
 	for idx := range tags {
-		str := fmt.Sprintf("($1, (select id from tag where tag_name=$%d))", idx+2)
+		str := fmt.Sprintf(insertTagsQueryParts, idx+2)
 		inserts = append(inserts, str)
 	}
 	sb.WriteString(strings.Join(inserts, ",\n"))
 	sb.WriteString(";")
-	query = sb.String()
+	insertTagsQuery := sb.String()
 
-	stmt, _ := p.Conn.Prepare(query)
+	stmt, _ := p.Conn.Prepare(insertTagsQuery)
 	_, err := stmt.Exec(vals...)
 	if err != nil {
 		return err
@@ -235,10 +199,8 @@ func (p PostgreUserRepo) insertTags(ctx context.Context, id uint64, tags []strin
 }
 
 func (p PostgreUserRepo) UpdateImgs(ctx context.Context, id uint64, imgs []string) error {
-	query := `update profile set imgs=$2 where id=$1 returning id;`
-
 	var user_id uint64
-	err := p.Conn.QueryRow(query, id, pq.Array(&imgs)).Scan(&user_id)
+	err := p.Conn.QueryRow(updateImgsQuery, id, pq.Array(&imgs)).Scan(&user_id)
 	if err != nil {
 		return err
 	}
@@ -247,9 +209,7 @@ func (p PostgreUserRepo) UpdateImgs(ctx context.Context, id uint64, imgs []strin
 }
 
 func (p PostgreUserRepo) AddReaction(ctx context.Context, currentUserId uint64, swipedUserId uint64, reactionType uint64) error {
-	query := "insert into reactions(id1, id2, type) values ($1,$2,$3);"
-
-	stmt, _ := p.Conn.Prepare(query)
+	stmt, _ := p.Conn.Prepare(addReactionQuery)
 	_, err := stmt.Exec(currentUserId, swipedUserId, reactionType)
 	if err != nil {
 		return err
@@ -259,27 +219,8 @@ func (p PostgreUserRepo) AddReaction(ctx context.Context, currentUserId uint64, 
 }
 
 func (p PostgreUserRepo) GetNextUserForSwipe(ctx context.Context, currentUserId uint64) ([]models.User, error) {
-	query := `select
-				op.id,
-				op.name,
-				op.email,
-				op.password,
-				op.date,
-				op.description
-			from profile p
-			join reactions r on (r.id1 = $1)
-			right join profile op on (op.id = r.id2)
-			left join matches m on (m.id1 = op.id)
-			where
-				op.name <> ''
-				and op.date <> ''
-				and r.id1 is null
-				and op.id <> $1
-				and (m.id2 is null or m.id2 <> $1)
-			limit 5;`
-
 	var notSwipedUser []models.User
-	err := p.Conn.Select(&notSwipedUser, query, currentUserId)
+	err := p.Conn.Select(&notSwipedUser, getNextUserForSwipeQuery, currentUserId)
 	if err != nil {
 		return nil, err
 	}
@@ -305,21 +246,8 @@ func (p PostgreUserRepo) GetNextUserForSwipe(ctx context.Context, currentUserId 
 }
 
 func (p PostgreUserRepo) GetUsersMatches(ctx context.Context, currentUserId uint64) ([]models.User, error) {
-	query := `select
-				op.id,
-				op.name,
-				op.email,
-				op.password,
-				op.date,
-				op.description
-			from profile p
-			join matches m on (p.id = m.id1)
-			join matches om on (om.id1 = m.id2 and om.id2 = m.id1)
-			join profile op on (op.id = om.id1)
-			where p.id = $1;`
-
 	var matchesUsers []models.User
-	err := p.Conn.Select(&matchesUsers, query, currentUserId)
+	err := p.Conn.Select(&matchesUsers, getUsersForMatchesQuery, currentUserId)
 	if err != nil {
 		return nil, err
 	}
@@ -346,10 +274,9 @@ func (p PostgreUserRepo) GetUsersMatches(ctx context.Context, currentUserId uint
 
 func (p PostgreUserRepo) GetLikes(ctx context.Context, currentUserId uint64) ([]uint64, error) {
 	// type = 1 is like (dislike - 2)
-	query := `select r.id1 from reactions r where r.id2 = $1 and r.type = 1;`
 
 	var likes []uint64
-	err := p.Conn.Select(&likes, query, currentUserId)
+	err := p.Conn.Select(&likes, getLikesQuery, currentUserId)
 	if err != nil {
 		return nil, err
 	}
@@ -358,9 +285,7 @@ func (p PostgreUserRepo) GetLikes(ctx context.Context, currentUserId uint64) ([]
 }
 
 func (p PostgreUserRepo) DeleteLike(ctx context.Context, firstUser uint64, secondUser uint64) error {
-	query := `delete from reactions r where ((r.id1=$1 and r.id2=$2) or (r.id1=$2 and r.id2=$1));`
-
-	stmt, _ := p.Conn.Prepare(query)
+	stmt, _ := p.Conn.Prepare(deleteLikeQuery)
 	_, err := stmt.Exec(firstUser, secondUser)
 	if err != nil {
 		return err
@@ -370,9 +295,7 @@ func (p PostgreUserRepo) DeleteLike(ctx context.Context, firstUser uint64, secon
 }
 
 func (p PostgreUserRepo) AddMatch(ctx context.Context, firstUser uint64, secondUser uint64) error {
-	query := "insert into matches(id1, id2) values ($1,$2),($2,$1);"
-
-	stmt, _ := p.Conn.Prepare(query)
+	stmt, _ := p.Conn.Prepare(addMatchQuery)
 	_, err := stmt.Exec(firstUser, secondUser)
 	if err != nil {
 		return err
