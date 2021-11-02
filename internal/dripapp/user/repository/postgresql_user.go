@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"database/sql"
 	"dripapp/configs"
 	"dripapp/internal/dripapp/models"
 	"fmt"
@@ -221,10 +222,13 @@ func (p PostgreUserRepo) insertTags(ctx context.Context, id uint64, tags []strin
 	sb.WriteString(";")
 	query = sb.String()
 
-	stmt, _ := p.conn.Prepare(query)
-	_, err := stmt.Exec(vals...)
+	// stmt, _ := p.conn.Prepare(query)
+	// _, err := stmt.Exec(vals...)
+	err := p.conn.QueryRow(query, vals...).Scan()
 	if err != nil {
-		return err
+		if err != sql.ErrNoRows {
+			return err
+		}
 	}
 
 	return nil
