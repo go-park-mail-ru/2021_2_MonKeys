@@ -88,8 +88,7 @@ func (p PostgreUserRepo) CreateUser(ctx context.Context, logUserData models.Logi
 
 func (p PostgreUserRepo) UpdateUser(ctx context.Context, newUserData models.User) (models.User, error) {
 	var RespUser models.User
-	err := p.Conn.QueryRow(UpdateUserQuery, newUserData.Name, newUserData.Email, newUserData.Date,
-		newUserData.Description, pq.Array(&newUserData.Imgs)).
+	err := p.Conn.QueryRow(UpdateUserQuery, newUserData.Name, newUserData.Email, newUserData.Date, newUserData.Description, pq.Array(&newUserData.Imgs)).
 		Scan(&RespUser.ID, &RespUser.Name, &RespUser.Email, &RespUser.Password, &RespUser.Date, &RespUser.Description, pq.Array(&RespUser.Imgs))
 	if err != nil {
 		return models.User{}, err
@@ -116,7 +115,8 @@ func (p PostgreUserRepo) UpdateUser(ctx context.Context, newUserData models.User
 }
 
 func (p PostgreUserRepo) deleteTags(ctx context.Context, userId uint64) error {
-	err := p.Conn.QueryRow(DeleteTagsQuery, userId).Scan()
+	var id uint64
+	err := p.Conn.QueryRow(DeleteTagsQuery, userId).Scan(&id)
 	if err != nil {
 		return err
 	}
@@ -179,20 +179,14 @@ func (p PostgreUserRepo) insertTags(ctx context.Context, id uint64, tags []strin
 		inserts = append(inserts, str)
 	}
 	sb.WriteString(strings.Join(inserts, ",\n"))
-	sb.WriteString(";")
+	sb.WriteString(" returning id;")
 	insertTagsQuery := sb.String()
 
-	stmt, _ := p.Conn.Prepare(insertTagsQuery)
-	_, err := stmt.Exec(vals...)
+	var respId uint64
+	err := p.Conn.QueryRow(insertTagsQuery, vals...).Scan(&respId)
 	if err != nil {
 		return err
 	}
-	// err := p.Conn.QueryRow(insertTagsQuery, vals...).Scan()
-	// if err != nil {
-	// 	if err != sql.ErrNoRows {
-	// 		return err
-	// 	}
-	// }
 
 	return nil
 }

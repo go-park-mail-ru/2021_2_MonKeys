@@ -10,7 +10,7 @@ const (
 	UpdateUserQuery = `update profile set name=$1, date=$3, description=$4, imgs=$5 where email=$2 
 							RETURNING id, email, password, name, email, password, date, description, imgs;`
 
-	DeleteTagsQuery = "delete from profile_tag where profile_id=$1;"
+	DeleteTagsQuery = "delete from profile_tag where profile_id=$1 returning id;"
 
 	GetTagsQuery = "select tag_name from tag;"
 

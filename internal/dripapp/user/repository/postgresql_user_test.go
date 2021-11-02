@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"database/sql/driver"
 	"dripapp/configs"
 	"dripapp/internal/dripapp/models"
 	"fmt"
@@ -295,6 +296,50 @@ func TestGetUserByID(t *testing.T) {
 	})
 }
 
+func TestInsertTags(t *testing.T) {
+	t.Parallel()
+	db, mock, err := sqlmock.New()
+	if err != nil {
+		t.Fatalf("cant create mock: %s", err)
+	}
+	defer db.Close()
+	sqlxDB := sqlx.NewDb(db, "sqlmock")
+
+	repo := &PostgreUserRepo{
+		Conn: *sqlxDB,
+	}
+
+	vals := []driver.Value{1, "anime", "music"}
+
+	t.Run("good insert tags", func(t *testing.T) {
+		rows := sqlmock.NewRows([]string{"id"}).AddRow(1)
+		mock.ExpectQuery("insert").WithArgs(vals...).WillReturnRows(rows)
+
+		err := repo.insertTags(context.TODO(), 1, []string{"anime", "music"})
+
+		if err != nil {
+			t.Errorf("unexpected err: %s", err)
+			return
+		}
+		if err := mock.ExpectationsWereMet(); err != nil {
+			t.Errorf("there were unfulfilled expectations: %s", err)
+			return
+		}
+	})
+	t.Run("len tags nil", func(t *testing.T) {
+		err := repo.insertTags(context.TODO(), 1, []string{})
+
+		if err != nil {
+			t.Errorf("unexpected err: %s", err)
+			return
+		}
+		if err := mock.ExpectationsWereMet(); err != nil {
+			t.Errorf("there were unfulfilled expectations: %s", err)
+			return
+		}
+	})
+}
+
 func TestUpdateUser(t *testing.T) {
 	t.Parallel()
 	db, mock, err := sqlmock.New()
@@ -316,9 +361,70 @@ func TestUpdateUser(t *testing.T) {
 		Date:        "2001-06-29",
 		Description: "всем привет",
 		Imgs:        []string{"img1", "img2"},
-		Tags:        []string{"tag1", "tag2"},
+		Tags:        []string{"anime", "music"},
 	}
 
+	vals := []driver.Value{1, "anime", "music"}
+
+	t.Run("good update", func(t *testing.T) {
+		rows := sqlmock.NewRows([]string{"id", "name", "email", "password", "date", "description", "imgs"}).
+			AddRow(1, "Ilyagu", "valid@valid.ru", "!Nagdimaev2001", "2001-06-29", "всем привет", pq.Array([]string{"img1", "img2"}))
+		mock.ExpectQuery("update").WithArgs(
+			"Ilyagu",
+			"valid@valid.ru",
+			"2001-06-29",
+			"всем привет",
+			pq.Array([]string{"img1", "img2"}),
+		).WillReturnRows(rows)
+
+		rowsDel := sqlmock.NewRows([]string{"id"}).AddRow(1)
+		mock.ExpectQuery("delete").WithArgs(1).WillReturnRows(rowsDel)
+
+		rowsInsTags := sqlmock.NewRows([]string{"id"}).AddRow(1)
+		mock.ExpectQuery("insert").WithArgs(vals...).WillReturnRows(rowsInsTags)
+
+		err := repo.insertTags(context.TODO(), 1, []string{"anime", "music"})
+
+		rowsTags := sqlmock.NewRows([]string{"tag_name"}).AddRow("anime").AddRow("music")
+		mock.ExpectQuery("select tag_name").WithArgs(1).WillReturnRows(rowsTags)
+
+		user, err := repo.UpdateUser(context.TODO(), u)
+
+		if err != nil {
+			t.Errorf("unexpected err: %s", err)
+			return
+		}
+		if err := mock.ExpectationsWereMet(); err != nil {
+			t.Errorf("there were unfulfilled expectations: %s", err)
+			return
+		}
+		if !reflect.DeepEqual(user, u) {
+			t.Errorf("results not match, want %v, have %v", u, user)
+			return
+		}
+	})
+	t.Run("error update", func(t *testing.T) {
+		mock.ExpectQuery("update").WithArgs(
+			"Ilyagu",
+			"valid@valid.ru",
+			"2001-06-29",
+			"всем привет",
+			pq.Array([]string{"img1", "img2"}),
+		).WillReturnError(sql.ErrNoRows)
+
+		err := repo.insertTags(context.TODO(), 1, []string{"anime", "music"})
+
+		_, err = repo.UpdateUser(context.TODO(), u)
+
+		if err == nil {
+			t.Errorf("unexpected err: %s", err)
+			return
+		}
+		if err := mock.ExpectationsWereMet(); err != nil {
+			t.Errorf("there were unfulfilled expectations: %s", err)
+			return
+		}
+	})
 	t.Run("error delete tags", func(t *testing.T) {
 		rows := sqlmock.NewRows([]string{"id", "name", "email", "password", "date", "description", "imgs"}).
 			AddRow(1, "Ilyagu", "valid@valid.ru", "!Nagdimaev2001", "2001-06-29", "всем привет", pq.Array([]string{"img1", "img2"}))
@@ -330,13 +436,7 @@ func TestUpdateUser(t *testing.T) {
 			pq.Array([]string{"img1", "img2"}),
 		).WillReturnRows(rows)
 
-		// vals := []driver.Value{1, "anime", "music"}
-
 		mock.ExpectQuery("delete").WithArgs(1).WillReturnError(sql.ErrNoRows)
-		// mock.ExpectQuery("insert into profile_tag").WithArgs(nil).WillReturnError(nil)
-
-		// rowsTags := sqlmock.NewRows([]string{"tag_name"}).AddRow("tag1").AddRow("tag2")
-		// mock.ExpectQuery("select tag_name").WithArgs(1).WillReturnRows(rowsTags)
 
 		_, err := repo.UpdateUser(context.TODO(), u)
 
@@ -348,47 +448,68 @@ func TestUpdateUser(t *testing.T) {
 			t.Errorf("there were unfulfilled expectations: %s", err)
 			return
 		}
-		// if !reflect.DeepEqual(user, u) {
-		// 	t.Errorf("results not match, want %v, have %v", u, user)
-		// 	return
-		// }
 	})
-	// t.Run("error insert tags", func(t *testing.T) {
-	// 	rows := sqlmock.NewRows([]string{"id", "name", "email", "password", "date", "description", "imgs"}).
-	// 		AddRow(1, "Ilyagu", "valid@valid.ru", "!Nagdimaev2001", "2001-06-29", "всем привет", pq.Array([]string{"img1", "img2"}))
-	// 	mock.ExpectQuery("update").WithArgs(
-	// 		"Ilyagu",
-	// 		"valid@valid.ru",
-	// 		"2001-06-29",
-	// 		"всем привет",
-	// 		pq.Array([]string{"img1", "img2"}),
-	// 	).WillReturnRows(rows)
+	t.Run("error insert tags", func(t *testing.T) {
+		rows := sqlmock.NewRows([]string{"id", "name", "email", "password", "date", "description", "imgs"}).
+			AddRow(1, "Ilyagu", "valid@valid.ru", "!Nagdimaev2001", "2001-06-29", "всем привет", pq.Array([]string{"img1", "img2"}))
+		mock.ExpectQuery("update").WithArgs(
+			"Ilyagu",
+			"valid@valid.ru",
+			"2001-06-29",
+			"всем привет",
+			pq.Array([]string{"img1", "img2"}),
+		).WillReturnRows(rows)
 
-	// 	// vals := []driver.Value{1, "anime", "music"}
+		rowsDel := sqlmock.NewRows([]string{"id"}).AddRow(1)
+		mock.ExpectQuery("delete").WithArgs(1).WillReturnRows(rowsDel)
 
-	// 	mock.ExpectQuery("delete").WithArgs(1).WillReturnError(sql.ErrNoRows)
-	// 	// mock.ExpectExec("insert into profile_tag").WithArgs(sqlmock.AnyArg()).WillReturnError(sql.ErrNoRows)
+		mock.ExpectQuery("insert").WithArgs(vals...).WillReturnError(sql.ErrNoRows)
 
-	// 	rowsTags := sqlmock.NewRows([]string{"tag_name"}).
-	// 		AddRow("tag1").
-	// 		AddRow("tag2")
-	// 	mock.ExpectQuery("select tag_name").WithArgs(1).WillReturnRows(rowsTags)
+		err := repo.insertTags(context.TODO(), 1, []string{"anime", "music"})
 
-	// 	_, err := repo.UpdateUser(context.TODO(), u)
+		_, err = repo.UpdateUser(context.TODO(), u)
 
-	// 	if err == nil {
-	// 		t.Errorf("unexpected err: %s", err)
-	// 		return
-	// 	}
-	// 	if err := mock.ExpectationsWereMet(); err != nil {
-	// 		t.Errorf("there were unfulfilled expectations: %s", err)
-	// 		return
-	// 	}
-	// 	// if !reflect.DeepEqual(user, u) {
-	// 	// 	t.Errorf("results not match, want %v, have %v", u, user)
-	// 	// 	return
-	// 	// }
-	// })
+		if err == nil {
+			t.Errorf("unexpected err: %s", err)
+			return
+		}
+		if err := mock.ExpectationsWereMet(); err != nil {
+			t.Errorf("there were unfulfilled expectations: %s", err)
+			return
+		}
+	})
+	t.Run("error get tags", func(t *testing.T) {
+		rows := sqlmock.NewRows([]string{"id", "name", "email", "password", "date", "description", "imgs"}).
+			AddRow(1, "Ilyagu", "valid@valid.ru", "!Nagdimaev2001", "2001-06-29", "всем привет", pq.Array([]string{"img1", "img2"}))
+		mock.ExpectQuery("update").WithArgs(
+			"Ilyagu",
+			"valid@valid.ru",
+			"2001-06-29",
+			"всем привет",
+			pq.Array([]string{"img1", "img2"}),
+		).WillReturnRows(rows)
+
+		rowsDel := sqlmock.NewRows([]string{"id"}).AddRow(1)
+		mock.ExpectQuery("delete").WithArgs(1).WillReturnRows(rowsDel)
+
+		rowsInsTags := sqlmock.NewRows([]string{"id"}).AddRow(1)
+		mock.ExpectQuery("insert").WithArgs(vals...).WillReturnRows(rowsInsTags)
+
+		err := repo.insertTags(context.TODO(), 1, []string{"anime", "music"})
+
+		mock.ExpectQuery("select tag_name").WithArgs(1).WillReturnError(fmt.Errorf("some error"))
+
+		_, err = repo.UpdateUser(context.TODO(), u)
+
+		if err == nil {
+			t.Errorf("unexpected err: %s", err)
+			return
+		}
+		if err := mock.ExpectationsWereMet(); err != nil {
+			t.Errorf("there were unfulfilled expectations: %s", err)
+			return
+		}
+	})
 }
 
 func TestGetTags(t *testing.T) {
