@@ -5,3 +5,6 @@ ignore:
   - "internal/dripapp/middleware"
   - "configs"
   - "cmd"
+  - "internal/dripapp/session/mocks"
+  - "internal/dripapp/user/mocks"
+  - "internal/dripapp/file/mocks"
