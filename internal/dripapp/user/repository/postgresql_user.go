@@ -100,9 +100,11 @@ func (p PostgreUserRepo) UpdateUser(ctx context.Context, newUserData models.User
 		return models.User{}, err
 	}
 
-	err = p.insertTags(ctx, newUserData.ID, newUserData.Tags)
-	if err != nil {
-		return models.User{}, err
+	if len(newUserData.Tags) != 0 {
+		err = p.insertTags(ctx, newUserData.ID, newUserData.Tags)
+		if err != nil {
+			return models.User{}, err
+		}
 	}
 
 	RespUser.Tags, err = p.getTagsByID(ctx, RespUser.ID)
