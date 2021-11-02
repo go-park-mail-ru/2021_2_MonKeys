@@ -112,7 +112,6 @@ func (p PostgreUserRepo) UpdateUser(ctx context.Context, newUserData models.User
 	}
 
 	return RespUser, err
-	}
 }
 
 func (p PostgreUserRepo) deleteTags(ctx context.Context, userId uint64) error {

@@ -8,11 +8,13 @@ import (
 	_s "dripapp/internal/dripapp/session/mocks"
 	"dripapp/internal/dripapp/user/mocks"
 	"errors"
-	"github.com/stretchr/testify/mock"
 	"io"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/gorilla/mux"
+	"github.com/stretchr/testify/mock"
 )
 
 const (
@@ -46,9 +48,9 @@ var (
 
 	tags = models.Tags{
 		AllTags: map[uint64]models.Tag{
-			1: models.Tag{TagName: "chill"},
-			2: models.Tag{TagName: "sport"},
-			3: models.Tag{TagName: "music"},
+			1: {TagName: "chill"},
+			2: {TagName: "sport"},
+			3: {TagName: "music"},
 		},
 		Count: 3,
 	}
@@ -62,14 +64,14 @@ var (
 		},
 		Count: "2",
 	}
-	usersMapStr   = `{"1":{"id":1,"email":"test@mail.ru"},"2":{"id":2,"email":"test2@mail.ru"}}`
+	usersMapStr     = `{"1":{"id":1,"email":"test@mail.ru"},"2":{"id":2,"email":"test2@mail.ru"}}`
 	matchesCountStr = "2"
 
 	reactionStr = "0"
-	match = models.Match{Match: true}
-	matchStr = "true"
+	match       = models.Match{Match: true}
+	matchStr    = "true"
 
-	notMatch = models.Match{Match: false}
+	notMatch    = models.Match{Match: false}
 	notMatchStr = "false"
 
 	photo = models.Photo{Path: "path"}
@@ -445,7 +447,7 @@ func TestReaction(t *testing.T) {
 			BodyResp:   `{"status":200,"body":{"match":` + notMatchStr + `}}`,
 		},
 		{
-			BodyReq: bytes.NewReader([]byte(`wrong input data`)),
+			BodyReq:    bytes.NewReader([]byte(`wrong input data`)),
 			StatusCode: http.StatusOK,
 			BodyResp:   `{"status":400,"body":null}`,
 		},
@@ -597,4 +599,11 @@ func TestDeletePhoto(t *testing.T) {
 
 		CheckResponse(t, w, caseNum, item)
 	}
+}
+
+func TestSetRouting(t *testing.T) {
+	mockUserUseCase := &mocks.UserUsecase{}
+	mockSessionUseCase := &_s.SessionUsecase{}
+
+	SetRouting(mux.NewRouter(), mockUserUseCase, mockSessionUseCase)
 }
