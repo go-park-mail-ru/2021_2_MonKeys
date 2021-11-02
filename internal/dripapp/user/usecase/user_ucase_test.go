@@ -1,12 +1,12 @@
 package usecase_test
 
 import (
+	"bytes"
 	"context"
 	"dripapp/configs"
 	"dripapp/internal/dripapp/models"
 	"errors"
 	"fmt"
-	"io"
 	"net/http"
 	"reflect"
 	"testing"
@@ -19,19 +19,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
-
-func CreateMultipartRequest(method, target string, body io.Reader) (*http.Request, error) {
-	r, err := http.NewRequest(method, target, body)
-	if err != nil {
-		return nil, err
-	}
-	r = r.WithContext(context.WithValue(r.Context(), configs.ForContext, models.Session{
-		UserID: 0,
-		Cookie: "",
-	}))
-
-	return r, nil
-}
 
 func TestUserUsecase_CurrentUser(t *testing.T) {
 	type TestCase struct {
@@ -112,7 +99,9 @@ func TestUserUsecase_CurrentUser(t *testing.T) {
 		}
 
 		mockUserRepository := new(userMocks.UserRepository)
-		mockUserRepository.On("GetUserByID", r.Context(), mock.AnythingOfType("uint64")).Return(MockResultCases[i].user, MockResultCases[i].err)
+		mockUserRepository.On("GetUserByID",
+			r.Context(),
+			mock.AnythingOfType("uint64")).Return(MockResultCases[i].user, MockResultCases[i].err)
 		mockFileRepository := new(fileMocks.FileRepository)
 
 		testUserUsecase := usecase.NewUserUsecase(mockUserRepository, mockFileRepository, time.Second*2)
@@ -332,8 +321,12 @@ func TestUserUsecase_EditProfile(t *testing.T) {
 		}
 
 		mockUserRepository := new(userMocks.UserRepository)
-		mockUserRepository.On("GetUserByID", r.Context(), mock.AnythingOfType("uint64")).Return(MockResultCases[i].oldUser, MockResultCases[i].errFirst)
-		mockUserRepository.On("UpdateUser", r.Context(), mock.AnythingOfType("models.User")).Return(MockResultCases[i].newUser, MockResultCases[i].errSecond)
+		mockUserRepository.On("GetUserByID",
+			r.Context(),
+			mock.AnythingOfType("uint64")).Return(MockResultCases[i].oldUser, MockResultCases[i].errFirst)
+		mockUserRepository.On("UpdateUser",
+			r.Context(),
+			mock.AnythingOfType("models.User")).Return(MockResultCases[i].newUser, MockResultCases[i].errSecond)
 		mockFileRepository := new(fileMocks.FileRepository)
 
 		testUserUsecase := usecase.NewUserUsecase(mockUserRepository, mockFileRepository, time.Second*2)
@@ -346,108 +339,368 @@ func TestUserUsecase_EditProfile(t *testing.T) {
 	}
 }
 
-// func TestUserUsecase_AddPhoto(t *testing.T) {
-// 	type TestCase struct {
-// 		userSession models.Session
-// 		err         models.HTTPError
-// 	}
-// 	testCases := []TestCase{
-// 		// Test OK
-// 		{
-// 			userSession: models.Session{
-// 				UserID: 0,
-// 				Cookie: "",
-// 			},
-// 			err: models.StatusOk200,
-// 		},
-// 		// Test ErrorNotFound
-// 		{
-// 			userSession: models.Session{
-// 				UserID: 1,
-// 				Cookie: "",
-// 			},
-// 			err: models.HTTPError{
-// 				Code:    http.StatusNotFound,
-// 				Message: "",
-// 			},
-// 		},
-// 		// Test ErrContextNilError
-// 		{
-// 			userSession: models.Session{
-// 				UserID: 2,
-// 				Cookie: "",
-// 			},
-// 			err: models.HTTPError{
-// 				Code:    http.StatusNotFound,
-// 				Message: models.ErrContextNilError,
-// 			},
-// 		},
-// 	}
-//
-// 	type MockResultCase struct {
-// 		user models.User
-// 		err  error
-// 	}
-// 	MockResultCases := []MockResultCase{
-// 		// Test OK
-// 		{
-// 			user: models.User{
-// 				ID:          0,
-// 				Name:        "Drip",
-// 				Email:       "drip@app.com",
-// 				Password:    "hahaha",
-// 				Date:        "2000-02-22",
-// 				Description: "vsem privet",
-// 				Imgs:        []string{"1", "2"},
-// 				Tags:        []string{"anime", "BMSTU"},
-// 			},
-// 			err: nil,
-// 		},
-// 		// Test ErrorNotFound
-// 		{
-// 			user: models.User{},
-// 			err:  errors.New(""),
-// 		},
-// 		// Test ErrContextNilError
-// 		{
-// 			user: models.User{},
-// 			err:  nil,
-// 		},
-// 	}
-//
-// 	for i, testCase := range testCases {
-// 		message := fmt.Sprintf("test case number: %d", i)
-//
-// 		// r, err := http.NewRequest(http.MethodGet, "test", nil)
-// 		body := bytes.NewReader([]byte(`------boundary
-// Content-Disposition: form-data; name="photo"; filename="photo.jpg"
-// Content-Type: image/jpeg
-//
-// ------boundary--`))
-// 		r, err := CreateMultipartRequest("POST", "/api/v1/profile/photo", body)
-// 		r.Header.Add("Content-type", "multipart/form-data; boundary=----boundary")
-// 		assert.NoError(t, err)
-// 		if testCase.userSession.UserID != 2 {
-// 			r = r.WithContext(context.WithValue(r.Context(), configs.ForContext, testCase.userSession))
-// 		}
-//
-// 		mockUserRepository := new(userMocks.UserRepository)
-// 		mockUserRepository.On("GetUserByID", r.Context(), mock.AnythingOfType("uint64")).Return(MockResultCases[i].user, MockResultCases[i].err)
-// 		mockFileRepository := new(fileMocks.FileRepository)
-//
-// 		testUserUsecase := usecase.NewUserUsecase(mockUserRepository, mockFileRepository, time.Second*2)
-//
-// 		uploadedPhoto, _, err := r.FormFile("photo")
-// 		assert.NoError(t, err)
-// 		defer uploadedPhoto.Close()
-//
-// 		user, status := testUserUsecase.AddPhoto(r.Context(), uploadedPhoto)
-//
-// 		assert.Equal(t, testCase.err, status, message)
-// 		reflect.DeepEqual(MockResultCases[i].user, user)
-//
-// 	}
-// }
+func TestUserUsecase_AddPhoto(t *testing.T) {
+	type TestCase struct {
+		userSession models.Session
+		path        string
+		err         models.HTTPError
+	}
+	testCases := []TestCase{
+		// Test OK
+		{
+			userSession: models.Session{
+				UserID: 0,
+				Cookie: "",
+			},
+			path: "",
+			err:  models.StatusOk200,
+		},
+		// Test ErrorNotFound
+		{
+			userSession: models.Session{
+				UserID: 1,
+				Cookie: "",
+			},
+			err: models.HTTPError{
+				Code:    http.StatusNotFound,
+				Message: "",
+			},
+		},
+		// Test ErrContextNilError
+		{
+			userSession: models.Session{
+				UserID: 2,
+				Cookie: "",
+			},
+			err: models.HTTPError{
+				Code:    http.StatusNotFound,
+				Message: models.ErrContextNilError,
+			},
+		},
+		// Test ErrSaveUserPhoto
+		{
+			userSession: models.Session{
+				UserID: 0,
+				Cookie: "",
+			},
+			err: models.HTTPError{
+				Code:    http.StatusInternalServerError,
+				Message: "",
+			},
+		},
+		// Test ErrUpdateImgs
+		{
+			userSession: models.Session{
+				UserID: 0,
+				Cookie: "",
+			},
+			err: models.HTTPError{
+				Code:    http.StatusInternalServerError,
+				Message: "",
+			},
+		},
+	}
+
+	type MockResultCase struct {
+		user          models.User
+		path          string
+		errGetUser    error
+		errSavePhoto  error
+		errUpdateImgs error
+	}
+	MockResultCases := []MockResultCase{
+		// Test OK
+		{
+			user: models.User{
+				ID:          0,
+				Name:        "Drip",
+				Email:       "drip@app.com",
+				Password:    "hahaha",
+				Date:        "2000-02-22",
+				Description: "vsem privet",
+				Imgs:        []string{"1", "2"},
+				Tags:        []string{"anime", "BMSTU"},
+			},
+			path:          "",
+			errGetUser:    nil,
+			errSavePhoto:  nil,
+			errUpdateImgs: nil,
+		},
+		// Test ErrorNotFound
+		{
+			user:          models.User{},
+			errGetUser:    errors.New(""),
+			errSavePhoto:  nil,
+			errUpdateImgs: nil,
+		},
+		// Test ErrContextNilError
+		{
+			user:          models.User{},
+			errGetUser:    nil,
+			errSavePhoto:  nil,
+			errUpdateImgs: nil,
+		},
+		// Test ErrSaveUserPhoto
+		{
+			user:          models.User{},
+			errGetUser:    nil,
+			errSavePhoto:  errors.New(""),
+			errUpdateImgs: nil,
+		},
+		// Test ErrUpdateImgs
+		{
+			user:          models.User{},
+			errGetUser:    nil,
+			errSavePhoto:  nil,
+			errUpdateImgs: errors.New(""),
+		},
+	}
+
+	for i, testCase := range testCases {
+		message := fmt.Sprintf("test case number: %d", i)
+
+		body := bytes.NewReader([]byte(`------boundary
+Content-Disposition: form-data; name="photo"; filename="photo.jpg"
+Content-Type: image/jpeg
+
+------boundary--`))
+		r, err := http.NewRequest("POST", "test", body)
+		assert.NoError(t, err)
+		r.Header.Add("Content-type", "multipart/form-data; boundary=----boundary")
+		if testCase.userSession.UserID != 2 {
+			r = r.WithContext(context.WithValue(r.Context(), configs.ForContext, testCase.userSession))
+		}
+
+		mockUserRepository := new(userMocks.UserRepository)
+		mockUserRepository.On("GetUserByID",
+			r.Context(),
+			mock.AnythingOfType("uint64")).Return(MockResultCases[i].user, MockResultCases[i].errGetUser)
+		mockUserRepository.On("UpdateImgs",
+			r.Context(),
+			mock.AnythingOfType("uint64"),
+			mock.AnythingOfType("[]string")).Return(MockResultCases[i].errUpdateImgs)
+		mockFileRepository := new(fileMocks.FileRepository)
+		mockFileRepository.On("SaveUserPhoto",
+			mock.AnythingOfType("models.User"),
+			mock.AnythingOfType("multipart.sectionReadCloser")).Return(MockResultCases[i].path, MockResultCases[i].errSavePhoto)
+
+		testUserUsecase := usecase.NewUserUsecase(mockUserRepository, mockFileRepository, time.Second*2)
+
+		uploadedPhoto, _, err := r.FormFile("photo")
+		assert.NoError(t, err)
+		defer uploadedPhoto.Close()
+
+		path, status := testUserUsecase.AddPhoto(r.Context(), uploadedPhoto)
+
+		assert.Equal(t, testCase.err, status, message)
+		reflect.DeepEqual(MockResultCases[i].path, path)
+
+	}
+}
+
+func TestUserUsecase_DeletePhoto(t *testing.T) {
+	type TestCase struct {
+		userSession models.Session
+		photo       models.Photo
+		err         models.HTTPError
+	}
+	testCases := []TestCase{
+		// Test OK
+		{
+			userSession: models.Session{
+				UserID: 0,
+				Cookie: "",
+			},
+			photo: models.Photo{
+				Path: "",
+			},
+			err: models.StatusOk200,
+		},
+		// Test ErrorNotFound
+		{
+			userSession: models.Session{
+				UserID: 1,
+				Cookie: "",
+			},
+			photo: models.Photo{},
+			err: models.HTTPError{
+				Code:    http.StatusNotFound,
+				Message: "",
+			},
+		},
+		// Test ErrContextNilError
+		{
+			userSession: models.Session{
+				UserID: 2,
+				Cookie: "",
+			},
+			photo: models.Photo{},
+			err: models.HTTPError{
+				Code:    http.StatusNotFound,
+				Message: models.ErrContextNilError,
+			},
+		},
+		// Test ErrDelete
+		{
+			userSession: models.Session{
+				UserID: 0,
+				Cookie: "",
+			},
+			photo: models.Photo{
+				Path: "",
+			},
+			err: models.HTTPError{
+				Code:    http.StatusInternalServerError,
+				Message: "",
+			},
+		},
+		// Test ErrUpdateImgs
+		{
+			userSession: models.Session{
+				UserID: 0,
+				Cookie: "",
+			},
+			photo: models.Photo{
+				Path: "",
+			},
+			err: models.HTTPError{
+				Code:    http.StatusInternalServerError,
+				Message: "",
+			},
+		},
+		// Test ErrDeletePhoto
+		{
+			userSession: models.Session{
+				UserID: 0,
+				Cookie: "",
+			},
+			photo: models.Photo{
+				Path: "",
+			},
+			err: models.HTTPError{
+				Code:    http.StatusBadRequest,
+				Message: "user does not have such a photo",
+			},
+		},
+	}
+
+	type MockResultCase struct {
+		user          models.User
+		path          string
+		errGetUser    error
+		errDelete     error
+		errUpdateImgs error
+	}
+	MockResultCases := []MockResultCase{
+		// Test OK
+		{
+			user: models.User{
+				ID:          0,
+				Name:        "Drip",
+				Email:       "drip@app.com",
+				Password:    "hahaha",
+				Date:        "2000-02-22",
+				Description: "vsem privet",
+				Imgs:        []string{"1", "2"},
+				Tags:        []string{"anime", "BMSTU"},
+			},
+			path:          "",
+			errGetUser:    nil,
+			errDelete:     nil,
+			errUpdateImgs: nil,
+		},
+		// Test ErrorNotFound
+		{
+			user:          models.User{},
+			errGetUser:    errors.New(""),
+			errDelete:     nil,
+			errUpdateImgs: nil,
+		},
+		// Test ErrContextNilError
+		{
+			user:          models.User{},
+			errGetUser:    nil,
+			errDelete:     nil,
+			errUpdateImgs: nil,
+		},
+		// Test ErrDelete
+		{
+			user: models.User{
+				ID:          0,
+				Name:        "Drip",
+				Email:       "drip@app.com",
+				Password:    "hahaha",
+				Date:        "2000-02-22",
+				Description: "vsem privet",
+				Imgs:        []string{"1", "2"},
+				Tags:        []string{"anime", "BMSTU"},
+			},
+			path:          "",
+			errGetUser:    nil,
+			errDelete:     errors.New(""),
+			errUpdateImgs: nil,
+		},
+		// Test ErrUpdateImgs
+		{
+			user: models.User{
+				ID:          0,
+				Name:        "Drip",
+				Email:       "drip@app.com",
+				Password:    "hahaha",
+				Date:        "2000-02-22",
+				Description: "vsem privet",
+				Imgs:        []string{"1", "2"},
+				Tags:        []string{"anime", "BMSTU"},
+			},
+			path:          "",
+			errGetUser:    nil,
+			errDelete:     nil,
+			errUpdateImgs: errors.New(""),
+		},
+		// Test ErrDeletePhoto
+		{
+			user:          models.User{},
+			path:          "",
+			errGetUser:    nil,
+			errDelete:     nil,
+			errUpdateImgs: nil,
+		},
+	}
+
+	for i, testCase := range testCases {
+		message := fmt.Sprintf("test case number: %d", i)
+
+		body := bytes.NewReader([]byte(`------boundary
+Content-Disposition: form-data; name="photo"; filename="photo.jpg"
+Content-Type: image/jpeg
+
+------boundary--`))
+		r, err := http.NewRequest("POST", "test", body)
+		assert.NoError(t, err)
+		r.Header.Add("Content-type", "multipart/form-data; boundary=----boundary")
+		if testCase.userSession.UserID != 2 {
+			r = r.WithContext(context.WithValue(r.Context(), configs.ForContext, testCase.userSession))
+		}
+
+		mockUserRepository := new(userMocks.UserRepository)
+		mockUserRepository.On("GetUserByID",
+			r.Context(),
+			mock.AnythingOfType("uint64")).Return(MockResultCases[i].user, MockResultCases[i].errGetUser)
+		mockUserRepository.On("UpdateImgs",
+			r.Context(),
+			mock.AnythingOfType("uint64"),
+			mock.AnythingOfType("[]string")).Return(MockResultCases[i].errUpdateImgs)
+		mockFileRepository := new(fileMocks.FileRepository)
+		mockFileRepository.On("Delete",
+			mock.AnythingOfType("string")).Return(MockResultCases[i].errDelete)
+
+		testUserUsecase := usecase.NewUserUsecase(mockUserRepository, mockFileRepository, time.Second*2)
+
+		status := testUserUsecase.DeletePhoto(r.Context(), testCase.photo)
+
+		assert.Equal(t, testCase.err, status, message)
+	}
+}
 
 func TestUserUsecase_Login(t *testing.T) {
 	type TestCase struct {
@@ -553,7 +806,9 @@ func TestUserUsecase_Login(t *testing.T) {
 		r = r.WithContext(context.WithValue(r.Context(), configs.ForContext, testCase.userSession))
 
 		mockUserRepository := new(userMocks.UserRepository)
-		mockUserRepository.On("GetUser", r.Context(), mock.AnythingOfType("string")).Return(MockResultCases[i].user, MockResultCases[i].err)
+		mockUserRepository.On("GetUser",
+			r.Context(),
+			mock.AnythingOfType("string")).Return(MockResultCases[i].user, MockResultCases[i].err)
 		mockFileRepository := new(fileMocks.FileRepository)
 
 		testUserUsecase := usecase.NewUserUsecase(mockUserRepository, mockFileRepository, time.Second*2)
@@ -736,10 +991,15 @@ func TestUserUsecase_Signup(t *testing.T) {
 		assert.NoError(t, err)
 
 		mockUserRepository := new(userMocks.UserRepository)
-		mockUserRepository.On("GetUser", mock.AnythingOfType("*context.timerCtx"), mock.AnythingOfType("string")).Return(MockResultCases[i].curUser, MockResultCases[i].errDB)
-		mockUserRepository.On("CreateUser", mock.AnythingOfType("*context.emptyCtx"), mock.AnythingOfType("models.LoginUser")).Return(MockResultCases[i].creatingUser, MockResultCases[i].errDB)
+		mockUserRepository.On("GetUser",
+			mock.AnythingOfType("*context.timerCtx"),
+			mock.AnythingOfType("string")).Return(MockResultCases[i].curUser, MockResultCases[i].errDB)
+		mockUserRepository.On("CreateUser",
+			mock.AnythingOfType("*context.emptyCtx"),
+			mock.AnythingOfType("models.LoginUser")).Return(MockResultCases[i].creatingUser, MockResultCases[i].errDB)
 		mockFileRepository := new(fileMocks.FileRepository)
-		mockFileRepository.On("CreateFoldersForNewUser", mock.AnythingOfType("models.User")).Return(MockResultCases[i].errFile)
+		mockFileRepository.On("CreateFoldersForNewUser",
+			mock.AnythingOfType("models.User")).Return(MockResultCases[i].errFile)
 
 		testUserUsecase := usecase.NewUserUsecase(mockUserRepository, mockFileRepository, time.Second*2)
 
@@ -936,8 +1196,12 @@ func TestUserUsecase_NextUser(t *testing.T) {
 		}
 
 		mockUserRepository := new(userMocks.UserRepository)
-		mockUserRepository.On("GetUserByID", r.Context(), mock.AnythingOfType("uint64")).Return(MockResultCases[i].user, MockResultCases[i].errGetUser)
-		mockUserRepository.On("GetNextUserForSwipe", mock.AnythingOfType("*context.timerCtx"), mock.AnythingOfType("uint64")).Return(MockResultCases[i].nextUsers, MockResultCases[i].errGetNextUsers)
+		mockUserRepository.On("GetUserByID",
+			r.Context(),
+			mock.AnythingOfType("uint64")).Return(MockResultCases[i].user, MockResultCases[i].errGetUser)
+		mockUserRepository.On("GetNextUserForSwipe",
+			mock.AnythingOfType("*context.timerCtx"),
+			mock.AnythingOfType("uint64")).Return(MockResultCases[i].nextUsers, MockResultCases[i].errGetNextUsers)
 		mockFileRepository := new(fileMocks.FileRepository)
 
 		testUserUsecase := usecase.NewUserUsecase(mockUserRepository, mockFileRepository, time.Second*2)
@@ -1074,8 +1338,11 @@ func TestUserUsecase_GetAllTags(t *testing.T) {
 		}
 
 		mockUserRepository := new(userMocks.UserRepository)
-		mockUserRepository.On("GetUserByID", r.Context(), mock.AnythingOfType("uint64")).Return(MockResultCases[i].user, MockResultCases[i].errGetUser)
-		mockUserRepository.On("GetTags", mock.AnythingOfType("*context.timerCtx")).Return(MockResultCases[i].tags, MockResultCases[i].errGetTags)
+		mockUserRepository.On("GetUserByID",
+			r.Context(),
+			mock.AnythingOfType("uint64")).Return(MockResultCases[i].user, MockResultCases[i].errGetUser)
+		mockUserRepository.On("GetTags",
+			mock.AnythingOfType("*context.timerCtx")).Return(MockResultCases[i].tags, MockResultCases[i].errGetTags)
 		mockFileRepository := new(fileMocks.FileRepository)
 
 		testUserUsecase := usecase.NewUserUsecase(mockUserRepository, mockFileRepository, time.Second*2)
@@ -1255,8 +1522,12 @@ func TestUserUsecase_UsersMatches(t *testing.T) {
 		}
 
 		mockUserRepository := new(userMocks.UserRepository)
-		mockUserRepository.On("GetUserByID", r.Context(), mock.AnythingOfType("uint64")).Return(MockResultCases[i].user, MockResultCases[i].errGetUser)
-		mockUserRepository.On("GetUsersMatches", mock.AnythingOfType("*context.timerCtx"), mock.AnythingOfType("uint64")).Return(MockResultCases[i].matches, MockResultCases[i].errGetMatches)
+		mockUserRepository.On("GetUserByID",
+			r.Context(),
+			mock.AnythingOfType("uint64")).Return(MockResultCases[i].user, MockResultCases[i].errGetUser)
+		mockUserRepository.On("GetUsersMatches",
+			mock.AnythingOfType("*context.timerCtx"),
+			mock.AnythingOfType("uint64")).Return(MockResultCases[i].matches, MockResultCases[i].errGetMatches)
 		mockFileRepository := new(fileMocks.FileRepository)
 
 		testUserUsecase := usecase.NewUserUsecase(mockUserRepository, mockFileRepository, time.Second*2)

@@ -102,14 +102,7 @@ func (h *userUsecase) EditProfile(c context.Context, newUserData models.User) (m
 		}
 	}
 
-	user, err := h.UserRepo.UpdateUser(c, currentUser)
-	if err != nil {
-		return models.User{}, models.HTTPError{
-			Code:    http.StatusInternalServerError,
-			Message: err.Error(),
-		}
-	}
-	user.Age, err = models.GetAgeFromDate(user.Date)
+	_, err = h.UserRepo.UpdateUser(c, currentUser)
 	if err != nil {
 		return models.User{}, models.HTTPError{
 			Code:    http.StatusInternalServerError,
