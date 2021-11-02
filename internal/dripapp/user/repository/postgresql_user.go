@@ -22,9 +22,9 @@ type PostgreUserRepo struct {
 
 func NewPostgresUserRepository(config configs.PostgresConfig) (models.UserRepository, error) {
 	ConnStr := fmt.Sprintf("user=%s password=%s dbname=%s sslmode=disable",
-		configs.Postgres.User,
-		configs.Postgres.Password,
-		configs.Postgres.DBName)
+		config.User,
+		config.Password,
+		config.DBName)
 
 	Conn, err := sqlx.Open("postgres", ConnStr)
 	if err != nil {
@@ -182,12 +182,17 @@ func (p PostgreUserRepo) insertTags(ctx context.Context, id uint64, tags []strin
 	sb.WriteString(";")
 	insertTagsQuery := sb.String()
 
-	// stmt, _ := p.Conn.Prepare(insertTagsQuery)
-	// _, err := stmt.Exec(vals...)
-	err := p.Conn.QueryRow(insertTagsQuery, vals...).Scan()
+	stmt, _ := p.Conn.Prepare(insertTagsQuery)
+	_, err := stmt.Exec(vals...)
 	if err != nil {
 		return err
 	}
+	// err := p.Conn.QueryRow(insertTagsQuery, vals...).Scan()
+	// if err != nil {
+	// 	if err != sql.ErrNoRows {
+	// 		return err
+	// 	}
+	// }
 
 	return nil
 }
@@ -203,8 +208,10 @@ func (p PostgreUserRepo) UpdateImgs(ctx context.Context, id uint64, imgs []strin
 }
 
 func (p PostgreUserRepo) AddReaction(ctx context.Context, currentUserId uint64, swipedUserId uint64, reactionType uint64) error {
-	stmt, _ := p.Conn.Prepare(AddReactionQuery)
-	_, err := stmt.Exec(currentUserId, swipedUserId, reactionType)
+	// stmt, _ := p.Conn.Prepare(AddReactionQuery)
+	// _, err := stmt.Exec(currentUserId, swipedUserId, reactionType)
+	var id uint64
+	err := p.Conn.QueryRow(AddReactionQuery, currentUserId, swipedUserId, reactionType).Scan(&id)
 	if err != nil {
 		return err
 	}
@@ -225,12 +232,12 @@ func (p PostgreUserRepo) GetNextUserForSwipe(ctx context.Context, currentUserId 
 			return nil, err
 		}
 
-		notSwipedUser[idx].Imgs, err = p.getImgsByID(ctx, currentUserId)
+		notSwipedUser[idx].Imgs, err = p.getImgsByID(ctx, notSwipedUser[idx].ID)
 		if err != nil {
 			return nil, err
 		}
 
-		notSwipedUser[idx].Tags, err = p.getTagsByID(ctx, currentUserId)
+		notSwipedUser[idx].Tags, err = p.getTagsByID(ctx, notSwipedUser[idx].ID)
 		if err != nil {
 			return nil, err
 		}
@@ -252,12 +259,12 @@ func (p PostgreUserRepo) GetUsersMatches(ctx context.Context, currentUserId uint
 			return nil, err
 		}
 
-		matchesUsers[idx].Imgs, err = p.getImgsByID(ctx, currentUserId)
+		matchesUsers[idx].Imgs, err = p.getImgsByID(ctx, matchesUsers[idx].ID)
 		if err != nil {
 			return nil, err
 		}
 
-		matchesUsers[idx].Tags, err = p.getTagsByID(ctx, currentUserId)
+		matchesUsers[idx].Tags, err = p.getTagsByID(ctx, matchesUsers[idx].ID)
 		if err != nil {
 			return nil, err
 		}
@@ -279,8 +286,10 @@ func (p PostgreUserRepo) GetLikes(ctx context.Context, currentUserId uint64) ([]
 }
 
 func (p PostgreUserRepo) DeleteLike(ctx context.Context, firstUser uint64, secondUser uint64) error {
-	stmt, _ := p.Conn.Prepare(DeleteLikeQuery)
-	_, err := stmt.Exec(firstUser, secondUser)
+	// stmt, _ := p.Conn.Prepare(DeleteLikeQuery)
+	// _, err := stmt.Exec(firstUser, secondUser)
+	var id uint64
+	err := p.Conn.QueryRow(DeleteLikeQuery, firstUser, secondUser).Scan(&id)
 	if err != nil {
 		return err
 	}
@@ -289,8 +298,10 @@ func (p PostgreUserRepo) DeleteLike(ctx context.Context, firstUser uint64, secon
 }
 
 func (p PostgreUserRepo) AddMatch(ctx context.Context, firstUser uint64, secondUser uint64) error {
-	stmt, _ := p.Conn.Prepare(AddMatchQuery)
-	_, err := stmt.Exec(firstUser, secondUser)
+	// stmt, _ := p.Conn.Prepare(AddMatchQuery)
+	// _, err := stmt.Exec(firstUser, secondUser)
+	var id uint64
+	err := p.Conn.QueryRow(AddMatchQuery, firstUser, secondUser).Scan(&id)
 	if err != nil {
 		return err
 	}

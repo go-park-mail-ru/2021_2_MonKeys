@@ -30,7 +30,7 @@ const (
 
 	UpdateImgsQuery = "update profile set imgs=$2 where id=$1 returning id;"
 
-	AddReactionQuery = "insert into reactions(id1, id2, type) values ($1,$2,$3);"
+	AddReactionQuery = "insert into reactions(id1, id2, type) values ($1,$2,$3) returning id;"
 
 	GetNextUserForSwipeQuery = `select
 									op.id,
@@ -66,7 +66,7 @@ const (
 
 	GetLikesQuery = "select r.id1 from reactions r where r.id2 = $1 and r.type = 1;"
 
-	DeleteLikeQuery = "delete from reactions r where ((r.id1=$1 and r.id2=$2) or (r.id1=$2 and r.id2=$1));"
+	DeleteLikeQuery = "delete from reactions r where ((r.id1=$1 and r.id2=$2) or (r.id1=$2 and r.id2=$1)) returning id;"
 
-	AddMatchQuery = "insert into matches(id1, id2) values ($1,$2),($2,$1);"
+	AddMatchQuery = "insert into matches(id1, id2) values ($1,$2),($2,$1) returning id;"
 )
