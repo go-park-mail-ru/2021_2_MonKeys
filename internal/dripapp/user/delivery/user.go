@@ -125,11 +125,7 @@ func (h *UserHandler) DeletePhoto(w http.ResponseWriter, r *http.Request) {
 	if status.Code != http.StatusOK {
 		responses.SendErrorResponse(w, models.HTTPError{
 			Code: resp.Status,
-<<<<<<< HEAD
 		}, h.Logger.ErrorLogging)
-=======
-		})
->>>>>>> 33a3700381a326d1cabcbf20eb88517c1e695824
 		return
 	}
 
