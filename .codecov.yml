@@ -1,0 +1,7 @@
+ignore:
+  - "internal/dripapp/file"
+  - "internal/dripapp/models"
+  - "internal/pkg"
+  - "internal/dripapp/middleware"
+  - "configs"
+  - "cmd"
