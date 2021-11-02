@@ -3,14 +3,14 @@ package repository
 const (
 	GetUserQuery = "select id, name, email, password, date, description, imgs from profile where email = $1;"
 
-	GetUserByIdAQuery = "select id, name, email, password, date, description from profile where id = $1;"
+	GetUserByIdAQuery = "select id, name, email, password, date, description, imgs from profile where id = $1;"
 
 	CreateUserQuery = "INSERT into profile(email,password) VALUES($1,$2) RETURNING id, email, password;"
 
 	UpdateUserQuery = `update profile set name=$1, date=$3, description=$4, imgs=$5 where email=$2 
-							RETURNING id, email, password, name, email, password, date, description;`
+							RETURNING id, email, password, name, email, password, date, description, imgs;`
 
-	DeleteTagsQuery = "delete from profile_tag where profile_id=$1"
+	DeleteTagsQuery = "delete from profile_tag where profile_id=$1;"
 
 	GetTagsQuery = "select tag_name from tag;"
 

@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"database/sql"
 	"dripapp/configs"
 	"dripapp/internal/dripapp/models"
 	"fmt"
@@ -51,29 +52,29 @@ func (p PostgreUserRepo) GetUser(ctx context.Context, email string) (models.User
 		return models.User{}, err
 	}
 
-	// RespUser.Tags, err = p.getTagsByID(ctx, RespUser.ID)
-	// if err != nil {
-	// 	return models.User{}, err
-	// }
+	RespUser.Tags, err = p.getTagsByID(ctx, RespUser.ID)
+	if err != nil {
+		if err != sql.ErrNoRows {
+			return models.User{}, err
+		}
+	}
 
 	return RespUser, nil
 }
 
 func (p PostgreUserRepo) GetUserByID(ctx context.Context, userID uint64) (models.User, error) {
 	var RespUser models.User
-	err := p.Conn.GetContext(ctx, &RespUser, GetUserByIdAQuery, userID)
+	err := p.Conn.QueryRow(GetUserByIdAQuery, userID).
+		Scan(&RespUser.ID, &RespUser.Name, &RespUser.Email, &RespUser.Password, &RespUser.Date, &RespUser.Description, pq.Array(&RespUser.Imgs))
 	if err != nil {
 		return models.User{}, err
 	}
 
 	RespUser.Tags, err = p.getTagsByID(ctx, userID)
 	if err != nil {
-		return models.User{}, err
-	}
-
-	RespUser.Imgs, err = p.getImgsByID(ctx, userID)
-	if err != nil {
-		return models.User{}, err
+		if err != sql.ErrNoRows {
+			return models.User{}, err
+		}
 	}
 
 	return RespUser, nil
@@ -87,40 +88,33 @@ func (p PostgreUserRepo) CreateUser(ctx context.Context, logUserData models.Logi
 
 func (p PostgreUserRepo) UpdateUser(ctx context.Context, newUserData models.User) (models.User, error) {
 	var RespUser models.User
-	err := p.Conn.GetContext(ctx, &RespUser, UpdateUserQuery, newUserData.Name, newUserData.Email, newUserData.Date,
-		newUserData.Description, pq.Array(&newUserData.Imgs))
-
-	if len(newUserData.Tags) != 0 {
-		err = p.deleteTags(ctx, newUserData.ID)
-		if err != nil {
-			return models.User{}, err
-		}
-		err = p.insertTags(ctx, newUserData.ID, newUserData.Tags)
-		if err != nil {
-			return models.User{}, err
-		}
+	err := p.Conn.QueryRow(UpdateUserQuery, newUserData.Name, newUserData.Email, newUserData.Date,
+		newUserData.Description, pq.Array(&newUserData.Imgs)).
+		Scan(&RespUser.ID, &RespUser.Name, &RespUser.Email, &RespUser.Password, &RespUser.Date, &RespUser.Description, pq.Array(&RespUser.Imgs))
+	if err != nil {
+		return models.User{}, err
 	}
 
-	if len(newUserData.Imgs) != 0 {
-		RespUser.Imgs, err = p.getImgsByID(ctx, RespUser.ID)
-		if err != nil {
-			return models.User{}, err
-		}
+	err = p.deleteTags(ctx, newUserData.ID)
+	if err != nil {
+		return models.User{}, err
 	}
 
-	if len(newUserData.Tags) != 0 {
-		RespUser.Tags, err = p.getTagsByID(ctx, RespUser.ID)
-		if err != nil {
-			return models.User{}, err
-		}
+	err = p.insertTags(ctx, newUserData.ID, newUserData.Tags)
+	if err != nil {
+		return models.User{}, err
+	}
+
+	RespUser.Tags, err = p.getTagsByID(ctx, RespUser.ID)
+	if err != nil {
+		return models.User{}, err
 	}
 
 	return RespUser, err
 }
 
 func (p PostgreUserRepo) deleteTags(ctx context.Context, userId uint64) error {
-	stmt, _ := p.Conn.Prepare(DeleteTagsQuery)
-	_, err := stmt.Exec(userId)
+	err := p.Conn.QueryRow(DeleteTagsQuery, userId).Scan()
 	if err != nil {
 		return err
 	}
@@ -186,8 +180,9 @@ func (p PostgreUserRepo) insertTags(ctx context.Context, id uint64, tags []strin
 	sb.WriteString(";")
 	insertTagsQuery := sb.String()
 
-	stmt, _ := p.Conn.Prepare(insertTagsQuery)
-	_, err := stmt.Exec(vals...)
+	// stmt, _ := p.Conn.Prepare(insertTagsQuery)
+	// _, err := stmt.Exec(vals...)
+	err := p.Conn.QueryRow(insertTagsQuery, vals...).Scan()
 	if err != nil {
 		return err
 	}
