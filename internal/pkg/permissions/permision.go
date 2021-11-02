@@ -3,6 +3,7 @@ package permissions
 import (
 	"dripapp/configs"
 	"dripapp/internal/dripapp/models"
+	"dripapp/internal/pkg/logger"
 	"dripapp/internal/pkg/responses"
 
 	"net/http"
@@ -20,14 +21,14 @@ func CheckAuthenticated(next http.HandlerFunc) http.HandlerFunc {
 				responses.SendErrorResponse(w, models.HTTPError{
 					Code:    http.StatusForbidden,
 					Message: models.ErrExtractContext,
-				})
+				}, logger.DripLogger.ErrorLogging)
 				return
 			}
 			if session.UserID == 0 {
 				responses.SendErrorResponse(w, models.HTTPError{
 					Code:    http.StatusForbidden,
 					Message: models.ErrAuth,
-				})
+				}, logger.DripLogger.ErrorLogging)
 				return
 			}
 
@@ -41,7 +42,7 @@ func generateCsrfLogic(w http.ResponseWriter) {
 		responses.SendErrorResponse(w, models.HTTPError{
 			Code:    http.StatusForbidden,
 			Message: "no permission",
-		})
+		}, logger.DripLogger.ErrorLogging)
 		return
 	}
 	timeDelta := time.Now().Add(time.Hour * 24 * 30)
@@ -69,7 +70,7 @@ func CheckCSRF(next http.HandlerFunc) http.HandlerFunc {
 				responses.SendErrorResponse(w, models.HTTPError{
 					Code:    http.StatusInternalServerError,
 					Message: "csrf-protection",
-				})
+				}, logger.DripLogger.ErrorLogging)
 				return
 			}
 			generateCsrfLogic(w)

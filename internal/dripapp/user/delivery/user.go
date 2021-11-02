@@ -2,6 +2,7 @@ package delivery
 
 import (
 	"dripapp/internal/dripapp/models"
+	"dripapp/internal/pkg/logger"
 	"dripapp/internal/pkg/responses"
 	"encoding/json"
 	"io/ioutil"
@@ -11,9 +12,9 @@ import (
 const maxPhotoSize = 20 * 1024 * 1025
 
 type UserHandler struct {
-	// Logger    *zap.SugaredLogger
 	SessionUcase models.SessionUsecase
 	UserUCase    models.UserUsecase
+	Logger       logger.Logger
 }
 
 func (h *UserHandler) CurrentUser(w http.ResponseWriter, r *http.Request) {
@@ -22,7 +23,7 @@ func (h *UserHandler) CurrentUser(w http.ResponseWriter, r *http.Request) {
 	user, status := h.UserUCase.CurrentUser(r.Context())
 	resp.Status = status.Code
 	if status.Code != http.StatusOK {
-		responses.SendErrorResponse(w, status)
+		responses.SendErrorResponse(w, status, h.Logger.ErrorLogging)
 		return
 	}
 
@@ -37,7 +38,7 @@ func (h *UserHandler) EditProfileHandler(w http.ResponseWriter, r *http.Request)
 		responses.SendErrorResponse(w, models.HTTPError{
 			Code:    http.StatusBadRequest,
 			Message: err.Error(),
-		})
+		}, h.Logger.ErrorLogging)
 		return
 	}
 
@@ -47,14 +48,14 @@ func (h *UserHandler) EditProfileHandler(w http.ResponseWriter, r *http.Request)
 		responses.SendErrorResponse(w, models.HTTPError{
 			Code:    http.StatusBadRequest,
 			Message: err.Error(),
-		})
+		}, h.Logger.ErrorLogging)
 		return
 	}
 
 	user, status := h.UserUCase.EditProfile(r.Context(), newUserData)
 	resp.Status = status.Code
 	if status.Code != http.StatusOK {
-		responses.SendErrorResponse(w, status)
+		responses.SendErrorResponse(w, status, h.Logger.ErrorLogging)
 		return
 	}
 
@@ -70,7 +71,7 @@ func (h *UserHandler) UploadPhoto(w http.ResponseWriter, r *http.Request) {
 		responses.SendErrorResponse(w, models.HTTPError{
 			Code:    http.StatusBadRequest,
 			Message: err.Error(),
-		})
+		}, h.Logger.ErrorLogging)
 		return
 	}
 
@@ -79,7 +80,7 @@ func (h *UserHandler) UploadPhoto(w http.ResponseWriter, r *http.Request) {
 		responses.SendErrorResponse(w, models.HTTPError{
 			Code:    http.StatusBadRequest,
 			Message: err.Error(),
-		})
+		}, h.Logger.ErrorLogging)
 		return
 	}
 	defer uploadedPhoto.Close()
@@ -88,8 +89,8 @@ func (h *UserHandler) UploadPhoto(w http.ResponseWriter, r *http.Request) {
 	resp.Status = status.Code
 	if resp.Status != http.StatusOK {
 		responses.SendErrorResponse(w, models.HTTPError{
-			Code:    resp.Status,
-		})
+			Code: resp.Status,
+		}, h.Logger.ErrorLogging)
 		return
 	}
 
@@ -105,7 +106,7 @@ func (h *UserHandler) DeletePhoto(w http.ResponseWriter, r *http.Request) {
 		responses.SendErrorResponse(w, models.HTTPError{
 			Code:    http.StatusBadRequest,
 			Message: err.Error(),
-		})
+		}, h.Logger.ErrorLogging)
 		return
 	}
 
@@ -115,7 +116,7 @@ func (h *UserHandler) DeletePhoto(w http.ResponseWriter, r *http.Request) {
 		responses.SendErrorResponse(w, models.HTTPError{
 			Code:    http.StatusBadRequest,
 			Message: err.Error(),
-		})
+		}, h.Logger.ErrorLogging)
 		return
 	}
 
@@ -123,8 +124,8 @@ func (h *UserHandler) DeletePhoto(w http.ResponseWriter, r *http.Request) {
 	resp.Status = status.Code
 	if status.Code != http.StatusOK {
 		responses.SendErrorResponse(w, models.HTTPError{
-			Code:    resp.Status,
-		})
+			Code: resp.Status,
+		}, h.Logger.ErrorLogging)
 		return
 	}
 
@@ -148,7 +149,7 @@ func (h *UserHandler) SignupHandler(w http.ResponseWriter, r *http.Request) {
 		responses.SendErrorResponse(w, models.HTTPError{
 			Code:    http.StatusBadRequest,
 			Message: err.Error(),
-		})
+		}, h.Logger.ErrorLogging)
 		return
 	}
 
@@ -159,14 +160,14 @@ func (h *UserHandler) SignupHandler(w http.ResponseWriter, r *http.Request) {
 		responses.SendErrorResponse(w, models.HTTPError{
 			Code:    http.StatusBadRequest,
 			Message: err.Error(),
-		})
+		}, h.Logger.ErrorLogging)
 		return
 	}
 
 	user, status := h.UserUCase.Signup(r.Context(), logUserData)
 	resp.Status = status.Code
 	if status.Code != http.StatusOK {
-		responses.SendErrorResponse(w, status)
+		responses.SendErrorResponse(w, status, h.Logger.ErrorLogging)
 		return
 	}
 	cookie := models.CreateSessionCookie(logUserData)
@@ -180,7 +181,7 @@ func (h *UserHandler) SignupHandler(w http.ResponseWriter, r *http.Request) {
 		responses.SendErrorResponse(w, models.HTTPError{
 			Code:    http.StatusInternalServerError,
 			Message: err.Error(),
-		})
+		}, h.Logger.WarnLogging)
 		return
 	}
 	resp.Body = user
@@ -196,7 +197,7 @@ func (h *UserHandler) NextUserHandler(w http.ResponseWriter, r *http.Request) {
 	nextUser, status := h.UserUCase.NextUser(r.Context())
 	resp.Status = status.Code
 	if status.Code != http.StatusOK {
-		responses.SendErrorResponse(w, status)
+		responses.SendErrorResponse(w, status, h.Logger.ErrorLogging)
 		return
 	}
 
@@ -209,7 +210,7 @@ func (h *UserHandler) GetAllTags(w http.ResponseWriter, r *http.Request) {
 	allTags, status := h.UserUCase.GetAllTags(r.Context())
 	resp.Status = status.Code
 	if status.Code != http.StatusOK {
-		responses.SendErrorResponse(w, status)
+		responses.SendErrorResponse(w, status, h.Logger.ErrorLogging)
 		return
 	}
 
@@ -222,7 +223,7 @@ func (h *UserHandler) MatchesHandler(w http.ResponseWriter, r *http.Request) {
 	matches, status := h.UserUCase.UsersMatches(r.Context())
 	resp.Status = status.Code
 	if status.Code != http.StatusOK {
-		responses.SendErrorResponse(w, status)
+		responses.SendErrorResponse(w, status, h.Logger.ErrorLogging)
 		return
 	}
 
@@ -238,7 +239,7 @@ func (h *UserHandler) ReactionHandler(w http.ResponseWriter, r *http.Request) {
 		responses.SendErrorResponse(w, models.HTTPError{
 			Code:    http.StatusBadRequest,
 			Message: err.Error(),
-		})
+		}, h.Logger.ErrorLogging)
 		return
 	}
 
@@ -249,7 +250,7 @@ func (h *UserHandler) ReactionHandler(w http.ResponseWriter, r *http.Request) {
 		responses.SendErrorResponse(w, models.HTTPError{
 			Code:    http.StatusBadRequest,
 			Message: err.Error(),
-		})
+		}, h.Logger.ErrorLogging)
 		return
 	}
 
@@ -257,7 +258,7 @@ func (h *UserHandler) ReactionHandler(w http.ResponseWriter, r *http.Request) {
 
 	resp.Status = status.Code
 	if status.Code != http.StatusOK {
-		responses.SendErrorResponse(w, status)
+		responses.SendErrorResponse(w, status, h.Logger.ErrorLogging)
 		return
 	}
 

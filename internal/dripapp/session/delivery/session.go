@@ -3,6 +3,7 @@ package delivery
 import (
 	"crypto/md5"
 	"dripapp/internal/dripapp/models"
+	"dripapp/internal/pkg/logger"
 	"dripapp/internal/pkg/responses"
 	"encoding/json"
 	"fmt"
@@ -12,7 +13,7 @@ import (
 )
 
 type SessionHandler struct {
-	// Logger    *zap.SugaredLogger
+	Logger       logger.Logger
 	UserUCase    models.UserUsecase
 	SessionUcase models.SessionUsecase
 }
@@ -52,7 +53,7 @@ func (h *SessionHandler) LoginHandler(w http.ResponseWriter, r *http.Request) {
 		responses.SendErrorResponse(w, models.HTTPError{
 			Code:    http.StatusBadRequest,
 			Message: err.Error(),
-		})
+		}, h.Logger.ErrorLogging)
 		return
 	}
 
@@ -62,7 +63,7 @@ func (h *SessionHandler) LoginHandler(w http.ResponseWriter, r *http.Request) {
 		responses.SendErrorResponse(w, models.HTTPError{
 			Code:    http.StatusBadRequest,
 			Message: err.Error(),
-		})
+		}, h.Logger.ErrorLogging)
 		return
 	}
 
@@ -70,7 +71,7 @@ func (h *SessionHandler) LoginHandler(w http.ResponseWriter, r *http.Request) {
 	if status != models.StatusOk200 {
 		responses.SendErrorResponse(w, models.HTTPError{
 			Code: http.StatusNotFound,
-		})
+		}, h.Logger.WarnLogging)
 		return
 	}
 
@@ -85,7 +86,7 @@ func (h *SessionHandler) LoginHandler(w http.ResponseWriter, r *http.Request) {
 		responses.SendErrorResponse(w, models.HTTPError{
 			Code:    http.StatusInternalServerError,
 			Message: err.Error(),
-		})
+		}, h.Logger.WarnLogging)
 		return
 	}
 
@@ -103,23 +104,41 @@ func (h *SessionHandler) LogoutHandler(w http.ResponseWriter, r *http.Request) {
 		responses.SendErrorResponse(w, models.HTTPError{
 			Code:    http.StatusNotFound,
 			Message: err.Error(),
-		})
+		}, h.Logger.WarnLogging)
 		return
 	}
-	session, err := r.Cookie("sessionId")
-	if err != nil {
-		responses.SendErrorResponse(w, models.HTTPError{
-			Code:    http.StatusNotFound,
-			Message: err.Error(),
-		})
-		return
-	}
+	// session, err := r.Cookie("sessionId")
+	// if err != nil {
+	// 	responses.SendErrorResponse(w, models.HTTPError{
+	// 		Code:    http.StatusNotFound,
+	// 		Message: err.Error(),
+	// 	}, h.Logger.ErrorLogging)
+	// 	return
+	// }
 
-	session.Expires = time.Now().AddDate(0, 0, -1)
-	session.Secure = true
-	session.HttpOnly = true
-	session.SameSite = http.SameSiteNoneMode
-	http.SetCookie(w, session)
+	// session.Expires = time.Now().AddDate(0, 0, -1)
+	// session.Secure = true
+	// session.HttpOnly = true
+	// session.SameSite = http.SameSiteNoneMode
+	// http.SetCookie(w, session)
+
+	authCookie := &http.Cookie{
+		Name:     "sessionId",
+		Value:    "",
+		Path:     "/",
+		Expires:  time.Unix(0, 0),
+		HttpOnly: true,
+	}
+	http.SetCookie(w, authCookie)
+
+	csrfCookie := &http.Cookie{
+		Name:     "csrf",
+		Value:    "",
+		Path:     "/",
+		Expires:  time.Unix(0, 0),
+		HttpOnly: true,
+	}
+	http.SetCookie(w, csrfCookie)
 
 	responses.SendOKResp(responses.JSON{Status: http.StatusOK}, w)
 }

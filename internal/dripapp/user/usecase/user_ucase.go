@@ -18,14 +18,6 @@ type userUsecase struct {
 	contextTimeout time.Duration
 }
 
-const (
-	StatusOK                  = 200
-	StatusBadRequest          = 400
-	StatusNotFound            = 404
-	StatusInternalServerError = 500
-	StatusEmailAlreadyExists  = 1001
-)
-
 func NewUserUsecase(
 	ur models.UserRepository,
 	fileManager models.FileRepository,
