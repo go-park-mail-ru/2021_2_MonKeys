@@ -88,7 +88,7 @@ func (h *UserHandler) UploadPhoto(w http.ResponseWriter, r *http.Request) {
 	resp.Status = status.Code
 	if resp.Status != http.StatusOK {
 		responses.SendErrorResponse(w, models.HTTPError{
-			Code:    resp.Status,
+			Code: resp.Status,
 		})
 		return
 	}
@@ -123,7 +123,7 @@ func (h *UserHandler) DeletePhoto(w http.ResponseWriter, r *http.Request) {
 	resp.Status = status.Code
 	if status.Code != http.StatusOK {
 		responses.SendErrorResponse(w, models.HTTPError{
-			Code:    resp.Status,
+			Code: resp.Status,
 		})
 		return
 	}
