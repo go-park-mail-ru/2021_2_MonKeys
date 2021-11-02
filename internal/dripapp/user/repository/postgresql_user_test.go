@@ -530,7 +530,7 @@ func TestGetTags(t *testing.T) {
 	tags[1] = "music"
 
 	t.Run("good get tags", func(t *testing.T) {
-		rowsTags := sqlmock.NewRows([]string{"tagname"}).
+		rowsTags := sqlmock.NewRows([]string{"tag_name"}).
 			AddRow("anime").
 			AddRow("music")
 		mock.ExpectQuery("select tag_name").WillReturnRows(rowsTags)
