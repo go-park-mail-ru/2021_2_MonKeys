@@ -7,6 +7,7 @@ import (
 	"dripapp/internal/dripapp/models"
 	_s "dripapp/internal/dripapp/session/mocks"
 	"dripapp/internal/dripapp/user/mocks"
+	"dripapp/internal/pkg/logger"
 	"errors"
 	"io"
 	"net/http"
@@ -108,6 +109,7 @@ func TestCurrentUser(t *testing.T) {
 	call := mockUserUseCase.On("CurrentUser", context.Background())
 
 	userHandler := &UserHandler{
+		Logger:       logger.DripLogger,
 		UserUCase:    mockUserUseCase,
 		SessionUcase: mockSessionUseCase,
 	}
@@ -153,6 +155,7 @@ func TestSignup(t *testing.T) {
 	mockSessionUseCase := &_s.SessionUsecase{}
 
 	userHandler := &UserHandler{
+		Logger:       logger.DripLogger,
 		UserUCase:    mockUserUseCase,
 		SessionUcase: mockSessionUseCase,
 	}
@@ -236,6 +239,7 @@ func TestNextUser(t *testing.T) {
 	mockSessionUseCase := &_s.SessionUsecase{}
 
 	userHandler := &UserHandler{
+		Logger:       logger.DripLogger,
 		UserUCase:    mockUserUseCase,
 		SessionUcase: mockSessionUseCase,
 	}
@@ -279,6 +283,7 @@ func TestEditProfile(t *testing.T) {
 	mockSessionUseCase := &_s.SessionUsecase{}
 
 	userHandler := &UserHandler{
+		Logger:       logger.DripLogger,
 		UserUCase:    mockUserUseCase,
 		SessionUcase: mockSessionUseCase,
 	}
@@ -333,6 +338,7 @@ func TestGetAllTags(t *testing.T) {
 	call := mockUserUseCase.On("GetAllTags", context.Background())
 
 	userHandler := &UserHandler{
+		Logger:       logger.DripLogger,
 		UserUCase:    mockUserUseCase,
 		SessionUcase: mockSessionUseCase,
 	}
@@ -379,6 +385,7 @@ func TestMatches(t *testing.T) {
 	call := mockUserUseCase.On("UsersMatches", context.Background())
 
 	userHandler := &UserHandler{
+		Logger:       logger.DripLogger,
 		UserUCase:    mockUserUseCase,
 		SessionUcase: mockSessionUseCase,
 	}
@@ -423,6 +430,7 @@ func TestReaction(t *testing.T) {
 	mockSessionUseCase := &_s.SessionUsecase{}
 
 	userHandler := &UserHandler{
+		Logger:       logger.DripLogger,
 		UserUCase:    mockUserUseCase,
 		SessionUcase: mockSessionUseCase,
 	}
@@ -484,6 +492,7 @@ func TestUploadPhoto(t *testing.T) {
 	mockSessionUseCase := &_s.SessionUsecase{}
 
 	userHandler := &UserHandler{
+		Logger:       logger.DripLogger,
 		UserUCase:    mockUserUseCase,
 		SessionUcase: mockSessionUseCase,
 	}
@@ -558,6 +567,7 @@ func TestDeletePhoto(t *testing.T) {
 	mockSessionUseCase := &_s.SessionUsecase{}
 
 	userHandler := &UserHandler{
+		Logger:       logger.DripLogger,
 		UserUCase:    mockUserUseCase,
 		SessionUcase: mockSessionUseCase,
 	}
@@ -605,5 +615,5 @@ func TestSetRouting(t *testing.T) {
 	mockUserUseCase := &mocks.UserUsecase{}
 	mockSessionUseCase := &_s.SessionUsecase{}
 
-	SetRouting(mux.NewRouter(), mockUserUseCase, mockSessionUseCase)
+	SetRouting(logger.DripLogger, mux.NewRouter(), mockUserUseCase, mockSessionUseCase)
 }

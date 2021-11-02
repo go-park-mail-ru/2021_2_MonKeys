@@ -7,12 +7,14 @@ import (
 	"dripapp/internal/dripapp/models"
 	_s "dripapp/internal/dripapp/session/mocks"
 	"dripapp/internal/dripapp/user/mocks"
+	"dripapp/internal/pkg/logger"
 	"errors"
-	"github.com/stretchr/testify/mock"
 	"io"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/stretchr/testify/mock"
 )
 
 type TestCase struct {
@@ -31,6 +33,7 @@ func TestLogin(t *testing.T) {
 	mockSessionUseCase := &_s.SessionUsecase{}
 
 	sessionHandler := &SessionHandler{
+		Logger:       logger.DripLogger,
 		UserUCase:    mockUserUseCase,
 		SessionUcase: mockSessionUseCase,
 	}
@@ -146,6 +149,7 @@ func TestLogout(t *testing.T) {
 	mockSessionUseCase := &_s.SessionUsecase{}
 
 	sessionHandler := &SessionHandler{
+		Logger:       logger.DripLogger,
 		UserUCase:    mockUserUseCase,
 		SessionUcase: mockSessionUseCase,
 	}
@@ -159,16 +163,6 @@ func TestLogout(t *testing.T) {
 			},
 			SessionCookie: http.Cookie{
 				Name: "sessionId",
-			},
-		},
-		{
-			StatusCode: http.StatusOK,
-			BodyResp:   `{"status":404,"body":null}`,
-			mockSessUseCase: []interface{}{
-				nil,
-			},
-			SessionCookie: http.Cookie{
-				Name: "wrong",
 			},
 		},
 		{

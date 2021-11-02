@@ -10,6 +10,7 @@ import (
 	_userDelivery "dripapp/internal/dripapp/user/delivery"
 	_userRepo "dripapp/internal/dripapp/user/repository"
 	_userUsecase "dripapp/internal/dripapp/user/usecase"
+	"dripapp/internal/pkg/logger"
 	"log"
 	"net/http"
 	"os"
@@ -83,7 +84,7 @@ func main() {
 	)
 
 	// delivery
-	_userDelivery.SetRouting(router, userUCase, sessionUcase)
+	_userDelivery.SetRouting(logger.DripLogger, router, userUCase, sessionUcase)
 
 	// middleware
 	middleware.NewMiddleware(router, sm, logFile)

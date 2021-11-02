@@ -3,18 +3,21 @@ package delivery
 import (
 	"dripapp/internal/dripapp/models"
 	_sessionDelivery "dripapp/internal/dripapp/session/delivery"
+	"dripapp/internal/pkg/logger"
 	"dripapp/internal/pkg/permissions"
 
 	"github.com/gorilla/mux"
 	httpSwagger "github.com/swaggo/http-swagger"
 )
 
-func SetRouting(router *mux.Router, us models.UserUsecase, su models.SessionUsecase) {
+func SetRouting(loggger logger.Logger, router *mux.Router, us models.UserUsecase, su models.SessionUsecase) {
 	userHandler := &UserHandler{
+		Logger:       loggger,
 		UserUCase:    us,
 		SessionUcase: su,
 	}
 	sessionHandler := &_sessionDelivery.SessionHandler{
+		Logger:       loggger,
 		UserUCase:    us,
 		SessionUcase: su,
 	}
