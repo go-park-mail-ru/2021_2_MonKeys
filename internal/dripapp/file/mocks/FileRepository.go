@@ -42,20 +42,20 @@ func (_m *FileRepository) Delete(filePath string) error {
 	return r0
 }
 
-// SaveUserPhoto provides a mock function with given fields: user, file
-func (_m *FileRepository) SaveUserPhoto(user models.User, file io.Reader) (string, error) {
-	ret := _m.Called(user, file)
+// SaveUserPhoto provides a mock function with given fields: user, file, fileName
+func (_m *FileRepository) SaveUserPhoto(user models.User, file io.Reader, fileName string) (string, error) {
+	ret := _m.Called(user, file, fileName)
 
 	var r0 string
-	if rf, ok := ret.Get(0).(func(models.User, io.Reader) string); ok {
-		r0 = rf(user, file)
+	if rf, ok := ret.Get(0).(func(models.User, io.Reader, string) string); ok {
+		r0 = rf(user, file, fileName)
 	} else {
 		r0 = ret.Get(0).(string)
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(models.User, io.Reader) error); ok {
-		r1 = rf(user, file)
+	if rf, ok := ret.Get(1).(func(models.User, io.Reader, string) error); ok {
+		r1 = rf(user, file, fileName)
 	} else {
 		r1 = ret.Error(1)
 	}

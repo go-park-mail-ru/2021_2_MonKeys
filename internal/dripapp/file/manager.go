@@ -26,7 +26,7 @@ func NewFileManager(config configs.FileStorageConfig) (fm *FileManager, err erro
 		PhotoFolder: photoFolder,
 	}
 
-	if ok, err := isNotExists(fm.RootFolder); ok {
+	if ok, err := fm.isNotExists(fm.RootFolder); ok {
 		if err != nil {
 			return nil, err
 		}
@@ -37,7 +37,7 @@ func NewFileManager(config configs.FileStorageConfig) (fm *FileManager, err erro
 		}
 	}
 
-	if ok, err := isNotExists(fm.PhotoFolder); ok {
+	if ok, err := fm.isNotExists(fm.PhotoFolder); ok {
 		if err != nil {
 			return nil, err
 		}
@@ -125,7 +125,7 @@ func createNameToNewPhoto(fileType string) (string, error) {
 	return fmt.Sprintf("%s.%s", u.String(), fileType), nil
 }
 
-func isNotExists(path string) (bool, error) {
+func (FileManager) isNotExists(path string) (bool, error) {
 	_, err := os.Stat(path)
 	if err == nil {
 		return false, nil
@@ -133,7 +133,6 @@ func isNotExists(path string) (bool, error) {
 
 	if os.IsNotExist(err) {
 		return true, nil
-
 	}
 
 	return false, err
