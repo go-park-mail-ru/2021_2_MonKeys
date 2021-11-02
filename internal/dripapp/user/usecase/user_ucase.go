@@ -357,7 +357,7 @@ func (h *userUsecase) GetAllTags(c context.Context) (models.Tags, models.HTTPErr
 	counter := 0
 
 	for _, value := range allTags {
-		respTag.TagName = value
+		respTag.Tag_Name = value
 		currentAllTags[uint64(counter)] = respTag
 		counter++
 	}
