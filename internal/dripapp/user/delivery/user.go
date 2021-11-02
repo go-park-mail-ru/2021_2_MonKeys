@@ -200,6 +200,7 @@ func (h *UserHandler) NextUserHandler(w http.ResponseWriter, r *http.Request) {
 	resp.Status = status.Code
 	if status.Code != http.StatusOK {
 		responses.SendErrorResponse(w, status)
+		return
 	}
 
 	resp.Body = nextUser
@@ -212,6 +213,7 @@ func (h *UserHandler) GetAllTags(w http.ResponseWriter, r *http.Request) {
 	resp.Status = status.Code
 	if status.Code != http.StatusOK {
 		responses.SendErrorResponse(w, status)
+		return
 	}
 
 	resp.Body = allTags
@@ -224,6 +226,7 @@ func (h *UserHandler) MatchesHandler(w http.ResponseWriter, r *http.Request) {
 	resp.Status = status.Code
 	if status.Code != http.StatusOK {
 		responses.SendErrorResponse(w, status)
+		return
 	}
 
 	resp.Body = matches
