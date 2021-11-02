@@ -105,6 +105,9 @@ jobs:
           name: Install Dependencies
           command: go get ./...
       - run:
+          name: go mod tidy
+          command: go mod tidy
+      - run:
           name: Install GolangCI-LINT
           command: go get github.com/golangci/golangci-lint/cmd/golangci-lint@v1.42.1
       - run:
