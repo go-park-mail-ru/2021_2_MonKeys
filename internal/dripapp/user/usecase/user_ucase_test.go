@@ -482,7 +482,8 @@ Content-Type: image/jpeg
 		mockFileRepository := new(fileMocks.FileRepository)
 		mockFileRepository.On("SaveUserPhoto",
 			mock.AnythingOfType("models.User"),
-			mock.AnythingOfType("multipart.sectionReadCloser")).Return(MockResultCases[i].path, MockResultCases[i].errSavePhoto)
+			mock.AnythingOfType("multipart.sectionReadCloser"),
+			mock.AnythingOfType("string")).Return(MockResultCases[i].path, MockResultCases[i].errSavePhoto)
 
 		testUserUsecase := usecase.NewUserUsecase(mockUserRepository, mockFileRepository, time.Second*2)
 
@@ -490,7 +491,7 @@ Content-Type: image/jpeg
 		assert.NoError(t, err)
 		defer uploadedPhoto.Close()
 
-		path, status := testUserUsecase.AddPhoto(r.Context(), uploadedPhoto)
+		path, status := testUserUsecase.AddPhoto(r.Context(), uploadedPhoto, testCase.path)
 
 		assert.Equal(t, testCase.err, status, message)
 		reflect.DeepEqual(MockResultCases[i].path, path)
@@ -1228,11 +1229,11 @@ func TestUserUsecase_GetAllTags(t *testing.T) {
 			},
 			tags: models.Tags{
 				AllTags: map[uint64]models.Tag{
-					0: models.Tag{Tag_Name: "anime"},
-					1: models.Tag{Tag_Name: "BMSTU"},
-					2: models.Tag{Tag_Name: "walk"},
-					3: models.Tag{Tag_Name: "netflix"},
-					4: models.Tag{Tag_Name: "prikolchiki"},
+					0: {TagName: "anime"},
+					1: {TagName: "BMSTU"},
+					2: {TagName: "walk"},
+					3: {TagName: "netflix"},
+					4: {TagName: "prikolchiki"},
 				},
 				Count: 5,
 			},
