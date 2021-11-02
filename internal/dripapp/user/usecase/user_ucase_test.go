@@ -1229,11 +1229,11 @@ func TestUserUsecase_GetAllTags(t *testing.T) {
 			},
 			tags: models.Tags{
 				AllTags: map[uint64]models.Tag{
-					0: {TagName: "anime"},
-					1: {TagName: "BMSTU"},
-					2: {TagName: "walk"},
-					3: {TagName: "netflix"},
-					4: {TagName: "prikolchiki"},
+					0: {Tag_Name: "anime"},
+					1: {Tag_Name: "BMSTU"},
+					2: {Tag_Name: "walk"},
+					3: {Tag_Name: "netflix"},
+					4: {Tag_Name: "prikolchiki"},
 				},
 				Count: 5,
 			},

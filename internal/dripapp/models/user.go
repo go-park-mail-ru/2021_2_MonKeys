@@ -37,7 +37,7 @@ type Match struct {
 }
 
 type Tag struct {
-	TagName string `json:"tagText"`
+	Tag_Name string `json:"tagText"`
 }
 
 type Tags struct {
