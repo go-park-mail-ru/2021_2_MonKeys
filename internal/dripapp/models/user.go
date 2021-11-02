@@ -51,10 +51,7 @@ type Matches struct {
 }
 
 func MakeUser(id uint64, email string, password string) (User, error) {
-	hashedPass, err := hasher.HashAndSalt(nil, password)
-	if err != nil {
-		return User{}, err
-	}
+	hashedPass := hasher.HashAndSalt(nil, password)
 	return User{ID: id, Email: email, Password: hashedPass}, nil
 }
 

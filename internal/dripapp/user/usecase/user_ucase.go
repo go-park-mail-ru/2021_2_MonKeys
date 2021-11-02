@@ -28,12 +28,10 @@ const (
 
 func NewUserUsecase(
 	ur models.UserRepository,
-	sess models.SessionRepository,
 	fileManager models.FileRepository,
 	timeout time.Duration) models.UserUsecase {
 	return &userUsecase{
 		UserRepo:       ur,
-		Session:        sess,
 		File:           fileManager,
 		contextTimeout: timeout,
 	}
@@ -104,14 +102,7 @@ func (h *userUsecase) EditProfile(c context.Context, newUserData models.User) (m
 		}
 	}
 
-	user, err := h.UserRepo.UpdateUser(c, currentUser)
-	if err != nil {
-		return models.User{}, models.HTTPError{
-			Code:    http.StatusInternalServerError,
-			Message: err.Error(),
-		}
-	}
-	user.Age, err = models.GetAgeFromDate(user.Date)
+	_, err = h.UserRepo.UpdateUser(c, currentUser)
 	if err != nil {
 		return models.User{}, models.HTTPError{
 			Code:    http.StatusInternalServerError,
@@ -246,7 +237,7 @@ func (h *userUsecase) Login(c context.Context, logUserData models.LoginUser) (mo
 	if !hasher.CheckWithHash(identifiableUser.Password, logUserData.Password) {
 		return models.User{}, models.HTTPError{
 			Code:    http.StatusNotFound,
-			Message: err.Error(),
+			Message: "",
 		}
 	}
 
@@ -266,21 +257,17 @@ func (h *userUsecase) Signup(c context.Context, logUserData models.LoginUser) (m
 	ctx, cancel := context.WithTimeout(c, h.contextTimeout)
 	defer cancel()
 
-	identifiableUser, err := h.UserRepo.GetUser(ctx, logUserData.Email)
+	identifiableUser, _ := h.UserRepo.GetUser(ctx, logUserData.Email)
 	if !identifiableUser.IsEmpty() {
 		return models.User{}, models.HTTPError{
 			Code:    models.StatusEmailAlreadyExists,
-			Message: err.Error(),
+			Message: "",
 		}
 	}
 
-	logUserData.Password, err = hasher.HashAndSalt(nil, logUserData.Password)
-	if err != nil {
-		return models.User{}, models.HTTPError{
-			Code:    http.StatusNotFound,
-			Message: err.Error(),
-		}
-	}
+	var err error
+	logUserData.Password = hasher.HashAndSalt(nil, logUserData.Password)
+
 	user, err := h.UserRepo.CreateUser(c, logUserData)
 	if err != nil {
 		return models.User{}, models.HTTPError{
@@ -408,6 +395,14 @@ func (h *userUsecase) UsersMatches(c context.Context) (models.Matches, models.HT
 		}
 	}
 
+	_, err := h.UserRepo.GetUserByID(c, currentSession.UserID)
+	if err != nil {
+		return models.Matches{}, models.HTTPError{
+			Code:    http.StatusNotFound,
+			Message: err.Error(),
+		}
+	}
+
 	// find matches
 	mathes, err := h.UserRepo.GetUsersMatches(ctx, currentSession.UserID)
 	if err != nil {
@@ -451,8 +446,16 @@ func (h *userUsecase) Reaction(c context.Context, reactionData models.UserReacti
 		}
 	}
 
+	_, err := h.UserRepo.GetUserByID(c, currentSession.UserID)
+	if err != nil {
+		return models.Match{}, models.HTTPError{
+			Code:    http.StatusNotFound,
+			Message: err.Error(),
+		}
+	}
+
 	// added reaction in db
-	err := h.UserRepo.AddReaction(ctx, currentSession.UserID, reactionData.Id, reactionData.Reaction)
+	err = h.UserRepo.AddReaction(ctx, currentSession.UserID, reactionData.Id, reactionData.Reaction)
 	if err != nil {
 		return models.Match{}, models.HTTPError{
 			Code:    http.StatusInternalServerError,
