@@ -12,7 +12,7 @@ func NewMiddleware(r *mux.Router, sp models.SessionRepository, logFile *os.File)
 		sessionRepo: sp,
 	}
 	r.Use(Logger(logFile))
-	r.Use(CORS)
+	//r.Use(CORS)
 	r.Use(PanicRecovery)
 	r.Use(sm.SessionMiddleware)
 }

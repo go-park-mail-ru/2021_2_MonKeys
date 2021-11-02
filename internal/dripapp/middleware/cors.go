@@ -8,12 +8,14 @@ import (
 
 var allowedOrigins = map[string]struct{}{
 	"http://127.0.0.1":         {},
+	"http://127.0.0.1:8000":    {},
 	"http://localhost":         {},
 	"http://localhost:8080":    {},
 	"http://ijia.me":           {},
 	"http://192.168.1.16:8080": {},
 
 	"https://localhost:8080":    {},
+	"https://127.0.0.1:8000":    {},
 	"https://192.168.1.16:8080": {},
 	"https://127.0.0.1":         {},
 	"https://localhost":         {},

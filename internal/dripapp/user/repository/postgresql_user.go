@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"database/sql"
 	"dripapp/configs"
 	"dripapp/internal/dripapp/models"
 	"fmt"
@@ -112,29 +113,25 @@ func (p PostgreUserRepo) UpdateUser(ctx context.Context, newUserData models.User
 	err := p.conn.GetContext(ctx, &RespUser, query, newUserData.Name, newUserData.Email, newUserData.Date,
 		newUserData.Description, pq.Array(&newUserData.Imgs))
 
+	err = p.deleteTags(ctx, newUserData.ID)
+	if err != nil {
+		return models.User{}, err
+	}
 	if len(newUserData.Tags) != 0 {
-		err = p.deleteTags(ctx, newUserData.ID)
-		if err != nil {
-			return models.User{}, err
-		}
 		err = p.insertTags(ctx, newUserData.ID, newUserData.Tags)
 		if err != nil {
 			return models.User{}, err
 		}
 	}
 
-	if len(newUserData.Imgs) != 0 {
-		RespUser.Imgs, err = p.getImgsByID(ctx, RespUser.ID)
-		if err != nil {
-			return models.User{}, err
-		}
+	RespUser.Imgs, err = p.getImgsByID(ctx, RespUser.ID)
+	if err != nil {
+		return models.User{}, err
 	}
 
-	if len(newUserData.Tags) != 0 {
-		RespUser.Tags, err = p.getTagsByID(ctx, RespUser.ID)
-		if err != nil {
-			return models.User{}, err
-		}
+	RespUser.Tags, err = p.getTagsByID(ctx, RespUser.ID)
+	if err != nil {
+		return models.User{}, err
 	}
 
 	return RespUser, err
@@ -165,7 +162,7 @@ func (p PostgreUserRepo) GetTags(ctx context.Context) (map[uint64]string, error)
 
 	var i uint64
 	for i = 0; i < uint64(len(tags)); i++ {
-		tagsMap[i] = tags[i].Tag_Name
+		tagsMap[i] = tags[i].TagName
 	}
 
 	return tagsMap, nil
@@ -225,10 +222,13 @@ func (p PostgreUserRepo) insertTags(ctx context.Context, id uint64, tags []strin
 	sb.WriteString(";")
 	query = sb.String()
 
-	stmt, _ := p.conn.Prepare(query)
-	_, err := stmt.Exec(vals...)
+	// stmt, _ := p.conn.Prepare(query)
+	// _, err := stmt.Exec(vals...)
+	err := p.conn.QueryRow(query, vals...).Scan()
 	if err != nil {
-		return err
+		if err != sql.ErrNoRows {
+			return err
+		}
 	}
 
 	return nil
@@ -290,12 +290,12 @@ func (p PostgreUserRepo) GetNextUserForSwipe(ctx context.Context, currentUserId 
 			return nil, err
 		}
 
-		notSwipedUser[idx].Imgs, err = p.getImgsByID(ctx, currentUserId)
+		notSwipedUser[idx].Imgs, err = p.getImgsByID(ctx, notSwipedUser[idx].ID)
 		if err != nil {
 			return nil, err
 		}
 
-		notSwipedUser[idx].Tags, err = p.getTagsByID(ctx, currentUserId)
+		notSwipedUser[idx].Tags, err = p.getTagsByID(ctx, notSwipedUser[idx].ID)
 		if err != nil {
 			return nil, err
 		}
