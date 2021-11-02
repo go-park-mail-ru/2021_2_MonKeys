@@ -112,6 +112,7 @@ func (p PostgreUserRepo) UpdateUser(ctx context.Context, newUserData models.User
 	}
 
 	return RespUser, err
+	}
 }
 
 func (p PostgreUserRepo) deleteTags(ctx context.Context, userId uint64) error {
@@ -135,7 +136,7 @@ func (p PostgreUserRepo) GetTags(ctx context.Context) (map[uint64]string, error)
 
 	var i uint64
 	for i = 0; i < uint64(len(tags)); i++ {
-		tagsMap[i] = tags[i].Tag_Name
+		tagsMap[i] = tags[i].TagName
 	}
 
 	return tagsMap, nil
@@ -184,8 +185,13 @@ func (p PostgreUserRepo) insertTags(ctx context.Context, id uint64, tags []strin
 
 	var respId uint64
 	err := p.Conn.QueryRow(insertTagsQuery, vals...).Scan(&respId)
+	// stmt, _ := p.conn.Prepare(query)
+	// _, err := stmt.Exec(vals...)
+
 	if err != nil {
-		return err
+		if err != sql.ErrNoRows {
+			return err
+		}
 	}
 
 	return nil

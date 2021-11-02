@@ -33,16 +33,35 @@ func SendOKResp(resp JSON, w http.ResponseWriter) {
 	log.Printf("CODE %d", resp.Status)
 }
 
+//func SendErrorResponse(w http.ResponseWriter, httpErr models.HTTPError) {
+//	w.WriteHeader(httpErr.Code)
+//	body, err := json.Marshal(httpErr)
+//	if err != nil {
+//		SendErrorResponse(w, models.HTTPError{
+//			Code:    http.StatusInternalServerError,
+//			Message: "Error encoding json",
+//		})
+//		return
+//	}
+//	_, _ = w.Write(body)
+//	log.Printf("CODE %d ERROR %s", httpErr.Code, httpErr.Message)
+//}
+
 func SendErrorResponse(w http.ResponseWriter, httpErr models.HTTPError) {
-	w.WriteHeader(httpErr.Code)
-	body, err := json.Marshal(httpErr)
+	var resp JSON
+	resp.Status = httpErr.Code
+
+	body, err := json.Marshal(resp)
 	if err != nil {
-		SendErrorResponse(w, models.HTTPError{
-			Code:    http.StatusInternalServerError,
-			Message: "Error encoding json",
-		})
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	_, _ = w.Write(body)
+
+	_, err = w.Write(body)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
 	log.Printf("CODE %d ERROR %s", httpErr.Code, httpErr.Message)
 }

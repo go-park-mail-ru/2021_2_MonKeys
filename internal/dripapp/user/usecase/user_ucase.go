@@ -28,12 +28,10 @@ const (
 
 func NewUserUsecase(
 	ur models.UserRepository,
-	sess models.SessionRepository,
 	fileManager models.FileRepository,
 	timeout time.Duration) models.UserUsecase {
 	return &userUsecase{
 		UserRepo:       ur,
-		Session:        sess,
 		File:           fileManager,
 		contextTimeout: timeout,
 	}
@@ -104,14 +102,7 @@ func (h *userUsecase) EditProfile(c context.Context, newUserData models.User) (m
 		}
 	}
 
-	user, err := h.UserRepo.UpdateUser(c, currentUser)
-	if err != nil {
-		return models.User{}, models.HTTPError{
-			Code:    http.StatusInternalServerError,
-			Message: err.Error(),
-		}
-	}
-	user.Age, err = models.GetAgeFromDate(user.Date)
+	_, err = h.UserRepo.UpdateUser(c, currentUser)
 	if err != nil {
 		return models.User{}, models.HTTPError{
 			Code:    http.StatusInternalServerError,
@@ -122,13 +113,13 @@ func (h *userUsecase) EditProfile(c context.Context, newUserData models.User) (m
 	return currentUser, models.StatusOk200
 }
 
-func (h *userUsecase) AddPhoto(c context.Context, photo io.Reader) (string, models.HTTPError) {
+func (h *userUsecase) AddPhoto(c context.Context, photo io.Reader, fileName string) (models.Photo, models.HTTPError) {
 	ctx, cancel := context.WithTimeout(c, h.contextTimeout)
 	defer cancel()
 
 	ctxSession := ctx.Value(configs.ForContext)
 	if ctxSession == nil {
-		return "", models.HTTPError{
+		return models.Photo{}, models.HTTPError{
 			Code:    http.StatusNotFound,
 			Message: models.ErrContextNilError,
 		}
@@ -136,7 +127,7 @@ func (h *userUsecase) AddPhoto(c context.Context, photo io.Reader) (string, mode
 
 	currentSession, ok := ctxSession.(models.Session)
 	if !ok {
-		return "", models.HTTPError{
+		return models.Photo{}, models.HTTPError{
 			Code:    http.StatusNotFound,
 			Message: models.ErrConvertToSession,
 		}
@@ -144,15 +135,15 @@ func (h *userUsecase) AddPhoto(c context.Context, photo io.Reader) (string, mode
 
 	user, err := h.UserRepo.GetUserByID(c, currentSession.UserID)
 	if err != nil {
-		return "", models.HTTPError{
+		return models.Photo{}, models.HTTPError{
 			Code:    http.StatusNotFound,
 			Message: err.Error(),
 		}
 	}
 
-	photoPath, err := h.File.SaveUserPhoto(user, photo)
+	photoPath, err := h.File.SaveUserPhoto(user, photo, fileName)
 	if err != nil {
-		return "", models.HTTPError{
+		return models.Photo{}, models.HTTPError{
 			Code:    http.StatusInternalServerError,
 			Message: err.Error(),
 		}
@@ -162,13 +153,13 @@ func (h *userUsecase) AddPhoto(c context.Context, photo io.Reader) (string, mode
 
 	err = h.UserRepo.UpdateImgs(c, user.ID, user.Imgs)
 	if err != nil {
-		return "", models.HTTPError{
+		return models.Photo{}, models.HTTPError{
 			Code:    http.StatusInternalServerError,
 			Message: err.Error(),
 		}
 	}
 
-	return photoPath, models.StatusOk200
+	return models.Photo{Path: photoPath}, models.StatusOk200
 }
 
 func (h *userUsecase) DeletePhoto(c context.Context, photo models.Photo) models.HTTPError {
@@ -235,7 +226,6 @@ func (h *userUsecase) DeletePhoto(c context.Context, photo models.Photo) models.
 // @Failure 400,404,500
 // @Router /login [post]
 func (h *userUsecase) Login(c context.Context, logUserData models.LoginUser) (models.User, models.HTTPError) {
-
 	identifiableUser, err := h.UserRepo.GetUser(c, logUserData.Email)
 	if err != nil {
 		return models.User{}, models.HTTPError{
@@ -244,14 +234,14 @@ func (h *userUsecase) Login(c context.Context, logUserData models.LoginUser) (mo
 		}
 	}
 
-	if hasher.CheckWithHash(identifiableUser.Password, logUserData.Password) {
-		return identifiableUser, models.StatusOk200
-	} else {
+	if !hasher.CheckWithHash(identifiableUser.Password, logUserData.Password) {
 		return models.User{}, models.HTTPError{
 			Code:    http.StatusNotFound,
-			Message: err.Error(),
+			Message: "",
 		}
 	}
+
+	return identifiableUser, models.StatusOk200
 }
 
 // @Summary SignUp
@@ -267,21 +257,17 @@ func (h *userUsecase) Signup(c context.Context, logUserData models.LoginUser) (m
 	ctx, cancel := context.WithTimeout(c, h.contextTimeout)
 	defer cancel()
 
-	identifiableUser, err := h.UserRepo.GetUser(ctx, logUserData.Email)
+	identifiableUser, _ := h.UserRepo.GetUser(ctx, logUserData.Email)
 	if !identifiableUser.IsEmpty() {
 		return models.User{}, models.HTTPError{
 			Code:    models.StatusEmailAlreadyExists,
-			Message: err.Error(),
+			Message: "",
 		}
 	}
 
-	logUserData.Password, err = hasher.HashAndSalt(nil, logUserData.Password)
-	if err != nil {
-		return models.User{}, models.HTTPError{
-			Code:    http.StatusNotFound,
-			Message: err.Error(),
-		}
-	}
+	var err error
+	logUserData.Password = hasher.HashAndSalt(nil, logUserData.Password)
+
 	user, err := h.UserRepo.CreateUser(c, logUserData)
 	if err != nil {
 		return models.User{}, models.HTTPError{
@@ -379,7 +365,7 @@ func (h *userUsecase) GetAllTags(c context.Context) (models.Tags, models.HTTPErr
 	counter := 0
 
 	for _, value := range allTags {
-		respTag.Tag_Name = value
+		respTag.TagName = value
 		currentAllTags[uint64(counter)] = respTag
 		counter++
 	}
@@ -406,6 +392,14 @@ func (h *userUsecase) UsersMatches(c context.Context) (models.Matches, models.HT
 		return models.Matches{}, models.HTTPError{
 			Code:    http.StatusNotFound,
 			Message: models.ErrConvertToSession,
+		}
+	}
+
+	_, err := h.UserRepo.GetUserByID(c, currentSession.UserID)
+	if err != nil {
+		return models.Matches{}, models.HTTPError{
+			Code:    http.StatusNotFound,
+			Message: err.Error(),
 		}
 	}
 
@@ -452,8 +446,16 @@ func (h *userUsecase) Reaction(c context.Context, reactionData models.UserReacti
 		}
 	}
 
+	_, err := h.UserRepo.GetUserByID(c, currentSession.UserID)
+	if err != nil {
+		return models.Match{}, models.HTTPError{
+			Code:    http.StatusNotFound,
+			Message: err.Error(),
+		}
+	}
+
 	// added reaction in db
-	err := h.UserRepo.AddReaction(ctx, currentSession.UserID, reactionData.Id, reactionData.Reaction)
+	err = h.UserRepo.AddReaction(ctx, currentSession.UserID, reactionData.Id, reactionData.Reaction)
 	if err != nil {
 		return models.Match{}, models.HTTPError{
 			Code:    http.StatusInternalServerError,

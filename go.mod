@@ -1,6 +1,6 @@
 module dripapp
 
-go 1.17
+go 1.13
 
 require (
 	github.com/DATA-DOG/go-sqlmock v1.5.0
@@ -8,6 +8,7 @@ require (
 	github.com/jmoiron/sqlx v1.3.4
 	github.com/lib/pq v1.10.3
 	github.com/nu7hatch/gouuid v0.0.0-20131221200532-179d4d0c4d8d
+	github.com/stretchr/testify v1.7.0
 	github.com/swaggo/http-swagger v1.1.2
 	github.com/swaggo/swag v1.7.4
 	github.com/tarantool/go-tarantool v0.0.0-20210330210617-56fe55c5fa5c
@@ -32,4 +33,7 @@ require (
 	google.golang.org/appengine v1.6.6 // indirect
 	gopkg.in/vmihailenco/msgpack.v2 v2.9.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
+	github.com/golang/protobuf v1.3.2 // indirect
+	github.com/stretchr/objx v0.1.1 // indirect
+	golang.org/x/tools v0.1.1 // indirect
 )

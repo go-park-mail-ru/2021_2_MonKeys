@@ -37,6 +37,6 @@ func (user *User) DeletePhoto(photo Photo) (err error) {
 
 type FileRepository interface {
 	CreateFoldersForNewUser(user User) error
-	SaveUserPhoto(user User, file io.Reader) (path string, err error)
+	SaveUserPhoto(user User, file io.Reader, fileName string) (path string, err error)
 	Delete(filePath string) error
 }

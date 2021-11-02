@@ -8,7 +8,7 @@ import (
 
 const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
-func HashAndSalt(salt []byte, password string) (string, error) {
+func HashAndSalt(salt []byte, password string) string {
 	if salt == nil {
 		salt = make([]byte, 8)
 		for i := range salt {
@@ -18,12 +18,12 @@ func HashAndSalt(salt []byte, password string) (string, error) {
 	// hashedPass := argon2.IDKey([]byte(password), salt, 1, 64*1024, 4, 32)
 	hashedPass := []byte(GetSha1([]byte(password)))
 	saltAndHash := append(salt, hashedPass...)
-	return string(saltAndHash[:]), nil
+	return string(saltAndHash[:])
 }
 
 func CheckWithHash(hashedStr string, plainStr string) bool {
 	salt := []byte(hashedStr[0:8])
-	plainStrWithHash, _ := HashAndSalt(salt, plainStr)
+	plainStrWithHash := HashAndSalt(salt, plainStr)
 	return plainStrWithHash == hashedStr
 }
 
