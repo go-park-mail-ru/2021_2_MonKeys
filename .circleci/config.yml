@@ -9,10 +9,9 @@ jobs:
       - run:
           name: Install Dependencies
           command: go get ./...
-      - save_cache:
-          key: go-mod-v4-{{ checksum "go.sum" }}
-          paths:
-            - "/go/pkg/mod"
+      - run:
+          name: go mod tidy
+          command: go mod tidy
       - run:
           name: "Create a temp directory for artifacts"
           command: |
@@ -30,10 +29,9 @@ jobs:
       - run:
           name: Install Dependencies
           command: go get ./...
-      - save_cache:
-          key: go-mod-v4-{{ checksum "go.sum" }}
-          paths:
-            - "/go/pkg/mod"
+      - run:
+          name: go mod tidy
+          command: go mod tidy
       - run:
           name: "Create a temp directory for artifacts"
           command: |
@@ -63,10 +61,10 @@ jobs:
       - run:
           name: Install Dependencies
           command: go get ./...
-      - save_cache:
-          key: go-mod-v4-{{ checksum "go.sum" }}
-          paths:
-            - "/go/pkg/mod"
+      - run:
+          name: go mod tidy
+          command: go mod tidy
+     
       - run:
           name: "Create a temp directory for artifacts"
           command: |
@@ -106,6 +104,9 @@ jobs:
       - run:
           name: Install Dependencies
           command: go get ./...
+      - run:
+          name: go mod tidy
+          command: go mod tidy
       - run:
           name: Install GolangCI-LINT
           command: go get github.com/golangci/golangci-lint/cmd/golangci-lint@v1.42.1

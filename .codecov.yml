@@ -1,0 +1,10 @@
+ignore:
+  - "internal/dripapp/file"
+  - "internal/dripapp/models"
+  - "internal/pkg"
+  - "internal/dripapp/middleware"
+  - "configs"
+  - "cmd"
+  - "internal/dripapp/session/mocks"
+  - "internal/dripapp/user/mocks"
+  - "internal/dripapp/file/mocks"
