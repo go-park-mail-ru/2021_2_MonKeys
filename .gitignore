@@ -1,9 +1,32 @@
+# goland
 .idea
+.vscode
 
-*.png
-*.js
+# build folder
+build
 
+# ssl keys
 api.ijia.me.key
 api.ijia.me.crt
 
+logs.log
+fmt
+
+# golang
 go.sum
+
+#codecov tmp
+coverage.out.tmp
+*.out
+
+#binary
+main-service
+
+# envs
+envs/
+
+# media files
+media
+
+#logs
+logs.log

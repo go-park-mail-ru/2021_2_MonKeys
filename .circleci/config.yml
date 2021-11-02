@@ -9,18 +9,48 @@ jobs:
       - run:
           name: Install Dependencies
           command: go get ./...
-      - save_cache:
-          key: go-mod-v4-{{ checksum "go.sum" }}
-          paths:
-            - "/go/pkg/mod"
+      - run:
+          name: go mod tidy
+          command: go mod tidy
       - run:
           name: "Create a temp directory for artifacts"
           command: |
             mkdir -p /tmp/artifacts
-      - run: go build
+      - run: cd cmd/dripapp && go build
       
       - store_artifacts:
           path: /tmp/artifacts
+  unit-tests:
+      working_directory: ~/repo
+      docker:
+        - image: circleci/golang:1.16
+      steps:
+      - checkout
+      - run:
+          name: Install Dependencies
+          command: go get ./...
+      - run:
+          name: go mod tidy
+          command: go mod tidy
+      - run:
+          name: "Create a temp directory for artifacts"
+          command: |
+            mkdir -p /tmp/artifacts
+      - run: cd cmd/dripapp && go build
+      - run:
+          name: "making test-results folder"
+          command: |
+                mkdir test-results && cd test-results && mkdir go && pwd
+                ls
+                pwd
+      - run:
+            name: "Running tests and storing under test-results folder"
+            command: |
+                ls 
+                go get gotest.tools/gotestsum
+                go run gotest.tools/gotestsum --junitfile test-results/go/unit-tests.xml
+      - store_test_results:
+                path: test-results
   test-coverage:
       working_directory: ~/repo
       docker:
@@ -31,15 +61,14 @@ jobs:
       - run:
           name: Install Dependencies
           command: go get ./...
-      - save_cache:
-          key: go-mod-v4-{{ checksum "go.sum" }}
-          paths:
-            - "/go/pkg/mod"
+      - run:
+          name: go mod tidy
+          command: go mod tidy
+     
       - run:
           name: "Create a temp directory for artifacts"
           command: |
             mkdir -p /tmp/artifacts
-      - run: go build
       - run: 
             name: "go cov dependecies"
             command: go get github.com/axw/gocov/gocov
@@ -49,7 +78,7 @@ jobs:
       - run:
           name: "run tests"
           command: |
-                go test -coverprofile=cover.out
+                go test -coverprofile=cover.out ./...
                 go tool cover -html=cover.out -o coverage.html
                 mv coverage.html /tmp/artifacts
       - run:
@@ -63,8 +92,9 @@ jobs:
             command: |
                 ls
                 gocov convert cover.out | gocov-xml > test-results/go/results.xml
-      - store_test_results:
-                path: test-results
+      - run:
+            name: upload codecov
+            command: bash <(curl -s https://codecov.io/bash) -t 7cfc4bf5-8684-4ae1-b55b-f6cc88432910
   linter:
     working_directory: ~/repo
     docker:
@@ -74,26 +104,27 @@ jobs:
       - run:
           name: Install Dependencies
           command: go get ./...
-      - save_cache:
-          key: go-mod-v4-{{ checksum "go.sum" }}
-          paths:
-            - "/go/pkg/mod"
       - run:
-          name: "Create a temp directory for artifacts"
-          command: |
-            mkdir -p /tmp/artifacts
-      - run: go build
-      
-      - store_artifacts:
-          path: /tmp/artifacts
-      - store_test_results:
-          path: test-results
+          name: go mod tidy
+          command: go mod tidy
+      - run:
+          name: Install GolangCI-LINT
+          command: go get github.com/golangci/golangci-lint/cmd/golangci-lint@v1.42.1
+      - run:
+          name: Running GolangCI-LINT
+          command: go run github.com/golangci/golangci-lint/cmd/golangci-lint run ./... --disable unused --disable deadcode
       
 workflows:
   version: 2
   build-test:
     jobs:
+      - linter
       - build
+      - unit-tests:
+          requires:
+            - build
       - test-coverage:
           requires:
             - build
+
+            

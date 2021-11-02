@@ -1,0 +1,42 @@
+version: "3"
+
+volumes:
+  dbbackups:
+  postgis-data:
+  tarantool:
+
+services:
+  main_service:
+    image: main_service
+    ports:
+      - "8000:8000"
+    volumes:
+      - $PWD/media:/dripapp/media
+    depends_on:
+      - tarantool
+      - postgres
+
+  tarantool:
+    image: "drip_tarantool"
+    ports:
+      - "3301:3301"
+    volumes:
+      - tarantool:/var/lib/tarantool
+    #   - $PWD/docker/tarantool_scripts/dripapp.lua:/opt/tarantool/dripapp.lua
+
+  postgres:
+    image: postgres:latest
+    volumes:
+      - postgis-data:/var/lib/postgresql
+      - $PWD/docker/postgres_scripts/dump.sql:/docker-entrypoint-initdb.d/dump.sql
+    # env_file:
+    #   - envs/postgres.env
+    environment:
+        POSTGRES_DB: "postgres"
+        POSTGRES_USER: "admin"
+        POSTGRES_PASSWORD: "lolkek"
+    ports:
+      - "5432:5432"
+    restart: on-failure
+    healthcheck:
+      test: "exit 0"
