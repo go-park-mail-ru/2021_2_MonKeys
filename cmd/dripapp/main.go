@@ -78,7 +78,6 @@ func main() {
 	sessionUcase := _sessionUcase.NewSessionUsecase(sm, timeoutContext)
 	userUCase := _userUsecase.NewUserUsecase(
 		userRepo,
-		sm,
 		fileManager,
 		timeoutContext,
 	)
