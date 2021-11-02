@@ -6,10 +6,11 @@ import (
 	"dripapp/internal/pkg/hasher"
 	"errors"
 	"fmt"
-	uuid "github.com/nu7hatch/gouuid"
 	"io"
 	"os"
 	"strings"
+
+	uuid "github.com/nu7hatch/gouuid"
 )
 
 type FileManager struct {

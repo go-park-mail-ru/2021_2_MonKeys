@@ -66,5 +66,4 @@ func SetRouting(router *mux.Router, us models.UserUsecase, su models.SessionUsec
 	router.HandleFunc("/api/v1/tags", permissions.CheckAuthenticated(userHandler.GetAllTags)).Methods("GET", "OPTIONS")
 
 	router.PathPrefix("/api/documentation/").Handler(httpSwagger.WrapHandler)
-
 }
