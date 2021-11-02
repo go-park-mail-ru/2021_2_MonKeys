@@ -122,13 +122,13 @@ func (h *userUsecase) EditProfile(c context.Context, newUserData models.User) (m
 	return currentUser, models.StatusOk200
 }
 
-func (h *userUsecase) AddPhoto(c context.Context, photo io.Reader, fileName string) (string, models.HTTPError) {
+func (h *userUsecase) AddPhoto(c context.Context, photo io.Reader, fileName string) (models.Photo, models.HTTPError) {
 	ctx, cancel := context.WithTimeout(c, h.contextTimeout)
 	defer cancel()
 
 	ctxSession := ctx.Value(configs.ForContext)
 	if ctxSession == nil {
-		return "", models.HTTPError{
+		return models.Photo{}, models.HTTPError{
 			Code:    http.StatusNotFound,
 			Message: models.ErrContextNilError,
 		}
@@ -136,7 +136,7 @@ func (h *userUsecase) AddPhoto(c context.Context, photo io.Reader, fileName stri
 
 	currentSession, ok := ctxSession.(models.Session)
 	if !ok {
-		return "", models.HTTPError{
+		return models.Photo{}, models.HTTPError{
 			Code:    http.StatusNotFound,
 			Message: models.ErrConvertToSession,
 		}
@@ -144,7 +144,7 @@ func (h *userUsecase) AddPhoto(c context.Context, photo io.Reader, fileName stri
 
 	user, err := h.UserRepo.GetUserByID(c, currentSession.UserID)
 	if err != nil {
-		return "", models.HTTPError{
+		return models.Photo{}, models.HTTPError{
 			Code:    http.StatusNotFound,
 			Message: err.Error(),
 		}
@@ -152,7 +152,7 @@ func (h *userUsecase) AddPhoto(c context.Context, photo io.Reader, fileName stri
 
 	photoPath, err := h.File.SaveUserPhoto(user, photo, fileName)
 	if err != nil {
-		return "", models.HTTPError{
+		return models.Photo{}, models.HTTPError{
 			Code:    http.StatusInternalServerError,
 			Message: err.Error(),
 		}
@@ -162,13 +162,13 @@ func (h *userUsecase) AddPhoto(c context.Context, photo io.Reader, fileName stri
 
 	err = h.UserRepo.UpdateImgs(c, user.ID, user.Imgs)
 	if err != nil {
-		return "", models.HTTPError{
+		return models.Photo{}, models.HTTPError{
 			Code:    http.StatusInternalServerError,
 			Message: err.Error(),
 		}
 	}
 
-	return photoPath, models.StatusOk200
+	return models.Photo{Path: photoPath}, models.StatusOk200
 }
 
 func (h *userUsecase) DeletePhoto(c context.Context, photo models.Photo) models.HTTPError {
@@ -235,7 +235,6 @@ func (h *userUsecase) DeletePhoto(c context.Context, photo models.Photo) models.
 // @Failure 400,404,500
 // @Router /login [post]
 func (h *userUsecase) Login(c context.Context, logUserData models.LoginUser) (models.User, models.HTTPError) {
-
 	identifiableUser, err := h.UserRepo.GetUser(c, logUserData.Email)
 	if err != nil {
 		return models.User{}, models.HTTPError{
@@ -244,14 +243,14 @@ func (h *userUsecase) Login(c context.Context, logUserData models.LoginUser) (mo
 		}
 	}
 
-	if hasher.CheckWithHash(identifiableUser.Password, logUserData.Password) {
-		return identifiableUser, models.StatusOk200
-	} else {
+	if !hasher.CheckWithHash(identifiableUser.Password, logUserData.Password) {
 		return models.User{}, models.HTTPError{
 			Code:    http.StatusNotFound,
 			Message: err.Error(),
 		}
 	}
+
+	return identifiableUser, models.StatusOk200
 }
 
 // @Summary SignUp
@@ -379,7 +378,7 @@ func (h *userUsecase) GetAllTags(c context.Context) (models.Tags, models.HTTPErr
 	counter := 0
 
 	for _, value := range allTags {
-		respTag.Tag_Name = value
+		respTag.TagName = value
 		currentAllTags[uint64(counter)] = respTag
 		counter++
 	}

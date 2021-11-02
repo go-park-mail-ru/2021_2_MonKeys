@@ -56,7 +56,7 @@ func (h *SessionHandler) LoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var logUserData *models.LoginUser
+	var logUserData models.LoginUser
 	err = json.Unmarshal(byteReq, &logUserData)
 	if err != nil {
 		responses.SendErrorResponse(w, models.HTTPError{
@@ -65,26 +65,34 @@ func (h *SessionHandler) LoginHandler(w http.ResponseWriter, r *http.Request) {
 		})
 		return
 	}
-	user, status := h.UserUCase.Login(r.Context(), *logUserData)
-	resp.Status = status.Code
-	if status.Code == http.StatusOK {
-		cookie := createSessionCookie(*logUserData)
 
-		sess := models.Session{
-			Cookie: cookie.Value,
-			UserID: user.ID,
-		}
-		err = h.SessionUcase.AddSession(r.Context(), sess)
-		if err != nil {
-			responses.SendErrorResponse(w, models.HTTPError{
-				Code:    http.StatusInternalServerError,
-				Message: err.Error(),
-			})
-			return
-		}
-		resp.Body = user
-		http.SetCookie(w, &cookie)
+	user, status := h.UserUCase.Login(r.Context(), logUserData)
+	if status != models.StatusOk200 {
+		responses.SendErrorResponse(w, models.HTTPError{
+			Code: http.StatusNotFound,
+		})
+		return
 	}
+
+	sessionCookie := createSessionCookie(logUserData)
+
+	sess := models.Session{
+		Cookie: sessionCookie.Value,
+		UserID: user.ID,
+	}
+	err = h.SessionUcase.AddSession(r.Context(), sess)
+	if err != nil {
+		responses.SendErrorResponse(w, models.HTTPError{
+			Code:    http.StatusInternalServerError,
+			Message: err.Error(),
+		})
+		return
+	}
+
+	http.SetCookie(w, &sessionCookie)
+
+	resp.Status = http.StatusOK
+	resp.Body = user
 
 	responses.SendOKResp(resp, w)
 }

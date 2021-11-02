@@ -49,7 +49,6 @@ func generateCsrfLogic(w http.ResponseWriter) {
 
 	http.SetCookie(w, csrfCookie)
 	w.Header().Set("csrf", csrf.String())
-
 }
 
 func SetCSRF(next http.HandlerFunc) http.HandlerFunc {
