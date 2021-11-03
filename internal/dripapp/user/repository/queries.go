@@ -48,6 +48,8 @@ const (
 									and r.id1 is null
 									and op.id <> $1
 									and (m.id2 is null or m.id2 <> $1)
+								group by 
+									op.id
 								limit 5;`
 
 	GetUsersForMatchesQuery = `select
