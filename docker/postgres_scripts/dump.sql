@@ -46,6 +46,8 @@ insert into
   tag(tag_name)
 values('anime'),('music'),('gaming'),('sport'),('scince');
 
+
+-- init
 insert into
   profile(name, email, password, date, description)
 values('lol1', 'lol1@mail.ru', 'oJnNPGsi805543a8fbee141b373962de3e347822de9ccb8e', '2000-02-20', 'ochen kryto'),
@@ -53,23 +55,8 @@ values('lol1', 'lol1@mail.ru', 'oJnNPGsi805543a8fbee141b373962de3e347822de9ccb8e
       ('lol3', 'lol3@mail.ru', 'oJnNPGsi805543a8fbee141b373962de3e347822de9ccb8e', '2000-02-20', 'ochen kryto'),
       ('lol4', 'lol4@mail.ru', 'oJnNPGsi805543a8fbee141b373962de3e347822de9ccb8e', '2000-02-20', 'ochen kryto'),
       ('lol5', 'lol5@mail.ru', 'oJnNPGsi805543a8fbee141b373962de3e347822de9ccb8e', '2000-02-20', 'ochen kryto'),
-      ('lol6', 'lol6@mail.ru', 'oJnNPGsi805543a8fbee141b373962de3e347822de9ccb8e', '2000-02-20', 'ochen kryto'),
-      ('lol7', 'lol7@mail.ru', 'oJnNPGsi805543a8fbee141b373962de3e347822de9ccb8e', '2000-02-20', 'ochen kryto'),
-      ('lol8', 'lol8@mail.ru', 'oJnNPGsi805543a8fbee141b373962de3e347822de9ccb8e', '2000-02-20', 'ochen kryto'),
-      ('lol9', 'lol9@mail.ru', 'oJnNPGsi805543a8fbee141b373962de3e347822de9ccb8e', '2000-02-20', 'ochen kryto'),
-      ('lol10', 'lol10@mail.ru', 'oJnNPGsi805543a8fbee141b373962de3e347822de9ccb8e', '2000-02-20', 'ochen kryto'),
-      ('lol11', 'lol11@mail.ru', 'oJnNPGsi805543a8fbee141b373962de3e347822de9ccb8e', '2000-02-20', 'ochen kryto'),
-      ('lol12', 'lol12@mail.ru', 'oJnNPGsi805543a8fbee141b373962de3e347822de9ccb8e', '2000-02-20', 'ochen kryto'),
-      ('lol13', 'lol13@mail.ru', 'oJnNPGsi805543a8fbee141b373962de3e347822de9ccb8e', '2000-02-20', 'ochen kryto');
 
 insert into
   profile(email, password)
-values('lol4@mail.ru', 'oJnNPGsi805543a8fbee141b373962de3e347822de9ccb8e'),
-      ('lol5@mail.ru', 'oJnNPGsi805543a8fbee141b373962de3e347822de9ccb8e');
-
--- insert into
---   matches(id1, id2)
--- values(1, 2),
---       (2, 1),
---       (1, 3),
---       (3, 2);
+values('lol6@mail.ru', 'oJnNPGsi805543a8fbee141b373962de3e347822de9ccb8e'),
+      ('lol7@mail.ru', 'oJnNPGsi805543a8fbee141b373962de3e347822de9ccb8e');

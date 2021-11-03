@@ -92,27 +92,23 @@ func (p PostgreUserRepo) UpdateUser(ctx context.Context, newUserData models.User
 	err := p.Conn.QueryRow(UpdateUserQuery, newUserData.Name, newUserData.Email, newUserData.Date, newUserData.Description, pq.Array(&newUserData.Imgs)).
 		Scan(&RespUser.ID, &RespUser.Name, &RespUser.Email, &RespUser.Password, &RespUser.Date, &RespUser.Description, pq.Array(&RespUser.Imgs))
 	if err != nil {
-		fmt.Println("update")
 		return models.User{}, err
 	}
 
 	err = p.deleteTags(ctx, newUserData.ID)
 	if err != nil && err != sql.ErrNoRows {
-		fmt.Println("delete")
 		return models.User{}, err
 	}
 
 	if len(newUserData.Tags) != 0 {
 		err = p.insertTags(ctx, newUserData.ID, newUserData.Tags)
 		if err != nil {
-			fmt.Println("insert")
 			return models.User{}, err
 		}
 	}
 
 	RespUser.Tags, err = p.getTagsByID(ctx, RespUser.ID)
 	if err != nil && err != sql.ErrNoRows {
-		fmt.Println("get")
 		return models.User{}, err
 	}
 
