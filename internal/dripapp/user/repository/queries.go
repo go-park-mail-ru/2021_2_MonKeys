@@ -41,13 +41,13 @@ const (
 								from profile p
 								join reactions r on (r.id1 = $1)
 								right join profile op on (op.id = r.id2)
-								left join matches m on (m.id1 = op.id)
+								left join matches m on (m.id1 = $1)
 								where
 									op.name <> ''
 									and op.date <> ''
 									and r.id1 is null
 									and op.id <> $1
-									and (m.id2 is null or m.id2 <> $1)
+									and (m.id1 is null or m.id1 <> $1)
 								group by 
 									op.id
 								limit 5;`
