@@ -55,6 +55,13 @@ func (h *userUsecase) CurrentUser(c context.Context) (models.User, models.HTTPEr
 			Message: err.Error(),
 		}
 	}
+	currentUser.Age, err = models.GetAgeFromDate(currentUser.Date)
+	if err != nil {
+		return models.User{}, models.HTTPError{
+			Code:    http.StatusNotFound,
+			Message: err.Error(),
+		}
+	}
 
 	return currentUser, models.StatusOk200
 }
