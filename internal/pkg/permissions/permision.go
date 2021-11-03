@@ -28,7 +28,7 @@ func CheckAuthenticated(next http.HandlerFunc) http.HandlerFunc {
 				responses.SendErrorResponse(w, models.HTTPError{
 					Code:    http.StatusForbidden,
 					Message: models.ErrAuth,
-				}, logger.DripLogger.ErrorLogging)
+				}, logger.DripLogger.WarnLogging)
 				return
 			}
 
