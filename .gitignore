@@ -17,6 +17,7 @@ go.sum
 
 #codecov tmp
 coverage.out.tmp
+coverage2.out.tmp
 *.out
 
 #binary

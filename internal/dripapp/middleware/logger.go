@@ -16,8 +16,6 @@ func Logger(logFile *os.File) (mw func(http.Handler) http.Handler) {
 
 			mw := io.MultiWriter(os.Stdout, logFile)
 			log.SetOutput(mw)
-			// log.Printf("LOG [%s] %s, %s %s",
-			// 	r.Method, r.RemoteAddr, r.URL.Path, time.Since(start))
 			logger.DripLogger.InfoLogging(r.Method, r.RemoteAddr, r.URL.Path, time.Since(start))
 
 			next.ServeHTTP(w, r)
