@@ -7,8 +7,7 @@ const (
 
 	CreateUserQuery = "INSERT into profile(email,password) VALUES($1,$2) RETURNING id, email, password;"
 
-	UpdateUserQuery = `update profile set name=$1, date=$3, description=$4, imgs=$5 where email=$2 
-							RETURNING id, name, email, password, date, description, imgs;`
+	UpdateUserQuery = "update profile set name=$1, date=$3, description=$4, imgs=$5 where email=$2 RETURNING id, name, email, password, date, description, imgs;"
 
 	DeleteTagsQuery = "delete from profile_tag where profile_id=$1 returning id;"
 

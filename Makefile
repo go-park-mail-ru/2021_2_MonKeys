@@ -57,7 +57,7 @@ run:
 app:
 # build run
 	docker rm -vf $$(docker ps -a -q) || true
-# rm -rf media
+	rm -rf media
 	docker build -t drip_tarantool -f ${DOCKER_DIR}/drip_tarantool.Dockerfile .
 	docker-compose up --build --no-deps -d
 	go run cmd/dripapp/main.go
