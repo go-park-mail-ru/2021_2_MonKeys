@@ -79,9 +79,8 @@ jobs:
           name: "run tests"
           command: |
                 go test -coverprofile=coverage.out.tmp -coverpkg=./... ./...
-                cat coverage.out.tmp | grep -v mock > coverage2.out.tmp
-                go tool cover -html=coverage2.out.tmp
-                mv coverage2.html /tmp/artifacts
+                go tool cover -html=cover.out -o coverage.html
+                mv coverage.html /tmp/artifacts
       - run:
           name: "making test-results folder"
           command: |
