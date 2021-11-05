@@ -8,7 +8,7 @@ create table if not exists profile(
   create_time date default now(),
   update_time date default now(),
   name varchar(255) default '',
-  email varchar(255) default '',
+  email varchar(255) unique default '',
   password varchar(255) default '',
   date varchar(255) default '',
   description varchar(1000) default '',
