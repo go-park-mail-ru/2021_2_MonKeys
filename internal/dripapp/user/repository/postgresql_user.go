@@ -88,7 +88,6 @@ func (p PostgreUserRepo) CreateUser(ctx context.Context, logUserData models.Logi
 
 func (p PostgreUserRepo) UpdateUser(ctx context.Context, newUserData models.User) (models.User, error) {
 	var RespUser models.User
-	fmt.Println(newUserData)
 	err := p.Conn.QueryRow(UpdateUserQuery, newUserData.Name, newUserData.Email, newUserData.Date, newUserData.Description, pq.Array(&newUserData.Imgs)).
 		Scan(&RespUser.ID, &RespUser.Name, &RespUser.Email, &RespUser.Password, &RespUser.Date, &RespUser.Description, pq.Array(&RespUser.Imgs))
 	if err != nil {

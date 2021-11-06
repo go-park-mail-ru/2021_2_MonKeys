@@ -70,7 +70,8 @@ func (h *SessionHandler) LoginHandler(w http.ResponseWriter, r *http.Request) {
 	user, status := h.UserUCase.Login(r.Context(), logUserData)
 	if status != models.StatusOk200 {
 		responses.SendErrorResponse(w, models.HTTPError{
-			Code: http.StatusNotFound,
+			Code:    http.StatusNotFound,
+			Message: status.Message,
 		}, h.Logger.WarnLogging)
 		return
 	}

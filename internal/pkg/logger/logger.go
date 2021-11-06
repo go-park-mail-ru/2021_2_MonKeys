@@ -29,9 +29,9 @@ func (l *Logger) InfoLogging(method string, remoteAddr string, url string, time 
 }
 
 func (l *Logger) ErrorLogging(code int, message string) {
-	l.Err.Printf("CODE %d MESSAGE%s", code, message)
+	l.Err.Printf("CODE %d MESSAGE %s", code, message)
 }
 
 func (l *Logger) WarnLogging(code int, message string) {
-	l.Warn.Printf("CODE %d MESSAGE%s", code, message)
+	l.Warn.Printf("CODE %d MESSAGE %s", code, message)
 }
