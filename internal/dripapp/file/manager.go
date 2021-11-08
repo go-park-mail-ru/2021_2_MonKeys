@@ -24,8 +24,8 @@ type FileManager struct {
 }
 
 type Image struct {
-	img image.Image
-	gif *gif.GIF
+	img     image.Image
+	gif     *gif.GIF
 	imgType string
 }
 
