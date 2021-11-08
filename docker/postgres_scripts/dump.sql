@@ -45,16 +45,3 @@ create table if not exists matches(
 insert into
   tag(tag_name)
 values('anime'),('music'),('gaming'),('sport'),('scince');
-
-insert into
-  profile(name, email, password, date, description)
-values('lol1', 'lol1@mail.ru', 'oJnNPGsi805543a8fbee141b373962de3e347822de9ccb8e', '2000-02-20', 'ochen kryto'),
-      ('lol2', 'lol2@mail.ru', 'oJnNPGsi805543a8fbee141b373962de3e347822de9ccb8e', '2000-02-20', 'ochen kryto'),
-      ('lol3', 'lol3@mail.ru', 'oJnNPGsi805543a8fbee141b373962de3e347822de9ccb8e', '2000-02-20', 'ochen kryto'),
-      ('lol4', 'lol4@mail.ru', 'oJnNPGsi805543a8fbee141b373962de3e347822de9ccb8e', '2000-02-20', 'ochen kryto'),
-      ('lol5', 'lol5@mail.ru', 'oJnNPGsi805543a8fbee141b373962de3e347822de9ccb8e', '2000-02-20', 'ochen kryto');
-
-insert into
-  profile(email, password)
-values('lol6@mail.ru', 'oJnNPGsi805543a8fbee141b373962de3e347822de9ccb8e'),
-      ('lol7@mail.ru', 'oJnNPGsi805543a8fbee141b373962de3e347822de9ccb8e');
