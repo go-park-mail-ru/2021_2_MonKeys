@@ -63,7 +63,7 @@ func SetCSRF(next http.HandlerFunc) http.HandlerFunc {
 func CheckCSRF(next http.HandlerFunc) http.HandlerFunc {
 	return http.HandlerFunc(
 		func(w http.ResponseWriter, r *http.Request) {
-			csrf := r.Header.Get("X-Csrf-Token")
+			csrf := r.Header.Get("x-csrf-Token")
 			csrfCookie, err := r.Cookie("csrf")
 
 			if err != nil || csrf == "" || csrfCookie.Value == "" || csrfCookie.Value != csrf {

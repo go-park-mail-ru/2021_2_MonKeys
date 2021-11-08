@@ -45,7 +45,6 @@ func NewTarantoolConnection(tntConfig configs.TarantoolConfig) (models.SessionRe
 func (conn *SessionManager) GetSessionByCookie(sessionCookie string) (session models.Session, err error) {
 	resp, err := conn.TarantoolConn.Call("check_session", []interface{}{sessionCookie})
 	if err != nil {
-		fmt.Println("cannot check session", err)
 		return models.Session{}, err
 	}
 

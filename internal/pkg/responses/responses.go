@@ -4,7 +4,6 @@ import (
 	"dripapp/internal/dripapp/models"
 	"dripapp/internal/pkg/logger"
 	"encoding/json"
-	"log"
 	"net/http"
 )
 
@@ -35,7 +34,7 @@ func SendOKResp(resp JSON, w http.ResponseWriter) {
 		)
 		return
 	}
-	log.Printf("CODE %d", resp.Status)
+	logger.DripLogger.Info.Printf("CODE %d", resp.Status)
 
 }
 
