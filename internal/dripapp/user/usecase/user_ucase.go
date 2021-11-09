@@ -55,6 +55,9 @@ func (h *userUsecase) CurrentUser(c context.Context) (models.User, models.HTTPEr
 			Message: err.Error(),
 		}
 	}
+	if len(currentUser.Date) == 0 {
+		return currentUser, models.StatusOk200
+	}
 	currentUser.Age, err = models.GetAgeFromDate(currentUser.Date)
 	if err != nil {
 		return models.User{}, models.HTTPError{
