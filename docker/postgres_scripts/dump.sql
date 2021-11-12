@@ -1,8 +1,3 @@
-drop table if exists matches;
-drop table if exists reactions;
-drop table if exists profile_tag;
-drop table if exists tag;
-drop table if exists profile;
 create table if not exists profile(
   id serial not null primary key,
   create_time date default now(),
@@ -14,6 +9,13 @@ create table if not exists profile(
   description varchar(1000) default '',
   imgs varchar(255) [] default array [] :: varchar []
 );
+
+create trigger modify_payment_updated_at
+    before update
+    on profile
+    for each row
+execute procedure public.moddatetime(updated_at);
+
 create table if not exists tag(
   id serial not null primary key,
   tag_name varchar(255) default ''

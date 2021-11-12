@@ -7,6 +7,8 @@ DOCKER_DIR := ${CURDIR}/docker
 ## install-dependencies: Install docker
 install-dependencies:
 	sudo apt install docker.io
+	sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+	sudo chmod +x /usr/local/bin/docker-compose
 
 ## build-go: Build compiles project
 build-go:
@@ -24,11 +26,9 @@ test-coverage:
 	go test -coverprofile=coverage.out.tmp -coverpkg=./...  ./...
 	cat coverage.out.tmp | grep -v mock > coverage2.out.tmp
 	go tool cover -html=coverage2.out.tmp
-## test: launch all tests
+
 test:
-	go test -coverprofile=coverage.out.tmp -coverpkg=./...  ./...
-	cat coverage.out.tmp | grep -v mock > coverage2.out.tmp
-	go tool cover -func=coverage2.out.tmp
+	go test ./...
 
 ## run-background: run process in background(available after build)
 run-background:
@@ -40,27 +40,43 @@ linter:
 	go run github.com/golangci/golangci-lint/cmd/golangci-lint run ./... --disable unused --disable deadcode
 	go mod tidy
 
-## build: Build and start docker with new changes
-build:
+## deploy-build: Deply build and start docker with new changes
+deploy-build:
 	docker rm -vf $$(docker ps -a -q) || true
+	rm -rf media
+	sudo rm -rf logs.log
 	docker build -t dependencies -f ${DOCKER_DIR}/builder.Dockerfile .
 	docker build -t drip_tarantool -f ${DOCKER_DIR}/drip_tarantool.Dockerfile .
 	docker build -t main_service -f ${DOCKER_DIR}/main_service.Dockerfile .
 
+## deploy-run: Deploy run app
+deploy-run:
+	docker-compose -f prod.yml up --build --no-deps
+
+## clean: Clean all volumes, containers, media folders  and log files
+clean:
+	docker rm -vf $$(docker ps -a -q) || true
+	sudo rm -rf media
+	sudo rm -rf logs.log
+	docker volume prune
+
+## build: Build and start docker with new changes
+build:
+	docker rm -vf $$(docker ps -a -q) || true
+	sudo rm -rf media
+	sudo rm -rf logs.log
+	docker build -t drip_tarantool -f ${DOCKER_DIR}/drip_tarantool.Dockerfile .
+	docker-compose -f local.yml up --build --no-deps -d
+
 ## run: Run app
 run:
-# docker-compose up --build --no-deps
-	docker-compose up --build --no-deps -d
 	go run cmd/dripapp/main.go
 
 ## app: Build and run app
-app:
-# build run
-	docker rm -vf $$(docker ps -a -q) || true
-	rm -rf media
-	docker build -t drip_tarantool -f ${DOCKER_DIR}/drip_tarantool.Dockerfile .
-	docker-compose up --build --no-deps -d
-	go run cmd/dripapp/main.go
+deploy-app: deploy-build deploy-run
+
+app: build run
+
 
 down:
 	docker-compose down

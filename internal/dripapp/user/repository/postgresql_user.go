@@ -21,10 +21,11 @@ type PostgreUserRepo struct {
 }
 
 func NewPostgresUserRepository(config configs.PostgresConfig) (models.UserRepository, error) {
-	ConnStr := fmt.Sprintf("user=%s password=%s dbname=%s sslmode=disable",
+	ConnStr := fmt.Sprintf("user=%s dbname=%s password=%s host=%s sslmode=disable",
 		config.User,
+		config.DBName,
 		config.Password,
-		config.DBName)
+		config.Host)
 
 	Conn, err := sqlx.Open("postgres", ConnStr)
 	if err != nil {
