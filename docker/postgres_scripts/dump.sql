@@ -1,20 +1,16 @@
+CREATE extension IF NOT EXISTS citext;
+
 create table if not exists profile(
   id serial not null primary key,
-  create_time date default now(),
-  update_time date default now(),
+  create_time timestamp default now(),
+  update_time timestamp default now(),
   name varchar(255) default '',
-  email varchar(255) unique default '',
+  email citext,
   password varchar(255) default '',
   date varchar(255) default '',
   description varchar(1000) default '',
   imgs varchar(255) [] default array [] :: varchar []
 );
-
-create trigger modify_payment_updated_at
-    before update
-    on profile
-    for each row
-execute procedure public.moddatetime(updated_at);
 
 create table if not exists tag(
   id serial not null primary key,
@@ -47,3 +43,33 @@ create table if not exists matches(
 insert into
   tag(tag_name)
 values('anime'),('music'),('gaming'),('sport'),('science');
+
+-- foregn keys
+create index idx_react_id1 on reactions(id1);
+create index idx_react_id2 on reactions(id2);
+create index idx_match_id1 on matches(id1);
+create index idx_match_id2 on matches(id1);
+create index idx_pt_profile_id on profile_tag(profile_id);
+create index idx_pt_tag_id on profile_tag(tag_id);
+
+-- lower
+create unique index uniq_email ON profile(email);
+
+-- search
+create index idx_profile_imgs_gin on profile using gin (imgs);
+
+create or replace function moddatetime()
+returns trigger as $$
+begin
+  NEW.update_time = NOW();
+  return NEW;
+end;
+$$ language plpgsql;
+
+create trigger modify_payment_update_time
+    before update
+    on profile
+    for each row
+execute procedure moddatetime();
+
+vacuum full analyze;

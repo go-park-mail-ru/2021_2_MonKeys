@@ -74,11 +74,6 @@ func SetConfig() {
 		User:     viper.GetString(`database.user`),
 		Password: viper.GetString(`database.pass`),
 		DBName:   viper.GetString(`database.name`),
-		// Port:     ":5432",
-		// Host:     "postgres",
-		// User:     "admin",
-		// Password: "lolkek",
-		// DBName:   "postgres",
 	}
 
 	Tarantool = TarantoolConfig{
@@ -87,11 +82,6 @@ func SetConfig() {
 		User:     viper.GetString(`session.user`),
 		Password: viper.GetString(`session.pass`),
 		DBName:   viper.GetString(`session.name`),
-		// Port:     ":3301",
-		// Host:     "tarantool",
-		// User:     "admin",
-		// Password: "pass",
-		// DBName:   "drip",
 	}
 
 	Server = ServerConfig{
@@ -99,10 +89,6 @@ func SetConfig() {
 		Host:     viper.GetString(`server.host`),
 		CertFile: viper.GetString(`server.certFile`),
 		KeyFile:  viper.GetString(`server.keyFile`),
-		// Host:     "127.0.0.1",
-		// Port:     ":8000",
-		// CertFile: "api.ijia.me.crt",
-		// KeyFile:  "api.ijia.me.key",
 	}
 
 	FileStorage = FileStorageConfig{
