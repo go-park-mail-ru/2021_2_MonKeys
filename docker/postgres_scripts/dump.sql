@@ -44,4 +44,4 @@ create table if not exists matches(
 );
 insert into
   tag(tag_name)
-values('anime'),('music'),('gaming'),('sport'),('scince');
+values('anime'),('music'),('gaming'),('sport'),('science');
