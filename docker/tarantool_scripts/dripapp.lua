@@ -10,7 +10,7 @@ function init()
     s = box.schema.space.create('sessions', {if_not_exists=true})
     s:format({
         { name = 'cookie', type = 'string' },
-        { name = 'user_id', type = 'unsigned' }d
+        { name = 'user_id', type = 'unsigned' }
     })
     s:create_index('primary', { type = 'HASH', parts = {'cookie'} })
 
