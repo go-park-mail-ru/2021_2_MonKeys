@@ -48,6 +48,8 @@ const (
 									from matches m
 									where m.id1 = $1
 								) and op.id <> $1
+								and op.name <> ''
+								and op.age <> ''
 									limit 5;`
 
 	GetUsersForMatchesQuery = `select
