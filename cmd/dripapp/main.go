@@ -54,14 +54,6 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	// err = userRepo.Init()
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-
-	// userRepo := _userRepo.NewMockDB()
-	// userRepo.Init()
-	// sm := session.NewSessionDB()
 
 	sm, err := session.NewTarantoolConnection(configs.Tarantool)
 	if err != nil {
@@ -100,6 +92,8 @@ func main() {
 
 	log.Printf("STD starting server at %s\n", srv.Addr)
 
+	// for local
 	log.Fatal(srv.ListenAndServe())
+	// for deploy
 	// log.Fatal(srv.ListenAndServeTLS(certFile, keyFile))
 }

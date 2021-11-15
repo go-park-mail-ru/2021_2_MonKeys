@@ -92,8 +92,8 @@ func SetConfig() {
 	}
 
 	FileStorage = FileStorageConfig{
-		RootFolder:       "media",
-		ProfilePhotoPath: "profile_photos",
+		RootFolder:       viper.GetString(`file_storage.root_folder`),
+		ProfilePhotoPath: viper.GetString(`file_storage.profile_photo_path`),
 	}
 
 	Timeouts = TimeoutsConfig{
