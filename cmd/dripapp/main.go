@@ -5,7 +5,8 @@ import (
 	"dripapp/internal/dripapp/file"
 	_fileDelivery "dripapp/internal/dripapp/file/delivery"
 	"dripapp/internal/dripapp/middleware"
-	"dripapp/internal/dripapp/session"
+	_sessionDelivery "dripapp/internal/dripapp/session/delivery"
+	_sessionRepo "dripapp/internal/dripapp/session/repository"
 	_sessionUcase "dripapp/internal/dripapp/session/usecase"
 	_userDelivery "dripapp/internal/dripapp/user/delivery"
 	_userRepo "dripapp/internal/dripapp/user/repository"
@@ -54,16 +55,8 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	// err = userRepo.Init()
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
 
-	// userRepo := _userRepo.NewMockDB()
-	// userRepo.Init()
-	// sm := session.NewSessionDB()
-
-	sm, err := session.NewTarantoolConnection(configs.Tarantool)
+	sm, err := _sessionRepo.NewTarantoolConnection(configs.Tarantool)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -84,12 +77,12 @@ func main() {
 	)
 
 	// delivery
-	_userDelivery.SetRouting(logger.DripLogger, router, userUCase, sessionUcase)
+	_userDelivery.SetUserRouting(logger.DripLogger, router, userUCase, sessionUcase, userRepo)
+	_sessionDelivery.SetSessionRouting(logger.DripLogger, router, userUCase, sessionUcase)
+	_fileDelivery.SetFileRouting(router, *fileManager)
 
 	// middleware
-	middleware.NewMiddleware(router, sm, logFile)
-
-	_fileDelivery.SetFileRouting(router, *fileManager)
+	middleware.NewMiddleware(router, sm, logFile, logger.DripLogger)
 
 	srv := &http.Server{
 		Handler:      router,
@@ -100,6 +93,8 @@ func main() {
 
 	log.Printf("STD starting server at %s\n", srv.Addr)
 
+	// for local
 	log.Fatal(srv.ListenAndServe())
+	// for deploy
 	// log.Fatal(srv.ListenAndServeTLS(certFile, keyFile))
 }

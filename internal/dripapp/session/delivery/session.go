@@ -44,7 +44,7 @@ func createSessionCookie(user models.LoginUser) http.Cookie {
 // @Param input body LoginUser true "data for login"
 // @Success 200 {object} JSON
 // @Failure 400,404,500
-// @Router /login [post]
+// @Router /session [post]
 func (h *SessionHandler) LoginHandler(w http.ResponseWriter, r *http.Request) {
 	var resp responses.JSON
 
@@ -52,7 +52,7 @@ func (h *SessionHandler) LoginHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		responses.SendErrorResponse(w, models.HTTPError{
 			Code:    http.StatusBadRequest,
-			Message: err.Error(),
+			Message: err,
 		}, h.Logger.ErrorLogging)
 		return
 	}
@@ -62,16 +62,17 @@ func (h *SessionHandler) LoginHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		responses.SendErrorResponse(w, models.HTTPError{
 			Code:    http.StatusBadRequest,
-			Message: err.Error(),
+			Message: err,
 		}, h.Logger.ErrorLogging)
 		return
 	}
 
 	user, status := h.UserUCase.Login(r.Context(), logUserData)
-	if status != models.StatusOk200 {
+	if status != nil {
+		resp.Status = http.StatusNotFound
 		responses.SendErrorResponse(w, models.HTTPError{
-			Code:    http.StatusNotFound,
-			Message: status.Message,
+			Code:    resp.Status,
+			Message: status,
 		}, h.Logger.WarnLogging)
 		return
 	}
@@ -86,7 +87,7 @@ func (h *SessionHandler) LoginHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		responses.SendErrorResponse(w, models.HTTPError{
 			Code:    http.StatusInternalServerError,
-			Message: err.Error(),
+			Message: err,
 		}, h.Logger.WarnLogging)
 		return
 	}
@@ -104,7 +105,7 @@ func (h *SessionHandler) LogoutHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		responses.SendErrorResponse(w, models.HTTPError{
 			Code:    http.StatusNotFound,
-			Message: err.Error(),
+			Message: err,
 		}, h.Logger.WarnLogging)
 		return
 	}

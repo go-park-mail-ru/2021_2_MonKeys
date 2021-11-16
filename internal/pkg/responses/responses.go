@@ -17,7 +17,7 @@ func SendOKResp(resp JSON, w http.ResponseWriter) {
 	if err != nil {
 		SendErrorResponse(w, models.HTTPError{
 			Code:    http.StatusInternalServerError,
-			Message: "Error encoding json",
+			Message: models.ErrJson,
 		},
 			logger.DripLogger.ErrorLogging,
 		)
@@ -28,7 +28,7 @@ func SendOKResp(resp JSON, w http.ResponseWriter) {
 	if err != nil {
 		SendErrorResponse(w, models.HTTPError{
 			Code:    http.StatusInternalServerError,
-			Message: "Error write byte",
+			Message: models.ErrWriteByte,
 		},
 			logger.DripLogger.ErrorLogging,
 		)
@@ -54,5 +54,5 @@ func SendErrorResponse(w http.ResponseWriter, httpErr models.HTTPError, logging 
 		return
 	}
 
-	logging(httpErr.Code, httpErr.Message)
+	logging(httpErr.Code, httpErr.Message.Error())
 }

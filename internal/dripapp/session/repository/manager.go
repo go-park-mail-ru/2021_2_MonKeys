@@ -20,8 +20,6 @@ func NewTarantoolConnection(tntConfig configs.TarantoolConfig) (models.SessionRe
 	addrPort := fmt.Sprintf("%s%s", tntConfig.Host, tntConfig.Port)
 	conn, err := tarantool.Connect(addrPort, tarantool.Opts{
 		User: "guest",
-		// User: tntConfig.User,
-		// Pass: tntConfig.Password,
 	})
 
 	seesManager := SessionManager{conn}

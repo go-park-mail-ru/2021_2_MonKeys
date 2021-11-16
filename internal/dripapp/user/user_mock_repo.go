@@ -240,9 +240,9 @@ func (db *MockDB) DropSwipes(ctx context.Context) error {
 	return nil
 }
 
-func (db *MockDB) CreateTag(ctx context.Context, tag_name string) error {
+func (db *MockDB) CreateTag(ctx context.Context, tagName string) error {
 	newID := uint64(len(db.tags) + 1)
-	db.tags[newID] = tag_name
+	db.tags[newID] = tagName
 	return nil
 }
 

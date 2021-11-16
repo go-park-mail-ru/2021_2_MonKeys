@@ -23,7 +23,7 @@ func CreateMultipartRequest(method, target string, body io.Reader) (*http.Reques
 	if err != nil {
 		return nil, err
 	}
-	r = r.WithContext(context.WithValue(r.Context(), configs.ForContext, models.Session{
+	r = r.WithContext(context.WithValue(r.Context(), configs.ContextUserID, models.Session{
 		UserID: 0,
 		Cookie: "",
 	}))
@@ -74,7 +74,7 @@ func TestUserUsecase_AddSession(t *testing.T) {
 
 		r, err := http.NewRequest(http.MethodGet, "test", nil)
 		assert.NoError(t, err)
-		r = r.WithContext(context.WithValue(r.Context(), configs.ForContext, testCase.session))
+		r = r.WithContext(context.WithValue(r.Context(), configs.ContextUserID, testCase.session))
 
 		mockSessionRepository := new(sessionMocks.SessionRepository)
 		mockSessionRepository.On("NewSessionCookie", mock.AnythingOfType("string"), mock.AnythingOfType("uint64")).Return(MockResultCases[i].err)
@@ -142,7 +142,7 @@ func TestUserUsecase_DeleteSession(t *testing.T) {
 		r, err := http.NewRequest(http.MethodGet, "test", nil)
 		assert.NoError(t, err)
 		if testCase.session.UserID != 1 {
-			r = r.WithContext(context.WithValue(r.Context(), configs.ForContext, testCase.session))
+			r = r.WithContext(context.WithValue(r.Context(), configs.ContextUserID, testCase.session))
 		}
 
 		mockSessionRepository := new(sessionMocks.SessionRepository)

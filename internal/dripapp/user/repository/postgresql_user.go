@@ -136,7 +136,7 @@ func (p PostgreUserRepo) GetTags(ctx context.Context) (map[uint64]string, error)
 
 	var i uint64
 	for i = 0; i < uint64(len(tags)); i++ {
-		tagsMap[i] = tags[i].Tag_Name
+		tagsMap[i] = tags[i].TagName
 	}
 
 	return tagsMap, nil
@@ -320,10 +320,10 @@ func (p PostgreUserRepo) AddMatch(ctx context.Context, firstUser uint64, secondU
 // 	return resp, nil
 // }
 
-// func (p PostgreUserRepo) CreateTag(ctx context.Context, tag_name string) error {
-// 	sel := "insert into tag(tag_name) values($1);"
+// func (p PostgreUserRepo) CreateTag(ctx context.Context, tagName string) error {
+// 	sel := "insert into tag(tagname) values($1);"
 
-// 	if err := p.Conn.QueryRow(sel, tag_name).Scan(); err != nil {
+// 	if err := p.Conn.QueryRow(sel, tagname).Scan(); err != nil {
 // 		return err
 // 	}
 

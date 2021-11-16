@@ -51,31 +51,37 @@ clean:
 ##################################### deploy
 
 ## deploy-build: Deply build and start docker with new changes
-deploy-build: clean
+deploy-build:
 	docker build -t dependencies -f ${DOCKER_DIR}/builder.Dockerfile .
 	docker build -t drip_tarantool -f ${DOCKER_DIR}/drip_tarantool.Dockerfile .
 	docker build -t main_service -f ${DOCKER_DIR}/main_service.Dockerfile .
 
 ## deploy-run: Deploy run app
 deploy-run:
-	docker-compose -f prod.yml up --build --no-deps
+	docker-compose -f prod.yml up --build --no-deps -d
 
 ## deploy-app: Deploy build and run app
 deploy-app: deploy-build deploy-run
 
+## deploy-app-clean: Deploy build and run app with clean
+deploy-app-clean: clean deploy-build deploy-run
+
 ######################################## local
 
 ## build: Build and start docker with new changes
-build: clean
+build:
 	docker build -t drip_tarantool -f ${DOCKER_DIR}/drip_tarantool.Dockerfile .
-	docker-compose -f local.yml up --build --no-deps -d
 
 ## run: Run app
 run:
+	docker-compose -f local.yml up --build --no-deps -d
 	go run cmd/dripapp/main.go
 
 ## app: Build and run app
 app: build run
+
+## app-clean: Build and run app with clean
+app-clean:clean build run
 
 
 down:

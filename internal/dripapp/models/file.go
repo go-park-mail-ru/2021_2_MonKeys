@@ -30,6 +30,7 @@ func (user *User) DeletePhoto(photo Photo) (err error) {
 			err = nil
 		}
 	}
+
 	user.Imgs = photos
 
 	return
