@@ -184,7 +184,7 @@ func TestSignup(t *testing.T) {
 			BodyReq: bytes.NewReader([]byte(`{"email":"wrongEmail","password":"wrongPassword"}`)),
 			mockUserUseCase: []interface{}{
 				models.User{},
-				models.StatusEmailAlreadyExists,
+				models.ErrEmailAlreadyExists,
 			},
 			mockSessUseCase: []interface{}{
 				nil,
@@ -249,7 +249,7 @@ func TestNextUser(t *testing.T) {
 		{
 			mockUserUseCase: []interface{}{
 				[]models.User{},
-				errors.New("prikol"),
+				errors.New(""),
 			},
 			StatusCode: http.StatusOK,
 			BodyResp:   `{"status":404,"body":null}`,
@@ -300,10 +300,10 @@ func TestEditProfile(t *testing.T) {
 			BodyReq: bytes.NewReader([]byte(`{"name":"testEdit","date":"wrong-format-data","description":"Description Description Description Description","imgSrc":"/img/testEdit/","tags":["Tags","Tags","Tags","Tags","Tags"]}`)),
 			mockUserUseCase: []interface{}{
 				models.User{},
-				errors.New("prikol"),
+				errors.New(""),
 			},
 			StatusCode: http.StatusOK,
-			BodyResp:   `{"status":400,"body":null}`,
+			BodyResp:   `{"status":404,"body":null}`,
 		},
 	}
 
@@ -348,7 +348,7 @@ func TestGetAllTags(t *testing.T) {
 		{
 			mockUserUseCase: []interface{}{
 				models.Tags{},
-				errors.New("prikol"),
+				errors.New(""),
 			},
 			StatusCode: http.StatusOK,
 			BodyResp:   `{"status":404,"body":null}`,
@@ -393,7 +393,7 @@ func TestMatches(t *testing.T) {
 		{
 			mockUserUseCase: []interface{}{
 				models.Matches{},
-				errors.New("prikol"),
+				errors.New(""),
 			},
 			StatusCode: http.StatusOK,
 			BodyResp:   `{"status":404,"body":null}`,
@@ -452,7 +452,7 @@ func TestReaction(t *testing.T) {
 			BodyReq: bytes.NewReader([]byte(`{"id":` + idStr + `,"reaction":` + reactionStr + `}`)),
 			mockUserUseCase: []interface{}{
 				models.Match{},
-				errors.New("prikol"),
+				errors.New(""),
 			},
 			StatusCode: http.StatusOK,
 			BodyResp:   `{"status":404,"body":null}`,
@@ -522,10 +522,10 @@ Content-Type: image/jpeg
 ------boundary--`)),
 			mockUserUseCase: []interface{}{
 				models.Photo{},
-				errors.New("prikol"),
+				errors.New(""),
 			},
 			StatusCode: http.StatusOK,
-			BodyResp:   `{"status":500,"body":null}`,
+			BodyResp:   `{"status":404,"body":null}`,
 		},
 	}
 
@@ -575,10 +575,10 @@ func TestDeletePhoto(t *testing.T) {
 		{
 			BodyReq: bytes.NewReader([]byte(`{"photo":"` + photo.Path + `"}`)),
 			mockUserUseCase: []interface{}{
-				errors.New("prikol"),
+				errors.New(""),
 			},
 			StatusCode: http.StatusOK,
-			BodyResp:   `{"status":400,"body":null}`,
+			BodyResp:   `{"status":404,"body":null}`,
 		},
 	}
 

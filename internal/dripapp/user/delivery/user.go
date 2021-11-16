@@ -58,12 +58,11 @@ func (h *UserHandler) EditProfileHandler(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	user, status := h.UserUCase.EditProfile(r.Context(), newUserData)
-	if status != nil {
-		resp.Status = http.StatusNotFound
+	user, err := h.UserUCase.EditProfile(r.Context(), newUserData)
+	if err != nil {
 		responses.SendErrorResponse(w, models.HTTPError{
 			Code:    http.StatusNotFound,
-			Message: status,
+			Message: err,
 		}, h.Logger.ErrorLogging)
 		return
 	}
@@ -178,12 +177,15 @@ func (h *UserHandler) SignupHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, status := h.UserUCase.Signup(r.Context(), logUserData)
-	if status != nil {
+	user, err := h.UserUCase.Signup(r.Context(), logUserData)
+	if err != nil {
 		resp.Status = http.StatusNotFound
+		if err == models.ErrEmailAlreadyExists {
+			resp.Status = models.StatusEmailAlreadyExists
+		}
 		responses.SendErrorResponse(w, models.HTTPError{
 			Code:    resp.Status,
-			Message: status,
+			Message: err,
 		}, h.Logger.ErrorLogging)
 		return
 	}

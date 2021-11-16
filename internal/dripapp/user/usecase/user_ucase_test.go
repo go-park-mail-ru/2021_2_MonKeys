@@ -720,7 +720,7 @@ func TestUserUsecase_Signup(t *testing.T) {
 				Password: "VBif222!",
 			},
 			user: models.User{},
-			err:  errors.New(""),
+			err:  models.ErrEmailAlreadyExists,
 		},
 		// Test ErrCreateUser
 		{
@@ -854,11 +854,10 @@ func TestUserUsecase_Signup(t *testing.T) {
 
 		testUserUsecase := usecase.NewUserUsecase(mockUserRepository, mockFileRepository, time.Second*2)
 
-		user, status := testUserUsecase.Signup(r.Context(), testCase.logUserData)
+		user, err := testUserUsecase.Signup(r.Context(), testCase.logUserData)
 
-		assert.Equal(t, testCase.err, status, message)
+		assert.Equal(t, testCase.err, err, message)
 		reflect.DeepEqual(testCase.user, user)
-
 	}
 }
 

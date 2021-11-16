@@ -5,7 +5,6 @@ import (
 	"dripapp/configs"
 	"dripapp/internal/dripapp/models"
 	"dripapp/internal/pkg/hasher"
-	"errors"
 	"io"
 	"strconv"
 	"time"
@@ -153,7 +152,7 @@ func (h *userUsecase) Signup(c context.Context, logUserData models.LoginUser) (m
 	if err != nil {
 	}
 	if !identifiableUser.IsEmpty() {
-		return models.User{}, errors.New("")
+		return models.User{}, models.ErrEmailAlreadyExists
 	}
 
 	logUserData.Password = hasher.HashAndSalt(nil, logUserData.Password)

@@ -13,7 +13,7 @@ var (
 
 	ErrNoSuchPhoto = errors.New("user does not have such a photo")
 
-	StatusEmailAlreadyExists = errors.New("email already exists")
+	StatusEmailAlreadyExists = 1001
 
 	ErrContextNilError    = errors.New("context nil error")
 	ErrConvertToSession   = errors.New("convert to model session error")
