@@ -41,7 +41,9 @@ type TimeoutsConfig struct {
 	ContextTimeout time.Duration
 }
 
-type contextID string
+type contextUserID string
+
+type contextUser string
 
 var (
 	Postgres PostgresConfig
@@ -54,7 +56,9 @@ var (
 
 	Timeouts TimeoutsConfig
 
-	ForContext contextID
+	ContextUserID contextUserID
+
+	ContextUser contextUser
 )
 
 func SetConfig() {
@@ -102,5 +106,7 @@ func SetConfig() {
 		ContextTimeout: time.Second * 2,
 	}
 
-	ForContext = "userID"
+	ContextUserID = "userID"
+
+	ContextUser = "user"
 }

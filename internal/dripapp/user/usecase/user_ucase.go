@@ -33,36 +33,11 @@ func (h *userUsecase) CurrentUser(c context.Context) (models.User, models.HTTPEr
 	ctx, cancel := context.WithTimeout(c, h.contextTimeout)
 	defer cancel()
 
-	ctxSession := ctx.Value(configs.ForContext)
-	if ctxSession == nil {
-		return models.User{}, models.HTTPError{
-			Code:    http.StatusNotFound,
-			Message: models.ErrContextNilError,
-		}
-	}
-	currentSession, ok := ctxSession.(models.Session)
+	currentUser, ok := ctx.Value(configs.ContextUser).(models.User)
 	if !ok {
 		return models.User{}, models.HTTPError{
 			Code:    http.StatusNotFound,
-			Message: models.ErrConvertToSession,
-		}
-	}
-
-	currentUser, err := h.UserRepo.GetUserByID(c, currentSession.UserID)
-	if err != nil {
-		return models.User{}, models.HTTPError{
-			Code:    http.StatusNotFound,
-			Message: err.Error(),
-		}
-	}
-	if len(currentUser.Date) == 0 {
-		return currentUser, models.StatusOk200
-	}
-	currentUser.Age, err = models.GetAgeFromDate(currentUser.Date)
-	if err != nil {
-		return models.User{}, models.HTTPError{
-			Code:    http.StatusNotFound,
-			Message: err.Error(),
+			Message: models.ErrConvertToUser,
 		}
 	}
 
@@ -73,7 +48,7 @@ func (h *userUsecase) EditProfile(c context.Context, newUserData models.User) (m
 	ctx, cancel := context.WithTimeout(c, h.contextTimeout)
 	defer cancel()
 
-	ctxSession := ctx.Value(configs.ForContext)
+	ctxSession := ctx.Value(configs.ContextUserID)
 	if ctxSession == nil {
 		return models.User{}, models.HTTPError{
 			Code:    http.StatusNotFound,
@@ -119,7 +94,7 @@ func (h *userUsecase) AddPhoto(c context.Context, photo io.Reader, fileName stri
 	ctx, cancel := context.WithTimeout(c, h.contextTimeout)
 	defer cancel()
 
-	ctxSession := ctx.Value(configs.ForContext)
+	ctxSession := ctx.Value(configs.ContextUserID)
 	if ctxSession == nil {
 		return models.Photo{}, models.HTTPError{
 			Code:    http.StatusNotFound,
@@ -168,7 +143,7 @@ func (h *userUsecase) DeletePhoto(c context.Context, photo models.Photo) models.
 	ctx, cancel := context.WithTimeout(c, h.contextTimeout)
 	defer cancel()
 
-	ctxSession := ctx.Value(configs.ForContext)
+	ctxSession := ctx.Value(configs.ContextUserID)
 	if ctxSession == nil {
 		return models.HTTPError{
 			Code:    http.StatusNotFound,
@@ -293,7 +268,7 @@ func (h *userUsecase) NextUser(c context.Context) ([]models.User, models.HTTPErr
 	ctx, cancel := context.WithTimeout(c, h.contextTimeout)
 	defer cancel()
 
-	ctxSession := ctx.Value(configs.ForContext)
+	ctxSession := ctx.Value(configs.ContextUserID)
 	if ctxSession == nil {
 		return nil, models.HTTPError{
 			Code:    http.StatusNotFound,
@@ -331,29 +306,6 @@ func (h *userUsecase) GetAllTags(c context.Context) (models.Tags, models.HTTPErr
 	ctx, cancel := context.WithTimeout(c, h.contextTimeout)
 	defer cancel()
 
-	ctxSession := ctx.Value(configs.ForContext)
-	if ctxSession == nil {
-		return models.Tags{}, models.HTTPError{
-			Code:    http.StatusNotFound,
-			Message: models.ErrContextNilError,
-		}
-	}
-	currentSession, ok := ctxSession.(models.Session)
-	if !ok {
-		return models.Tags{}, models.HTTPError{
-			Code:    http.StatusNotFound,
-			Message: models.ErrConvertToSession,
-		}
-	}
-
-	_, err := h.UserRepo.GetUserByID(c, currentSession.UserID)
-	if err != nil {
-		return models.Tags{}, models.HTTPError{
-			Code:    http.StatusNotFound,
-			Message: err.Error(),
-		}
-	}
-
 	allTags, err := h.UserRepo.GetTags(ctx)
 	if err != nil {
 		return models.Tags{}, models.HTTPError{
@@ -382,7 +334,7 @@ func (h *userUsecase) UsersMatches(c context.Context) (models.Matches, models.HT
 	ctx, cancel := context.WithTimeout(c, h.contextTimeout)
 	defer cancel()
 
-	ctxSession := ctx.Value(configs.ForContext)
+	ctxSession := ctx.Value(configs.ContextUserID)
 	if ctxSession == nil {
 		return models.Matches{}, models.HTTPError{
 			Code:    http.StatusNotFound,
@@ -433,7 +385,7 @@ func (h *userUsecase) Reaction(c context.Context, reactionData models.UserReacti
 	ctx, cancel := context.WithTimeout(c, h.contextTimeout)
 	defer cancel()
 
-	ctxSession := ctx.Value(configs.ForContext)
+	ctxSession := ctx.Value(configs.ContextUserID)
 	if ctxSession == nil {
 		return models.Match{}, models.HTTPError{
 			Code:    http.StatusNotFound,

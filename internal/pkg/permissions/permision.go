@@ -1,10 +1,12 @@
 package permissions
 
 import (
+	"context"
 	"dripapp/configs"
 	"dripapp/internal/dripapp/models"
 	"dripapp/internal/pkg/logger"
 	"dripapp/internal/pkg/responses"
+	"fmt"
 
 	"net/http"
 	"time"
@@ -12,11 +14,16 @@ import (
 	uuid "github.com/nu7hatch/gouuid"
 )
 
+type UserMiddlware struct {
+	UserRepo models.UserRepository
+}
+
 func CheckAuthenticated(next http.HandlerFunc) http.HandlerFunc {
 	return http.HandlerFunc(
 		func(w http.ResponseWriter, r *http.Request) {
 
-			session, ok := r.Context().Value(configs.ForContext).(models.Session)
+			fmt.Println("check middlware")
+			session, ok := r.Context().Value(configs.ContextUserID).(models.Session)
 			if !ok {
 				responses.SendErrorResponse(w, models.HTTPError{
 					Code:    http.StatusForbidden,
@@ -32,6 +39,53 @@ func CheckAuthenticated(next http.HandlerFunc) http.HandlerFunc {
 				return
 			}
 
+			next.ServeHTTP(w, r)
+		})
+}
+
+func (us *UserMiddlware) GetCurrentUser(next http.HandlerFunc) http.HandlerFunc {
+	return http.HandlerFunc(
+		func(w http.ResponseWriter, r *http.Request) {
+
+			fmt.Println("get current")
+			ctxSession := r.Context().Value(configs.ContextUserID)
+			if ctxSession == nil {
+				responses.SendErrorResponse(w, models.HTTPError{
+					Code:    http.StatusForbidden,
+					Message: models.ErrExtractContext,
+				}, logger.DripLogger.ErrorLogging)
+				return
+			}
+			currentSession, ok := ctxSession.(models.Session)
+			if !ok {
+				responses.SendErrorResponse(w, models.HTTPError{
+					Code:    http.StatusForbidden,
+					Message: models.ErrExtractContext,
+				}, logger.DripLogger.ErrorLogging)
+				return
+			}
+
+			currentUser, err := us.UserRepo.GetUserByID(r.Context(), currentSession.UserID)
+			if err != nil {
+				responses.SendErrorResponse(w, models.HTTPError{
+					Code:    http.StatusNotFound,
+					Message: err.Error(),
+				}, logger.DripLogger.ErrorLogging)
+				return
+			}
+
+			if len(currentUser.Date) != 0 {
+				currentUser.Age, err = models.GetAgeFromDate(currentUser.Date)
+				if err != nil {
+					responses.SendErrorResponse(w, models.HTTPError{
+						Code:    http.StatusNotFound,
+						Message: err.Error(),
+					}, logger.DripLogger.ErrorLogging)
+					return
+				}
+			}
+
+			r = r.WithContext(context.WithValue(r.Context(), configs.ContextUser, currentUser))
 			next.ServeHTTP(w, r)
 		})
 }

@@ -17,6 +17,7 @@ var (
 
 	ErrContextNilError  = "context nil error"
 	ErrConvertToSession = "convert to model session error"
+	ErrConvertToUser    = "convert to model user error"
 	ErrExtractContext   = "context extract error"
 	ErrAuth             = "auth error"
 )

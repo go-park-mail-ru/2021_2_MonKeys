@@ -4,6 +4,7 @@ import (
 	"context"
 	"dripapp/configs"
 	"dripapp/internal/dripapp/models"
+	"fmt"
 	"net/http"
 )
 
@@ -13,6 +14,7 @@ type sessionMiddleware struct {
 
 func (s *sessionMiddleware) SessionMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		fmt.Println("auth middlware")
 		var userSession models.Session
 		session, err := r.Cookie("sessionId")
 		if err != nil {
@@ -29,7 +31,7 @@ func (s *sessionMiddleware) SessionMiddleware(next http.Handler) http.Handler {
 				}
 			}
 		}
-		r = r.WithContext(context.WithValue(r.Context(), configs.ForContext, userSession))
+		r = r.WithContext(context.WithValue(r.Context(), configs.ContextUserID, userSession))
 		next.ServeHTTP(w, r)
 	})
 }

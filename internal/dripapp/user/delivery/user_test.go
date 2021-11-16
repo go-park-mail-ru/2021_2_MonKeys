@@ -7,6 +7,7 @@ import (
 	"dripapp/internal/dripapp/models"
 	_s "dripapp/internal/dripapp/session/mocks"
 	"dripapp/internal/dripapp/user/mocks"
+	"dripapp/internal/dripapp/user/repository"
 	"dripapp/internal/pkg/logger"
 	"errors"
 	"io"
@@ -18,10 +19,10 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
-const (
-	correctCase = iota + 1
-	wrongCase
-)
+// const (
+// 	correctCase = iota + 1
+// 	wrongCase
+// )
 
 type TestCase struct {
 	BodyReq         io.Reader
@@ -92,7 +93,7 @@ func CheckResponse(t *testing.T, w *httptest.ResponseRecorder, caseNum int, test
 
 func CreateRequest(method, target string, body io.Reader) (r *http.Request) {
 	r = httptest.NewRequest(method, target, body)
-	r = r.WithContext(context.WithValue(r.Context(), configs.ForContext, models.Session{
+	r = r.WithContext(context.WithValue(r.Context(), configs.ContextUserID, models.Session{
 		UserID: 0,
 		Cookie: "",
 	}))
@@ -614,6 +615,7 @@ func TestDeletePhoto(t *testing.T) {
 func TestSetRouting(t *testing.T) {
 	mockUserUseCase := &mocks.UserUsecase{}
 	mockSessionUseCase := &_s.SessionUsecase{}
+	mockUserRepo := &repository.PostgreUserRepo{}
 
-	SetRouting(logger.DripLogger, mux.NewRouter(), mockUserUseCase, mockSessionUseCase)
+	SetUserRouting(logger.DripLogger, mux.NewRouter(), mockUserUseCase, mockSessionUseCase, mockUserRepo)
 }

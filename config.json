@@ -21,7 +21,7 @@
       "name": "drip"
   },
   "file_storage": {
-    "root_folder": "127.0.0.1",
-    "profile_photo_path": ":3301"
+    "root_folder": "media",
+    "profile_photo_path": "profile_photos"
   }
 }

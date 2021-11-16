@@ -383,8 +383,6 @@ func TestUpdateUser(t *testing.T) {
 		rowsInsTags := sqlmock.NewRows([]string{"id"}).AddRow(1)
 		mock.ExpectQuery("insert").WithArgs(vals...).WillReturnRows(rowsInsTags)
 
-		err := repo.insertTags(context.TODO(), 1, []string{"anime", "music"})
-
 		rowsTags := sqlmock.NewRows([]string{"tag_name"}).AddRow("anime").AddRow("music")
 		mock.ExpectQuery("select tag_name").WithArgs(1).WillReturnRows(rowsTags)
 
@@ -411,8 +409,6 @@ func TestUpdateUser(t *testing.T) {
 			"всем привет",
 			pq.Array([]string{"img1", "img2"}),
 		).WillReturnError(sql.ErrNoRows)
-
-		err := repo.insertTags(context.TODO(), 1, []string{"anime", "music"})
 
 		_, err = repo.UpdateUser(context.TODO(), u)
 
@@ -465,8 +461,6 @@ func TestUpdateUser(t *testing.T) {
 
 		mock.ExpectQuery("insert").WithArgs(vals...).WillReturnError(sql.ErrNoRows)
 
-		err := repo.insertTags(context.TODO(), 1, []string{"anime", "music"})
-
 		_, err = repo.UpdateUser(context.TODO(), u)
 
 		if err == nil {
@@ -494,8 +488,6 @@ func TestUpdateUser(t *testing.T) {
 
 		rowsInsTags := sqlmock.NewRows([]string{"id"}).AddRow(1)
 		mock.ExpectQuery("insert").WithArgs(vals...).WillReturnRows(rowsInsTags)
-
-		err := repo.insertTags(context.TODO(), 1, []string{"anime", "music"})
 
 		mock.ExpectQuery("select tag_name").WithArgs(1).WillReturnError(fmt.Errorf("some error"))
 

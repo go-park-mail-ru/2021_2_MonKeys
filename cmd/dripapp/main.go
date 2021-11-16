@@ -5,7 +5,8 @@ import (
 	"dripapp/internal/dripapp/file"
 	_fileDelivery "dripapp/internal/dripapp/file/delivery"
 	"dripapp/internal/dripapp/middleware"
-	"dripapp/internal/dripapp/session"
+	_sessionDelivery "dripapp/internal/dripapp/session/delivery"
+	_sessionRepo "dripapp/internal/dripapp/session/repository"
 	_sessionUcase "dripapp/internal/dripapp/session/usecase"
 	_userDelivery "dripapp/internal/dripapp/user/delivery"
 	_userRepo "dripapp/internal/dripapp/user/repository"
@@ -55,7 +56,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	sm, err := session.NewTarantoolConnection(configs.Tarantool)
+	sm, err := _sessionRepo.NewTarantoolConnection(configs.Tarantool)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -76,12 +77,12 @@ func main() {
 	)
 
 	// delivery
-	_userDelivery.SetRouting(logger.DripLogger, router, userUCase, sessionUcase)
+	_userDelivery.SetUserRouting(logger.DripLogger, router, userUCase, sessionUcase, userRepo)
+	_sessionDelivery.SetSessionRouting(logger.DripLogger, router, userUCase, sessionUcase)
+	_fileDelivery.SetFileRouting(router, *fileManager)
 
 	// middleware
 	middleware.NewMiddleware(router, sm, logFile)
-
-	_fileDelivery.SetFileRouting(router, *fileManager)
 
 	srv := &http.Server{
 		Handler:      router,
