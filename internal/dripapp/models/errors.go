@@ -15,9 +15,10 @@ var (
 
 	StatusEmailAlreadyExists = 1001
 
-	ErrContextNilError  = "context nil error"
-	ErrConvertToSession = "convert to model session error"
-	ErrConvertToUser    = "convert to model user error"
-	ErrExtractContext   = "context extract error"
-	ErrAuth             = "auth error"
+	ErrContextNilError    = "context nil error"
+	ErrConvertToSession   = "convert to model session error"
+	ErrConvertToUser      = "convert to model user error"
+	ErrExtractContext     = "context extract error"
+	ErrAuth               = "auth error"
+	ErrEmailAlreadyExists = "email already exists"
 )

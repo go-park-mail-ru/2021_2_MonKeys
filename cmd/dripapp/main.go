@@ -82,7 +82,7 @@ func main() {
 	_fileDelivery.SetFileRouting(router, *fileManager)
 
 	// middleware
-	middleware.NewMiddleware(router, sm, logFile)
+	middleware.NewMiddleware(router, sm, logFile, logger.DripLogger)
 
 	srv := &http.Server{
 		Handler:      router,

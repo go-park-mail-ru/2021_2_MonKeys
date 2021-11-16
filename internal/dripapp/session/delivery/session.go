@@ -68,10 +68,11 @@ func (h *SessionHandler) LoginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	user, status := h.UserUCase.Login(r.Context(), logUserData)
-	if status != models.StatusOk200 {
+	if status != nil {
+		resp.Status = http.StatusNotFound
 		responses.SendErrorResponse(w, models.HTTPError{
-			Code:    http.StatusNotFound,
-			Message: status.Message,
+			Code:    resp.Status,
+			Message: status.Error(),
 		}, h.Logger.WarnLogging)
 		return
 	}
