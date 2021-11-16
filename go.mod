@@ -10,7 +10,7 @@ require (
 	github.com/nu7hatch/gouuid v0.0.0-20131221200532-179d4d0c4d8d
 	github.com/stretchr/testify v1.7.0
 	github.com/swaggo/http-swagger v1.1.2
-	github.com/swaggo/swag v1.7.4
+	github.com/swaggo/swag v1.7.4 // indirect
 	github.com/tarantool/go-tarantool v0.0.0-20211104105631-61f3a41907b6
 )
 

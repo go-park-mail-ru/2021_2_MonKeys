@@ -51,7 +51,6 @@ func TestUserUsecase_CurrentUser(t *testing.T) {
 
 	type MockResultCase struct {
 		user models.User
-		err  error
 	}
 	MockResultCases := []MockResultCase{
 		// Test OK
@@ -66,14 +65,12 @@ func TestUserUsecase_CurrentUser(t *testing.T) {
 				Imgs:        []string{"1", "2"},
 				Tags:        []string{"anime", "BMSTU"},
 			},
-			err: models.ErrContextNilError,
 		},
 		// Test ErrContextNilError
 		{
 			user: models.User{
 				ID: 2,
 			},
-			err: models.ErrContextNilError,
 		},
 	}
 
@@ -149,23 +146,12 @@ func TestUserUsecase_EditProfile(t *testing.T) {
 	}
 
 	type MockResultCase struct {
-		oldUser models.User
 		newUser models.User
 		err     error
 	}
 	MockResultCases := []MockResultCase{
 		// Test OK
 		{
-			oldUser: models.User{
-				ID:          1,
-				Name:        "Drip",
-				Email:       "drip@app.com",
-				Password:    "hahaha",
-				Date:        "2001-02-22",
-				Description: "vsem privet",
-				Imgs:        []string{"1", "2"},
-				Tags:        []string{"anime", "BMSTU"},
-			},
 			newUser: models.User{
 				ID:          1,
 				Name:        "DripDrip",
@@ -181,28 +167,16 @@ func TestUserUsecase_EditProfile(t *testing.T) {
 		},
 		// Test ErrorNotFound
 		{
-			oldUser: models.User{},
 			newUser: models.User{},
 			err:     errors.New("failed on userYear"),
 		},
 		// Test ErrContextNilError
 		{
-			oldUser: models.User{},
 			newUser: models.User{},
 			err:     nil,
 		},
 		// Test ErrFailedToSaveAge
 		{
-			oldUser: models.User{
-				ID:          0,
-				Name:        "Drip",
-				Email:       "drip@app.com",
-				Password:    "hahaha",
-				Date:        "22-02-2001",
-				Description: "vsem privet",
-				Imgs:        []string{"1", "2"},
-				Tags:        []string{"anime", "BMSTU"},
-			},
 			newUser: models.User{
 				ID:          0,
 				Name:        "DripDrip",
@@ -218,16 +192,6 @@ func TestUserUsecase_EditProfile(t *testing.T) {
 		},
 		// Test ErrUpdateUser
 		{
-			oldUser: models.User{
-				ID:          0,
-				Name:        "Drip",
-				Email:       "drip@app.com",
-				Password:    "hahaha",
-				Date:        "2000-02-22",
-				Description: "vsem privet",
-				Imgs:        []string{"1", "2"},
-				Tags:        []string{"anime", "BMSTU"},
-			},
 			newUser: models.User{
 				ID:          0,
 				Name:        "DripDrip",
@@ -243,16 +207,6 @@ func TestUserUsecase_EditProfile(t *testing.T) {
 		},
 		// Test ErrFailedToSaveAgeNewProfile
 		{
-			oldUser: models.User{
-				ID:          0,
-				Name:        "Drip",
-				Email:       "drip@app.com",
-				Password:    "hahaha",
-				Date:        "2000-02-22",
-				Description: "vsem privet",
-				Imgs:        []string{"1", "2"},
-				Tags:        []string{"anime", "BMSTU"},
-			},
 			newUser: models.User{
 				ID:          0,
 				Name:        "DripDrip",
@@ -339,55 +293,34 @@ func TestUserUsecase_AddPhoto(t *testing.T) {
 	}
 
 	type MockResultCase struct {
-		user          models.User
 		path          string
-		errGetUser    error
 		errSavePhoto  error
 		errUpdateImgs error
 	}
 	MockResultCases := []MockResultCase{
 		// Test OK
 		{
-			user: models.User{
-				ID:          1,
-				Name:        "Drip",
-				Email:       "drip@app.com",
-				Password:    "hahaha",
-				Date:        "2000-02-22",
-				Description: "vsem privet",
-				Imgs:        []string{"1", "2"},
-				Tags:        []string{"anime", "BMSTU"},
-			},
 			path:          "",
-			errGetUser:    nil,
 			errSavePhoto:  nil,
 			errUpdateImgs: nil,
 		},
 		// Test ErrorNotFound
 		{
-			user:          models.User{},
-			errGetUser:    nil,
 			errSavePhoto:  nil,
 			errUpdateImgs: nil,
 		},
 		// Test ErrContextNilError
 		{
-			user:          models.User{},
-			errGetUser:    nil,
 			errSavePhoto:  nil,
 			errUpdateImgs: nil,
 		},
 		// Test ErrSaveUserPhoto
 		{
-			user:          models.User{},
-			errGetUser:    nil,
 			errSavePhoto:  errors.New(""),
 			errUpdateImgs: nil,
 		},
 		// Test ErrUpdateImgs
 		{
-			user:          models.User{},
-			errGetUser:    nil,
 			errSavePhoto:  nil,
 			errUpdateImgs: errors.New(""),
 		},
@@ -510,38 +443,32 @@ func TestUserUsecase_DeletePhoto(t *testing.T) {
 	}
 
 	type MockResultCase struct {
-		errGetUser    error
 		errDelete     error
 		errUpdateImgs error
 	}
 	MockResultCases := []MockResultCase{
 		// Test OK
 		{
-			errGetUser:    nil,
 			errDelete:     nil,
 			errUpdateImgs: nil,
 		},
 		// Test ErrContextNilError
 		{
-			errGetUser:    nil,
 			errDelete:     nil,
 			errUpdateImgs: nil,
 		},
 		// Test ErrDelete
 		{
-			errGetUser:    nil,
 			errDelete:     errors.New(""),
 			errUpdateImgs: nil,
 		},
 		// Test ErrUpdateImgs
 		{
-			errGetUser:    nil,
 			errDelete:     nil,
 			errUpdateImgs: errors.New(""),
 		},
 		// Test ErrDeletePhoto
 		{
-			errGetUser:    nil,
 			errDelete:     nil,
 			errUpdateImgs: nil,
 		},
@@ -949,24 +876,12 @@ func TestUserUsecase_NextUser(t *testing.T) {
 	}
 
 	type MockResultCase struct {
-		user            models.User
 		nextUsers       []models.User
-		errGetUser      error
 		errGetNextUsers error
 	}
 	MockResultCases := []MockResultCase{
 		// Test OK
 		{
-			user: models.User{
-				ID:          0,
-				Name:        "Drip",
-				Email:       "drip@app.com",
-				Password:    "hahaha",
-				Date:        "2000-02-22",
-				Description: "vsem privet",
-				Imgs:        []string{"1", "2"},
-				Tags:        []string{"anime", "BMSTU"},
-			},
 			nextUsers: []models.User{
 				{
 					ID:          1,
@@ -1002,35 +917,19 @@ func TestUserUsecase_NextUser(t *testing.T) {
 					Tags:        []string{"BMSTU"},
 				},
 			},
-			errGetUser:      nil,
 			errGetNextUsers: nil,
 		},
 		// Test ErrorNotFound
 		{
-			user:            models.User{},
-			errGetUser:      errors.New(""),
 			errGetNextUsers: nil,
 		},
 		// Test ErrContextNilError
 		{
-			user:            models.User{},
-			errGetUser:      nil,
 			errGetNextUsers: nil,
 		},
 		// Test ErrGetNextUserForSwipe
 		{
-			user: models.User{
-				ID:          0,
-				Name:        "Drip",
-				Email:       "drip@app.com",
-				Password:    "hahaha",
-				Date:        "2000-02-22",
-				Description: "vsem privet",
-				Imgs:        []string{"1", "2"},
-				Tags:        []string{"anime", "BMSTU"},
-			},
 			nextUsers:       nil,
-			errGetUser:      nil,
 			errGetNextUsers: errors.New(""),
 		},
 	}
@@ -1099,15 +998,12 @@ func TestUserUsecase_GetAllTags(t *testing.T) {
 	}
 
 	type MockResultCase struct {
-		user       models.User
 		tags       map[uint64]string
-		errGetUser error
 		errGetTags error
 	}
 	MockResultCases := []MockResultCase{
 		// Test OK
 		{
-			user: models.User{},
 			tags: map[uint64]string{
 				0: "anime",
 				1: "BMSTU",
@@ -1115,23 +1011,11 @@ func TestUserUsecase_GetAllTags(t *testing.T) {
 				3: "netflix",
 				4: "prikolchiki",
 			},
-			errGetUser: nil,
 			errGetTags: nil,
 		},
 		// Test ErrGetTags
 		{
-			user: models.User{
-				ID:          0,
-				Name:        "Drip",
-				Email:       "drip@app.com",
-				Password:    "hahaha",
-				Date:        "2000-02-22",
-				Description: "vsem privet",
-				Imgs:        []string{"1", "2"},
-				Tags:        []string{"anime", "BMSTU"},
-			},
 			tags:       map[uint64]string{},
-			errGetUser: nil,
 			errGetTags: errors.New(""),
 		},
 	}

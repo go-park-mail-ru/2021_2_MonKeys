@@ -130,9 +130,7 @@ func (h *userUsecase) Signup(c context.Context, logUserData models.LoginUser) (m
 	ctx, cancel := context.WithTimeout(c, h.contextTimeout)
 	defer cancel()
 
-	identifiableUser, err := h.UserRepo.GetUser(ctx, logUserData.Email)
-	if err != nil {
-	}
+	identifiableUser, _ := h.UserRepo.GetUser(ctx, logUserData.Email)
 	if !identifiableUser.IsEmpty() {
 		return models.User{}, models.ErrEmailAlreadyExists
 	}

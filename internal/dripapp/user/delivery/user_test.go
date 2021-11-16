@@ -19,11 +19,6 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
-const (
-	correctCase = iota + 1
-	wrongCase
-)
-
 type TestCase struct {
 	BodyReq         io.Reader
 	mockUserUseCase []interface{}
