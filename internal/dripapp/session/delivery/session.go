@@ -52,7 +52,7 @@ func (h *SessionHandler) LoginHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		responses.SendErrorResponse(w, models.HTTPError{
 			Code:    http.StatusBadRequest,
-			Message: err.Error(),
+			Message: err,
 		}, h.Logger.ErrorLogging)
 		return
 	}
@@ -62,7 +62,7 @@ func (h *SessionHandler) LoginHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		responses.SendErrorResponse(w, models.HTTPError{
 			Code:    http.StatusBadRequest,
-			Message: err.Error(),
+			Message: err,
 		}, h.Logger.ErrorLogging)
 		return
 	}
@@ -72,7 +72,7 @@ func (h *SessionHandler) LoginHandler(w http.ResponseWriter, r *http.Request) {
 		resp.Status = http.StatusNotFound
 		responses.SendErrorResponse(w, models.HTTPError{
 			Code:    resp.Status,
-			Message: status.Error(),
+			Message: status,
 		}, h.Logger.WarnLogging)
 		return
 	}
@@ -87,7 +87,7 @@ func (h *SessionHandler) LoginHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		responses.SendErrorResponse(w, models.HTTPError{
 			Code:    http.StatusInternalServerError,
-			Message: err.Error(),
+			Message: err,
 		}, h.Logger.WarnLogging)
 		return
 	}
@@ -105,7 +105,7 @@ func (h *SessionHandler) LogoutHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		responses.SendErrorResponse(w, models.HTTPError{
 			Code:    http.StatusNotFound,
-			Message: err.Error(),
+			Message: err,
 		}, h.Logger.WarnLogging)
 		return
 	}

@@ -69,7 +69,7 @@ func (us *UserMiddlware) GetCurrentUser(next http.HandlerFunc) http.HandlerFunc 
 			if err != nil {
 				responses.SendErrorResponse(w, models.HTTPError{
 					Code:    http.StatusNotFound,
-					Message: err.Error(),
+					Message: err,
 				}, logger.DripLogger.ErrorLogging)
 				return
 			}
@@ -79,7 +79,7 @@ func (us *UserMiddlware) GetCurrentUser(next http.HandlerFunc) http.HandlerFunc 
 				if err != nil {
 					responses.SendErrorResponse(w, models.HTTPError{
 						Code:    http.StatusNotFound,
-						Message: err.Error(),
+						Message: err,
 					}, logger.DripLogger.ErrorLogging)
 					return
 				}
@@ -95,7 +95,7 @@ func generateCsrfLogic(w http.ResponseWriter) {
 	if err != nil {
 		responses.SendErrorResponse(w, models.HTTPError{
 			Code:    http.StatusForbidden,
-			Message: "no permission",
+			Message: models.ErrNoPermission,
 		}, logger.DripLogger.ErrorLogging)
 		return
 	}
@@ -123,7 +123,7 @@ func CheckCSRF(next http.HandlerFunc) http.HandlerFunc {
 			if err != nil || csrf == "" || csrfCookie.Value == "" || csrfCookie.Value != csrf {
 				responses.SendErrorResponse(w, models.HTTPError{
 					Code:    http.StatusInternalServerError,
-					Message: "csrf-protection",
+					Message: models.ErrCSRF,
 				}, logger.DripLogger.ErrorLogging)
 				return
 			}

@@ -160,7 +160,7 @@ func TestSignup(t *testing.T) {
 			BodyReq: bytes.NewReader([]byte(`{"email":"` + email + `","password":"` + password + `"}`)),
 			mockUserUseCase: []interface{}{
 				user,
-				models.StatusOk200,
+				nil,
 			},
 			mockSessUseCase: []interface{}{
 				nil,
@@ -172,7 +172,7 @@ func TestSignup(t *testing.T) {
 			BodyReq: bytes.NewReader([]byte(`wrong input data`)),
 			mockUserUseCase: []interface{}{
 				user,
-				models.StatusOk200,
+				nil,
 			},
 			mockSessUseCase: []interface{}{
 				nil,
@@ -184,9 +184,7 @@ func TestSignup(t *testing.T) {
 			BodyReq: bytes.NewReader([]byte(`{"email":"wrongEmail","password":"wrongPassword"}`)),
 			mockUserUseCase: []interface{}{
 				models.User{},
-				models.HTTPError{
-					Code: models.StatusEmailAlreadyExists,
-				},
+				models.StatusEmailAlreadyExists,
 			},
 			mockSessUseCase: []interface{}{
 				nil,
@@ -198,10 +196,10 @@ func TestSignup(t *testing.T) {
 			BodyReq: bytes.NewReader([]byte(`{"email":"` + email + `","password":"` + password + `"}`)),
 			mockUserUseCase: []interface{}{
 				user,
-				models.StatusOk200,
+				nil,
 			},
 			mockSessUseCase: []interface{}{
-				errors.New("session already exists"),
+				models.ErrSessionAlreadyExists,
 			},
 			StatusCode: http.StatusOK,
 			BodyResp:   `{"status":500,"body":null}`,
@@ -243,7 +241,7 @@ func TestNextUser(t *testing.T) {
 		{
 			mockUserUseCase: []interface{}{
 				[]models.User{user},
-				models.StatusOk200,
+				nil,
 			},
 			StatusCode: http.StatusOK,
 			BodyResp:   `{"status":200,"body":[{"id":` + idStr + `,"email":"` + email + `"}]}`,
@@ -251,7 +249,7 @@ func TestNextUser(t *testing.T) {
 		{
 			mockUserUseCase: []interface{}{
 				[]models.User{},
-				models.HTTPError{Code: http.StatusNotFound},
+				errors.New("prikol"),
 			},
 			StatusCode: http.StatusOK,
 			BodyResp:   `{"status":404,"body":null}`,
@@ -288,7 +286,7 @@ func TestEditProfile(t *testing.T) {
 			BodyReq: bytes.NewReader([]byte(`{"email":"` + email + `","password":"` + password + `"}`)),
 			mockUserUseCase: []interface{}{
 				user,
-				models.StatusOk200,
+				nil,
 			},
 			StatusCode: http.StatusOK,
 			BodyResp:   `{"status":200,"body":{"id":` + idStr + `,"email":"` + email + `"}}`,
@@ -302,7 +300,7 @@ func TestEditProfile(t *testing.T) {
 			BodyReq: bytes.NewReader([]byte(`{"name":"testEdit","date":"wrong-format-data","description":"Description Description Description Description","imgSrc":"/img/testEdit/","tags":["Tags","Tags","Tags","Tags","Tags"]}`)),
 			mockUserUseCase: []interface{}{
 				models.User{},
-				models.HTTPError{Code: http.StatusBadRequest},
+				errors.New("prikol"),
 			},
 			StatusCode: http.StatusOK,
 			BodyResp:   `{"status":400,"body":null}`,
@@ -342,7 +340,7 @@ func TestGetAllTags(t *testing.T) {
 		{
 			mockUserUseCase: []interface{}{
 				tags,
-				models.StatusOk200,
+				nil,
 			},
 			StatusCode: http.StatusOK,
 			BodyResp:   `{"status":200,"body":{"allTags":` + tagsMapStr + `,"tagsCount":` + tagsCountStr + `}}`,
@@ -350,9 +348,7 @@ func TestGetAllTags(t *testing.T) {
 		{
 			mockUserUseCase: []interface{}{
 				models.Tags{},
-				models.HTTPError{
-					Code: http.StatusNotFound,
-				},
+				errors.New("prikol"),
 			},
 			StatusCode: http.StatusOK,
 			BodyResp:   `{"status":404,"body":null}`,
@@ -389,7 +385,7 @@ func TestMatches(t *testing.T) {
 		{
 			mockUserUseCase: []interface{}{
 				matches,
-				models.StatusOk200,
+				nil,
 			},
 			StatusCode: http.StatusOK,
 			BodyResp:   `{"status":200,"body":{"allUsers":` + usersMapStr + `,"matchesCount":"` + matchesCountStr + `"}}`,
@@ -397,9 +393,7 @@ func TestMatches(t *testing.T) {
 		{
 			mockUserUseCase: []interface{}{
 				models.Matches{},
-				models.HTTPError{
-					Code: http.StatusNotFound,
-				},
+				errors.New("prikol"),
 			},
 			StatusCode: http.StatusOK,
 			BodyResp:   `{"status":404,"body":null}`,
@@ -435,7 +429,7 @@ func TestReaction(t *testing.T) {
 			BodyReq: bytes.NewReader([]byte(`{"id":` + idStr + `,"reaction":` + reactionStr + `}`)),
 			mockUserUseCase: []interface{}{
 				match,
-				models.StatusOk200,
+				nil,
 			},
 			StatusCode: http.StatusOK,
 			BodyResp:   `{"status":200,"body":{"match":` + matchStr + `}}`,
@@ -444,7 +438,7 @@ func TestReaction(t *testing.T) {
 			BodyReq: bytes.NewReader([]byte(`{"id":` + idStr + `,"reaction":` + reactionStr + `}`)),
 			mockUserUseCase: []interface{}{
 				notMatch,
-				models.StatusOk200,
+				nil,
 			},
 			StatusCode: http.StatusOK,
 			BodyResp:   `{"status":200,"body":{"match":` + notMatchStr + `}}`,
@@ -458,7 +452,7 @@ func TestReaction(t *testing.T) {
 			BodyReq: bytes.NewReader([]byte(`{"id":` + idStr + `,"reaction":` + reactionStr + `}`)),
 			mockUserUseCase: []interface{}{
 				models.Match{},
-				models.HTTPError{Code: http.StatusNotFound},
+				errors.New("prikol"),
 			},
 			StatusCode: http.StatusOK,
 			BodyResp:   `{"status":404,"body":null}`,
@@ -501,7 +495,7 @@ Content-Type: image/jpeg
 ------boundary--`)),
 			mockUserUseCase: []interface{}{
 				photo,
-				models.StatusOk200,
+				nil,
 			},
 			StatusCode: http.StatusOK,
 			BodyResp:   `{"status":200,"body":{"photo":"` + photo.Path + `"}}`,
@@ -528,7 +522,7 @@ Content-Type: image/jpeg
 ------boundary--`)),
 			mockUserUseCase: []interface{}{
 				models.Photo{},
-				models.HTTPError{Code: http.StatusInternalServerError},
+				errors.New("prikol"),
 			},
 			StatusCode: http.StatusOK,
 			BodyResp:   `{"status":500,"body":null}`,
@@ -568,7 +562,7 @@ func TestDeletePhoto(t *testing.T) {
 		{
 			BodyReq: bytes.NewReader([]byte(`{"photo":"` + photo.Path + `"}`)),
 			mockUserUseCase: []interface{}{
-				models.StatusOk200,
+				nil,
 			},
 			StatusCode: http.StatusOK,
 			BodyResp:   `{"status":200,"body":null}`,
@@ -581,7 +575,7 @@ func TestDeletePhoto(t *testing.T) {
 		{
 			BodyReq: bytes.NewReader([]byte(`{"photo":"` + photo.Path + `"}`)),
 			mockUserUseCase: []interface{}{
-				models.HTTPError{Code: http.StatusBadRequest},
+				errors.New("prikol"),
 			},
 			StatusCode: http.StatusOK,
 			BodyResp:   `{"status":400,"body":null}`,

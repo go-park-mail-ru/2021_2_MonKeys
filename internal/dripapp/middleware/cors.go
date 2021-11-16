@@ -4,6 +4,7 @@ import (
 	"dripapp/internal/dripapp/models"
 	"dripapp/internal/pkg/logger"
 	"dripapp/internal/pkg/responses"
+	"errors"
 	"fmt"
 	"net/http"
 	"strings"
@@ -36,7 +37,7 @@ func CORS(logger logger.Logger) (mw func(http.Handler) http.Handler) {
 				mess := fmt.Sprintf("unknown origin %s", origin)
 				responses.SendErrorResponse(w, models.HTTPError{
 					Code:    http.StatusInternalServerError,
-					Message: mess,
+					Message: errors.New(mess),
 				}, logger.ErrorLogging)
 				return
 			}

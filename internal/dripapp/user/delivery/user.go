@@ -25,7 +25,7 @@ func (h *UserHandler) CurrentUser(w http.ResponseWriter, r *http.Request) {
 		resp.Status = http.StatusNotFound
 		responses.SendErrorResponse(w, models.HTTPError{
 			Code:    http.StatusNotFound,
-			Message: status.Error(),
+			Message: status,
 		}, h.Logger.ErrorLogging)
 		return
 	}
@@ -42,7 +42,7 @@ func (h *UserHandler) EditProfileHandler(w http.ResponseWriter, r *http.Request)
 		resp.Status = http.StatusBadRequest
 		responses.SendErrorResponse(w, models.HTTPError{
 			Code:    http.StatusBadRequest,
-			Message: err.Error(),
+			Message: err,
 		}, h.Logger.ErrorLogging)
 		return
 	}
@@ -53,7 +53,7 @@ func (h *UserHandler) EditProfileHandler(w http.ResponseWriter, r *http.Request)
 		resp.Status = http.StatusBadRequest
 		responses.SendErrorResponse(w, models.HTTPError{
 			Code:    http.StatusBadRequest,
-			Message: err.Error(),
+			Message: err,
 		}, h.Logger.ErrorLogging)
 		return
 	}
@@ -63,7 +63,7 @@ func (h *UserHandler) EditProfileHandler(w http.ResponseWriter, r *http.Request)
 		resp.Status = http.StatusNotFound
 		responses.SendErrorResponse(w, models.HTTPError{
 			Code:    http.StatusNotFound,
-			Message: status.Error(),
+			Message: status,
 		}, h.Logger.ErrorLogging)
 		return
 	}
@@ -80,7 +80,7 @@ func (h *UserHandler) UploadPhoto(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		responses.SendErrorResponse(w, models.HTTPError{
 			Code:    http.StatusBadRequest,
-			Message: err.Error(),
+			Message: err,
 		}, h.Logger.ErrorLogging)
 		return
 	}
@@ -89,7 +89,7 @@ func (h *UserHandler) UploadPhoto(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		responses.SendErrorResponse(w, models.HTTPError{
 			Code:    http.StatusBadRequest,
-			Message: err.Error(),
+			Message: err,
 		}, h.Logger.ErrorLogging)
 		return
 	}
@@ -100,7 +100,7 @@ func (h *UserHandler) UploadPhoto(w http.ResponseWriter, r *http.Request) {
 		resp.Status = http.StatusNotFound
 		responses.SendErrorResponse(w, models.HTTPError{
 			Code:    resp.Status,
-			Message: status.Error(),
+			Message: status,
 		}, h.Logger.ErrorLogging)
 		return
 	}
@@ -117,7 +117,7 @@ func (h *UserHandler) DeletePhoto(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		responses.SendErrorResponse(w, models.HTTPError{
 			Code:    http.StatusBadRequest,
-			Message: err.Error(),
+			Message: err,
 		}, h.Logger.ErrorLogging)
 		return
 	}
@@ -127,7 +127,7 @@ func (h *UserHandler) DeletePhoto(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		responses.SendErrorResponse(w, models.HTTPError{
 			Code:    http.StatusBadRequest,
-			Message: err.Error(),
+			Message: err,
 		}, h.Logger.ErrorLogging)
 		return
 	}
@@ -137,7 +137,7 @@ func (h *UserHandler) DeletePhoto(w http.ResponseWriter, r *http.Request) {
 		resp.Status = http.StatusNotFound
 		responses.SendErrorResponse(w, models.HTTPError{
 			Code:    resp.Status,
-			Message: status.Error(),
+			Message: status,
 		}, h.Logger.ErrorLogging)
 		return
 	}
@@ -162,7 +162,7 @@ func (h *UserHandler) SignupHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		responses.SendErrorResponse(w, models.HTTPError{
 			Code:    http.StatusBadRequest,
-			Message: err.Error(),
+			Message: err,
 		}, h.Logger.ErrorLogging)
 		return
 	}
@@ -173,7 +173,7 @@ func (h *UserHandler) SignupHandler(w http.ResponseWriter, r *http.Request) {
 		resp.Status = http.StatusBadRequest
 		responses.SendErrorResponse(w, models.HTTPError{
 			Code:    http.StatusBadRequest,
-			Message: err.Error(),
+			Message: err,
 		}, h.Logger.ErrorLogging)
 		return
 	}
@@ -183,7 +183,7 @@ func (h *UserHandler) SignupHandler(w http.ResponseWriter, r *http.Request) {
 		resp.Status = http.StatusNotFound
 		responses.SendErrorResponse(w, models.HTTPError{
 			Code:    resp.Status,
-			Message: status.Error(),
+			Message: status,
 		}, h.Logger.ErrorLogging)
 		return
 	}
@@ -197,7 +197,7 @@ func (h *UserHandler) SignupHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		responses.SendErrorResponse(w, models.HTTPError{
 			Code:    http.StatusInternalServerError,
-			Message: err.Error(),
+			Message: err,
 		}, h.Logger.WarnLogging)
 		return
 	}
@@ -218,7 +218,7 @@ func (h *UserHandler) NextUserHandler(w http.ResponseWriter, r *http.Request) {
 		resp.Status = http.StatusNotFound
 		responses.SendErrorResponse(w, models.HTTPError{
 			Code:    resp.Status,
-			Message: status.Error(),
+			Message: status,
 		}, h.Logger.ErrorLogging)
 		return
 	}
@@ -235,7 +235,7 @@ func (h *UserHandler) GetAllTags(w http.ResponseWriter, r *http.Request) {
 		resp.Status = http.StatusNotFound
 		responses.SendErrorResponse(w, models.HTTPError{
 			Code:    resp.Status,
-			Message: status.Error(),
+			Message: status,
 		}, h.Logger.ErrorLogging)
 		return
 	}
@@ -252,7 +252,7 @@ func (h *UserHandler) MatchesHandler(w http.ResponseWriter, r *http.Request) {
 		resp.Status = http.StatusNotFound
 		responses.SendErrorResponse(w, models.HTTPError{
 			Code:    resp.Status,
-			Message: status.Error(),
+			Message: status,
 		}, h.Logger.ErrorLogging)
 		return
 	}
@@ -269,7 +269,7 @@ func (h *UserHandler) ReactionHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		responses.SendErrorResponse(w, models.HTTPError{
 			Code:    http.StatusBadRequest,
-			Message: err.Error(),
+			Message: err,
 		}, h.Logger.ErrorLogging)
 		return
 	}
@@ -280,7 +280,7 @@ func (h *UserHandler) ReactionHandler(w http.ResponseWriter, r *http.Request) {
 		resp.Status = http.StatusBadRequest
 		responses.SendErrorResponse(w, models.HTTPError{
 			Code:    http.StatusBadRequest,
-			Message: err.Error(),
+			Message: err,
 		}, h.Logger.ErrorLogging)
 		return
 	}
@@ -291,7 +291,7 @@ func (h *UserHandler) ReactionHandler(w http.ResponseWriter, r *http.Request) {
 		resp.Status = http.StatusNotFound
 		responses.SendErrorResponse(w, models.HTTPError{
 			Code:    resp.Status,
-			Message: status.Error(),
+			Message: status,
 		}, h.Logger.ErrorLogging)
 		return
 	}

@@ -35,7 +35,7 @@ func (h *userUsecase) CurrentUser(c context.Context) (models.User, error) {
 
 	currentUser, ok := ctx.Value(configs.ContextUser).(models.User)
 	if !ok {
-		return models.User{}, errors.New(models.ErrContextNilError)
+		return models.User{}, models.ErrContextNilError
 	}
 
 	return currentUser, nil
@@ -47,7 +47,7 @@ func (h *userUsecase) EditProfile(c context.Context, newUserData models.User) (m
 
 	currentUser, ok := ctx.Value(configs.ContextUser).(models.User)
 	if !ok {
-		return models.User{}, errors.New(models.ErrContextNilError)
+		return models.User{}, models.ErrContextNilError
 	}
 
 	err := currentUser.FillProfile(newUserData)
@@ -69,7 +69,7 @@ func (h *userUsecase) AddPhoto(c context.Context, photo io.Reader, fileName stri
 
 	currentUser, ok := ctx.Value(configs.ContextUser).(models.User)
 	if !ok {
-		return models.Photo{}, errors.New(models.ErrContextNilError)
+		return models.Photo{}, models.ErrContextNilError
 	}
 
 	photoPath, err := h.File.SaveUserPhoto(currentUser, photo, fileName)
@@ -93,7 +93,7 @@ func (h *userUsecase) DeletePhoto(c context.Context, photo models.Photo) error {
 
 	currentUser, ok := ctx.Value(configs.ContextUser).(models.User)
 	if !ok {
-		return errors.New(models.ErrContextNilError)
+		return models.ErrContextNilError
 	}
 
 	err := currentUser.DeletePhoto(photo)
@@ -177,7 +177,7 @@ func (h *userUsecase) NextUser(c context.Context) ([]models.User, error) {
 
 	currentUser, ok := ctx.Value(configs.ContextUser).(models.User)
 	if !ok {
-		return nil, errors.New(models.ErrContextNilError)
+		return nil, models.ErrContextNilError
 	}
 
 	nextUsers, err := h.UserRepo.GetNextUserForSwipe(ctx, currentUser.ID)
@@ -219,7 +219,7 @@ func (h *userUsecase) UsersMatches(c context.Context) (models.Matches, error) {
 
 	currentUser, ok := ctx.Value(configs.ContextUser).(models.User)
 	if !ok {
-		return models.Matches{}, errors.New(models.ErrContextNilError)
+		return models.Matches{}, models.ErrContextNilError
 	}
 
 	// find matches
@@ -249,7 +249,7 @@ func (h *userUsecase) Reaction(c context.Context, reactionData models.UserReacti
 
 	currentUser, ok := ctx.Value(configs.ContextUser).(models.User)
 	if !ok {
-		return models.Match{}, errors.New(models.ErrContextNilError)
+		return models.Match{}, models.ErrContextNilError
 	}
 
 	// added reaction in db

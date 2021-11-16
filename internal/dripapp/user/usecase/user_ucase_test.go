@@ -45,7 +45,7 @@ func TestUserUsecase_CurrentUser(t *testing.T) {
 			user: models.User{
 				ID: 2,
 			},
-			err: errors.New(models.ErrContextNilError),
+			err: models.ErrContextNilError,
 		},
 	}
 
@@ -66,14 +66,14 @@ func TestUserUsecase_CurrentUser(t *testing.T) {
 				Imgs:        []string{"1", "2"},
 				Tags:        []string{"anime", "BMSTU"},
 			},
-			err: errors.New(models.ErrContextNilError),
+			err: models.ErrContextNilError,
 		},
 		// Test ErrContextNilError
 		{
 			user: models.User{
 				ID: 2,
 			},
-			err: errors.New(models.ErrContextNilError),
+			err: models.ErrContextNilError,
 		},
 	}
 
@@ -123,7 +123,7 @@ func TestUserUsecase_EditProfile(t *testing.T) {
 			user: models.User{
 				ID: 2,
 			},
-			err: errors.New(models.ErrContextNilError),
+			err: models.ErrContextNilError,
 		},
 		// Test ErrFailedToSaveAge
 		{
@@ -320,7 +320,7 @@ func TestUserUsecase_AddPhoto(t *testing.T) {
 			user: models.User{
 				ID: 2,
 			},
-			err: errors.New(models.ErrContextNilError),
+			err: models.ErrContextNilError,
 		},
 		// Test ErrSaveUserPhoto
 		{
@@ -463,7 +463,7 @@ func TestUserUsecase_DeletePhoto(t *testing.T) {
 				ID: 2,
 			},
 			photo: models.Photo{},
-			err:   errors.New(models.ErrContextNilError),
+			err:   models.ErrContextNilError,
 		},
 		// Test ErrDelete
 		{
@@ -930,7 +930,7 @@ func TestUserUsecase_NextUser(t *testing.T) {
 				ID: 2,
 			},
 			nextUsers: nil,
-			err:       errors.New(models.ErrContextNilError),
+			err:       models.ErrContextNilError,
 		},
 		// Test ErrGetNextUserForSwipe
 		{
@@ -1220,7 +1220,7 @@ func TestUserUsecase_UsersMatches(t *testing.T) {
 				ID: 2,
 			},
 			matches: models.Matches{},
-			err:     errors.New(models.ErrContextNilError),
+			err:     models.ErrContextNilError,
 		},
 		// Test ErrGetTags
 		{
@@ -1379,7 +1379,7 @@ func TestUserUsecase_Reaction(t *testing.T) {
 			},
 			reactionData: models.UserReaction{},
 			match:        models.Match{},
-			err:          errors.New(models.ErrContextNilError),
+			err:          models.ErrContextNilError,
 		},
 		// Test ErrAddReaction
 		{
