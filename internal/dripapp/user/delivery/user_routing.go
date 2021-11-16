@@ -21,17 +21,17 @@ func SetUserRouting(loggger logger.Logger, router *mux.Router, us models.UserUse
 	}
 
 	router.HandleFunc("/api/v1/profile", _p.SetCSRF(_p.CheckAuthenticated(userMid.GetCurrentUser(userHandler.CurrentUser)))).Methods("GET", "OPTIONS")
-	router.HandleFunc("/api/v1/profile", _p.CheckCSRF(_p.CheckAuthenticated(userHandler.EditProfileHandler))).Methods("PUT", "OPTIONS")
+	router.HandleFunc("/api/v1/profile", _p.CheckCSRF(_p.CheckAuthenticated(userMid.GetCurrentUser(userHandler.EditProfileHandler)))).Methods("PUT", "OPTIONS")
 	router.HandleFunc("/api/v1/profile", _p.SetCSRF(userHandler.SignupHandler)).Methods("POST", "OPTIONS")
 
-	router.HandleFunc("/api/v1/profile/photo", _p.CheckCSRF(userHandler.UploadPhoto)).Methods("POST", "OPTIONS")
-	router.HandleFunc("/api/v1/profile/photo", _p.CheckCSRF(userHandler.DeletePhoto)).Methods("DELETE", "OPTIONS")
+	router.HandleFunc("/api/v1/profile/photo", _p.CheckCSRF(_p.CheckAuthenticated(userMid.GetCurrentUser(userHandler.UploadPhoto)))).Methods("POST", "OPTIONS")
+	router.HandleFunc("/api/v1/profile/photo", _p.CheckCSRF(_p.CheckAuthenticated(userMid.GetCurrentUser(userHandler.DeletePhoto)))).Methods("DELETE", "OPTIONS")
 
-	router.HandleFunc("/api/v1/user/cards", _p.SetCSRF(_p.CheckAuthenticated(userHandler.NextUserHandler))).Methods("GET", "OPTIONS")
+	router.HandleFunc("/api/v1/user/cards", _p.SetCSRF(_p.CheckAuthenticated(userMid.GetCurrentUser(userHandler.NextUserHandler)))).Methods("GET", "OPTIONS")
 
-	router.HandleFunc("/api/v1/matches", _p.SetCSRF(_p.CheckAuthenticated(userHandler.MatchesHandler))).Methods("GET", "OPTIONS")
+	router.HandleFunc("/api/v1/matches", _p.SetCSRF(_p.CheckAuthenticated(userMid.GetCurrentUser(userHandler.MatchesHandler)))).Methods("GET", "OPTIONS")
 
-	router.HandleFunc("/api/v1/likes", _p.CheckCSRF(_p.CheckAuthenticated(userHandler.ReactionHandler))).Methods("POST", "OPTIONS")
+	router.HandleFunc("/api/v1/likes", _p.CheckCSRF(_p.CheckAuthenticated(userMid.GetCurrentUser(userHandler.ReactionHandler)))).Methods("POST", "OPTIONS")
 
 	router.HandleFunc("/api/v1/tags", _p.SetCSRF(_p.CheckAuthenticated(userHandler.GetAllTags))).Methods("GET", "OPTIONS")
 

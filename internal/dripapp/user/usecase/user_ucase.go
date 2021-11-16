@@ -151,7 +151,6 @@ func (h *userUsecase) Signup(c context.Context, logUserData models.LoginUser) (m
 
 	identifiableUser, err := h.UserRepo.GetUser(ctx, logUserData.Email)
 	if err != nil {
-		return models.User{}, err
 	}
 	if !identifiableUser.IsEmpty() {
 		return models.User{}, errors.New("")
