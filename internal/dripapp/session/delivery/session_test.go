@@ -50,7 +50,7 @@ func TestLogin(t *testing.T) {
 					Email:    "testLogin1@mail.ru",
 					Password: "123456qQ",
 				},
-				models.StatusOk200,
+				nil,
 			},
 			mockSessUseCase: []interface{}{
 				nil,
@@ -62,7 +62,7 @@ func TestLogin(t *testing.T) {
 			BodyResp:   `{"status":400,"body":null}`,
 			mockUserUseCase: []interface{}{
 				models.User{},
-				models.HTTPError{Code: http.StatusBadRequest},
+				errors.New(""),
 			},
 			mockSessUseCase: []interface{}{
 				nil,
@@ -74,9 +74,7 @@ func TestLogin(t *testing.T) {
 			BodyResp:   `{"status":404,"body":null}`,
 			mockUserUseCase: []interface{}{
 				models.User{},
-				models.HTTPError{
-					Code: http.StatusNotFound,
-				},
+				errors.New(""),
 			},
 			mockSessUseCase: []interface{}{
 				nil,
@@ -88,7 +86,7 @@ func TestLogin(t *testing.T) {
 			BodyResp:   `{"status":404,"body":null}`,
 			mockUserUseCase: []interface{}{
 				models.User{},
-				models.HTTPError{Code: http.StatusNotFound},
+				errors.New(""),
 			},
 			mockSessUseCase: []interface{}{
 				nil,
@@ -104,7 +102,7 @@ func TestLogin(t *testing.T) {
 					Email:    "testLogin1@mail.ru",
 					Password: "123456qQ",
 				},
-				models.StatusOk200,
+				nil,
 			},
 			mockSessUseCase: []interface{}{
 				errors.New("session already exists"),

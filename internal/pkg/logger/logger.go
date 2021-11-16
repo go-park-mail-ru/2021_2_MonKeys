@@ -16,10 +16,10 @@ type Logger struct {
 
 var (
 	DripLogger = Logger{
-		Debug: log.New(os.Stderr, "WARNING\t", log.Ldate|log.Ltime),
-		Info:  log.New(os.Stderr, "DEBUG\t", log.Ldate|log.Ltime),
-		Warn:  log.New(os.Stderr, "ERROR\t", log.Ldate|log.Ltime),
-		Err:   log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime),
+		Debug: log.New(os.Stderr, "DEBUG\t", log.Ldate|log.Ltime),
+		Info:  log.New(os.Stderr, "INFO\t", log.Ldate|log.Ltime),
+		Warn:  log.New(os.Stderr, "WARNING\t", log.Ldate|log.Ltime),
+		Err:   log.New(os.Stdout, "ERROR\t", log.Ldate|log.Ltime),
 	}
 )
 
