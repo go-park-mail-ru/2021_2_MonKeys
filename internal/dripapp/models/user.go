@@ -118,12 +118,4 @@ type UserRepository interface {
 	GetLikes(ctx context.Context, currentUserId uint64) ([]uint64, error)
 	DeleteLike(ctx context.Context, firstUser uint64, secondUser uint64) error
 	AddMatch(ctx context.Context, firstUser uint64, secondUser uint64) error
-
-	// CreateUserAndProfile(ctx context.Context, user User) (User, error)
-	// IsSwiped(ctx context.Context, userID, swipedUserID uint64) (bool, error)
-	// CreateTag(ctx context.Context, tagName string) error
-	// Init() error
-	// DropSwipes(ctx context.Context) error
-	// DropUsers(ctx context.Context) error
-	// DeleteTags(ctx context.Context, userId uint64) error
 }

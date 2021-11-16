@@ -113,15 +113,6 @@ func (h *userUsecase) DeletePhoto(c context.Context, photo models.Photo) error {
 	return nil
 }
 
-// @Summary LogIn
-// @Description log in
-// @Tags login
-// @Accept json
-// @Produce json
-// @Param input body LoginUser true "data for login"
-// @Success 200 {object} JSON
-// @Failure 400,404,500
-// @Router /login [post]
 func (h *userUsecase) Login(c context.Context, logUserData models.LoginUser) (models.User, error) {
 	identifiableUser, err := h.UserRepo.GetUser(c, logUserData.Email)
 	if err != nil {
@@ -135,15 +126,6 @@ func (h *userUsecase) Login(c context.Context, logUserData models.LoginUser) (mo
 	return identifiableUser, nil
 }
 
-// @Summary SignUp
-// @Description registration user
-// @Tags registration
-// @Accept json
-// @Produce json
-// @Param input body LoginUser true "data for registration"
-// @Success 200 {object} JSON
-// @Failure 400,404,500
-// @Router /signup [post]
 func (h *userUsecase) Signup(c context.Context, logUserData models.LoginUser) (models.User, error) {
 	ctx, cancel := context.WithTimeout(c, h.contextTimeout)
 	defer cancel()

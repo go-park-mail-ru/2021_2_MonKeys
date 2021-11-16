@@ -72,10 +72,6 @@ func (conn *SessionManager) GetSessionByCookie(sessionCookie string) (session mo
 	if !ok {
 		return models.Session{}, fmt.Errorf("cannot cast data: %v", sessionDataSlice)
 	}
-	// userId, ok := sessionDataSlice.(interface{}).(*models.Session)
-	// if !ok {
-	// 	return models.Session{}, fmt.Errorf("cannot cast data: %v", sessionDataSlice)
-	// }
 
 	return models.Session{Cookie: cookie, UserID: userId}, nil
 }

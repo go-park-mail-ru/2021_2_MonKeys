@@ -36,15 +36,6 @@ func createSessionCookie(user models.LoginUser) http.Cookie {
 	return cookie
 }
 
-// @Summary LogIn
-// @Description log in
-// @Tags login
-// @Accept json
-// @Produce json
-// @Param input body LoginUser true "data for login"
-// @Success 200 {object} JSON
-// @Failure 400,404,500
-// @Router /session [post]
 func (h *SessionHandler) LoginHandler(w http.ResponseWriter, r *http.Request) {
 	var resp responses.JSON
 
@@ -109,20 +100,6 @@ func (h *SessionHandler) LogoutHandler(w http.ResponseWriter, r *http.Request) {
 		}, h.Logger.WarnLogging)
 		return
 	}
-	// session, err := r.Cookie("sessionId")
-	// if err != nil {
-	// 	responses.SendErrorResponse(w, models.HTTPError{
-	// 		Code:    http.StatusNotFound,
-	// 		Message: err.Error(),
-	// 	}, h.Logger.ErrorLogging)
-	// 	return
-	// }
-
-	// session.Expires = time.Now().AddDate(0, 0, -1)
-	// session.Secure = true
-	// session.HttpOnly = true
-	// session.SameSite = http.SameSiteNoneMode
-	// http.SetCookie(w, session)
 
 	authCookie := &http.Cookie{
 		Name:     "sessionId",

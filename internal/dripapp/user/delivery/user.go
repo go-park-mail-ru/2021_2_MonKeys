@@ -145,15 +145,6 @@ func (h *UserHandler) DeletePhoto(w http.ResponseWriter, r *http.Request) {
 	responses.SendOKResp(resp, w)
 }
 
-// @Summary SignUp
-// @Description registration user
-// @Tags registration
-// @Accept json
-// @Produce json
-// @Param input body LoginUser true "data for registration"
-// @Success 200 {object} JSON
-// @Failure 400,404,500
-// @Router /profile [post]
 func (h *UserHandler) SignupHandler(w http.ResponseWriter, r *http.Request) {
 	var resp responses.JSON
 
