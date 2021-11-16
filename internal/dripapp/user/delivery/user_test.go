@@ -50,9 +50,9 @@ var (
 
 	tags = models.Tags{
 		AllTags: map[uint64]models.Tag{
-			1: {Tag_Name: "chill"},
-			2: {Tag_Name: "sport"},
-			3: {Tag_Name: "music"},
+			1: {TagName: "chill"},
+			2: {TagName: "sport"},
+			3: {TagName: "music"},
 		},
 		Count: 3,
 	}

@@ -11,10 +11,10 @@ const (
 
 	DeleteTagsQuery = "delete from profile_tag where profile_id=$1 returning id;"
 
-	GetTagsQuery = "select tag_name from tag;"
+	GetTagsQuery = "select tagname from tag;"
 
 	GetTagsByIdQuery = `select
-							tag_name
+							tagname
 						from
 							profile p
 							join profile_tag pt on(pt.profile_id = p.id)
@@ -25,7 +25,7 @@ const (
 	GetImgsByIDQuery = "SELECT imgs FROM profile WHERE id=$1;"
 
 	InsertTagsQueryFirstPart = "insert into profile_tag(profile_id, tag_id) values"
-	InsertTagsQueryParts     = "($1, (select id from tag where tag_name=$%d))"
+	InsertTagsQueryParts     = "($1, (select id from tag where tagname=$%d))"
 
 	UpdateImgsQuery = "update profile set imgs=$2 where id=$1 returning id;"
 

@@ -44,7 +44,7 @@ func createSessionCookie(user models.LoginUser) http.Cookie {
 // @Param input body LoginUser true "data for login"
 // @Success 200 {object} JSON
 // @Failure 400,404,500
-// @Router /login [post]
+// @Router /session [post]
 func (h *SessionHandler) LoginHandler(w http.ResponseWriter, r *http.Request) {
 	var resp responses.JSON
 

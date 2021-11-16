@@ -203,7 +203,7 @@ func (h *userUsecase) GetAllTags(c context.Context) (models.Tags, error) {
 	counter := 0
 
 	for _, value := range allTags {
-		respTag.Tag_Name = value
+		respTag.TagName = value
 		currentAllTags[uint64(counter)] = respTag
 		counter++
 	}

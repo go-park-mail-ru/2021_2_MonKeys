@@ -38,7 +38,7 @@ type Match struct {
 }
 
 type Tag struct {
-	Tag_Name string `json:"tagText"`
+	TagName string `json:"tagText"`
 }
 
 type Tags struct {
@@ -121,7 +121,7 @@ type UserRepository interface {
 
 	// CreateUserAndProfile(ctx context.Context, user User) (User, error)
 	// IsSwiped(ctx context.Context, userID, swipedUserID uint64) (bool, error)
-	// CreateTag(ctx context.Context, tag_name string) error
+	// CreateTag(ctx context.Context, tagName string) error
 	// Init() error
 	// DropSwipes(ctx context.Context) error
 	// DropUsers(ctx context.Context) error
