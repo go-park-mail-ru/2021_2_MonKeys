@@ -3,7 +3,7 @@ package models
 import "errors"
 
 type HTTPError struct {
-	Code    int    `json:"-"`
+	Code    int   `json:"-"`
 	Message error `json:"error_description"`
 }
 
@@ -23,9 +23,9 @@ var (
 	ErrEmailAlreadyExists = errors.New("email already exists")
 
 	ErrNoPermission = errors.New("no permission")
-	ErrCSRF = errors.New("csrf-protection")
-	ErrJson = errors.New("Error encoding json")
-	ErrWriteByte = errors.New("Error write byte")
+	ErrCSRF         = errors.New("csrf-protection")
+	ErrJson         = errors.New("Error encoding json")
+	ErrWriteByte    = errors.New("Error write byte")
 
 	ErrSessionAlreadyExists = errors.New("session already exists")
 )

@@ -21,17 +21,6 @@ import (
 	"github.com/gorilla/mux"
 )
 
-// @title Drip API
-// @version 1.0
-// @description API for Drip.
-// @termsOfService http://swagger.io/terms/
-
-// @host api.ijia.me
-// @BasePath /api/v1
-
-// @securityDefinitions.apikey ApiKeyAuth
-// @in header
-// @name Set-Cookie
 func main() {
 	// logfile
 	logFile, err := os.OpenFile("logs.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
