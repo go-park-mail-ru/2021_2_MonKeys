@@ -4,11 +4,13 @@ create table if not exists profile(
   id serial not null primary key,
   create_time timestamp default now(),
   update_time timestamp default now(),
-  name varchar(255) default '',
-  email citext,
-  password varchar(255) default '',
-  date varchar(255) default '',
-  description varchar(1000) default '',
+  email citext, 
+  password varchar(100) default '',
+  name varchar(63) default '',
+  gender varchar(15) default '',
+  prefer varchar(15) default '',
+  date varchar(15) default '',
+  description varchar(1023) default '',
   imgs varchar(255) [] default array [] :: varchar []
 );
 

@@ -39,7 +39,8 @@ func NewPostgresUserRepository(config configs.PostgresConfig) (models.UserReposi
 func (p PostgreUserRepo) GetUser(ctx context.Context, email string) (models.User, error) {
 	var RespUser models.User
 	err := p.Conn.QueryRow(GetUserQuery, email).
-		Scan(&RespUser.ID, &RespUser.Name, &RespUser.Email, &RespUser.Password, &RespUser.Date, &RespUser.Description, pq.Array(&RespUser.Imgs))
+		Scan(&RespUser.ID, &RespUser.Email, &RespUser.Password, &RespUser.Name, &RespUser.Gender, &RespUser.Prefer,
+			&RespUser.Date, &RespUser.Description, pq.Array(&RespUser.Imgs))
 	if err != nil {
 		return models.User{}, err
 	}
@@ -57,7 +58,8 @@ func (p PostgreUserRepo) GetUser(ctx context.Context, email string) (models.User
 func (p PostgreUserRepo) GetUserByID(ctx context.Context, userID uint64) (models.User, error) {
 	var RespUser models.User
 	err := p.Conn.QueryRow(GetUserByIdAQuery, userID).
-		Scan(&RespUser.ID, &RespUser.Name, &RespUser.Email, &RespUser.Password, &RespUser.Date, &RespUser.Description, pq.Array(&RespUser.Imgs))
+		Scan(&RespUser.ID, &RespUser.Email, &RespUser.Password, &RespUser.Name, &RespUser.Gender, &RespUser.Prefer,
+			&RespUser.Date, &RespUser.Description, pq.Array(&RespUser.Imgs))
 	if err != nil {
 		return models.User{}, err
 	}
@@ -80,8 +82,10 @@ func (p PostgreUserRepo) CreateUser(ctx context.Context, logUserData models.Logi
 
 func (p PostgreUserRepo) UpdateUser(ctx context.Context, newUserData models.User) (models.User, error) {
 	var RespUser models.User
-	err := p.Conn.QueryRow(UpdateUserQuery, newUserData.Name, newUserData.Email, newUserData.Date, newUserData.Description, pq.Array(&newUserData.Imgs)).
-		Scan(&RespUser.ID, &RespUser.Name, &RespUser.Email, &RespUser.Password, &RespUser.Date, &RespUser.Description, pq.Array(&RespUser.Imgs))
+	err := p.Conn.QueryRow(UpdateUserQuery, newUserData.Email, newUserData.Name, newUserData.Gender, newUserData.Prefer,
+		newUserData.Date, newUserData.Description, pq.Array(&newUserData.Imgs)).
+		Scan(&RespUser.ID, &RespUser.Email, &RespUser.Password, &RespUser.Name, &RespUser.Gender, &RespUser.Prefer,
+			&RespUser.Date, &RespUser.Description, pq.Array(&RespUser.Imgs))
 	if err != nil {
 		return models.User{}, err
 	}
@@ -206,9 +210,16 @@ func (p PostgreUserRepo) AddReaction(ctx context.Context, currentUserId uint64, 
 	return nil
 }
 
-func (p PostgreUserRepo) GetNextUserForSwipe(ctx context.Context, currentUserId uint64) ([]models.User, error) {
+func (p PostgreUserRepo) GetNextUserForSwipe(ctx context.Context, currentUserId uint64, prefer string) ([]models.User, error) {
+	var sb strings.Builder
+	sb.WriteString(GetNextUserForSwipeQuery1)
+	if len(prefer) != 0 {
+		sb.WriteString(GetNextUserForSwipeQueryPrefer)
+	}
+	sb.WriteString(Limit)
+	GetNextUserForSwipeQuery := sb.String()
 	var notSwipedUser []models.User
-	err := p.Conn.Select(&notSwipedUser, GetNextUserForSwipeQuery, currentUserId)
+	err := p.Conn.Select(&notSwipedUser, GetNextUserForSwipeQuery, currentUserId, prefer)
 	if err != nil {
 		return nil, err
 	}

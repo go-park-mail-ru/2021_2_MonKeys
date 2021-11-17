@@ -1,13 +1,14 @@
 package repository
 
 const (
-	GetUserQuery = "select id, name, email, password, date, description, imgs from profile where email = $1;"
+	GetUserQuery = "select id, email, password, name, gender, prefer, date, description, imgs from profile where email = $1;"
 
-	GetUserByIdAQuery = "select id, name, email, password, date, description, imgs from profile where id = $1;"
+	GetUserByIdAQuery = "select id, email, password, name, gender, prefer, date, description, imgs from profile where id = $1;"
 
 	CreateUserQuery = "INSERT into profile(email,password) VALUES($1,$2) RETURNING id, email, password;"
 
-	UpdateUserQuery = "update profile set name=$1, date=$3, description=$4, imgs=$5 where email=$2 RETURNING id, name, email, password, date, description, imgs;"
+	UpdateUserQuery = `update profile set name=$2, gender=$3, prefer=$4, date=$5, description=$6, imgs=$7 where email=$1
+RETURNING id, email, password, name, gender, prefer, date, description, imgs;`
 
 	DeleteTagsQuery = "delete from profile_tag where profile_id=$1 returning id;"
 
@@ -31,11 +32,13 @@ const (
 
 	AddReactionQuery = "insert into reactions(id1, id2, type) values ($1,$2,$3) returning id;"
 
-	GetNextUserForSwipeQuery = `select 
+	GetNextUserForSwipeQuery1 = `select 
 									op.id,
-									op.name,
 									op.email,
 									op.password,
+									op.name,
+									op.gender,
+									op.prefer,
 									op.date,
 									op.description
 								from profile op
@@ -47,14 +50,19 @@ const (
 									select m.id2
 									from matches m
 									where m.id1 = $1
-								) and op.id <> $1
-									limit 5;`
+								) and op.id <> $1`
+
+	GetNextUserForSwipeQueryPrefer = "and gender=$2"
+
+	Limit = "limit 5;"
 
 	GetUsersForMatchesQuery = `select
 									op.id,
-									op.name,
 									op.email,
 									op.password,
+									op.name,
+									op.gender,
+									op.prefer,
 									op.date,
 									op.description
 								from profile p

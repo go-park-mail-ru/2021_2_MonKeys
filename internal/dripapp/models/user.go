@@ -12,9 +12,11 @@ import (
 
 type User struct {
 	ID          uint64   `json:"id,omitempty"`
-	Name        string   `json:"name,omitempty"`
 	Email       string   `json:"email,omitempty"`
 	Password    string   `json:"-"`
+	Name        string   `json:"name,omitempty"`
+	Gender      string   `json:"gender,omitempty"`
+	Prefer      string   `json:"prefer,omitempty"`
 	Date        string   `json:"date,omitempty"`
 	Age         string   `json:"age,omitempty"`
 	Description string   `json:"description,omitempty"`
@@ -113,7 +115,7 @@ type UserRepository interface {
 	GetTags(ctx context.Context) (map[uint64]string, error)
 	UpdateImgs(ctx context.Context, id uint64, imgs []string) error
 	AddReaction(ctx context.Context, currentUserId uint64, swipedUserId uint64, reactionType uint64) error
-	GetNextUserForSwipe(ctx context.Context, currentUserId uint64) ([]User, error)
+	GetNextUserForSwipe(ctx context.Context, currentUserId uint64, prefer string) ([]User, error)
 	GetUsersMatches(ctx context.Context, currentUserId uint64) ([]User, error)
 	GetLikes(ctx context.Context, currentUserId uint64) ([]uint64, error)
 	DeleteLike(ctx context.Context, firstUser uint64, secondUser uint64) error

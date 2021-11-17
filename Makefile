@@ -25,6 +25,7 @@ build-docker:
 test-coverage:
 	go test -coverprofile=coverage.out.tmp -coverpkg=./...  ./...
 	cat coverage.out.tmp | grep -v mock > coverage2.out.tmp
+	go tool cover -func=coverage2.out.tmp
 	go tool cover -html=coverage2.out.tmp
 
 test:
