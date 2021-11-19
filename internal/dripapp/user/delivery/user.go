@@ -4,8 +4,9 @@ import (
 	"dripapp/internal/dripapp/models"
 	"dripapp/internal/pkg/logger"
 	"dripapp/internal/pkg/responses"
-	"github.com/gorilla/websocket"
 	"net/http"
+
+	"github.com/gorilla/websocket"
 )
 
 const maxPhotoSize = 20 * 1024 * 1025
@@ -221,7 +222,7 @@ func (h *UserHandler) Notifications(w http.ResponseWriter, r *http.Request) {
 	ws, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		status := models.HTTPError{
-			Code: http.StatusInternalServerError,
+			Code:    http.StatusInternalServerError,
 			Message: err,
 		}
 		responses.SendError(w, status, h.Logger.ErrorLogging)
@@ -236,7 +237,7 @@ func (h *UserHandler) sendNewMsgNotifications(client *websocket.Conn) {
 
 		err := client.ReadJSON(&msg)
 		if err != nil {
-			h.Logger.ErrorLogging(http.StatusBadRequest, "ReadJSON: " + err.Error())
+			h.Logger.ErrorLogging(http.StatusBadRequest, "ReadJSON: "+err.Error())
 			return
 		}
 
@@ -249,14 +250,14 @@ func (h *UserHandler) sendNewMsgNotifications(client *websocket.Conn) {
 }
 
 func (h *UserHandler) LikesHandler(w http.ResponseWriter, r *http.Request) {
-	var resp responses.JSON
-	likes, status := h.UserUCase.UserLikes(r.Context())
-	resp.Status = status.Code
-	if status.Code != http.StatusOK {
-		responses.SendErrorResponse(w, status, h.Logger.ErrorLogging)
+	likes, err := h.UserUCase.UserLikes(r.Context())
+	if err != nil {
+		responses.SendError(w, models.HTTPError{
+			Code:    http.StatusNotFound,
+			Message: err,
+		}, h.Logger.ErrorLogging)
 		return
 	}
 
-	resp.Body = likes
-	responses.SendOKResp(resp, w)
+	responses.SendData(w, likes)
 }

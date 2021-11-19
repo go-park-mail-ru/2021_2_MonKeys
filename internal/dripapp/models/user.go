@@ -112,7 +112,7 @@ type UserUsecase interface {
 	GetAllTags(c context.Context) (Tags, error)
 	UsersMatches(c context.Context) (Matches, error)
 	Reaction(c context.Context, reactionData UserReaction) (Match, error)
-  UserLikes(c context.Context) (Likes, error)
+	UserLikes(c context.Context) (Likes, error)
 }
 
 // ArticleRepository represent the article's repository contract

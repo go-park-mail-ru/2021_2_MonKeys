@@ -29,9 +29,9 @@ func SetUserRouting(loggger logger.Logger, router *mux.Router, us models.UserUse
 
 	router.HandleFunc("/api/v1/user/cards", _p.SetCSRF(_p.CheckAuthenticated(userMid.GetCurrentUser(userHandler.NextUserHandler)))).Methods("GET", "OPTIONS")
 
-	router.HandleFunc("/api/v1/user/likes", _p.SetCSRF(_p.CheckAuthenticated(userHandler.LikesHandler))).Methods("GET", "OPTIONS")
+	router.HandleFunc("/api/v1/user/likes", _p.SetCSRF(_p.CheckAuthenticated(userMid.GetCurrentUser(userHandler.LikesHandler)))).Methods("GET", "OPTIONS")
 
-  router.HandleFunc("/api/v1/matches", _p.SetCSRF(_p.CheckAuthenticated(userMid.GetCurrentUser(userHandler.MatchesHandler)))).Methods("GET", "OPTIONS")
+	router.HandleFunc("/api/v1/matches", _p.SetCSRF(_p.CheckAuthenticated(userMid.GetCurrentUser(userHandler.MatchesHandler)))).Methods("GET", "OPTIONS")
 
 	router.HandleFunc("/api/v1/likes", _p.CheckCSRF(_p.CheckAuthenticated(userMid.GetCurrentUser(userHandler.ReactionHandler)))).Methods("POST", "OPTIONS")
 

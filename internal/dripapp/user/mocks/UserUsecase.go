@@ -200,6 +200,27 @@ func (_m *UserUsecase) Signup(c context.Context, logUserData models.LoginUser) (
 	return r0, r1
 }
 
+// UserLikes provides a mock function with given fields: c
+func (_m *UserUsecase) UserLikes(c context.Context) (models.Likes, error) {
+	ret := _m.Called(c)
+
+	var r0 models.Likes
+	if rf, ok := ret.Get(0).(func(context.Context) models.Likes); ok {
+		r0 = rf(c)
+	} else {
+		r0 = ret.Get(0).(models.Likes)
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context) error); ok {
+		r1 = rf(c)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // UsersMatches provides a mock function with given fields: c
 func (_m *UserUsecase) UsersMatches(c context.Context) (models.Matches, error) {
 	ret := _m.Called(c)

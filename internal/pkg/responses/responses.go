@@ -35,7 +35,7 @@ func SendOK(w http.ResponseWriter) {
 func SendData(w http.ResponseWriter, v interface{}) {
 	resp := JSON{
 		Status: http.StatusOK,
-		Body: v,
+		Body:   v,
 	}
 
 	err := WriteJSON(w, resp)

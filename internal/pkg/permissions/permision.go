@@ -6,7 +6,6 @@ import (
 	"dripapp/internal/dripapp/models"
 	"dripapp/internal/pkg/logger"
 	"dripapp/internal/pkg/responses"
-	"fmt"
 
 	"net/http"
 	"time"
@@ -22,7 +21,7 @@ func CheckAuthenticated(next http.HandlerFunc) http.HandlerFunc {
 	return http.HandlerFunc(
 		func(w http.ResponseWriter, r *http.Request) {
 
-			fmt.Println("check middlware")
+			logger.DripLogger.DebugLogging("check middlware")
 			session, ok := r.Context().Value(configs.ContextUserID).(models.Session)
 			if !ok {
 				responses.SendError(w, models.HTTPError{
@@ -47,7 +46,7 @@ func (us *UserMiddlware) GetCurrentUser(next http.HandlerFunc) http.HandlerFunc 
 	return http.HandlerFunc(
 		func(w http.ResponseWriter, r *http.Request) {
 
-			fmt.Println("get current")
+			logger.DripLogger.DebugLogging("get current")
 			ctxSession := r.Context().Value(configs.ContextUserID)
 			if ctxSession == nil {
 				responses.SendError(w, models.HTTPError{

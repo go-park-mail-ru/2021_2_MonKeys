@@ -241,7 +241,7 @@ func (h *userUsecase) Reaction(c context.Context, reactionData models.UserReacti
 	var currMath models.Match
 	currMath.Match = false
 	if reactionData.Reaction != 1 {
-		return currMath, models.StatusOk200
+		return currMath, nil
 	}
 
 	// get users who liked current user
@@ -268,40 +268,19 @@ func (h *userUsecase) Reaction(c context.Context, reactionData models.UserReacti
 	return currMath, nil
 }
 
-func (h *userUsecase) UserLikes(c context.Context) (models.Likes, models.HTTPError) {
+func (h *userUsecase) UserLikes(c context.Context) (models.Likes, error) {
 	ctx, cancel := context.WithTimeout(c, h.contextTimeout)
 	defer cancel()
 
-	ctxSession := ctx.Value(configs.ForContext)
-	if ctxSession == nil {
-		return models.Likes{}, models.HTTPError{
-			Code:    http.StatusNotFound,
-			Message: models.ErrContextNilError,
-		}
-	}
-	currentSession, ok := ctxSession.(models.Session)
+	currentUser, ok := ctx.Value(configs.ContextUser).(models.User)
 	if !ok {
-		return models.Likes{}, models.HTTPError{
-			Code:    http.StatusNotFound,
-			Message: models.ErrConvertToSession,
-		}
-	}
-
-	_, err := h.UserRepo.GetUserByID(c, currentSession.UserID)
-	if err != nil {
-		return models.Likes{}, models.HTTPError{
-			Code:    http.StatusNotFound,
-			Message: err.Error(),
-		}
+		return models.Likes{}, models.ErrContextNilError
 	}
 
 	// find likes
-	likes, err := h.UserRepo.GetUsersLikes(ctx, currentSession.UserID)
+	likes, err := h.UserRepo.GetUsersLikes(ctx, currentUser.ID)
 	if err != nil {
-		return models.Likes{}, models.HTTPError{
-			Code:    http.StatusNotFound,
-			Message: err.Error(),
-		}
+		return models.Likes{}, err
 	}
 
 	// count
@@ -316,5 +295,5 @@ func (h *userUsecase) UserLikes(c context.Context) (models.Likes, models.HTTPErr
 	allLikes.AllUsers = allMathesMap
 	allLikes.Count = strconv.Itoa(counter)
 
-	return allLikes, models.StatusOk200
+	return allLikes, nil
 }
