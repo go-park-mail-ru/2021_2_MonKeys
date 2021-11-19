@@ -45,10 +45,10 @@ func TestGetUser(t *testing.T) {
 		mock.ExpectQuery("select id, name, email, password, date, description, imgs").
 			WithArgs("valid@valid.ru").WillReturnRows(rows)
 
-		rowsTags := sqlmock.NewRows([]string{"tag_name"}).
+		rowsTags := sqlmock.NewRows([]string{"tagname"}).
 			AddRow("tag1").
 			AddRow("tag2")
-		mock.ExpectQuery("select tag_name").WithArgs(1).WillReturnRows(rowsTags)
+		mock.ExpectQuery("select tagname").WithArgs(1).WillReturnRows(rowsTags)
 
 		user, err := repo.GetUser(context.TODO(), "valid@valid.ru")
 
@@ -71,7 +71,7 @@ func TestGetUser(t *testing.T) {
 		mock.ExpectQuery("select id, name, email, password, date, description, imgs").
 			WithArgs("valid@valid.ru").WillReturnRows(rows)
 
-		mock.ExpectQuery("select tag_name").WithArgs(1).WillReturnError(sql.ErrNoRows)
+		mock.ExpectQuery("select tagname").WithArgs(1).WillReturnError(sql.ErrNoRows)
 
 		user, err := repo.GetUser(context.TODO(), "valid@valid.ru")
 
@@ -110,7 +110,7 @@ func TestGetUser(t *testing.T) {
 		mock.ExpectQuery("select id, name, email, password, date, description, imgs").
 			WithArgs("valid@valid.ru").WillReturnRows(rows)
 
-		mock.ExpectQuery("select tag_name").WithArgs(1).WillReturnError(fmt.Errorf("db_error"))
+		mock.ExpectQuery("select tagname").WithArgs(1).WillReturnError(fmt.Errorf("db_error"))
 
 		_, err := repo.GetUser(context.TODO(), "valid@valid.ru")
 
@@ -216,10 +216,10 @@ func TestGetUserByID(t *testing.T) {
 		mock.ExpectQuery("select id, name, email, password, date, description, imgs").
 			WithArgs(1).WillReturnRows(rows)
 
-		rowsTags := sqlmock.NewRows([]string{"tag_name"}).
+		rowsTags := sqlmock.NewRows([]string{"tagname"}).
 			AddRow("tag1").
 			AddRow("tag2")
-		mock.ExpectQuery("select tag_name").WithArgs(1).WillReturnRows(rowsTags)
+		mock.ExpectQuery("select tagname").WithArgs(1).WillReturnRows(rowsTags)
 
 		user, err := repo.GetUserByID(context.TODO(), 1)
 
@@ -242,7 +242,7 @@ func TestGetUserByID(t *testing.T) {
 		mock.ExpectQuery("select id, name, email, password, date, description, imgs").
 			WithArgs(1).WillReturnRows(rows)
 
-		mock.ExpectQuery("select tag_name").WithArgs(1).WillReturnError(sql.ErrNoRows)
+		mock.ExpectQuery("select tagname").WithArgs(1).WillReturnError(sql.ErrNoRows)
 
 		user, err := repo.GetUserByID(context.TODO(), 1)
 
@@ -281,7 +281,7 @@ func TestGetUserByID(t *testing.T) {
 		mock.ExpectQuery("select id, name, email, password, date, description, imgs").
 			WithArgs(1).WillReturnRows(rows)
 
-		mock.ExpectQuery("select tag_name").WithArgs(1).WillReturnError(fmt.Errorf("db_error"))
+		mock.ExpectQuery("select tagname").WithArgs(1).WillReturnError(fmt.Errorf("db_error"))
 
 		_, err := repo.GetUserByID(context.TODO(), 1)
 
@@ -383,10 +383,8 @@ func TestUpdateUser(t *testing.T) {
 		rowsInsTags := sqlmock.NewRows([]string{"id"}).AddRow(1)
 		mock.ExpectQuery("insert").WithArgs(vals...).WillReturnRows(rowsInsTags)
 
-		err := repo.insertTags(context.TODO(), 1, []string{"anime", "music"})
-
-		rowsTags := sqlmock.NewRows([]string{"tag_name"}).AddRow("anime").AddRow("music")
-		mock.ExpectQuery("select tag_name").WithArgs(1).WillReturnRows(rowsTags)
+		rowsTags := sqlmock.NewRows([]string{"tagname"}).AddRow("anime").AddRow("music")
+		mock.ExpectQuery("select tagname").WithArgs(1).WillReturnRows(rowsTags)
 
 		user, err := repo.UpdateUser(context.TODO(), u)
 
@@ -411,8 +409,6 @@ func TestUpdateUser(t *testing.T) {
 			"всем привет",
 			pq.Array([]string{"img1", "img2"}),
 		).WillReturnError(sql.ErrNoRows)
-
-		err := repo.insertTags(context.TODO(), 1, []string{"anime", "music"})
 
 		_, err = repo.UpdateUser(context.TODO(), u)
 
@@ -465,8 +461,6 @@ func TestUpdateUser(t *testing.T) {
 
 		mock.ExpectQuery("insert").WithArgs(vals...).WillReturnError(sql.ErrNoRows)
 
-		err := repo.insertTags(context.TODO(), 1, []string{"anime", "music"})
-
 		_, err = repo.UpdateUser(context.TODO(), u)
 
 		if err == nil {
@@ -495,9 +489,7 @@ func TestUpdateUser(t *testing.T) {
 		rowsInsTags := sqlmock.NewRows([]string{"id"}).AddRow(1)
 		mock.ExpectQuery("insert").WithArgs(vals...).WillReturnRows(rowsInsTags)
 
-		err := repo.insertTags(context.TODO(), 1, []string{"anime", "music"})
-
-		mock.ExpectQuery("select tag_name").WithArgs(1).WillReturnError(fmt.Errorf("some error"))
+		mock.ExpectQuery("select tagname").WithArgs(1).WillReturnError(fmt.Errorf("some error"))
 
 		_, err = repo.UpdateUser(context.TODO(), u)
 
@@ -530,10 +522,10 @@ func TestGetTags(t *testing.T) {
 	tags[1] = "music"
 
 	t.Run("good get tags", func(t *testing.T) {
-		rowsTags := sqlmock.NewRows([]string{"tag_name"}).
+		rowsTags := sqlmock.NewRows([]string{"tagname"}).
 			AddRow("anime").
 			AddRow("music")
-		mock.ExpectQuery("select tag_name").WillReturnRows(rowsTags)
+		mock.ExpectQuery("select tagname").WillReturnRows(rowsTags)
 
 		testTags, err := repo.GetTags(context.TODO())
 
@@ -551,7 +543,7 @@ func TestGetTags(t *testing.T) {
 		}
 	})
 	t.Run("error get tags", func(t *testing.T) {
-		mock.ExpectQuery("select tag_name").WillReturnError(sql.ErrNoRows)
+		mock.ExpectQuery("select tagname").WillReturnError(sql.ErrNoRows)
 
 		_, err := repo.GetTags(context.TODO())
 
@@ -689,10 +681,10 @@ func TestGetNext(t *testing.T) {
 		rowImgs := sqlmock.NewRows([]string{"imgs"}).AddRow(pq.Array([]string{"img1", "img2"}))
 		mock.ExpectQuery("SELECT imgs").WithArgs(1).WillReturnRows(rowImgs)
 
-		rowsTags := sqlmock.NewRows([]string{"tag_name"}).
+		rowsTags := sqlmock.NewRows([]string{"tagname"}).
 			AddRow("tag1").
 			AddRow("tag2")
-		mock.ExpectQuery("select tag_name").WithArgs(1).WillReturnRows(rowsTags)
+		mock.ExpectQuery("select tagname").WithArgs(1).WillReturnRows(rowsTags)
 
 		users, err := repo.GetNextUserForSwipe(context.TODO(), 1)
 
@@ -749,7 +741,7 @@ func TestGetNext(t *testing.T) {
 		rowImgs := sqlmock.NewRows([]string{"imgs"}).AddRow(pq.Array([]string{"img1", "img2"}))
 		mock.ExpectQuery("SELECT imgs").WithArgs(1).WillReturnRows(rowImgs)
 
-		mock.ExpectQuery("select tag_name").WithArgs(1).WillReturnError(sql.ErrNoRows)
+		mock.ExpectQuery("select tagname").WithArgs(1).WillReturnError(sql.ErrNoRows)
 
 		_, err := repo.GetNextUserForSwipe(context.TODO(), 1)
 
@@ -815,10 +807,10 @@ func TestGetNextMatches(t *testing.T) {
 		rowImgs := sqlmock.NewRows([]string{"imgs"}).AddRow(pq.Array([]string{"img1", "img2"}))
 		mock.ExpectQuery("SELECT imgs").WithArgs(1).WillReturnRows(rowImgs)
 
-		rowsTags := sqlmock.NewRows([]string{"tag_name"}).
+		rowsTags := sqlmock.NewRows([]string{"tagname"}).
 			AddRow("tag1").
 			AddRow("tag2")
-		mock.ExpectQuery("select tag_name").WithArgs(1).WillReturnRows(rowsTags)
+		mock.ExpectQuery("select tagname").WithArgs(1).WillReturnRows(rowsTags)
 
 		users, err := repo.GetUsersMatches(context.TODO(), 1)
 
@@ -875,7 +867,7 @@ func TestGetNextMatches(t *testing.T) {
 		rowImgs := sqlmock.NewRows([]string{"imgs"}).AddRow(pq.Array([]string{"img1", "img2"}))
 		mock.ExpectQuery("SELECT imgs").WithArgs(1).WillReturnRows(rowImgs)
 
-		mock.ExpectQuery("select tag_name").WithArgs(1).WillReturnError(sql.ErrNoRows)
+		mock.ExpectQuery("select tagname").WithArgs(1).WillReturnError(sql.ErrNoRows)
 
 		_, err := repo.GetUsersMatches(context.TODO(), 1)
 

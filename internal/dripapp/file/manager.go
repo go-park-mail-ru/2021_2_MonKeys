@@ -6,7 +6,6 @@ import (
 	"dripapp/internal/pkg/hasher"
 	"errors"
 	"fmt"
-	"github.com/chai2010/webp"
 	"image"
 	"image/gif"
 	"image/jpeg"
@@ -14,6 +13,8 @@ import (
 	"io"
 	"os"
 	"strings"
+
+	"github.com/chai2010/webp"
 
 	uuid "github.com/nu7hatch/gouuid"
 )
@@ -129,7 +130,7 @@ func getNewFilename() (string, error) {
 		return "", err
 	}
 
-	return fmt.Sprintf("%s", u.String()), nil
+	return u.String(), nil
 }
 
 func (FileManager) isNotExists(path string) (bool, error) {

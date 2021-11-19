@@ -15,7 +15,6 @@ func HashAndSalt(salt []byte, password string) string {
 			salt[i] = letterBytes[rand.Int63()%int64(len(letterBytes))]
 		}
 	}
-	// hashedPass := argon2.IDKey([]byte(password), salt, 1, 64*1024, 4, 32)
 	hashedPass := []byte(GetSha1([]byte(password)))
 	saltAndHash := append(salt, hashedPass...)
 	return string(saltAndHash[:])

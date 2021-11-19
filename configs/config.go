@@ -1,7 +1,17 @@
 package configs
 
 import (
+	"log"
 	"time"
+
+	"github.com/spf13/viper"
+)
+
+const (
+	DEBUG   = 1
+	INFO    = 2
+	WARNING = 3
+	ERROR   = 4
 )
 
 type PostgresConfig struct {
@@ -23,7 +33,7 @@ type TarantoolConfig struct {
 type ServerConfig struct {
 	Host     string
 	Port     string
-	SertFile string
+	CertFile string
 	KeyFile  string
 }
 
@@ -38,7 +48,11 @@ type TimeoutsConfig struct {
 	ContextTimeout time.Duration
 }
 
-type contextID string
+type logLevel int
+
+type contextUserID string
+
+type contextUser string
 
 var (
 	Postgres PostgresConfig
@@ -51,60 +65,61 @@ var (
 
 	Timeouts TimeoutsConfig
 
-	ForContext contextID
+	LogLevel logLevel
+
+	ContextUserID contextUserID
+
+	ContextUser contextUser
 )
 
 func SetConfig() {
-	// viper.SetConfigFile("config.json")
-	// err := viper.ReadInConfig()
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
+	viper.SetConfigFile("config.json")
+	err := viper.ReadInConfig()
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	// if viper.GetBool(`debug`) {
-	// 	log.Println("Service RUN on DEBUG mode")
-	// }
+	logLevelStr := viper.GetString(`log_level`)
+
+	log.Printf("Service RUN on %s mode", logLevelStr)
+
+	switch logLevelStr {
+	case "DEBUG":
+		LogLevel = DEBUG
+	case "INFO":
+		LogLevel = INFO
+	case "WARNING":
+		LogLevel = WARNING
+	case "ERROR":
+		LogLevel = ERROR
+	}
 
 	Postgres = PostgresConfig{
-		// Port:     viper.GetString(`database.port`),
-		// Host:     viper.GetString(`database.host`),
-		// User:     viper.GetString(`database.user`),
-		// Password: viper.GetString(`database.pass`),
-		// DBName:   viper.GetString(`database.name`),
-		Port:     ":5432",
-		Host:     "127.0.0.1",
-		User:     "admin",
-		Password: "lolkek",
-		DBName:   "postgres",
+		Port:     viper.GetString(`database.port`),
+		Host:     viper.GetString(`database.host`),
+		User:     viper.GetString(`database.user`),
+		Password: viper.GetString(`database.pass`),
+		DBName:   viper.GetString(`database.name`),
 	}
 
 	Tarantool = TarantoolConfig{
-		// Port:     viper.GetString(`session.port`),
-		// Host:     viper.GetString(`session.host`),
-		// User:     viper.GetString(`session.user`),
-		// Password: viper.GetString(`session.pass`),
-		// DBName:   viper.GetString(`session.name`),
-		Port:     ":3301",
-		Host:     "127.0.0.1",
-		User:     "admin",
-		Password: "pass",
-		DBName:   "drip",
+		Port:     viper.GetString(`session.port`),
+		Host:     viper.GetString(`session.host`),
+		User:     viper.GetString(`session.user`),
+		Password: viper.GetString(`session.pass`),
+		DBName:   viper.GetString(`session.name`),
 	}
 
 	Server = ServerConfig{
-		// Port:     viper.GetString(`server.port`),
-		// Host:     viper.GetString(`server.host`),
-		// SertFile: viper.GetString(`server.sertFile`),
-		// KeyFile:  viper.GetString(`server.keyFile`),
-		Host:     "127.0.0.1",
-		Port:     ":8000",
-		SertFile: "api.ijia.me.crt",
-		KeyFile:  "api.ijia.me.key",
+		Port:     viper.GetString(`server.port`),
+		Host:     viper.GetString(`server.host`),
+		CertFile: viper.GetString(`server.certFile`),
+		KeyFile:  viper.GetString(`server.keyFile`),
 	}
 
 	FileStorage = FileStorageConfig{
-		RootFolder:       "media",
-		ProfilePhotoPath: "profile_photos",
+		RootFolder:       viper.GetString(`file_storage.root_folder`),
+		ProfilePhotoPath: viper.GetString(`file_storage.profile_photo_path`),
 	}
 
 	Timeouts = TimeoutsConfig{
@@ -113,5 +128,7 @@ func SetConfig() {
 		ContextTimeout: time.Second * 2,
 	}
 
-	ForContext = "userID"
+	ContextUserID = "userID"
+
+	ContextUser = "user"
 }

@@ -17,7 +17,7 @@ type UserUsecase struct {
 }
 
 // AddPhoto provides a mock function with given fields: c, photo, fileName
-func (_m *UserUsecase) AddPhoto(c context.Context, photo io.Reader, fileName string) (models.Photo, models.HTTPError) {
+func (_m *UserUsecase) AddPhoto(c context.Context, photo io.Reader, fileName string) (models.Photo, error) {
 	ret := _m.Called(c, photo, fileName)
 
 	var r0 models.Photo
@@ -27,18 +27,18 @@ func (_m *UserUsecase) AddPhoto(c context.Context, photo io.Reader, fileName str
 		r0 = ret.Get(0).(models.Photo)
 	}
 
-	var r1 models.HTTPError
-	if rf, ok := ret.Get(1).(func(context.Context, io.Reader, string) models.HTTPError); ok {
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, io.Reader, string) error); ok {
 		r1 = rf(c, photo, fileName)
 	} else {
-		r1 = ret.Get(1).(models.HTTPError)
+		r1 = ret.Error(1)
 	}
 
 	return r0, r1
 }
 
 // CurrentUser provides a mock function with given fields: c
-func (_m *UserUsecase) CurrentUser(c context.Context) (models.User, models.HTTPError) {
+func (_m *UserUsecase) CurrentUser(c context.Context) (models.User, error) {
 	ret := _m.Called(c)
 
 	var r0 models.User
@@ -48,32 +48,32 @@ func (_m *UserUsecase) CurrentUser(c context.Context) (models.User, models.HTTPE
 		r0 = ret.Get(0).(models.User)
 	}
 
-	var r1 models.HTTPError
-	if rf, ok := ret.Get(1).(func(context.Context) models.HTTPError); ok {
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context) error); ok {
 		r1 = rf(c)
 	} else {
-		r1 = ret.Get(1).(models.HTTPError)
+		r1 = ret.Error(1)
 	}
 
 	return r0, r1
 }
 
 // DeletePhoto provides a mock function with given fields: c, photo
-func (_m *UserUsecase) DeletePhoto(c context.Context, photo models.Photo) models.HTTPError {
+func (_m *UserUsecase) DeletePhoto(c context.Context, photo models.Photo) error {
 	ret := _m.Called(c, photo)
 
-	var r0 models.HTTPError
-	if rf, ok := ret.Get(0).(func(context.Context, models.Photo) models.HTTPError); ok {
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, models.Photo) error); ok {
 		r0 = rf(c, photo)
 	} else {
-		r0 = ret.Get(0).(models.HTTPError)
+		r0 = ret.Error(0)
 	}
 
 	return r0
 }
 
 // EditProfile provides a mock function with given fields: c, newUserData
-func (_m *UserUsecase) EditProfile(c context.Context, newUserData models.User) (models.User, models.HTTPError) {
+func (_m *UserUsecase) EditProfile(c context.Context, newUserData models.User) (models.User, error) {
 	ret := _m.Called(c, newUserData)
 
 	var r0 models.User
@@ -83,18 +83,18 @@ func (_m *UserUsecase) EditProfile(c context.Context, newUserData models.User) (
 		r0 = ret.Get(0).(models.User)
 	}
 
-	var r1 models.HTTPError
-	if rf, ok := ret.Get(1).(func(context.Context, models.User) models.HTTPError); ok {
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, models.User) error); ok {
 		r1 = rf(c, newUserData)
 	} else {
-		r1 = ret.Get(1).(models.HTTPError)
+		r1 = ret.Error(1)
 	}
 
 	return r0, r1
 }
 
 // GetAllTags provides a mock function with given fields: c
-func (_m *UserUsecase) GetAllTags(c context.Context) (models.Tags, models.HTTPError) {
+func (_m *UserUsecase) GetAllTags(c context.Context) (models.Tags, error) {
 	ret := _m.Called(c)
 
 	var r0 models.Tags
@@ -104,18 +104,18 @@ func (_m *UserUsecase) GetAllTags(c context.Context) (models.Tags, models.HTTPEr
 		r0 = ret.Get(0).(models.Tags)
 	}
 
-	var r1 models.HTTPError
-	if rf, ok := ret.Get(1).(func(context.Context) models.HTTPError); ok {
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context) error); ok {
 		r1 = rf(c)
 	} else {
-		r1 = ret.Get(1).(models.HTTPError)
+		r1 = ret.Error(1)
 	}
 
 	return r0, r1
 }
 
 // Login provides a mock function with given fields: c, logUserData
-func (_m *UserUsecase) Login(c context.Context, logUserData models.LoginUser) (models.User, models.HTTPError) {
+func (_m *UserUsecase) Login(c context.Context, logUserData models.LoginUser) (models.User, error) {
 	ret := _m.Called(c, logUserData)
 
 	var r0 models.User
@@ -125,18 +125,18 @@ func (_m *UserUsecase) Login(c context.Context, logUserData models.LoginUser) (m
 		r0 = ret.Get(0).(models.User)
 	}
 
-	var r1 models.HTTPError
-	if rf, ok := ret.Get(1).(func(context.Context, models.LoginUser) models.HTTPError); ok {
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, models.LoginUser) error); ok {
 		r1 = rf(c, logUserData)
 	} else {
-		r1 = ret.Get(1).(models.HTTPError)
+		r1 = ret.Error(1)
 	}
 
 	return r0, r1
 }
 
 // NextUser provides a mock function with given fields: c
-func (_m *UserUsecase) NextUser(c context.Context) ([]models.User, models.HTTPError) {
+func (_m *UserUsecase) NextUser(c context.Context) ([]models.User, error) {
 	ret := _m.Called(c)
 
 	var r0 []models.User
@@ -148,18 +148,18 @@ func (_m *UserUsecase) NextUser(c context.Context) ([]models.User, models.HTTPEr
 		}
 	}
 
-	var r1 models.HTTPError
-	if rf, ok := ret.Get(1).(func(context.Context) models.HTTPError); ok {
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context) error); ok {
 		r1 = rf(c)
 	} else {
-		r1 = ret.Get(1).(models.HTTPError)
+		r1 = ret.Error(1)
 	}
 
 	return r0, r1
 }
 
 // Reaction provides a mock function with given fields: c, reactionData
-func (_m *UserUsecase) Reaction(c context.Context, reactionData models.UserReaction) (models.Match, models.HTTPError) {
+func (_m *UserUsecase) Reaction(c context.Context, reactionData models.UserReaction) (models.Match, error) {
 	ret := _m.Called(c, reactionData)
 
 	var r0 models.Match
@@ -169,18 +169,18 @@ func (_m *UserUsecase) Reaction(c context.Context, reactionData models.UserReact
 		r0 = ret.Get(0).(models.Match)
 	}
 
-	var r1 models.HTTPError
-	if rf, ok := ret.Get(1).(func(context.Context, models.UserReaction) models.HTTPError); ok {
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, models.UserReaction) error); ok {
 		r1 = rf(c, reactionData)
 	} else {
-		r1 = ret.Get(1).(models.HTTPError)
+		r1 = ret.Error(1)
 	}
 
 	return r0, r1
 }
 
 // Signup provides a mock function with given fields: c, logUserData
-func (_m *UserUsecase) Signup(c context.Context, logUserData models.LoginUser) (models.User, models.HTTPError) {
+func (_m *UserUsecase) Signup(c context.Context, logUserData models.LoginUser) (models.User, error) {
 	ret := _m.Called(c, logUserData)
 
 	var r0 models.User
@@ -190,18 +190,18 @@ func (_m *UserUsecase) Signup(c context.Context, logUserData models.LoginUser) (
 		r0 = ret.Get(0).(models.User)
 	}
 
-	var r1 models.HTTPError
-	if rf, ok := ret.Get(1).(func(context.Context, models.LoginUser) models.HTTPError); ok {
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, models.LoginUser) error); ok {
 		r1 = rf(c, logUserData)
 	} else {
-		r1 = ret.Get(1).(models.HTTPError)
+		r1 = ret.Error(1)
 	}
 
 	return r0, r1
 }
 
 // UsersMatches provides a mock function with given fields: c
-func (_m *UserUsecase) UsersMatches(c context.Context) (models.Matches, models.HTTPError) {
+func (_m *UserUsecase) UsersMatches(c context.Context) (models.Matches, error) {
 	ret := _m.Called(c)
 
 	var r0 models.Matches
@@ -211,11 +211,11 @@ func (_m *UserUsecase) UsersMatches(c context.Context) (models.Matches, models.H
 		r0 = ret.Get(0).(models.Matches)
 	}
 
-	var r1 models.HTTPError
-	if rf, ok := ret.Get(1).(func(context.Context) models.HTTPError); ok {
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context) error); ok {
 		r1 = rf(c)
 	} else {
-		r1 = ret.Get(1).(models.HTTPError)
+		r1 = ret.Error(1)
 	}
 
 	return r0, r1

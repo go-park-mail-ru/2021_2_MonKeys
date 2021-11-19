@@ -32,7 +32,7 @@ func (s *sessionUsecase) DeleteSession(c context.Context) error {
 	ctx, cancel := context.WithTimeout(c, s.contextTimeout)
 	defer cancel()
 
-	ctxSession := ctx.Value(configs.ForContext)
+	ctxSession := ctx.Value(configs.ContextUserID)
 	if ctxSession == nil {
 		return errors.New("context nil error")
 	}

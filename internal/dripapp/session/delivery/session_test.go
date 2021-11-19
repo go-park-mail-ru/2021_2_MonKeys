@@ -14,6 +14,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/gorilla/mux"
 	"github.com/stretchr/testify/mock"
 )
 
@@ -49,7 +50,7 @@ func TestLogin(t *testing.T) {
 					Email:    "testLogin1@mail.ru",
 					Password: "123456qQ",
 				},
-				models.StatusOk200,
+				nil,
 			},
 			mockSessUseCase: []interface{}{
 				nil,
@@ -61,7 +62,7 @@ func TestLogin(t *testing.T) {
 			BodyResp:   `{"status":400,"body":null}`,
 			mockUserUseCase: []interface{}{
 				models.User{},
-				models.HTTPError{Code: http.StatusBadRequest},
+				errors.New(""),
 			},
 			mockSessUseCase: []interface{}{
 				nil,
@@ -73,9 +74,7 @@ func TestLogin(t *testing.T) {
 			BodyResp:   `{"status":404,"body":null}`,
 			mockUserUseCase: []interface{}{
 				models.User{},
-				models.HTTPError{
-					Code: http.StatusNotFound,
-				},
+				errors.New(""),
 			},
 			mockSessUseCase: []interface{}{
 				nil,
@@ -87,7 +86,7 @@ func TestLogin(t *testing.T) {
 			BodyResp:   `{"status":404,"body":null}`,
 			mockUserUseCase: []interface{}{
 				models.User{},
-				models.HTTPError{Code: http.StatusNotFound},
+				errors.New(""),
 			},
 			mockSessUseCase: []interface{}{
 				nil,
@@ -103,7 +102,7 @@ func TestLogin(t *testing.T) {
 					Email:    "testLogin1@mail.ru",
 					Password: "123456qQ",
 				},
-				models.StatusOk200,
+				nil,
 			},
 			mockSessUseCase: []interface{}{
 				errors.New("session already exists"),
@@ -113,7 +112,7 @@ func TestLogin(t *testing.T) {
 
 	for caseNum, item := range cases {
 		r := httptest.NewRequest("POST", "/api/v1/login", item.BodyReq)
-		r = r.WithContext(context.WithValue(r.Context(), configs.ForContext, models.Session{
+		r = r.WithContext(context.WithValue(r.Context(), configs.ContextUserID, models.Session{
 			UserID: 0,
 			Cookie: "",
 		}))
@@ -180,7 +179,7 @@ func TestLogout(t *testing.T) {
 	for caseNum, item := range cases {
 		r := httptest.NewRequest("GET", "/api/v1/logout", item.BodyReq)
 		r.AddCookie(&item.SessionCookie)
-		r = r.WithContext(context.WithValue(r.Context(), configs.ForContext, models.Session{
+		r = r.WithContext(context.WithValue(r.Context(), configs.ContextUserID, models.Session{
 			UserID: 0,
 			Cookie: "",
 		}))
@@ -201,4 +200,11 @@ func TestLogout(t *testing.T) {
 				caseNum, w.Body.String(), item.BodyResp)
 		}
 	}
+}
+
+func TestSetRouting(t *testing.T) {
+	mockUserUseCase := &mocks.UserUsecase{}
+	mockSessionUseCase := &_s.SessionUsecase{}
+
+	SetSessionRouting(logger.DripLogger, mux.NewRouter(), mockUserUseCase, mockSessionUseCase)
 }
