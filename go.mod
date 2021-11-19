@@ -17,6 +17,7 @@ require (
 require (
 	github.com/chai2010/webp v1.1.0
 	github.com/golang/protobuf v1.3.2 // indirect
+	github.com/gorilla/websocket v1.4.2
 	github.com/stretchr/objx v0.1.1 // indirect
 	golang.org/x/text v0.3.6 // indirect
 	golang.org/x/tools v0.1.1 // indirect

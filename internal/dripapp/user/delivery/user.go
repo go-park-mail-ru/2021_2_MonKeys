@@ -5,6 +5,7 @@ import (
 	"dripapp/internal/pkg/logger"
 	"dripapp/internal/pkg/responses"
 	"encoding/json"
+	"github.com/gorilla/websocket"
 	"io/ioutil"
 	"net/http"
 )
@@ -264,4 +265,40 @@ func (h *UserHandler) ReactionHandler(w http.ResponseWriter, r *http.Request) {
 
 	resp.Body = match
 	responses.SendOKResp(resp, w)
+}
+
+var upgrader = websocket.Upgrader{
+	ReadBufferSize:  1024,
+	WriteBufferSize: 1024,
+}
+
+func (h *UserHandler) Notifications(w http.ResponseWriter, r *http.Request) {
+	ws, err := upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		status := models.HTTPError{
+			Code: http.StatusInternalServerError,
+			Message: "ws connect: " + err.Error(),
+		}
+		responses.SendErrorResponse(w, status, h.Logger.ErrorLogging)
+		return
+	}
+	go h.sendNewMsgNotifications(ws)
+}
+
+func (h *UserHandler) sendNewMsgNotifications(client *websocket.Conn) {
+	for {
+		var msg models.Message
+
+		err := client.ReadJSON(&msg)
+		if err != nil {
+			h.Logger.ErrorLogging(http.StatusBadRequest, "ReadJSON: " + err.Error())
+			return
+		}
+
+		err = client.WriteJSON(msg)
+		if err != nil {
+			h.Logger.ErrorLogging(http.StatusBadRequest, "WriteJSON")
+			return
+		}
+	}
 }
