@@ -25,14 +25,14 @@ func CheckAuthenticated(next http.HandlerFunc) http.HandlerFunc {
 			fmt.Println("check middlware")
 			session, ok := r.Context().Value(configs.ContextUserID).(models.Session)
 			if !ok {
-				responses.SendErrorResponse(w, models.HTTPError{
+				responses.SendError(w, models.HTTPError{
 					Code:    http.StatusForbidden,
 					Message: models.ErrExtractContext,
 				}, logger.DripLogger.ErrorLogging)
 				return
 			}
 			if session.UserID == 0 {
-				responses.SendErrorResponse(w, models.HTTPError{
+				responses.SendError(w, models.HTTPError{
 					Code:    http.StatusForbidden,
 					Message: models.ErrAuth,
 				}, logger.DripLogger.WarnLogging)
@@ -50,7 +50,7 @@ func (us *UserMiddlware) GetCurrentUser(next http.HandlerFunc) http.HandlerFunc 
 			fmt.Println("get current")
 			ctxSession := r.Context().Value(configs.ContextUserID)
 			if ctxSession == nil {
-				responses.SendErrorResponse(w, models.HTTPError{
+				responses.SendError(w, models.HTTPError{
 					Code:    http.StatusForbidden,
 					Message: models.ErrExtractContext,
 				}, logger.DripLogger.ErrorLogging)
@@ -58,7 +58,7 @@ func (us *UserMiddlware) GetCurrentUser(next http.HandlerFunc) http.HandlerFunc 
 			}
 			currentSession, ok := ctxSession.(models.Session)
 			if !ok {
-				responses.SendErrorResponse(w, models.HTTPError{
+				responses.SendError(w, models.HTTPError{
 					Code:    http.StatusForbidden,
 					Message: models.ErrExtractContext,
 				}, logger.DripLogger.ErrorLogging)
@@ -67,7 +67,7 @@ func (us *UserMiddlware) GetCurrentUser(next http.HandlerFunc) http.HandlerFunc 
 
 			currentUser, err := us.UserRepo.GetUserByID(r.Context(), currentSession.UserID)
 			if err != nil {
-				responses.SendErrorResponse(w, models.HTTPError{
+				responses.SendError(w, models.HTTPError{
 					Code:    http.StatusNotFound,
 					Message: err,
 				}, logger.DripLogger.ErrorLogging)
@@ -77,7 +77,7 @@ func (us *UserMiddlware) GetCurrentUser(next http.HandlerFunc) http.HandlerFunc 
 			if len(currentUser.Date) != 0 {
 				currentUser.Age, err = models.GetAgeFromDate(currentUser.Date)
 				if err != nil {
-					responses.SendErrorResponse(w, models.HTTPError{
+					responses.SendError(w, models.HTTPError{
 						Code:    http.StatusNotFound,
 						Message: err,
 					}, logger.DripLogger.ErrorLogging)
@@ -93,7 +93,7 @@ func (us *UserMiddlware) GetCurrentUser(next http.HandlerFunc) http.HandlerFunc 
 func generateCsrfLogic(w http.ResponseWriter) {
 	csrf, err := uuid.NewV4()
 	if err != nil {
-		responses.SendErrorResponse(w, models.HTTPError{
+		responses.SendError(w, models.HTTPError{
 			Code:    http.StatusForbidden,
 			Message: models.ErrNoPermission,
 		}, logger.DripLogger.ErrorLogging)
@@ -121,7 +121,7 @@ func CheckCSRF(next http.HandlerFunc) http.HandlerFunc {
 			csrfCookie, err := r.Cookie("csrf")
 
 			if err != nil || csrf == "" || csrfCookie.Value == "" || csrfCookie.Value != csrf {
-				responses.SendErrorResponse(w, models.HTTPError{
+				responses.SendError(w, models.HTTPError{
 					Code:    http.StatusInternalServerError,
 					Message: models.ErrCSRF,
 				}, logger.DripLogger.ErrorLogging)
