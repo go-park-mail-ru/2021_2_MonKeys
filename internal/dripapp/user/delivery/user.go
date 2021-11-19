@@ -305,7 +305,7 @@ func (h *UserHandler) Notifications(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		status := models.HTTPError{
 			Code: http.StatusInternalServerError,
-			Message: "ws connect: " + err.Error(),
+			Message: err,
 		}
 		responses.SendErrorResponse(w, status, h.Logger.ErrorLogging)
 		return
