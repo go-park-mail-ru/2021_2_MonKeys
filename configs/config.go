@@ -7,6 +7,13 @@ import (
 	"github.com/spf13/viper"
 )
 
+const (
+	DEBUG   = 1
+	INFO    = 2
+	WARNING = 3
+	ERROR   = 4
+)
+
 type PostgresConfig struct {
 	User     string
 	Password string
@@ -41,7 +48,11 @@ type TimeoutsConfig struct {
 	ContextTimeout time.Duration
 }
 
-type contextID string
+type logLevel int
+
+type contextUserID string
+
+type contextUser string
 
 var (
 	Postgres PostgresConfig
@@ -54,7 +65,11 @@ var (
 
 	Timeouts TimeoutsConfig
 
-	ForContext contextID
+	LogLevel logLevel
+
+	ContextUserID contextUserID
+
+	ContextUser contextUser
 )
 
 func SetConfig() {
@@ -64,8 +79,19 @@ func SetConfig() {
 		log.Fatal(err)
 	}
 
-	if viper.GetBool(`debug`) {
-		log.Println("Service RUN on DEBUG mode")
+	logLevelStr := viper.GetString(`log_level`)
+
+	log.Printf("Service RUN on %s mode", logLevelStr)
+
+	switch logLevelStr {
+	case "DEBUG":
+		LogLevel = DEBUG
+	case "INFO":
+		LogLevel = INFO
+	case "WARNING":
+		LogLevel = WARNING
+	case "ERROR":
+		LogLevel = ERROR
 	}
 
 	Postgres = PostgresConfig{
@@ -92,8 +118,8 @@ func SetConfig() {
 	}
 
 	FileStorage = FileStorageConfig{
-		RootFolder:       "media",
-		ProfilePhotoPath: "profile_photos",
+		RootFolder:       viper.GetString(`file_storage.root_folder`),
+		ProfilePhotoPath: viper.GetString(`file_storage.profile_photo_path`),
 	}
 
 	Timeouts = TimeoutsConfig{
@@ -102,5 +128,7 @@ func SetConfig() {
 		ContextTimeout: time.Second * 2,
 	}
 
-	ForContext = "userID"
+	ContextUserID = "userID"
+
+	ContextUser = "user"
 }

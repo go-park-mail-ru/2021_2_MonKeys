@@ -20,8 +20,6 @@ func NewTarantoolConnection(tntConfig configs.TarantoolConfig) (models.SessionRe
 	addrPort := fmt.Sprintf("%s%s", tntConfig.Host, tntConfig.Port)
 	conn, err := tarantool.Connect(addrPort, tarantool.Opts{
 		User: "guest",
-		// User: tntConfig.User,
-		// Pass: tntConfig.Password,
 	})
 
 	seesManager := SessionManager{conn}
@@ -74,10 +72,6 @@ func (conn *SessionManager) GetSessionByCookie(sessionCookie string) (session mo
 	if !ok {
 		return models.Session{}, fmt.Errorf("cannot cast data: %v", sessionDataSlice)
 	}
-	// userId, ok := sessionDataSlice.(interface{}).(*models.Session)
-	// if !ok {
-	// 	return models.Session{}, fmt.Errorf("cannot cast data: %v", sessionDataSlice)
-	// }
 
 	return models.Session{Cookie: cookie, UserID: userId}, nil
 }

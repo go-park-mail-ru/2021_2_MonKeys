@@ -32,15 +32,6 @@ func NewPostgresUserRepository(config configs.PostgresConfig) (models.UserReposi
 		return nil, err
 	}
 
-	// query, err := ioutil.ReadFile("docker/postgres_scripts/dump.sql")
-	// if err != nil {
-	// 	return nil, err
-	// }
-	// strQuery := string(query)
-	// if _, err := Conn.Exec(strQuery); err != nil {
-	// 	return nil, err
-	// }
-
 	log.Printf("%s%s", success, ConnStr)
 	return &PostgreUserRepo{*Conn}, nil
 }
@@ -136,7 +127,7 @@ func (p PostgreUserRepo) GetTags(ctx context.Context) (map[uint64]string, error)
 
 	var i uint64
 	for i = 0; i < uint64(len(tags)); i++ {
-		tagsMap[i] = tags[i].Tag_Name
+		tagsMap[i] = tags[i].TagName
 	}
 
 	return tagsMap, nil
@@ -185,8 +176,6 @@ func (p PostgreUserRepo) insertTags(ctx context.Context, id uint64, tags []strin
 
 	var respId uint64
 	err := p.Conn.QueryRow(insertTagsQuery, vals...).Scan(&respId)
-	// stmt, _ := p.conn.Prepare(query)
-	// _, err := stmt.Exec(vals...)
 
 	if err != nil {
 		if err != sql.ErrNoRows {
@@ -208,8 +197,6 @@ func (p PostgreUserRepo) UpdateImgs(ctx context.Context, id uint64, imgs []strin
 }
 
 func (p PostgreUserRepo) AddReaction(ctx context.Context, currentUserId uint64, swipedUserId uint64, reactionType uint64) error {
-	// stmt, _ := p.Conn.Prepare(AddReactionQuery)
-	// _, err := stmt.Exec(currentUserId, swipedUserId, reactionType)
 	var id uint64
 	err := p.Conn.QueryRow(AddReactionQuery, currentUserId, swipedUserId, reactionType).Scan(&id)
 	if err != nil {
@@ -286,8 +273,6 @@ func (p PostgreUserRepo) GetLikes(ctx context.Context, currentUserId uint64) ([]
 }
 
 func (p PostgreUserRepo) DeleteLike(ctx context.Context, firstUser uint64, secondUser uint64) error {
-	// stmt, _ := p.Conn.Prepare(DeleteLikeQuery)
-	// _, err := stmt.Exec(firstUser, secondUser)
 	var id uint64
 	err := p.Conn.QueryRow(DeleteLikeQuery, firstUser, secondUser).Scan(&id)
 	if err != nil {
@@ -298,8 +283,6 @@ func (p PostgreUserRepo) DeleteLike(ctx context.Context, firstUser uint64, secon
 }
 
 func (p PostgreUserRepo) AddMatch(ctx context.Context, firstUser uint64, secondUser uint64) error {
-	// stmt, _ := p.Conn.Prepare(AddMatchQuery)
-	// _, err := stmt.Exec(firstUser, secondUser)
 	var id uint64
 	err := p.Conn.QueryRow(AddMatchQuery, firstUser, secondUser).Scan(&id)
 	if err != nil {
@@ -439,3 +422,4 @@ func (p PostgreUserRepo) GetUsersLikes(ctx context.Context, currentUserId uint64
 
 // 	return nil
 // }
+

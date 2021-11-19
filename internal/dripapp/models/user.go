@@ -3,6 +3,7 @@ package models
 import (
 	"context"
 	"dripapp/internal/pkg/hasher"
+	"dripapp/internal/pkg/logger"
 	"errors"
 	"io"
 	"strconv"
@@ -37,7 +38,7 @@ type Match struct {
 }
 
 type Tag struct {
-	Tag_Name string `json:"tagText"`
+	TagName string `json:"tagText"`
 }
 
 type Tags struct {
@@ -55,6 +56,11 @@ type Likes struct {
 	Count    string          `json:"likesCount"`
 }
 
+type Message struct {
+	Text string `json:"text"`
+	//fromID string `json:"fromID,omitempty"`
+}
+
 func MakeUser(id uint64, email string, password string) (User, error) {
 	hashedPass := hasher.HashAndSalt(nil, password)
 	return User{ID: id, Email: email, Password: hashedPass}, nil
@@ -65,6 +71,7 @@ func (user User) IsEmpty() bool {
 }
 
 func GetAgeFromDate(date string) (string, error) {
+	logger.DripLogger.DebugLogging(date)
 	birthday, err := time.Parse("2006-01-02", date)
 	if err != nil {
 		return "", errors.New("failed on userYear")
@@ -83,7 +90,7 @@ func (user *User) FillProfile(newUserData User) (err error) {
 	user.Date = newUserData.Date
 	user.Age, err = GetAgeFromDate(newUserData.Date)
 	if err != nil {
-		return errors.New("failed to save age")
+		return err
 	}
 	user.Date = newUserData.Date
 	user.Description = newUserData.Description
@@ -95,17 +102,17 @@ func (user *User) FillProfile(newUserData User) (err error) {
 
 // ArticleUsecase represent the article's usecases
 type UserUsecase interface {
-	CurrentUser(c context.Context) (User, HTTPError)
-	EditProfile(c context.Context, newUserData User) (User, HTTPError)
-	AddPhoto(c context.Context, photo io.Reader, fileName string) (Photo, HTTPError)
-	DeletePhoto(c context.Context, photo Photo) HTTPError
-	Login(c context.Context, logUserData LoginUser) (User, HTTPError)
-	Signup(c context.Context, logUserData LoginUser) (User, HTTPError)
-	NextUser(c context.Context) ([]User, HTTPError)
-	GetAllTags(c context.Context) (Tags, HTTPError)
-	UsersMatches(c context.Context) (Matches, HTTPError)
-	Reaction(c context.Context, reactionData UserReaction) (Match, HTTPError)
-	UserLikes(c context.Context) (Likes, HTTPError)
+	CurrentUser(c context.Context) (User, error)
+	EditProfile(c context.Context, newUserData User) (User, error)
+	AddPhoto(c context.Context, photo io.Reader, fileName string) (Photo, error)
+	DeletePhoto(c context.Context, photo Photo) error
+	Login(c context.Context, logUserData LoginUser) (User, error)
+	Signup(c context.Context, logUserData LoginUser) (User, error)
+	NextUser(c context.Context) ([]User, error)
+	GetAllTags(c context.Context) (Tags, error)
+	UsersMatches(c context.Context) (Matches, error)
+	Reaction(c context.Context, reactionData UserReaction) (Match, error)
+  UserLikes(c context.Context) (Likes, error)
 }
 
 // ArticleRepository represent the article's repository contract
@@ -123,12 +130,4 @@ type UserRepository interface {
 	DeleteLike(ctx context.Context, firstUser uint64, secondUser uint64) error
 	AddMatch(ctx context.Context, firstUser uint64, secondUser uint64) error
 	GetUsersLikes(ctx context.Context, currentUserId uint64) ([]User, error)
-
-	// CreateUserAndProfile(ctx context.Context, user User) (User, error)
-	// IsSwiped(ctx context.Context, userID, swipedUserID uint64) (bool, error)
-	// CreateTag(ctx context.Context, tag_name string) error
-	// Init() error
-	// DropSwipes(ctx context.Context) error
-	// DropUsers(ctx context.Context) error
-	// DeleteTags(ctx context.Context, userId uint64) error
 }

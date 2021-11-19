@@ -14,7 +14,7 @@ create table if not exists profile(
 
 create table if not exists tag(
   id serial not null primary key,
-  tag_name varchar(255) default ''
+  tagname varchar(255) default ''
 );
 create table if not exists profile_tag(
   id serial not null primary key,
@@ -41,7 +41,7 @@ create table if not exists matches(
   constraint fk_pt_profile2 foreign key (id2) REFERENCES profile (id)
 );
 insert into
-  tag(tag_name)
+  tag(tagname)
 values('anime'),('music'),('gaming'),('sport'),('science');
 
 -- foregn keys
