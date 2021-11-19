@@ -237,6 +237,13 @@ func (h *userUsecase) Reaction(c context.Context, reactionData models.UserReacti
 		return models.Match{}, err
 	}
 
+	// no match if dislike
+	var currMath models.Match
+	currMath.Match = false
+	if reactionData.Reaction != 1 {
+		return currMath, models.StatusOk200
+	}
+
 	// get users who liked current user
 	var likes []uint64
 	likes, err = h.UserRepo.GetLikes(ctx, currentUser.ID)
@@ -244,8 +251,6 @@ func (h *userUsecase) Reaction(c context.Context, reactionData models.UserReacti
 		return models.Match{}, err
 	}
 
-	var currMath models.Match
-	currMath.Match = false
 	for _, value := range likes {
 		if value == reactionData.Id {
 			currMath.Match = true
@@ -261,4 +266,55 @@ func (h *userUsecase) Reaction(c context.Context, reactionData models.UserReacti
 	}
 
 	return currMath, nil
+}
+
+func (h *userUsecase) UserLikes(c context.Context) (models.Likes, models.HTTPError) {
+	ctx, cancel := context.WithTimeout(c, h.contextTimeout)
+	defer cancel()
+
+	ctxSession := ctx.Value(configs.ForContext)
+	if ctxSession == nil {
+		return models.Likes{}, models.HTTPError{
+			Code:    http.StatusNotFound,
+			Message: models.ErrContextNilError,
+		}
+	}
+	currentSession, ok := ctxSession.(models.Session)
+	if !ok {
+		return models.Likes{}, models.HTTPError{
+			Code:    http.StatusNotFound,
+			Message: models.ErrConvertToSession,
+		}
+	}
+
+	_, err := h.UserRepo.GetUserByID(c, currentSession.UserID)
+	if err != nil {
+		return models.Likes{}, models.HTTPError{
+			Code:    http.StatusNotFound,
+			Message: err.Error(),
+		}
+	}
+
+	// find likes
+	likes, err := h.UserRepo.GetUsersLikes(ctx, currentSession.UserID)
+	if err != nil {
+		return models.Likes{}, models.HTTPError{
+			Code:    http.StatusNotFound,
+			Message: err.Error(),
+		}
+	}
+
+	// count
+	counter := 0
+	var allMathesMap = make(map[uint64]models.User)
+	for _, value := range likes {
+		allMathesMap[uint64(counter)] = value
+		counter++
+	}
+
+	var allLikes models.Likes
+	allLikes.AllUsers = allMathesMap
+	allLikes.Count = strconv.Itoa(counter)
+
+	return allLikes, models.StatusOk200
 }

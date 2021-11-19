@@ -51,6 +51,11 @@ type Matches struct {
 	Count    string          `json:"matchesCount"`
 }
 
+type Likes struct {
+	AllUsers map[uint64]User `json:"allUsers"`
+	Count    string          `json:"likesCount"`
+}
+
 type Message struct {
 	Text string `json:"text"`
 	//fromID string `json:"fromID,omitempty"`
@@ -107,6 +112,7 @@ type UserUsecase interface {
 	GetAllTags(c context.Context) (Tags, error)
 	UsersMatches(c context.Context) (Matches, error)
 	Reaction(c context.Context, reactionData UserReaction) (Match, error)
+  UserLikes(c context.Context) (Likes, error)
 }
 
 // ArticleRepository represent the article's repository contract
@@ -123,4 +129,5 @@ type UserRepository interface {
 	GetLikes(ctx context.Context, currentUserId uint64) ([]uint64, error)
 	DeleteLike(ctx context.Context, firstUser uint64, secondUser uint64) error
 	AddMatch(ctx context.Context, firstUser uint64, secondUser uint64) error
+	GetUsersLikes(ctx context.Context, currentUserId uint64) ([]User, error)
 }
