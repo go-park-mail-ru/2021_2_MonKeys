@@ -35,7 +35,6 @@ const (
 									op.id,
 									op.name,
 									op.email,
-									op.password,
 									op.date,
 									op.description
 								from profile op
@@ -49,14 +48,13 @@ const (
 									where m.id1 = $1
 								) and op.id <> $1
 								and op.name <> ''
-								and op.age <> ''
+								and op.date <> ''
 									limit 5;`
 
 	GetUsersForMatchesQuery = `select
 									op.id,
 									op.name,
 									op.email,
-									op.password,
 									op.date,
 									op.description
 								from profile p
@@ -70,4 +68,16 @@ const (
 	DeleteLikeQuery = "delete from reactions r where ((r.id1=$1 and r.id2=$2) or (r.id1=$2 and r.id2=$1)) returning id;"
 
 	AddMatchQuery = "insert into matches(id1, id2) values ($1,$2),($2,$1) returning id;"
+
+	GetUserLikes = `select p.id,
+						   p.name,
+						   p.email,
+						   p.date,
+						   p.description
+					from profile p
+					join reactions r on (r.id1 = p.id
+										 and r.id2 = $1
+										 and r.type = 1
+										 and p.name <> ''
+										 and p.date <> '');`
 )

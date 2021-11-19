@@ -265,3 +265,16 @@ func (h *UserHandler) ReactionHandler(w http.ResponseWriter, r *http.Request) {
 	resp.Body = match
 	responses.SendOKResp(resp, w)
 }
+
+func (h *UserHandler) LikesHandler(w http.ResponseWriter, r *http.Request) {
+	var resp responses.JSON
+	likes, status := h.UserUCase.UserLikes(r.Context())
+	resp.Status = status.Code
+	if status.Code != http.StatusOK {
+		responses.SendErrorResponse(w, status, h.Logger.ErrorLogging)
+		return
+	}
+
+	resp.Body = likes
+	responses.SendOKResp(resp, w)
+}

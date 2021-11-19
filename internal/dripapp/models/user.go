@@ -50,6 +50,11 @@ type Matches struct {
 	Count    string          `json:"matchesCount"`
 }
 
+type Likes struct {
+	AllUsers map[uint64]User `json:"allUsers"`
+	Count    string          `json:"likesCount"`
+}
+
 func MakeUser(id uint64, email string, password string) (User, error) {
 	hashedPass := hasher.HashAndSalt(nil, password)
 	return User{ID: id, Email: email, Password: hashedPass}, nil
@@ -100,6 +105,7 @@ type UserUsecase interface {
 	GetAllTags(c context.Context) (Tags, HTTPError)
 	UsersMatches(c context.Context) (Matches, HTTPError)
 	Reaction(c context.Context, reactionData UserReaction) (Match, HTTPError)
+	UserLikes(c context.Context) (Likes, HTTPError)
 }
 
 // ArticleRepository represent the article's repository contract
@@ -116,6 +122,7 @@ type UserRepository interface {
 	GetLikes(ctx context.Context, currentUserId uint64) ([]uint64, error)
 	DeleteLike(ctx context.Context, firstUser uint64, secondUser uint64) error
 	AddMatch(ctx context.Context, firstUser uint64, secondUser uint64) error
+	GetUsersLikes(ctx context.Context, currentUserId uint64) ([]User, error)
 
 	// CreateUserAndProfile(ctx context.Context, user User) (User, error)
 	// IsSwiped(ctx context.Context, userID, swipedUserID uint64) (bool, error)

@@ -33,6 +33,7 @@ func SetRouting(loggger logger.Logger, router *mux.Router, us models.UserUsecase
 	router.HandleFunc("/api/v1/profile/photo", permissions.CheckCSRF(userHandler.DeletePhoto)).Methods("DELETE", "OPTIONS")
 
 	router.HandleFunc("/api/v1/user/cards", permissions.SetCSRF(permissions.CheckAuthenticated(userHandler.NextUserHandler))).Methods("GET", "OPTIONS")
+	router.HandleFunc("/api/v1/user/likes", permissions.SetCSRF(permissions.CheckAuthenticated(userHandler.LikesHandler))).Methods("GET", "OPTIONS")
 
 	router.HandleFunc("/api/v1/matches", permissions.SetCSRF(permissions.CheckAuthenticated(userHandler.MatchesHandler))).Methods("GET", "OPTIONS")
 
