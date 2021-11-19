@@ -188,6 +188,29 @@ func (_m *UserRepository) GetUserByID(ctx context.Context, userID uint64) (model
 	return r0, r1
 }
 
+// GetUsersLikes provides a mock function with given fields: ctx, currentUserId
+func (_m *UserRepository) GetUsersLikes(ctx context.Context, currentUserId uint64) ([]models.User, error) {
+	ret := _m.Called(ctx, currentUserId)
+
+	var r0 []models.User
+	if rf, ok := ret.Get(0).(func(context.Context, uint64) []models.User); ok {
+		r0 = rf(ctx, currentUserId)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]models.User)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, uint64) error); ok {
+		r1 = rf(ctx, currentUserId)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // GetUsersMatches provides a mock function with given fields: ctx, currentUserId
 func (_m *UserRepository) GetUsersMatches(ctx context.Context, currentUserId uint64) ([]models.User, error) {
 	ret := _m.Called(ctx, currentUserId)

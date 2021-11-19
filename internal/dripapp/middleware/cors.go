@@ -35,7 +35,7 @@ func CORS(logger logger.Logger) (mw func(http.Handler) http.Handler) {
 				w.Header().Set("Access-Control-Allow-Origin", origin)
 			} else {
 				mess := fmt.Sprintf("unknown origin %s", origin)
-				responses.SendErrorResponse(w, models.HTTPError{
+				responses.SendError(w, models.HTTPError{
 					Code:    http.StatusInternalServerError,
 					Message: errors.New(mess),
 				}, logger.ErrorLogging)

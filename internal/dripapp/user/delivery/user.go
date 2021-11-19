@@ -4,10 +4,9 @@ import (
 	"dripapp/internal/dripapp/models"
 	"dripapp/internal/pkg/logger"
 	"dripapp/internal/pkg/responses"
-	"encoding/json"
-	"github.com/gorilla/websocket"
-	"io/ioutil"
 	"net/http"
+
+	"github.com/gorilla/websocket"
 )
 
 const maxPhotoSize = 20 * 1024 * 1025
@@ -19,40 +18,23 @@ type UserHandler struct {
 }
 
 func (h *UserHandler) CurrentUser(w http.ResponseWriter, r *http.Request) {
-	var resp responses.JSON
-
-	user, status := h.UserUCase.CurrentUser(r.Context())
-	if status != nil {
-		resp.Status = http.StatusNotFound
-		responses.SendErrorResponse(w, models.HTTPError{
-			Code:    http.StatusNotFound,
-			Message: status,
-		}, h.Logger.ErrorLogging)
-		return
-	}
-
-	resp.Status = http.StatusOK
-	resp.Body = user
-	responses.SendOKResp(resp, w)
-}
-
-func (h *UserHandler) EditProfileHandler(w http.ResponseWriter, r *http.Request) {
-	var resp responses.JSON
-	byteReq, err := ioutil.ReadAll(r.Body)
+	user, err := h.UserUCase.CurrentUser(r.Context())
 	if err != nil {
-		resp.Status = http.StatusBadRequest
-		responses.SendErrorResponse(w, models.HTTPError{
-			Code:    http.StatusBadRequest,
+		responses.SendError(w, models.HTTPError{
+			Code:    http.StatusNotFound,
 			Message: err,
 		}, h.Logger.ErrorLogging)
 		return
 	}
 
+	responses.SendData(w, user)
+}
+
+func (h *UserHandler) EditProfileHandler(w http.ResponseWriter, r *http.Request) {
 	var newUserData models.User
-	err = json.Unmarshal(byteReq, &newUserData)
+	err := responses.ReadJSON(r, &newUserData)
 	if err != nil {
-		resp.Status = http.StatusBadRequest
-		responses.SendErrorResponse(w, models.HTTPError{
+		responses.SendError(w, models.HTTPError{
 			Code:    http.StatusBadRequest,
 			Message: err,
 		}, h.Logger.ErrorLogging)
@@ -61,24 +43,20 @@ func (h *UserHandler) EditProfileHandler(w http.ResponseWriter, r *http.Request)
 
 	user, err := h.UserUCase.EditProfile(r.Context(), newUserData)
 	if err != nil {
-		responses.SendErrorResponse(w, models.HTTPError{
+		responses.SendError(w, models.HTTPError{
 			Code:    http.StatusNotFound,
 			Message: err,
 		}, h.Logger.ErrorLogging)
 		return
 	}
 
-	resp.Status = http.StatusOK
-	resp.Body = user
-	responses.SendOKResp(resp, w)
+	responses.SendData(w, user)
 }
 
 func (h *UserHandler) UploadPhoto(w http.ResponseWriter, r *http.Request) {
-	var resp responses.JSON
-
 	err := r.ParseMultipartForm(maxPhotoSize)
 	if err != nil {
-		responses.SendErrorResponse(w, models.HTTPError{
+		responses.SendError(w, models.HTTPError{
 			Code:    http.StatusBadRequest,
 			Message: err,
 		}, h.Logger.ErrorLogging)
@@ -87,7 +65,7 @@ func (h *UserHandler) UploadPhoto(w http.ResponseWriter, r *http.Request) {
 
 	uploadedPhoto, fileHeader, err := r.FormFile("photo")
 	if err != nil {
-		responses.SendErrorResponse(w, models.HTTPError{
+		responses.SendError(w, models.HTTPError{
 			Code:    http.StatusBadRequest,
 			Message: err,
 		}, h.Logger.ErrorLogging)
@@ -95,74 +73,46 @@ func (h *UserHandler) UploadPhoto(w http.ResponseWriter, r *http.Request) {
 	}
 	defer uploadedPhoto.Close()
 
-	photo, status := h.UserUCase.AddPhoto(r.Context(), uploadedPhoto, fileHeader.Filename)
-	if status != nil {
-		resp.Status = http.StatusNotFound
-		responses.SendErrorResponse(w, models.HTTPError{
-			Code:    resp.Status,
-			Message: status,
+	photo, err := h.UserUCase.AddPhoto(r.Context(), uploadedPhoto, fileHeader.Filename)
+	if err != nil {
+		responses.SendError(w, models.HTTPError{
+			Code:    http.StatusInternalServerError,
+			Message: err,
 		}, h.Logger.ErrorLogging)
 		return
 	}
 
-	resp.Status = http.StatusOK
-	resp.Body = photo
-	responses.SendOKResp(resp, w)
+	responses.SendData(w, photo)
 }
 
 func (h *UserHandler) DeletePhoto(w http.ResponseWriter, r *http.Request) {
-	var resp responses.JSON
-
-	byteReq, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		responses.SendErrorResponse(w, models.HTTPError{
-			Code:    http.StatusBadRequest,
-			Message: err,
-		}, h.Logger.ErrorLogging)
-		return
-	}
-
 	var photo models.Photo
-	err = json.Unmarshal(byteReq, &photo)
+	err := responses.ReadJSON(r, &photo)
 	if err != nil {
-		responses.SendErrorResponse(w, models.HTTPError{
+		responses.SendError(w, models.HTTPError{
 			Code:    http.StatusBadRequest,
 			Message: err,
 		}, h.Logger.ErrorLogging)
 		return
 	}
 
-	status := h.UserUCase.DeletePhoto(r.Context(), photo)
-	if status != nil {
-		resp.Status = http.StatusNotFound
-		responses.SendErrorResponse(w, models.HTTPError{
-			Code:    resp.Status,
-			Message: status,
+	err = h.UserUCase.DeletePhoto(r.Context(), photo)
+	if err != nil {
+		responses.SendError(w, models.HTTPError{
+			Code:    http.StatusNotFound,
+			Message: err,
 		}, h.Logger.ErrorLogging)
 		return
 	}
 
-	resp.Status = http.StatusOK
-	responses.SendOKResp(resp, w)
+	responses.SendOK(w)
 }
 
 func (h *UserHandler) SignupHandler(w http.ResponseWriter, r *http.Request) {
-	var resp responses.JSON
-
-	byteReq, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		responses.SendErrorResponse(w, models.HTTPError{
-			Code:    http.StatusBadRequest,
-			Message: err,
-		}, h.Logger.ErrorLogging)
-		return
-	}
-
 	var logUserData models.LoginUser
-	err = json.Unmarshal(byteReq, &logUserData)
+	err := responses.ReadJSON(r, &logUserData)
 	if err != nil {
-		resp.Status = http.StatusBadRequest
-		responses.SendErrorResponse(w, models.HTTPError{
+		responses.SendError(w, models.HTTPError{
 			Code:    http.StatusBadRequest,
 			Message: err,
 		}, h.Logger.ErrorLogging)
@@ -171,12 +121,12 @@ func (h *UserHandler) SignupHandler(w http.ResponseWriter, r *http.Request) {
 
 	user, err := h.UserUCase.Signup(r.Context(), logUserData)
 	if err != nil {
-		resp.Status = http.StatusNotFound
+		code := http.StatusNotFound
 		if err == models.ErrEmailAlreadyExists {
-			resp.Status = models.StatusEmailAlreadyExists
+			code = models.StatusEmailAlreadyExists
 		}
-		responses.SendErrorResponse(w, models.HTTPError{
-			Code:    resp.Status,
+		responses.SendError(w, models.HTTPError{
+			Code:    code,
 			Message: err,
 		}, h.Logger.ErrorLogging)
 		return
@@ -189,110 +139,78 @@ func (h *UserHandler) SignupHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	err = h.SessionUcase.AddSession(r.Context(), sess)
 	if err != nil {
-		responses.SendErrorResponse(w, models.HTTPError{
+		responses.SendError(w, models.HTTPError{
 			Code:    http.StatusInternalServerError,
 			Message: err,
 		}, h.Logger.WarnLogging)
 		return
 	}
 
-	resp.Status = http.StatusOK
-	resp.Body = user
-
 	http.SetCookie(w, &cookie)
 
-	responses.SendOKResp(resp, w)
+	responses.SendData(w, user)
 }
 
 func (h *UserHandler) NextUserHandler(w http.ResponseWriter, r *http.Request) {
-	var resp responses.JSON
-
-	nextUser, status := h.UserUCase.NextUser(r.Context())
-	if status != nil {
-		resp.Status = http.StatusNotFound
-		responses.SendErrorResponse(w, models.HTTPError{
-			Code:    resp.Status,
-			Message: status,
+	nextUser, err := h.UserUCase.NextUser(r.Context())
+	if err != nil {
+		responses.SendError(w, models.HTTPError{
+			Code:    http.StatusNotFound,
+			Message: err,
 		}, h.Logger.ErrorLogging)
 		return
 	}
 
-	resp.Status = http.StatusOK
-	resp.Body = nextUser
-	responses.SendOKResp(resp, w)
+	responses.SendData(w, nextUser)
 }
 
 func (h *UserHandler) GetAllTags(w http.ResponseWriter, r *http.Request) {
-	var resp responses.JSON
-	allTags, status := h.UserUCase.GetAllTags(r.Context())
-	if status != nil {
-		resp.Status = http.StatusNotFound
-		responses.SendErrorResponse(w, models.HTTPError{
-			Code:    resp.Status,
-			Message: status,
+	allTags, err := h.UserUCase.GetAllTags(r.Context())
+	if err != nil {
+		responses.SendError(w, models.HTTPError{
+			Code:    http.StatusNotFound,
+			Message: err,
 		}, h.Logger.ErrorLogging)
 		return
 	}
 
-	resp.Status = http.StatusOK
-	resp.Body = allTags
-	responses.SendOKResp(resp, w)
+	responses.SendData(w, allTags)
 }
 
 func (h *UserHandler) MatchesHandler(w http.ResponseWriter, r *http.Request) {
-	var resp responses.JSON
-	matches, status := h.UserUCase.UsersMatches(r.Context())
-	if status != nil {
-		resp.Status = http.StatusNotFound
-		responses.SendErrorResponse(w, models.HTTPError{
-			Code:    resp.Status,
-			Message: status,
+	matches, err := h.UserUCase.UsersMatches(r.Context())
+	if err != nil {
+		responses.SendError(w, models.HTTPError{
+			Code:    http.StatusNotFound,
+			Message: err,
 		}, h.Logger.ErrorLogging)
 		return
 	}
 
-	resp.Status = http.StatusOK
-	resp.Body = matches
-	responses.SendOKResp(resp, w)
+	responses.SendData(w, matches)
 }
 
 func (h *UserHandler) ReactionHandler(w http.ResponseWriter, r *http.Request) {
-	var resp responses.JSON
-
-	byteReq, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		responses.SendErrorResponse(w, models.HTTPError{
-			Code:    http.StatusBadRequest,
-			Message: err,
-		}, h.Logger.ErrorLogging)
-		return
-	}
-
 	var reactionData models.UserReaction
-	err = json.Unmarshal(byteReq, &reactionData)
+	err := responses.ReadJSON(r, &reactionData)
 	if err != nil {
-		resp.Status = http.StatusBadRequest
-		responses.SendErrorResponse(w, models.HTTPError{
+		responses.SendError(w, models.HTTPError{
 			Code:    http.StatusBadRequest,
 			Message: err,
 		}, h.Logger.ErrorLogging)
 		return
 	}
 
-	match, status := h.UserUCase.Reaction(r.Context(), reactionData)
-
-	if status != nil {
-		resp.Status = http.StatusNotFound
-		responses.SendErrorResponse(w, models.HTTPError{
-			Code:    resp.Status,
-			Message: status,
+	match, err := h.UserUCase.Reaction(r.Context(), reactionData)
+	if err != nil {
+		responses.SendError(w, models.HTTPError{
+			Code:    http.StatusNotFound,
+			Message: err,
 		}, h.Logger.ErrorLogging)
 		return
 	}
 
-	resp.Status = http.StatusOK
-	resp.Body = match
-	responses.SendOKResp(resp, w)
+	responses.SendData(w, match)
 }
 
 var upgrader = websocket.Upgrader{
@@ -304,10 +222,10 @@ func (h *UserHandler) Notifications(w http.ResponseWriter, r *http.Request) {
 	ws, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		status := models.HTTPError{
-			Code: http.StatusInternalServerError,
-			Message: "ws connect: " + err.Error(),
+			Code:    http.StatusInternalServerError,
+			Message: err,
 		}
-		responses.SendErrorResponse(w, status, h.Logger.ErrorLogging)
+		responses.SendError(w, status, h.Logger.ErrorLogging)
 		return
 	}
 	go h.sendNewMsgNotifications(ws)
@@ -319,7 +237,7 @@ func (h *UserHandler) sendNewMsgNotifications(client *websocket.Conn) {
 
 		err := client.ReadJSON(&msg)
 		if err != nil {
-			h.Logger.ErrorLogging(http.StatusBadRequest, "ReadJSON: " + err.Error())
+			h.Logger.ErrorLogging(http.StatusBadRequest, "ReadJSON: "+err.Error())
 			return
 		}
 
@@ -329,4 +247,17 @@ func (h *UserHandler) sendNewMsgNotifications(client *websocket.Conn) {
 			return
 		}
 	}
+}
+
+func (h *UserHandler) LikesHandler(w http.ResponseWriter, r *http.Request) {
+	likes, err := h.UserUCase.UserLikes(r.Context())
+	if err != nil {
+		responses.SendError(w, models.HTTPError{
+			Code:    http.StatusNotFound,
+			Message: err,
+		}, h.Logger.ErrorLogging)
+		return
+	}
+
+	responses.SendData(w, likes)
 }

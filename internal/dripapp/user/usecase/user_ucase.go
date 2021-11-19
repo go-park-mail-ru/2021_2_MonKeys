@@ -237,6 +237,13 @@ func (h *userUsecase) Reaction(c context.Context, reactionData models.UserReacti
 		return models.Match{}, err
 	}
 
+	// no match if dislike
+	var currMath models.Match
+	currMath.Match = false
+	if reactionData.Reaction != 1 {
+		return currMath, nil
+	}
+
 	// get users who liked current user
 	var likes []uint64
 	likes, err = h.UserRepo.GetLikes(ctx, currentUser.ID)
@@ -244,8 +251,6 @@ func (h *userUsecase) Reaction(c context.Context, reactionData models.UserReacti
 		return models.Match{}, err
 	}
 
-	var currMath models.Match
-	currMath.Match = false
 	for _, value := range likes {
 		if value == reactionData.Id {
 			currMath.Match = true
@@ -261,4 +266,34 @@ func (h *userUsecase) Reaction(c context.Context, reactionData models.UserReacti
 	}
 
 	return currMath, nil
+}
+
+func (h *userUsecase) UserLikes(c context.Context) (models.Likes, error) {
+	ctx, cancel := context.WithTimeout(c, h.contextTimeout)
+	defer cancel()
+
+	currentUser, ok := ctx.Value(configs.ContextUser).(models.User)
+	if !ok {
+		return models.Likes{}, models.ErrContextNilError
+	}
+
+	// find likes
+	likes, err := h.UserRepo.GetUsersLikes(ctx, currentUser.ID)
+	if err != nil {
+		return models.Likes{}, err
+	}
+
+	// count
+	counter := 0
+	var allMathesMap = make(map[uint64]models.User)
+	for _, value := range likes {
+		allMathesMap[uint64(counter)] = value
+		counter++
+	}
+
+	var allLikes models.Likes
+	allLikes.AllUsers = allMathesMap
+	allLikes.Count = strconv.Itoa(counter)
+
+	return allLikes, nil
 }

@@ -5,9 +5,7 @@ import (
 	"dripapp/internal/dripapp/models"
 	"dripapp/internal/pkg/logger"
 	"dripapp/internal/pkg/responses"
-	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"time"
 )
@@ -37,33 +35,21 @@ func createSessionCookie(user models.LoginUser) http.Cookie {
 }
 
 func (h *SessionHandler) LoginHandler(w http.ResponseWriter, r *http.Request) {
-	var resp responses.JSON
-
-	byteReq, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		responses.SendErrorResponse(w, models.HTTPError{
-			Code:    http.StatusBadRequest,
-			Message: err,
-		}, h.Logger.ErrorLogging)
-		return
-	}
-
 	var logUserData models.LoginUser
-	err = json.Unmarshal(byteReq, &logUserData)
+	err := responses.ReadJSON(r, &logUserData)
 	if err != nil {
-		responses.SendErrorResponse(w, models.HTTPError{
+		responses.SendError(w, models.HTTPError{
 			Code:    http.StatusBadRequest,
 			Message: err,
 		}, h.Logger.ErrorLogging)
 		return
 	}
 
-	user, status := h.UserUCase.Login(r.Context(), logUserData)
-	if status != nil {
-		resp.Status = http.StatusNotFound
-		responses.SendErrorResponse(w, models.HTTPError{
-			Code:    resp.Status,
-			Message: status,
+	user, err := h.UserUCase.Login(r.Context(), logUserData)
+	if err != nil {
+		responses.SendError(w, models.HTTPError{
+			Code:    http.StatusNotFound,
+			Message: err,
 		}, h.Logger.WarnLogging)
 		return
 	}
@@ -76,7 +62,7 @@ func (h *SessionHandler) LoginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	err = h.SessionUcase.AddSession(r.Context(), sess)
 	if err != nil {
-		responses.SendErrorResponse(w, models.HTTPError{
+		responses.SendError(w, models.HTTPError{
 			Code:    http.StatusInternalServerError,
 			Message: err,
 		}, h.Logger.WarnLogging)
@@ -85,16 +71,13 @@ func (h *SessionHandler) LoginHandler(w http.ResponseWriter, r *http.Request) {
 
 	http.SetCookie(w, &sessionCookie)
 
-	resp.Status = http.StatusOK
-	resp.Body = user
-
-	responses.SendOKResp(resp, w)
+	responses.SendData(w, user)
 }
 
 func (h *SessionHandler) LogoutHandler(w http.ResponseWriter, r *http.Request) {
 	err := h.SessionUcase.DeleteSession(r.Context())
 	if err != nil {
-		responses.SendErrorResponse(w, models.HTTPError{
+		responses.SendError(w, models.HTTPError{
 			Code:    http.StatusNotFound,
 			Message: err,
 		}, h.Logger.WarnLogging)
@@ -119,5 +102,5 @@ func (h *SessionHandler) LogoutHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	http.SetCookie(w, csrfCookie)
 
-	responses.SendOKResp(responses.JSON{Status: http.StatusOK}, w)
+	responses.SendOK(w)
 }
