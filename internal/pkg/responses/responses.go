@@ -53,16 +53,11 @@ func SendData(w http.ResponseWriter, v interface{}) {
 }
 
 func SendError(w http.ResponseWriter, httpErr models.HTTPError, logging func(int, string)) {
-	var resp JSON
-	resp.Status = httpErr.Code
-
-	body, err := json.Marshal(resp)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		return
+	resp := JSON{
+		Status: httpErr.Code,
 	}
 
-	_, err = w.Write(body)
+	err := WriteJSON(w, resp)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
