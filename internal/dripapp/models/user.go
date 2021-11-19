@@ -51,6 +51,11 @@ type Matches struct {
 	Count    string          `json:"matchesCount"`
 }
 
+type Message struct {
+	Text string `json:"text"`
+	//fromID string `json:"fromID,omitempty"`
+}
+
 func MakeUser(id uint64, email string, password string) (User, error) {
 	hashedPass := hasher.HashAndSalt(nil, password)
 	return User{ID: id, Email: email, Password: hashedPass}, nil

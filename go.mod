@@ -25,4 +25,9 @@ require (
 	golang.org/x/sys v0.0.0-20211116061358-0a5406a5449c // indirect
 	golang.org/x/tools v0.1.7 // indirect
 	gopkg.in/vmihailenco/msgpack.v2 v2.9.2 // indirect
+	github.com/golang/protobuf v1.3.2 // indirect
+	github.com/gorilla/websocket v1.4.2
+	github.com/stretchr/objx v0.1.1 // indirect
+	golang.org/x/text v0.3.6 // indirect
+	golang.org/x/tools v0.1.1 // indirect
 )
