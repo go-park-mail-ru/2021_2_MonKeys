@@ -520,7 +520,7 @@ Content-Type: image/jpeg
 				errors.New(""),
 			},
 			StatusCode: http.StatusOK,
-			BodyResp:   `{"status":404,"body":null}`,
+			BodyResp:   `{"status":500,"body":null}`,
 		},
 	}
 
