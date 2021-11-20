@@ -63,6 +63,18 @@ const (
 								join profile op on (op.id = om.id1)
 								where p.id = $1;`
 
+	GetUsersForMatchesWithSearchingQuery = `select
+												op.id,
+												op.name,
+												op.email,
+												op.date,
+												op.description
+											from profile p
+											join matches m on (p.id = m.id1)
+											join matches om on (om.id1 = m.id2 and om.id2 = m.id1)
+											join profile op on (op.id = om.id1)
+											where p.id = $1 and LOWER(op.name) like LOWER($2);`
+
 	GetLikesQuery = "select r.id1 from reactions r where r.id2 = $1 and r.type = 1;"
 
 	DeleteLikeQuery = "delete from reactions r where ((r.id1=$1 and r.id2=$2) or (r.id1=$2 and r.id2=$1)) returning id;"

@@ -190,6 +190,29 @@ func (h *UserHandler) MatchesHandler(w http.ResponseWriter, r *http.Request) {
 	responses.SendData(w, matches)
 }
 
+func (h *UserHandler) SearchMatchesHandler(w http.ResponseWriter, r *http.Request) {
+	var searchData models.Search
+	err := responses.ReadJSON(r, &searchData)
+	if err != nil {
+		responses.SendError(w, models.HTTPError{
+			Code:    http.StatusBadRequest,
+			Message: err,
+		}, h.Logger.ErrorLogging)
+		return
+	}
+
+	matches, err := h.UserUCase.UsersMatchesWithSearching(r.Context(), searchData)
+	if err != nil {
+		responses.SendError(w, models.HTTPError{
+			Code:    http.StatusNotFound,
+			Message: err,
+		}, h.Logger.ErrorLogging)
+		return
+	}
+
+	responses.SendData(w, matches)
+}
+
 func (h *UserHandler) ReactionHandler(w http.ResponseWriter, r *http.Request) {
 	var reactionData models.UserReaction
 	err := responses.ReadJSON(r, &reactionData)
