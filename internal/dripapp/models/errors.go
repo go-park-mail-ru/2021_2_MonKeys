@@ -14,6 +14,7 @@ var (
 	ErrNoSuchPhoto = errors.New("user does not have such a photo")
 
 	StatusEmailAlreadyExists = 1001
+	StatusCsrfProtection     = 419
 
 	ErrContextNilError    = errors.New("context nil error")
 	ErrConvertToSession   = errors.New("convert to model session error")

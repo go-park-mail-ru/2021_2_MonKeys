@@ -121,7 +121,7 @@ func CheckCSRF(next http.HandlerFunc) http.HandlerFunc {
 
 			if err != nil || csrf == "" || csrfCookie.Value == "" || csrfCookie.Value != csrf {
 				responses.SendError(w, models.HTTPError{
-					Code:    http.StatusInternalServerError,
+					Code:    models.StatusCsrfProtection,
 					Message: models.ErrCSRF,
 				}, logger.DripLogger.ErrorLogging)
 				return
