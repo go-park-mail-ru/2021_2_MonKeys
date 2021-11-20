@@ -12,7 +12,7 @@ function init()
         { name = 'cookie', type = 'string' },
         { name = 'user_id', type = 'unsigned' }
     })
-    s:create_index('primary', { type = 'HASH', parts = {'cookie'} })
+    s:create_index('primary', { type = 'HASH', parts = {'cookie'}, if_not_exists = true })
 
     print('create space sessions')
 end

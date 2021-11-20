@@ -89,6 +89,8 @@ func GetAgeFromDate(date string) (string, error) {
 
 func (user *User) FillProfile(newUserData User) (err error) {
 	user.Name = newUserData.Name
+	user.Gender = newUserData.Gender
+	user.Prefer = newUserData.Prefer
 	user.Date = newUserData.Date
 	user.Age, err = GetAgeFromDate(newUserData.Date)
 	if err != nil {
