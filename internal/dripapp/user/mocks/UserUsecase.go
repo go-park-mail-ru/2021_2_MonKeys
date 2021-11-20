@@ -241,3 +241,24 @@ func (_m *UserUsecase) UsersMatches(c context.Context) (models.Matches, error) {
 
 	return r0, r1
 }
+
+// UsersMatchesWithSearching provides a mock function with given fields: c, searchData
+func (_m *UserUsecase) UsersMatchesWithSearching(c context.Context, searchData models.Search) (models.Matches, error) {
+	ret := _m.Called(c, searchData)
+
+	var r0 models.Matches
+	if rf, ok := ret.Get(0).(func(context.Context, models.Search) models.Matches); ok {
+		r0 = rf(c, searchData)
+	} else {
+		r0 = ret.Get(0).(models.Matches)
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, models.Search) error); ok {
+		r1 = rf(c, searchData)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}

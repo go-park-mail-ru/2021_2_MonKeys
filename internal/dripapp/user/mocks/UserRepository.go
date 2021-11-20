@@ -234,6 +234,29 @@ func (_m *UserRepository) GetUsersMatches(ctx context.Context, currentUserId uin
 	return r0, r1
 }
 
+// GetUsersMatchesWithSearching provides a mock function with given fields: ctx, currentUserId, searchTmpl
+func (_m *UserRepository) GetUsersMatchesWithSearching(ctx context.Context, currentUserId uint64, searchTmpl string) ([]models.User, error) {
+	ret := _m.Called(ctx, currentUserId, searchTmpl)
+
+	var r0 []models.User
+	if rf, ok := ret.Get(0).(func(context.Context, uint64, string) []models.User); ok {
+		r0 = rf(ctx, currentUserId, searchTmpl)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]models.User)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, uint64, string) error); ok {
+		r1 = rf(ctx, currentUserId, searchTmpl)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // UpdateImgs provides a mock function with given fields: ctx, id, imgs
 func (_m *UserRepository) UpdateImgs(ctx context.Context, id uint64, imgs []string) error {
 	ret := _m.Called(ctx, id, imgs)

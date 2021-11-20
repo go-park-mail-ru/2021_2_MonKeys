@@ -339,6 +339,33 @@ func (p PostgreUserRepo) GetUsersLikes(ctx context.Context, currentUserId uint64
 	return likesUsers, nil
 }
 
+func (p PostgreUserRepo) GetUsersMatchesWithSearching(ctx context.Context, currentUserId uint64, searchTmpl string) ([]models.User, error) {
+	var matchesUsers []models.User
+	err := p.Conn.Select(&matchesUsers, GetUsersForMatchesWithSearchingQuery, currentUserId, searchTmpl)
+	if err != nil {
+		return nil, err
+	}
+
+	for idx := range matchesUsers {
+		matchesUsers[idx].Age, err = models.GetAgeFromDate(matchesUsers[idx].Date)
+		if err != nil {
+			return nil, err
+		}
+
+		matchesUsers[idx].Imgs, err = p.getImgsByID(ctx, matchesUsers[idx].ID)
+		if err != nil {
+			return nil, err
+		}
+
+		matchesUsers[idx].Tags, err = p.getTagsByID(ctx, matchesUsers[idx].ID)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return matchesUsers, nil
+}
+
 // func (p PostgreUserRepo) IsSwiped(ctx context.Context, userID, swipedUserID uint64) (bool, error) {
 // 	query := `select exists(select id1, id2 from reactions where id1=$1 and id2=$2)`
 

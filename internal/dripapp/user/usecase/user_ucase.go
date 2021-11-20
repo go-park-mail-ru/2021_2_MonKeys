@@ -224,6 +224,36 @@ func (h *userUsecase) UsersMatches(c context.Context) (models.Matches, error) {
 	return allMatches, nil
 }
 
+func (h *userUsecase) UsersMatchesWithSearching(c context.Context, searchData models.Search) (models.Matches, error) {
+	ctx, cancel := context.WithTimeout(c, h.contextTimeout)
+	defer cancel()
+
+	currentUser, ok := ctx.Value(configs.ContextUser).(models.User)
+	if !ok {
+		return models.Matches{}, models.ErrContextNilError
+	}
+
+	// find matches
+	mathes, err := h.UserRepo.GetUsersMatchesWithSearching(ctx, currentUser.ID, searchData.SearchingTmpl)
+	if err != nil {
+		return models.Matches{}, err
+	}
+
+	// count
+	counter := 0
+	var allMathesMap = make(map[uint64]models.User)
+	for _, value := range mathes {
+		allMathesMap[uint64(counter)] = value
+		counter++
+	}
+
+	var allMatches models.Matches
+	allMatches.AllUsers = allMathesMap
+	allMatches.Count = strconv.Itoa(counter)
+
+	return allMatches, nil
+}
+
 func (h *userUsecase) Reaction(c context.Context, reactionData models.UserReaction) (models.Match, error) {
 	ctx, cancel := context.WithTimeout(c, h.contextTimeout)
 	defer cancel()
