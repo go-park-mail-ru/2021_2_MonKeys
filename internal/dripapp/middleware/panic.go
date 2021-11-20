@@ -14,7 +14,7 @@ func PanicRecovery(l logger.Logger) (mw func(http.Handler) http.Handler) {
 			defer func() {
 				if err := recover(); err != nil {
 					fmt.Printf("Recovered from panic with err: %s on Method: [%s] %s\n", err, r.Method, r.RequestURI)
-					responses.SendErrorResponse(w, models.InternalServerError500, l.ErrorLogging)
+					responses.SendError(w, models.InternalServerError500, l.ErrorLogging)
 					return
 				}
 			}()

@@ -17,6 +17,7 @@ require (
 require (
 	github.com/chai2010/webp v1.1.0
 	github.com/go-openapi/spec v0.20.4 // indirect
+	github.com/gorilla/websocket v1.4.2
 	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/spf13/viper v1.9.0
 	github.com/stretchr/objx v0.3.0 // indirect
