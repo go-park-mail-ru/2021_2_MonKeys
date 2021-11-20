@@ -56,6 +56,10 @@ type Likes struct {
 	Count    string          `json:"likesCount"`
 }
 
+type Search struct {
+	SearchingTmpl string `json:"searchTmpl"`
+}
+
 type Message struct {
 	Text string `json:"text"`
 	//fromID string `json:"fromID,omitempty"`
@@ -113,6 +117,7 @@ type UserUsecase interface {
 	UsersMatches(c context.Context) (Matches, error)
 	Reaction(c context.Context, reactionData UserReaction) (Match, error)
 	UserLikes(c context.Context) (Likes, error)
+	UsersMatchesWithSearching(c context.Context, searchData Search) (Matches, error)
 }
 
 // ArticleRepository represent the article's repository contract
@@ -130,4 +135,5 @@ type UserRepository interface {
 	DeleteLike(ctx context.Context, firstUser uint64, secondUser uint64) error
 	AddMatch(ctx context.Context, firstUser uint64, secondUser uint64) error
 	GetUsersLikes(ctx context.Context, currentUserId uint64) ([]User, error)
+	GetUsersMatchesWithSearching(ctx context.Context, currentUserId uint64, searchTmpl string) ([]User, error)
 }
