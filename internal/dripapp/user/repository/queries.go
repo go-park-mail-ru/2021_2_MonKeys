@@ -1,14 +1,19 @@
 package repository
 
 const (
-	GetUserQuery = "select id, email, password, name, gender, prefer, date, description, imgs from profile where email = $1;"
+	GetUserQuery = `select id, email, password, name, gender, prefer, date, 
+	case when date <> '' then date_part('year', age(date::timestamp)) else 0 end as age,
+	description, imgs from profile where email = $1;`
 
-	GetUserByIdAQuery = "select id, email, password, name, gender, prefer, date, description, imgs from profile where id = $1;"
+	GetUserByIdAQuery = `select id, email, password, name, gender, prefer, date, 
+	case when date <> '' then date_part('year', age(date::timestamp)) else 0 end as age,
+	description, imgs from profile where id = $1;`
 
 	CreateUserQuery = "INSERT into profile(email,password) VALUES($1,$2) RETURNING id, email, password;"
 
 	UpdateUserQuery = `update profile set name=$2, gender=$3, prefer=$4, date=$5, description=$6, imgs=$7 where email=$1
-RETURNING id, email, password, name, gender, prefer, date, description, imgs;`
+RETURNING id, email, password, name, gender, prefer, date, 
+case when date <> '' then date_part('year', age(date::timestamp)) else 0 end as age, description, imgs;`
 
 	DeleteTagsQuery = "delete from profile_tag where profile_id=$1 returning id;"
 
@@ -37,9 +42,8 @@ RETURNING id, email, password, name, gender, prefer, date, description, imgs;`
 									op.email,
 									op.password,
 									op.name,
-									op.gender,
-									op.prefer,
 									op.date,
+									case when date <> '' then date_part('year', age(date::timestamp)) else 0 end as age,
 									op.description
 								from profile op
 								where op.id not in (
@@ -52,20 +56,20 @@ RETURNING id, email, password, name, gender, prefer, date, description, imgs;`
 									where m.id1 = $1
 								) and op.id <> $1
 									and op.name <> ''
-									and op.date <> ''`
+									and op.date <> ''
+									`
 
-	GetNextUserForSwipeQueryPrefer = "and op.gender=$2"
+	GetNextUserForSwipeQueryPrefer = "and op.gender=$2\n"
 
-	Limit = "limit 5;"
+	Limit = " limit 5;"
 
 	GetUsersForMatchesQuery = `select
 									op.id,
 									op.email,
 									op.password,
 									op.name,
-									op.gender,
-									op.prefer,
 									op.date,
+									case when op.date <> '' then date_part('year', age(op.date::timestamp)) else 0 end as age,
 									op.description
 								from profile p
 								join matches m on (p.id = m.id1)
@@ -78,6 +82,7 @@ RETURNING id, email, password, name, gender, prefer, date, description, imgs;`
 												op.name,
 												op.email,
 												op.date,
+												case when op.date <> '' then date_part('year', age(op.date::timestamp)) else 0 end as age,
 												op.description
 											from profile p
 											join matches m on (p.id = m.id1)
@@ -95,6 +100,7 @@ RETURNING id, email, password, name, gender, prefer, date, description, imgs;`
 						   p.name,
 						   p.email,
 						   p.date,
+						   case when p.date <> '' then date_part('year', age(p.date::timestamp)) else 0 end as age,
 						   p.description
 					from profile p
 					join reactions r on (r.id1 = p.id

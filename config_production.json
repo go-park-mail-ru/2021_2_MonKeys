@@ -11,7 +11,7 @@
       "port": ":5432",
       "user": "admin",
       "pass": "lolkek",
-      "name": "postgres"
+      "name": "drip"
   },
   "session": {
       "host": "tarantool",

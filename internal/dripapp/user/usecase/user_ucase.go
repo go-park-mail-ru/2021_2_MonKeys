@@ -51,7 +51,7 @@ func (h *userUsecase) EditProfile(c context.Context, newUserData models.User) (u
 
 	newUserData.ID = currentUser.ID
 	newUserData.Email = currentUser.Email
-	newUserData.Age, err = models.GetAgeFromDate(newUserData.Date)
+	// newUserData.Age, err = models.GetAgeFromDate(newUserData.Date)
 	if err != nil {
 		return models.User{}, err
 	}

@@ -73,17 +73,6 @@ func (us *UserMiddlware) GetCurrentUser(next http.HandlerFunc) http.HandlerFunc 
 				return
 			}
 
-			if len(currentUser.Date) != 0 {
-				currentUser.Age, err = models.GetAgeFromDate(currentUser.Date)
-				if err != nil {
-					responses.SendError(w, models.HTTPError{
-						Code:    http.StatusNotFound,
-						Message: err,
-					}, logger.DripLogger.ErrorLogging)
-					return
-				}
-			}
-
 			r = r.WithContext(context.WithValue(r.Context(), configs.ContextUser, currentUser))
 			next.ServeHTTP(w, r)
 		})
