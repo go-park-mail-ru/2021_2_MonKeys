@@ -38,15 +38,18 @@ func startRepo(r models.UserRepository, f models.FileRepository)  {
 	err = f.CreateFoldersForNewUser(user)
 	fmt.Println("CreateFoldersForNewUser: ", err)
 
-	err = user.FillProfile(models.User{
+	userData := models.User{
+		ID: user.ID,
+		Email: user.Email,
+		Password: user.Password,
 		Name: "Vladimir",
 		Date: "2004-01-02",
 		Description: "Description Description 123",
 		Imgs: []string{"wsx.webp"},
-	})
+	}
 	fmt.Println("FillProfile: ", err)
 
-	_, _ = r.UpdateUser(context.Background(), user)
+	_, _ = r.UpdateUser(context.Background(), userData)
 }
 
 func main() {
