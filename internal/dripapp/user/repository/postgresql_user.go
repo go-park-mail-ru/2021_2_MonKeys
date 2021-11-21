@@ -282,10 +282,20 @@ func (p PostgreUserRepo) GetLikes(ctx context.Context, currentUserId uint64) ([]
 	return likes, nil
 }
 
-func (p PostgreUserRepo) DeleteLike(ctx context.Context, firstUser uint64, secondUser uint64) error {
+func (p PostgreUserRepo) DeleteReaction(ctx context.Context, firstUser uint64, secondUser uint64) error {
 	var id uint64
-	err := p.Conn.QueryRow(DeleteLikeQuery, firstUser, secondUser).Scan(&id)
-	if err != nil {
+	err := p.Conn.QueryRow(DeleteReactionQuery, firstUser, secondUser).Scan(&id)
+	if err != nil && err != sql.ErrNoRows {
+		return err
+	}
+
+	return nil
+}
+
+func (p PostgreUserRepo) DeleteMatches(ctx context.Context, firstUser uint64, secondUser uint64) error {
+	var id uint64
+	err := p.Conn.QueryRow(DeleteMatchQuery, firstUser, secondUser).Scan(&id)
+	if err != nil && err != sql.ErrNoRows {
 		return err
 	}
 
@@ -344,6 +354,82 @@ func (p PostgreUserRepo) GetUsersMatchesWithSearching(ctx context.Context, curre
 	}
 
 	return matchesUsers, nil
+}
+
+func (p PostgreUserRepo) GetReports(ctx context.Context) (map[uint64]string, error) {
+	var reports []models.Report
+	err := p.Conn.Select(&reports, GetReportsQuery)
+	fmt.Println(352, err)
+	if err != nil {
+		return nil, err
+	}
+
+	reportsMap := make(map[uint64]string)
+
+	var i uint64
+	for i = 0; i < uint64(len(reports)); i++ {
+		reportsMap[i] = reports[i].ReportDesc
+	}
+
+	return reportsMap, nil
+}
+
+func (p PostgreUserRepo) AddReport(ctx context.Context, report models.NewReport) error {
+	var reportId uint64
+	if err := p.Conn.QueryRow(GetReportIdFromDescQuery, report.ReportDesc).Scan(&reportId); err != nil {
+		return err
+	}
+
+	var respId uint64
+	err := p.Conn.QueryRow(AddReportToProfileQuery, report.ToId, reportId).Scan(&respId)
+
+	if err != nil {
+		if err != sql.ErrNoRows {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (p PostgreUserRepo) GetReportsCount(ctx context.Context, userId uint64) (uint64, error) {
+	var curCount uint64
+	if err := p.Conn.QueryRow(GetReportsCountQuery, userId).Scan(&curCount); err != nil {
+		return curCount, err
+	}
+
+	return curCount, nil
+}
+
+func (p PostgreUserRepo) GetReportsWithMaxCountCount(ctx context.Context, userId uint64) (uint64, error) {
+	var reportId uint64
+	if err := p.Conn.QueryRow(GetReportsIdWithMaxCountQuery, userId).Scan(&reportId); err != nil {
+		return reportId, err
+	}
+
+	return reportId, nil
+}
+
+func (p PostgreUserRepo) GetReportDesc(ctx context.Context, reportId uint64) (string, error) {
+	var reportDesc string
+	if err := p.Conn.QueryRow(GetReportDescFromIdQuery, reportId).Scan(&reportDesc); err != nil {
+		return reportDesc, err
+	}
+
+	return reportDesc, nil
+}
+
+func (p PostgreUserRepo) UpdateReportStatus(ctx context.Context, userId uint64, reportStatus string) error {
+	var respId uint64
+	err := p.Conn.QueryRow(UpdateProfilesReportStatusQuery, userId, reportStatus).Scan(&respId)
+
+	if err != nil {
+		if err != sql.ErrNoRows {
+			return err
+		}
+	}
+
+	return nil
 }
 
 // func (p PostgreUserRepo) IsSwiped(ctx context.Context, userID, swipedUserID uint64) (bool, error) {
