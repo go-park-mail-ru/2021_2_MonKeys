@@ -32,7 +32,7 @@ services:
     # env_file:
     #   - envs/postgres.env
     environment:
-        POSTGRES_DB: "postgres"
+        POSTGRES_DB: "drip"
         POSTGRES_USER: "admin"
         POSTGRES_PASSWORD: "lolkek"
     ports:

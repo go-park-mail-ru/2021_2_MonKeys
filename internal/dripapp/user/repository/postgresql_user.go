@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"dripapp/configs"
 	"dripapp/internal/dripapp/models"
+	"dripapp/internal/pkg/logger"
 	"fmt"
 	"log"
 	"strings"
@@ -39,7 +40,8 @@ func NewPostgresUserRepository(config configs.PostgresConfig) (models.UserReposi
 func (p PostgreUserRepo) GetUser(ctx context.Context, email string) (models.User, error) {
 	var RespUser models.User
 	err := p.Conn.QueryRow(GetUserQuery, email).
-		Scan(&RespUser.ID, &RespUser.Name, &RespUser.Email, &RespUser.Password, &RespUser.Date, &RespUser.Description, pq.Array(&RespUser.Imgs))
+		Scan(&RespUser.ID, &RespUser.Email, &RespUser.Password, &RespUser.Name, &RespUser.Gender, &RespUser.Prefer,
+			&RespUser.Date, &RespUser.Age, &RespUser.Description, pq.Array(&RespUser.Imgs))
 	if err != nil {
 		return models.User{}, err
 	}
@@ -57,7 +59,8 @@ func (p PostgreUserRepo) GetUser(ctx context.Context, email string) (models.User
 func (p PostgreUserRepo) GetUserByID(ctx context.Context, userID uint64) (models.User, error) {
 	var RespUser models.User
 	err := p.Conn.QueryRow(GetUserByIdAQuery, userID).
-		Scan(&RespUser.ID, &RespUser.Name, &RespUser.Email, &RespUser.Password, &RespUser.Date, &RespUser.Description, pq.Array(&RespUser.Imgs))
+		Scan(&RespUser.ID, &RespUser.Email, &RespUser.Password, &RespUser.Name, &RespUser.Gender, &RespUser.Prefer,
+			&RespUser.Date, &RespUser.Age, &RespUser.Description, pq.Array(&RespUser.Imgs))
 	if err != nil {
 		return models.User{}, err
 	}
@@ -80,26 +83,32 @@ func (p PostgreUserRepo) CreateUser(ctx context.Context, logUserData models.Logi
 
 func (p PostgreUserRepo) UpdateUser(ctx context.Context, newUserData models.User) (models.User, error) {
 	var RespUser models.User
-	err := p.Conn.QueryRow(UpdateUserQuery, newUserData.Name, newUserData.Email, newUserData.Date, newUserData.Description, pq.Array(&newUserData.Imgs)).
-		Scan(&RespUser.ID, &RespUser.Name, &RespUser.Email, &RespUser.Password, &RespUser.Date, &RespUser.Description, pq.Array(&RespUser.Imgs))
+	err := p.Conn.QueryRow(UpdateUserQuery, newUserData.Email, newUserData.Name, newUserData.Gender, newUserData.Prefer,
+		newUserData.Date, newUserData.Description, pq.Array(&newUserData.Imgs)).
+		Scan(&RespUser.ID, &RespUser.Email, &RespUser.Password, &RespUser.Name, &RespUser.Gender, &RespUser.Prefer,
+			&RespUser.Date, &RespUser.Age, &RespUser.Description, pq.Array(&RespUser.Imgs))
 	if err != nil {
+		logger.DripLogger.DebugLogging("update error")
 		return models.User{}, err
 	}
 
 	err = p.deleteTags(ctx, newUserData.ID)
 	if err != nil && err != sql.ErrNoRows {
+		logger.DripLogger.DebugLogging("delete error")
 		return models.User{}, err
 	}
 
 	if len(newUserData.Tags) != 0 {
 		err = p.insertTags(ctx, newUserData.ID, newUserData.Tags)
 		if err != nil {
+			logger.DripLogger.DebugLogging("insert error")
 			return models.User{}, err
 		}
 	}
 
 	RespUser.Tags, err = p.getTagsByID(ctx, RespUser.ID)
 	if err != nil && err != sql.ErrNoRows {
+		logger.DripLogger.DebugLogging("get tags by id")
 		return models.User{}, err
 	}
 
@@ -206,31 +215,37 @@ func (p PostgreUserRepo) AddReaction(ctx context.Context, currentUserId uint64, 
 	return nil
 }
 
-func (p PostgreUserRepo) GetNextUserForSwipe(ctx context.Context, currentUserId uint64) ([]models.User, error) {
-	var notSwipedUser []models.User
-	err := p.Conn.Select(&notSwipedUser, GetNextUserForSwipeQuery, currentUserId)
+func (p PostgreUserRepo) GetNextUserForSwipe(ctx context.Context, currentUserId uint64, prefer string) (notSwipedUsers []models.User, err error) {
+	var sb strings.Builder
+	sb.WriteString(GetNextUserForSwipeQuery1)
+	if len(prefer) != 0 {
+		sb.WriteString(GetNextUserForSwipeQueryPrefer)
+	}
+	sb.WriteString(Limit)
+	GetNextUserForSwipeQuery := sb.String()
+
+	if len(prefer) != 0 {
+		err = p.Conn.Select(&notSwipedUsers, GetNextUserForSwipeQuery, currentUserId, prefer)
+	} else {
+		err = p.Conn.Select(&notSwipedUsers, GetNextUserForSwipeQuery, currentUserId)
+	}
 	if err != nil {
 		return nil, err
 	}
 
-	for idx := range notSwipedUser {
-		notSwipedUser[idx].Age, err = models.GetAgeFromDate(notSwipedUser[idx].Date)
+	for idx := range notSwipedUsers {
+		notSwipedUsers[idx].Imgs, err = p.getImgsByID(ctx, notSwipedUsers[idx].ID)
 		if err != nil {
 			return nil, err
 		}
 
-		notSwipedUser[idx].Imgs, err = p.getImgsByID(ctx, notSwipedUser[idx].ID)
-		if err != nil {
-			return nil, err
-		}
-
-		notSwipedUser[idx].Tags, err = p.getTagsByID(ctx, notSwipedUser[idx].ID)
+		notSwipedUsers[idx].Tags, err = p.getTagsByID(ctx, notSwipedUsers[idx].ID)
 		if err != nil {
 			return nil, err
 		}
 	}
 
-	return notSwipedUser, nil
+	return notSwipedUsers, nil
 }
 
 func (p PostgreUserRepo) GetUsersMatches(ctx context.Context, currentUserId uint64) ([]models.User, error) {
@@ -241,11 +256,6 @@ func (p PostgreUserRepo) GetUsersMatches(ctx context.Context, currentUserId uint
 	}
 
 	for idx := range matchesUsers {
-		matchesUsers[idx].Age, err = models.GetAgeFromDate(matchesUsers[idx].Date)
-		if err != nil {
-			return nil, err
-		}
-
 		matchesUsers[idx].Imgs, err = p.getImgsByID(ctx, matchesUsers[idx].ID)
 		if err != nil {
 			return nil, err
@@ -310,11 +320,6 @@ func (p PostgreUserRepo) GetUsersLikes(ctx context.Context, currentUserId uint64
 	}
 
 	for idx := range likesUsers {
-		likesUsers[idx].Age, err = models.GetAgeFromDate(likesUsers[idx].Date)
-		if err != nil {
-			return nil, err
-		}
-
 		likesUsers[idx].Imgs, err = p.getImgsByID(ctx, likesUsers[idx].ID)
 		if err != nil {
 			return nil, err
@@ -337,11 +342,6 @@ func (p PostgreUserRepo) GetUsersMatchesWithSearching(ctx context.Context, curre
 	}
 
 	for idx := range matchesUsers {
-		matchesUsers[idx].Age, err = models.GetAgeFromDate(matchesUsers[idx].Date)
-		if err != nil {
-			return nil, err
-		}
-
 		matchesUsers[idx].Imgs, err = p.getImgsByID(ctx, matchesUsers[idx].ID)
 		if err != nil {
 			return nil, err

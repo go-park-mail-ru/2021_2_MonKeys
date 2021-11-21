@@ -24,16 +24,18 @@ const (
 )
 
 type User struct {
-	ID           uint64   `json:"id,omitempty"`
-	Name         string   `json:"name,omitempty"`
-	Email        string   `json:"email,omitempty"`
-	Password     string   `json:"-"`
-	Date         string   `json:"date,omitempty"`
-	Age          string   `json:"age,omitempty"`
-	Description  string   `json:"description,omitempty"`
-	Imgs         []string `json:"imgs,omitempty"`
-	Tags         []string `json:"tags,omitempty"`
-	ReportStatus string   `json:"reportStatus,omitempty"`
+	ID          uint64   `json:"id,omitempty"`
+	Email       string   `json:"email,omitempty"`
+	Password    string   `json:"-"`
+	Name        string   `json:"name,omitempty"`
+	Gender      string   `json:"gender,omitempty"`
+	Prefer      string   `json:"prefer,omitempty"`
+	Date        string   `json:"date,omitempty"`
+	Age         string   `json:"age,omitempty"`
+	Description string   `json:"description,omitempty"`
+	Imgs        []string `json:"imgs,omitempty"`
+	Tags        []string `json:"tags,omitempty"`
+  ReportStatus string   `json:"reportStatus,omitempty"`
 }
 
 type LoginUser struct {
@@ -123,6 +125,8 @@ func GetAgeFromDate(date string) (string, error) {
 
 func (user *User) FillProfile(newUserData User) (err error) {
 	user.Name = newUserData.Name
+	user.Gender = newUserData.Gender
+	user.Prefer = newUserData.Prefer
 	user.Date = newUserData.Date
 	user.Age, err = GetAgeFromDate(newUserData.Date)
 	if err != nil {
@@ -163,7 +167,7 @@ type UserRepository interface {
 	GetTags(ctx context.Context) (map[uint64]string, error)
 	UpdateImgs(ctx context.Context, id uint64, imgs []string) error
 	AddReaction(ctx context.Context, currentUserId uint64, swipedUserId uint64, reactionType uint64) error
-	GetNextUserForSwipe(ctx context.Context, currentUserId uint64) ([]User, error)
+	GetNextUserForSwipe(ctx context.Context, currentUserId uint64, prefer string) ([]User, error)
 	GetUsersMatches(ctx context.Context, currentUserId uint64) ([]User, error)
 	GetLikes(ctx context.Context, currentUserId uint64) ([]uint64, error)
 	DeleteReaction(ctx context.Context, firstUser uint64, secondUser uint64) error

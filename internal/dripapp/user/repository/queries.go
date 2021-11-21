@@ -1,13 +1,19 @@
 package repository
 
 const (
-	GetUserQuery = "select id, name, email, password, date, description, imgs from profile where email = $1;"
+	GetUserQuery = `select id, email, password, name, gender, prefer, date, 
+	case when date <> '' then date_part('year', age(date::timestamp)) else 0 end as age,
+	description, imgs from profile where email = $1;`
 
-	GetUserByIdAQuery = "select id, name, email, password, date, description, imgs from profile where id = $1;"
+	GetUserByIdAQuery = `select id, email, password, name, gender, prefer, date, 
+	case when date <> '' then date_part('year', age(date::timestamp)) else 0 end as age,
+	description, imgs from profile where id = $1;`
 
 	CreateUserQuery = "INSERT into profile(email,password) VALUES($1,$2) RETURNING id, email, password;"
 
-	UpdateUserQuery = "update profile set name=$1, date=$3, description=$4, imgs=$5 where email=$2 RETURNING id, name, email, password, date, description, imgs;"
+	UpdateUserQuery = `update profile set name=$2, gender=$3, prefer=$4, date=$5, description=$6, imgs=$7 where email=$1
+RETURNING id, email, password, name, gender, prefer, date, 
+case when date <> '' then date_part('year', age(date::timestamp)) else 0 end as age, description, imgs;`
 
 	DeleteTagsQuery = "delete from profile_tag where profile_id=$1 returning id;"
 
@@ -31,13 +37,15 @@ const (
 
 	AddReactionQuery = "insert into reactions(id1, id2, type) values ($1,$2,$3) returning id;"
 
-	GetNextUserForSwipeQuery = `select 
+	GetNextUserForSwipeQuery1 = `select 
 									op.id,
-									op.name,
 									op.email,
+									op.password,
+									op.name,
 									op.date,
+									case when date <> '' then date_part('year', age(date::timestamp)) else 0 end as age,
 									op.description,
-									op.reportstatus
+                  op.reportstatus
 								from profile op
 								where op.id not in (
 									select r.id2
@@ -48,17 +56,23 @@ const (
 									from matches m
 									where m.id1 = $1
 								) and op.id <> $1
-								and op.name <> ''
-								and op.date <> ''
-									limit 5;`
+									and op.name <> ''
+									and op.date <> ''
+									`
+
+	GetNextUserForSwipeQueryPrefer = "and op.gender=$2\n"
+
+	Limit = " limit 5;"
 
 	GetUsersForMatchesQuery = `select
 									op.id,
-									op.name,
 									op.email,
+									op.password,
+									op.name,
 									op.date,
+									case when op.date <> '' then date_part('year', age(op.date::timestamp)) else 0 end as age,
 									op.description,
-									op.reportstatus
+                  op.reportstatus
 								from profile p
 								join matches m on (p.id = m.id1)
 								join matches om on (om.id1 = m.id2 and om.id2 = m.id1)
@@ -70,8 +84,9 @@ const (
 												op.name,
 												op.email,
 												op.date,
-												op.description,
-												op.reportstatus
+												case when op.date <> '' then date_part('year', age(op.date::timestamp)) else 0 end as age,
+												op.description
+                        op.reportstatus
 											from profile p
 											join matches m on (p.id = m.id1)
 											join matches om on (om.id1 = m.id2 and om.id2 = m.id1)
@@ -90,8 +105,9 @@ const (
 						   p.name,
 						   p.email,
 						   p.date,
-						   p.description,
-						   p.reportstatus
+						   case when p.date <> '' then date_part('year', age(p.date::timestamp)) else 0 end as age,
+						   p.description
+               p.reportstatus
 					from profile p
 					join reactions r on (r.id1 = p.id
 										 and r.id2 = $1
