@@ -363,19 +363,13 @@ func (h *userUsecase) GetChat(c context.Context, fromId uint64, lastId uint64) (
 	return mses, nil
 }
 
-func (h *userUsecase) SendMessage(c context.Context, ms models.Message) error {
-	ctx, cancel := context.WithTimeout(c, h.contextTimeout)
-	defer cancel()
+func (h *userUsecase) SendMessage(currentUser models.User, message models.Message) (models.Message, error) {
+	ctx := context.Background()
 
-	currentUser, ok := ctx.Value(configs.ContextUser).(models.User)
-	if !ok {
-		return models.ErrContextNilError
-	}
-
-	err := h.UserRepo.SendMessage(ctx, currentUser.ID, ms.ToID, ms.Text)
+	msg, err := h.UserRepo.SendMessage(ctx, currentUser.ID, message.ToID, message.Text)
 	if err != nil {
-		return err
+		return models.Message{}, err
 	}
 
-	return nil
+	return msg, nil
 }

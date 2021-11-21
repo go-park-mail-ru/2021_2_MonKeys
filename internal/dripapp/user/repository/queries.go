@@ -127,7 +127,7 @@ case when date <> '' then date_part('year', age(date::date)) else 0 end as age, 
     limit 1;`
 
 	SendNessage = `
-	insert into message(from_id, to_id, text) values ($1,$2,$3) returning message_id;
+	insert into message(from_id, to_id, text) values ($1,$2,$3) returning message_id, from_id, to_id, text, date;
 	`
 
 	InitChat = `

@@ -359,7 +359,7 @@ func (p PostgreUserRepo) GetChats(ctx context.Context, currentUserId uint64) ([]
 		if err != nil {
 			return nil, err
 		}
-		chats[idx].LastMessage = ms
+		chats[idx].Messages = append(chats[idx].Messages, ms)
 	}
 
 	return chats, nil
@@ -375,14 +375,14 @@ func (p PostgreUserRepo) GetChat(ctx context.Context, currentId uint64, fromId u
 	return mses, nil
 }
 
-func (p PostgreUserRepo) SendMessage(ctx context.Context, currentId uint64, toId uint64, text string) error {
-	var id uint64
-	err := p.Conn.GetContext(ctx, &id, SendNessage, currentId, toId, text)
+func (p PostgreUserRepo) SendMessage(ctx context.Context, currentId uint64, toId uint64, text string) (models.Message, error) {
+	var msg models.Message
+	err := p.Conn.GetContext(ctx, &msg, SendNessage, currentId, toId, text)
 	if err != nil {
-		return err
+		return models.Message{}, err
 	}
 
-	return nil
+	return msg, nil
 }
 
 // func (p PostgreUserRepo) IsSwiped(ctx context.Context, userID, swipedUserID uint64) (bool, error) {

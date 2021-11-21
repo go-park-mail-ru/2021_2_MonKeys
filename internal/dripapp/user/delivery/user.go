@@ -4,6 +4,7 @@ import (
 	"dripapp/internal/dripapp/models"
 	"dripapp/internal/pkg/logger"
 	"dripapp/internal/pkg/responses"
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -253,16 +254,27 @@ func (h *UserHandler) Notifications(w http.ResponseWriter, r *http.Request) {
 		responses.SendError(w, status, h.Logger.ErrorLogging)
 		return
 	}
-	go h.sendNewMsgNotifications(ws)
+
+
+	currentUser, _ := h.UserUCase.CurrentUser(r.Context())
+	fmt.Println(currentUser)
+
+	go h.sendNewMsgNotifications(currentUser, ws)
 }
 
-func (h *UserHandler) sendNewMsgNotifications(client *websocket.Conn) {
+func (h *UserHandler) sendNewMsgNotifications(user models.User, client *websocket.Conn) {
 	for {
 		var msg models.Message
 
 		err := client.ReadJSON(&msg)
 		if err != nil {
 			h.Logger.ErrorLogging(http.StatusBadRequest, "ReadJSON: "+err.Error())
+			return
+		}
+
+		msg, err = h.UserUCase.SendMessage(user, msg)
+		if err != nil {
+			h.Logger.ErrorLogging(http.StatusBadRequest, "UserUCase: "+err.Error())
 			return
 		}
 
@@ -328,27 +340,4 @@ func (h *UserHandler) GetChats(w http.ResponseWriter, r *http.Request) {
 	}
 
 	responses.SendData(w, chats)
-}
-
-func (h *UserHandler) SendMessage(w http.ResponseWriter, r *http.Request) {
-	var ms models.Message
-	err := responses.ReadJSON(r, &ms)
-	if err != nil {
-		responses.SendError(w, models.HTTPError{
-			Code:    http.StatusBadRequest,
-			Message: err,
-		}, h.Logger.ErrorLogging)
-		return
-	}
-
-	err = h.UserUCase.SendMessage(r.Context(), ms)
-	if err != nil {
-		responses.SendError(w, models.HTTPError{
-			Code:    http.StatusNotFound,
-			Message: err,
-		}, h.Logger.ErrorLogging)
-		return
-	}
-
-	responses.SendOK(w)
 }

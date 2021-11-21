@@ -72,7 +72,7 @@ type Chat struct {
 	FromUserID  uint64  `json:"fromUserID"`
 	Name        string  `json:"name"`
 	Img         string  `json:"img"`
-	LastMessage Message `json:"lastMessage"`
+	Messages    []Message `json:"messages"`
 }
 
 // ArticleUsecase represent the article's usecases
@@ -92,7 +92,7 @@ type UserUsecase interface {
 
 	GetChats(c context.Context) ([]Chat, error)
 	GetChat(c context.Context, fromId uint64, lastId uint64) ([]Message, error)
-	SendMessage(c context.Context, ms Message) error
+	SendMessage(currentUser User, message Message) (Message, error)
 }
 
 // ArticleRepository represent the article's repository contract
@@ -114,5 +114,5 @@ type UserRepository interface {
 
 	GetChats(ctx context.Context, currentUserId uint64) ([]Chat, error)
 	GetChat(ctx context.Context, currentId uint64, fromId uint64, lastId uint64) ([]Message, error)
-	SendMessage(ctx context.Context, currentId uint64, toId uint64, text string) error
+	SendMessage(ctx context.Context, currentId uint64, toId uint64, text string) (Message, error)
 }

@@ -19,6 +19,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 	"time"
 
 	_ "dripapp/docs"
@@ -26,10 +27,9 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func startRepo(r models.UserRepository, f models.FileRepository)  {
-	time.Sleep(3 * time.Second)
+func createUser(r models.UserRepository, f models.FileRepository, number int) uint64 {
 	loginData := models.LoginUser{
-		Email: "qwe@qwe",
+		Email: "qwe" + strconv.Itoa(number) + "@qwe",
 		Password: hasher.HashAndSalt(nil, "qweQWE12"),
 	}
 	user, err := r.CreateUser(context.Background(), loginData)
@@ -42,7 +42,7 @@ func startRepo(r models.UserRepository, f models.FileRepository)  {
 		ID: user.ID,
 		Email: user.Email,
 		Password: user.Password,
-		Name: "Vladimir",
+		Name: "Vladimir" + strconv.Itoa(number),
 		Date: "2004-01-02",
 		Description: "Description Description 123",
 		Imgs: []string{"wsx.webp"},
@@ -50,6 +50,21 @@ func startRepo(r models.UserRepository, f models.FileRepository)  {
 	fmt.Println("FillProfile: ", err)
 
 	_, _ = r.UpdateUser(context.Background(), userData)
+
+	return user.ID
+}
+
+func startRepo(r models.UserRepository, f models.FileRepository)  {
+	time.Sleep(3 * time.Second)
+
+	userID1 := createUser(r, f, 1)
+	userID2 := createUser(r, f, 2)
+
+	// Message
+	_, err := r.SendMessage(context.Background(), userID1, userID2, "")
+	_, err = r.SendMessage(context.Background(), userID2, userID1, "")
+	_, err = r.SendMessage(context.Background(), userID1, userID2, "AAAAAAAAA!")
+	fmt.Println("SendMessage: ", err)
 }
 
 func main() {
