@@ -27,7 +27,7 @@ import (
 )
 
 func startRepo(r models.UserRepository, f models.FileRepository)  {
-	time.Sleep(time.Second)
+	time.Sleep(3 * time.Second)
 	loginData := models.LoginUser{
 		Email: "qwe@qwe",
 		Password: hasher.HashAndSalt(nil, "qweQWE12"),
@@ -110,7 +110,7 @@ func main() {
 
 	log.Printf("STD starting server at %s\n", srv.Addr)
 
-	startRepo(userRepo, fileManager)
+	go startRepo(userRepo, fileManager)
 	// for local
 	log.Fatal(srv.ListenAndServe())
 	// for deploy
