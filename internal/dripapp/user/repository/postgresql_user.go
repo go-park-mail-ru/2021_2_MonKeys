@@ -346,45 +346,6 @@ func (p PostgreUserRepo) GetUsersMatchesWithSearching(ctx context.Context, curre
 	return matchesUsers, nil
 }
 
-func (p PostgreUserRepo) GetChats(ctx context.Context, currentUserId uint64) ([]models.Chat, error) {
-	var chats []models.Chat
-	err := p.Conn.Select(&chats, GetChats, currentUserId)
-	if err != nil {
-		return nil, err
-	}
-
-	for idx := range chats {
-		var ms models.Message
-		err := p.Conn.GetContext(ctx, &ms, GetLastMessage, currentUserId, chats[idx].FromUserID)
-		if err != nil {
-			return nil, err
-		}
-		chats[idx].Messages = append(chats[idx].Messages, ms)
-	}
-
-	return chats, nil
-}
-
-func (p PostgreUserRepo) GetChat(ctx context.Context, currentId uint64, fromId uint64, lastId uint64) ([]models.Message, error) {
-	var mses []models.Message
-	err := p.Conn.Select(&mses, GetMessages, currentId, fromId, lastId)
-	if err != nil {
-		return nil, err
-	}
-
-	return mses, nil
-}
-
-func (p PostgreUserRepo) SendMessage(ctx context.Context, currentId uint64, toId uint64, text string) (models.Message, error) {
-	var msg models.Message
-	err := p.Conn.GetContext(ctx, &msg, SendNessage, currentId, toId, text)
-	if err != nil {
-		return models.Message{}, err
-	}
-
-	return msg, nil
-}
-
 // func (p PostgreUserRepo) IsSwiped(ctx context.Context, userID, swipedUserID uint64) (bool, error) {
 // 	query := `select exists(select id1, id2 from reactions where id1=$1 and id2=$2)`
 

@@ -3,6 +3,9 @@ package main
 import (
 	"context"
 	"dripapp/configs"
+	_chatDelivery "dripapp/internal/dripapp/chat/delivery"
+	_chatRepo "dripapp/internal/dripapp/chat/repository"
+	_chatUsecase "dripapp/internal/dripapp/chat/usecase"
 	"dripapp/internal/dripapp/file"
 	_fileDelivery "dripapp/internal/dripapp/file/delivery"
 	"dripapp/internal/dripapp/middleware"
@@ -29,7 +32,7 @@ import (
 
 func createUser(r models.UserRepository, f models.FileRepository, number int) uint64 {
 	loginData := models.LoginUser{
-		Email: "qwe" + strconv.Itoa(number) + "@qwe",
+		Email:    "qwe" + strconv.Itoa(number) + "@qwe",
 		Password: hasher.HashAndSalt(nil, "qweQWE12"),
 	}
 	user, err := r.CreateUser(context.Background(), loginData)
@@ -39,13 +42,13 @@ func createUser(r models.UserRepository, f models.FileRepository, number int) ui
 	fmt.Println("CreateFoldersForNewUser: ", err)
 
 	userData := models.User{
-		ID: user.ID,
-		Email: user.Email,
-		Password: user.Password,
-		Name: "Vladimir" + strconv.Itoa(number),
-		Date: "2004-01-02",
+		ID:          user.ID,
+		Email:       user.Email,
+		Password:    user.Password,
+		Name:        "Vladimir" + strconv.Itoa(number),
+		Date:        "2004-01-02",
 		Description: "Description Description 123",
-		Imgs: []string{"wsx.webp"},
+		Imgs:        []string{"wsx.webp"},
 	}
 	fmt.Println("FillProfile: ", err)
 
@@ -54,16 +57,21 @@ func createUser(r models.UserRepository, f models.FileRepository, number int) ui
 	return user.ID
 }
 
-func startRepo(r models.UserRepository, f models.FileRepository)  {
+func startRepo(r models.UserRepository, cr models.ChatRepository, f models.FileRepository) {
 	time.Sleep(3 * time.Second)
 
 	userID1 := createUser(r, f, 1)
 	userID2 := createUser(r, f, 2)
+	userID3 := createUser(r, f, 3)
 
 	// Message
-	_, err := r.SendMessage(context.Background(), userID1, userID2, "")
-	_, err = r.SendMessage(context.Background(), userID2, userID1, "")
-	_, err = r.SendMessage(context.Background(), userID1, userID2, "AAAAAAAAA!")
+	_, err := cr.SendMessage(userID1, userID2, "")
+	_, err = cr.SendMessage(userID2, userID1, "")
+	_, err = cr.SendMessage(userID1, userID2, "AAAAAAAAA!")
+
+	_, err = cr.SendMessage(userID1, userID3, "")
+	_, err = cr.SendMessage(userID3, userID1, "")
+	_, err = cr.SendMessage(userID1, userID3, "первое сообщение!")
 	fmt.Println("SendMessage: ", err)
 }
 
@@ -111,10 +119,18 @@ func main() {
 		timeoutContext,
 	)
 
+	// chat
+	chatRepo, err := _chatRepo.NewPostgresChatRepository(configs.Postgres)
+	if err != nil {
+		log.Fatal(err)
+	}
+	chatUseCase := _chatUsecase.NewChatUseCase(chatRepo, timeoutContext)
+
 	// delivery
 	_userDelivery.SetUserRouting(logger.DripLogger, router, userUCase, sessionUcase, userRepo)
 	_sessionDelivery.SetSessionRouting(logger.DripLogger, router, userUCase, sessionUcase)
 	_fileDelivery.SetFileRouting(router, *fileManager)
+	_chatDelivery.SetChatRouting(logger.DripLogger, router, chatUseCase, userRepo)
 
 	// middleware
 	middleware.NewMiddleware(router, sm, logFile, logger.DripLogger)
@@ -128,7 +144,7 @@ func main() {
 
 	log.Printf("STD starting server at %s\n", srv.Addr)
 
-	go startRepo(userRepo, fileManager)
+	go startRepo(userRepo, chatRepo, fileManager)
 	// for local
 	log.Fatal(srv.ListenAndServe())
 	// for deploy

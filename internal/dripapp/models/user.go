@@ -3,7 +3,6 @@ package models
 import (
 	"context"
 	"io"
-	"time"
 )
 
 type User struct {
@@ -60,21 +59,6 @@ type Search struct {
 	SearchingTmpl string `json:"searchTmpl"`
 }
 
-type Message struct {
-	MessageID uint64    `json:"messageID" db:"message_id"`
-	FromID    uint64    `json:"fromID" db:"from_id"`
-	ToID      uint64    `json:"toID" db:"to_id"`
-	Text      string    `json:"text"`
-	Date      time.Time `json:"date"`
-}
-
-type Chat struct {
-	FromUserID  uint64  `json:"fromUserID"`
-	Name        string  `json:"name"`
-	Img         string  `json:"img"`
-	Messages    []Message `json:"messages"`
-}
-
 // ArticleUsecase represent the article's usecases
 type UserUsecase interface {
 	CurrentUser(c context.Context) (User, error)
@@ -89,10 +73,6 @@ type UserUsecase interface {
 	Reaction(c context.Context, reactionData UserReaction) (Match, error)
 	UserLikes(c context.Context) (Likes, error)
 	UsersMatchesWithSearching(c context.Context, searchData Search) (Matches, error)
-
-	GetChats(c context.Context) ([]Chat, error)
-	GetChat(c context.Context, fromId uint64, lastId uint64) ([]Message, error)
-	SendMessage(currentUser User, message Message) (Message, error)
 }
 
 // ArticleRepository represent the article's repository contract
@@ -111,8 +91,4 @@ type UserRepository interface {
 	AddMatch(ctx context.Context, firstUser uint64, secondUser uint64) error
 	GetUsersLikes(ctx context.Context, currentUserId uint64) ([]User, error)
 	GetUsersMatchesWithSearching(ctx context.Context, currentUserId uint64, searchTmpl string) ([]User, error)
-
-	GetChats(ctx context.Context, currentUserId uint64) ([]Chat, error)
-	GetChat(ctx context.Context, currentId uint64, fromId uint64, lastId uint64) ([]Message, error)
-	SendMessage(ctx context.Context, currentId uint64, toId uint64, text string) (Message, error)
 }
