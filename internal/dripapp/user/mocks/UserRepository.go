@@ -100,13 +100,13 @@ func (_m *UserRepository) GetLikes(ctx context.Context, currentUserId uint64) ([
 	return r0, r1
 }
 
-// GetNextUserForSwipe provides a mock function with given fields: ctx, currentUserId
-func (_m *UserRepository) GetNextUserForSwipe(ctx context.Context, currentUserId uint64) ([]models.User, error) {
-	ret := _m.Called(ctx, currentUserId)
+// GetNextUserForSwipe provides a mock function with given fields: ctx, currentUserId, prefer
+func (_m *UserRepository) GetNextUserForSwipe(ctx context.Context, currentUserId uint64, prefer string) ([]models.User, error) {
+	ret := _m.Called(ctx, currentUserId, prefer)
 
 	var r0 []models.User
-	if rf, ok := ret.Get(0).(func(context.Context, uint64) []models.User); ok {
-		r0 = rf(ctx, currentUserId)
+	if rf, ok := ret.Get(0).(func(context.Context, uint64, string) []models.User); ok {
+		r0 = rf(ctx, currentUserId, prefer)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]models.User)
@@ -114,8 +114,8 @@ func (_m *UserRepository) GetNextUserForSwipe(ctx context.Context, currentUserId
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(context.Context, uint64) error); ok {
-		r1 = rf(ctx, currentUserId)
+	if rf, ok := ret.Get(1).(func(context.Context, uint64, string) error); ok {
+		r1 = rf(ctx, currentUserId, prefer)
 	} else {
 		r1 = ret.Error(1)
 	}

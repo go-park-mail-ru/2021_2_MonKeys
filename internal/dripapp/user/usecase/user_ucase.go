@@ -40,7 +40,7 @@ func (h *userUsecase) CurrentUser(c context.Context) (models.User, error) {
 	return currentUser, nil
 }
 
-func (h *userUsecase) EditProfile(c context.Context, newUserData models.User) (models.User, error) {
+func (h *userUsecase) EditProfile(c context.Context, newUserData models.User) (updatedUser models.User, err error) {
 	ctx, cancel := context.WithTimeout(c, h.contextTimeout)
 	defer cancel()
 
@@ -49,17 +49,19 @@ func (h *userUsecase) EditProfile(c context.Context, newUserData models.User) (m
 		return models.User{}, models.ErrContextNilError
 	}
 
-	err := currentUser.FillProfile(newUserData)
+	newUserData.ID = currentUser.ID
+	newUserData.Email = currentUser.Email
+	// newUserData.Age, err = models.GetAgeFromDate(newUserData.Date)
 	if err != nil {
 		return models.User{}, err
 	}
 
-	_, err = h.UserRepo.UpdateUser(c, currentUser)
+	updatedUser, err = h.UserRepo.UpdateUser(c, newUserData)
 	if err != nil {
 		return models.User{}, err
 	}
 
-	return currentUser, nil
+	return updatedUser, nil
 }
 
 func (h *userUsecase) AddPhoto(c context.Context, photo io.Reader, fileName string) (models.Photo, error) {
@@ -159,7 +161,7 @@ func (h *userUsecase) NextUser(c context.Context) ([]models.User, error) {
 		return nil, models.ErrContextNilError
 	}
 
-	nextUsers, err := h.UserRepo.GetNextUserForSwipe(ctx, currentUser.ID)
+	nextUsers, err := h.UserRepo.GetNextUserForSwipe(ctx, currentUser.ID, currentUser.Prefer)
 	if err != nil {
 		return nil, err
 	}
