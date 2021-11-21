@@ -41,7 +41,7 @@ func (p PostgreUserRepo) GetUser(ctx context.Context, email string) (models.User
 	var RespUser models.User
 	err := p.Conn.QueryRow(GetUserQuery, email).
 		Scan(&RespUser.ID, &RespUser.Email, &RespUser.Password, &RespUser.Name, &RespUser.Gender, &RespUser.Prefer,
-			&RespUser.Date, &RespUser.Age, &RespUser.Description, pq.Array(&RespUser.Imgs))
+			&RespUser.FromAge, &RespUser.ToAge, &RespUser.Date, &RespUser.Age, &RespUser.Description, pq.Array(&RespUser.Imgs))
 	if err != nil {
 		return models.User{}, err
 	}
@@ -60,7 +60,7 @@ func (p PostgreUserRepo) GetUserByID(ctx context.Context, userID uint64) (models
 	var RespUser models.User
 	err := p.Conn.QueryRow(GetUserByIdAQuery, userID).
 		Scan(&RespUser.ID, &RespUser.Email, &RespUser.Password, &RespUser.Name, &RespUser.Gender, &RespUser.Prefer,
-			&RespUser.Date, &RespUser.Age, &RespUser.Description, pq.Array(&RespUser.Imgs))
+			&RespUser.FromAge, &RespUser.ToAge, &RespUser.Date, &RespUser.Age, &RespUser.Description, pq.Array(&RespUser.Imgs))
 	if err != nil {
 		return models.User{}, err
 	}
@@ -84,9 +84,9 @@ func (p PostgreUserRepo) CreateUser(ctx context.Context, logUserData models.Logi
 func (p PostgreUserRepo) UpdateUser(ctx context.Context, newUserData models.User) (models.User, error) {
 	var RespUser models.User
 	err := p.Conn.QueryRow(UpdateUserQuery, newUserData.Email, newUserData.Name, newUserData.Gender, newUserData.Prefer,
-		newUserData.Date, newUserData.Description, pq.Array(&newUserData.Imgs)).
+		newUserData.FromAge, newUserData.ToAge, newUserData.Date, newUserData.Description, pq.Array(&newUserData.Imgs)).
 		Scan(&RespUser.ID, &RespUser.Email, &RespUser.Password, &RespUser.Name, &RespUser.Gender, &RespUser.Prefer,
-			&RespUser.Date, &RespUser.Age, &RespUser.Description, pq.Array(&RespUser.Imgs))
+			&RespUser.FromAge, &RespUser.ToAge, &RespUser.Date, &RespUser.Age, &RespUser.Description, pq.Array(&RespUser.Imgs))
 	if err != nil {
 		logger.DripLogger.DebugLogging("update error")
 		return models.User{}, err
@@ -215,19 +215,19 @@ func (p PostgreUserRepo) AddReaction(ctx context.Context, currentUserId uint64, 
 	return nil
 }
 
-func (p PostgreUserRepo) GetNextUserForSwipe(ctx context.Context, currentUserId uint64, prefer string) (notSwipedUsers []models.User, err error) {
+func (p PostgreUserRepo) GetNextUserForSwipe(ctx context.Context, currentUser models.User) (notSwipedUsers []models.User, err error) {
 	var sb strings.Builder
 	sb.WriteString(GetNextUserForSwipeQuery1)
-	if len(prefer) != 0 {
+	if len(currentUser.Prefer) != 0 {
 		sb.WriteString(GetNextUserForSwipeQueryPrefer)
 	}
 	sb.WriteString(Limit)
 	GetNextUserForSwipeQuery := sb.String()
 
-	if len(prefer) != 0 {
-		err = p.Conn.Select(&notSwipedUsers, GetNextUserForSwipeQuery, currentUserId, prefer)
+	if len(currentUser.Prefer) != 0 {
+		err = p.Conn.Select(&notSwipedUsers, GetNextUserForSwipeQuery, currentUser.ID, currentUser.FromAge, currentUser.ToAge, currentUser.Prefer)
 	} else {
-		err = p.Conn.Select(&notSwipedUsers, GetNextUserForSwipeQuery, currentUserId)
+		err = p.Conn.Select(&notSwipedUsers, GetNextUserForSwipeQuery, currentUser.ID, currentUser.FromAge, currentUser.ToAge)
 	}
 	if err != nil {
 		return nil, err
@@ -346,14 +346,53 @@ func (p PostgreUserRepo) GetUsersMatchesWithSearching(ctx context.Context, curre
 	return matchesUsers, nil
 }
 
+func (p PostgreUserRepo) GetChats(ctx context.Context, currentUserId uint64) ([]models.Chat, error) {
+	var chats []models.Chat
+	err := p.Conn.Select(&chats, GetChats, currentUserId)
+	if err != nil {
+		return nil, err
+	}
+
+	for idx := range chats {
+		var ms models.Message
+		err := p.Conn.GetContext(ctx, &ms, GetLastMessage, currentUserId, chats[idx].FromUserID)
+		if err != nil {
+			return nil, err
+		}
+		chats[idx].LastMessage = ms
+	}
+
+	return chats, nil
+}
+
+func (p PostgreUserRepo) GetChat(ctx context.Context, currentId uint64, fromId uint64, lastId uint64) ([]models.Message, error) {
+	var mses []models.Message
+	err := p.Conn.Select(&mses, GetMessages, currentId, fromId, lastId)
+	if err != nil {
+		return nil, err
+	}
+
+	return mses, nil
+}
+
+func (p PostgreUserRepo) SendMessage(ctx context.Context, currentId uint64, toId uint64, text string) error {
+	var id uint64
+	err := p.Conn.GetContext(ctx, &id, SendNessage, currentId, toId, text)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 // func (p PostgreUserRepo) IsSwiped(ctx context.Context, userID, swipedUserID uint64) (bool, error) {
 // 	query := `select exists(select id1, id2 from reactions where id1=$1 and id2=$2)`
 
-// 	var resp bool
-// 	err := p.Conn.GetContext(ctx, &resp, query, userID, swipedUserID)
-// 	if err != nil {
-// 		return false, err
-// 	}
+// var resp bool
+// err := p.Conn.GetContext(ctx, &resp, query, userID, swipedUserID)
+// if err != nil {
+// 	return false, err
+// }
 // 	return resp, nil
 // }
 

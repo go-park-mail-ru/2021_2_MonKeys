@@ -5,7 +5,9 @@ import (
 	"dripapp/internal/pkg/logger"
 	"dripapp/internal/pkg/responses"
 	"net/http"
+	"strconv"
 
+	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
 )
 
@@ -283,4 +285,70 @@ func (h *UserHandler) LikesHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	responses.SendData(w, likes)
+}
+
+func (h *UserHandler) GetChat(w http.ResponseWriter, r *http.Request) {
+	fromId, err := strconv.Atoi(mux.Vars(r)["id"])
+	if err != nil {
+		responses.SendError(w, models.HTTPError{
+			Code:    http.StatusNotFound,
+			Message: err,
+		}, h.Logger.ErrorLogging)
+		return
+	}
+	lastId, err := strconv.Atoi(mux.Vars(r)["lastId"])
+	if err != nil {
+		responses.SendError(w, models.HTTPError{
+			Code:    http.StatusNotFound,
+			Message: err,
+		}, h.Logger.ErrorLogging)
+		return
+	}
+
+	mses, err := h.UserUCase.GetChat(r.Context(), uint64(fromId), uint64(lastId))
+	if err != nil {
+		responses.SendError(w, models.HTTPError{
+			Code:    http.StatusNotFound,
+			Message: err,
+		}, h.Logger.ErrorLogging)
+		return
+	}
+
+	responses.SendData(w, mses)
+}
+
+func (h *UserHandler) GetChats(w http.ResponseWriter, r *http.Request) {
+	chats, err := h.UserUCase.GetChats(r.Context())
+	if err != nil {
+		responses.SendError(w, models.HTTPError{
+			Code:    http.StatusNotFound,
+			Message: err,
+		}, h.Logger.ErrorLogging)
+		return
+	}
+
+	responses.SendData(w, chats)
+}
+
+func (h *UserHandler) SendMessage(w http.ResponseWriter, r *http.Request) {
+	var ms models.Message
+	err := responses.ReadJSON(r, &ms)
+	if err != nil {
+		responses.SendError(w, models.HTTPError{
+			Code:    http.StatusBadRequest,
+			Message: err,
+		}, h.Logger.ErrorLogging)
+		return
+	}
+
+	err = h.UserUCase.SendMessage(r.Context(), ms)
+	if err != nil {
+		responses.SendError(w, models.HTTPError{
+			Code:    http.StatusNotFound,
+			Message: err,
+		}, h.Logger.ErrorLogging)
+		return
+	}
+
+	responses.SendOK(w)
 }

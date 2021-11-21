@@ -77,6 +77,52 @@ func (_m *UserRepository) DeleteLike(ctx context.Context, firstUser uint64, seco
 	return r0
 }
 
+// GetChat provides a mock function with given fields: ctx, currentId, fromId, lastId
+func (_m *UserRepository) GetChat(ctx context.Context, currentId uint64, fromId uint64, lastId uint64) ([]models.Message, error) {
+	ret := _m.Called(ctx, currentId, fromId, lastId)
+
+	var r0 []models.Message
+	if rf, ok := ret.Get(0).(func(context.Context, uint64, uint64, uint64) []models.Message); ok {
+		r0 = rf(ctx, currentId, fromId, lastId)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]models.Message)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, uint64, uint64, uint64) error); ok {
+		r1 = rf(ctx, currentId, fromId, lastId)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GetChats provides a mock function with given fields: ctx, currentUserId
+func (_m *UserRepository) GetChats(ctx context.Context, currentUserId uint64) ([]models.Chat, error) {
+	ret := _m.Called(ctx, currentUserId)
+
+	var r0 []models.Chat
+	if rf, ok := ret.Get(0).(func(context.Context, uint64) []models.Chat); ok {
+		r0 = rf(ctx, currentUserId)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]models.Chat)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, uint64) error); ok {
+		r1 = rf(ctx, currentUserId)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // GetLikes provides a mock function with given fields: ctx, currentUserId
 func (_m *UserRepository) GetLikes(ctx context.Context, currentUserId uint64) ([]uint64, error) {
 	ret := _m.Called(ctx, currentUserId)
@@ -100,13 +146,13 @@ func (_m *UserRepository) GetLikes(ctx context.Context, currentUserId uint64) ([
 	return r0, r1
 }
 
-// GetNextUserForSwipe provides a mock function with given fields: ctx, currentUserId, prefer
-func (_m *UserRepository) GetNextUserForSwipe(ctx context.Context, currentUserId uint64, prefer string) ([]models.User, error) {
-	ret := _m.Called(ctx, currentUserId, prefer)
+// GetNextUserForSwipe provides a mock function with given fields: ctx, currentUser
+func (_m *UserRepository) GetNextUserForSwipe(ctx context.Context, currentUser models.User) ([]models.User, error) {
+	ret := _m.Called(ctx, currentUser)
 
 	var r0 []models.User
-	if rf, ok := ret.Get(0).(func(context.Context, uint64, string) []models.User); ok {
-		r0 = rf(ctx, currentUserId, prefer)
+	if rf, ok := ret.Get(0).(func(context.Context, models.User) []models.User); ok {
+		r0 = rf(ctx, currentUser)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]models.User)
@@ -114,8 +160,8 @@ func (_m *UserRepository) GetNextUserForSwipe(ctx context.Context, currentUserId
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(context.Context, uint64, string) error); ok {
-		r1 = rf(ctx, currentUserId, prefer)
+	if rf, ok := ret.Get(1).(func(context.Context, models.User) error); ok {
+		r1 = rf(ctx, currentUser)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -255,6 +301,20 @@ func (_m *UserRepository) GetUsersMatchesWithSearching(ctx context.Context, curr
 	}
 
 	return r0, r1
+}
+
+// SendMessage provides a mock function with given fields: ctx, currentId, toId, text
+func (_m *UserRepository) SendMessage(ctx context.Context, currentId uint64, toId uint64, text string) error {
+	ret := _m.Called(ctx, currentId, toId, text)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, uint64, uint64, string) error); ok {
+		r0 = rf(ctx, currentId, toId, text)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
 }
 
 // UpdateImgs provides a mock function with given fields: ctx, id, imgs

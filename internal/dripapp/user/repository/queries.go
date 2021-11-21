@@ -1,19 +1,19 @@
 package repository
 
 const (
-	GetUserQuery = `select id, email, password, name, gender, prefer, date, 
-	case when date <> '' then date_part('year', age(date::timestamp)) else 0 end as age,
+	GetUserQuery = `select id, email, password, name, gender, prefer, fromage, toage, date, 
+	case when date <> '' then date_part('year', age(date::date)) else 0 end as age,
 	description, imgs from profile where email = $1;`
 
-	GetUserByIdAQuery = `select id, email, password, name, gender, prefer, date, 
-	case when date <> '' then date_part('year', age(date::timestamp)) else 0 end as age,
+	GetUserByIdAQuery = `select id, email, password, name, gender, prefer, fromage, toage, date, 
+	case when date <> '' then date_part('year', age(date::date)) else 0 end as age,
 	description, imgs from profile where id = $1;`
 
 	CreateUserQuery = "INSERT into profile(email,password) VALUES($1,$2) RETURNING id, email, password;"
 
-	UpdateUserQuery = `update profile set name=$2, gender=$3, prefer=$4, date=$5, description=$6, imgs=$7 where email=$1
-RETURNING id, email, password, name, gender, prefer, date, 
-case when date <> '' then date_part('year', age(date::timestamp)) else 0 end as age, description, imgs;`
+	UpdateUserQuery = `update profile set name=$2, gender=$3, prefer=$4, fromage=$5, toage=$6, date=$7, description=$8, imgs=$9 where email=$1
+RETURNING id, email, password, name, gender, prefer, fromage, toage, date, 
+case when date <> '' then date_part('year', age(date::date)) else 0 end as age, description, imgs;`
 
 	DeleteTagsQuery = "delete from profile_tag where profile_id=$1 returning id;"
 
@@ -57,9 +57,11 @@ case when date <> '' then date_part('year', age(date::timestamp)) else 0 end as 
 								) and op.id <> $1
 									and op.name <> ''
 									and op.date <> ''
+									and (case when date <> '' then date_part('year', age(date::timestamp)) else 0 end)>=$2
+    								and (case when date <> '' then date_part('year', age(date::timestamp)) else 0 end)<=$3
 									`
 
-	GetNextUserForSwipeQueryPrefer = "and op.gender=$2\n"
+	GetNextUserForSwipeQueryPrefer = "and op.gender=$4\n"
 
 	Limit = " limit 5;"
 
@@ -108,4 +110,39 @@ case when date <> '' then date_part('year', age(date::timestamp)) else 0 end as 
 										 and r.type = 1
 										 and p.name <> ''
 										 and p.date <> '');`
+
+	GetMessages = `select message_id, from_id, to_id, text, date
+    from message
+    where
+      ((from_id = $1 and to_id = $2) or (from_id = $2 and to_id = $1)) and message_id < $3
+    order by date
+    limit 100;`
+
+	GetLastMessage = `select message_id, from_id, to_id, text, date
+    from message
+    where
+      (from_id = $1 and to_id = $2)
+      or (from_id = $2 and to_id = $1 )
+    order by date desc
+    limit 1;`
+
+	SendNessage = `
+	insert into message(from_id, to_id, text) values ($1,$2,$3) returning message_id;
+	`
+
+	InitChat = `
+	insert into message(from_id, to_id) values ($1,$2);
+	insert into message(from_id, to_id) values ($2,$1);
+	`
+
+	GetChats = `
+	select
+		p.id as FromUserID, p.name, p.imgs[1] as img
+	from
+		profile p
+		join message m on p.id = m.from_id
+		join profile op on op.id = m.to_id
+	where (m.from_id=$1 or m.to_id=$1) and (p.id<>$1)
+	group by p.id, p.name, p.imgs[1];
+	`
 )

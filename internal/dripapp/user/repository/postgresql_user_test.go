@@ -667,6 +667,8 @@ func TestGetNext(t *testing.T) {
 			Name:        "Ilyagu",
 			Gender:      "male",
 			Prefer:      "female",
+			FromAge:     18,
+			ToAge:       100,
 			Date:        "2001-06-29",
 			Description: " я хач",
 			Age:         "20",
@@ -688,7 +690,7 @@ func TestGetNext(t *testing.T) {
 			AddRow("tag2")
 		mock.ExpectQuery("select tagname").WithArgs(1).WillReturnRows(rowsTags)
 
-		users, err := repo.GetNextUserForSwipe(context.TODO(), 1, "")
+		users, err := repo.GetNextUserForSwipe(context.TODO(), us[0])
 
 		if err != nil {
 			t.Errorf("unexpected err: %s", err)
@@ -706,7 +708,7 @@ func TestGetNext(t *testing.T) {
 	t.Run("error get next", func(t *testing.T) {
 		mock.ExpectQuery("select op.id").WithArgs(1).WillReturnError(sql.ErrNoRows)
 
-		_, err := repo.GetNextUserForSwipe(context.TODO(), 1, "")
+		_, err := repo.GetNextUserForSwipe(context.TODO(), us[0])
 
 		if err == nil {
 			t.Errorf("unexpected err: %s", err)
@@ -724,7 +726,7 @@ func TestGetNext(t *testing.T) {
 
 		mock.ExpectQuery("SELECT imgs").WithArgs(1).WillReturnError(fmt.Errorf("some error"))
 
-		_, err := repo.GetNextUserForSwipe(context.TODO(), 1, "")
+		_, err := repo.GetNextUserForSwipe(context.TODO(), us[0])
 
 		if err == nil {
 			t.Errorf("unexpected err: %s", err)
@@ -745,7 +747,7 @@ func TestGetNext(t *testing.T) {
 
 		mock.ExpectQuery("select tagname").WithArgs(1).WillReturnError(sql.ErrNoRows)
 
-		_, err := repo.GetNextUserForSwipe(context.TODO(), 1, "")
+		_, err := repo.GetNextUserForSwipe(context.TODO(), us[0])
 
 		if err == nil {
 			t.Errorf("unexpected err: %s", err)
@@ -761,7 +763,7 @@ func TestGetNext(t *testing.T) {
 			AddRow(1, "Ilyagu", "valid@valid.ru", "!Nagdimaev2001", "fsdgsdg", " я хач")
 		mock.ExpectQuery("select op.id").WithArgs(1).WillReturnRows(row)
 
-		_, err := repo.GetNextUserForSwipe(context.TODO(), 1, "")
+		_, err := repo.GetNextUserForSwipe(context.TODO(), us[0])
 
 		if err == nil {
 			t.Errorf("unexpected err: %s", err)

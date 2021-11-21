@@ -122,7 +122,7 @@ func (h *userUsecase) Login(c context.Context, logUserData models.LoginUser) (mo
 	}
 
 	if !hasher.CheckWithHash(identifiableUser.Password, logUserData.Password) {
-		return models.User{}, err
+		return models.User{}, models.ErrMismatch
 	}
 
 	return identifiableUser, nil
@@ -133,7 +133,7 @@ func (h *userUsecase) Signup(c context.Context, logUserData models.LoginUser) (m
 	defer cancel()
 
 	identifiableUser, _ := h.UserRepo.GetUser(ctx, logUserData.Email)
-	if !identifiableUser.IsEmpty() {
+	if len(identifiableUser.Email) != 0 {
 		return models.User{}, models.ErrEmailAlreadyExists
 	}
 
@@ -161,7 +161,7 @@ func (h *userUsecase) NextUser(c context.Context) ([]models.User, error) {
 		return nil, models.ErrContextNilError
 	}
 
-	nextUsers, err := h.UserRepo.GetNextUserForSwipe(ctx, currentUser.ID, currentUser.Prefer)
+	nextUsers, err := h.UserRepo.GetNextUserForSwipe(ctx, currentUser)
 	if err != nil {
 		return nil, err
 	}
@@ -328,4 +328,55 @@ func (h *userUsecase) UserLikes(c context.Context) (models.Likes, error) {
 	allLikes.Count = strconv.Itoa(counter)
 
 	return allLikes, nil
+}
+
+func (h *userUsecase) GetChats(c context.Context) ([]models.Chat, error) {
+	ctx, cancel := context.WithTimeout(c, h.contextTimeout)
+	defer cancel()
+
+	currentUser, ok := ctx.Value(configs.ContextUser).(models.User)
+	if !ok {
+		return nil, models.ErrContextNilError
+	}
+
+	chats, err := h.UserRepo.GetChats(ctx, currentUser.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	return chats, nil
+}
+
+func (h *userUsecase) GetChat(c context.Context, fromId uint64, lastId uint64) ([]models.Message, error) {
+	ctx, cancel := context.WithTimeout(c, h.contextTimeout)
+	defer cancel()
+
+	currentUser, ok := ctx.Value(configs.ContextUser).(models.User)
+	if !ok {
+		return nil, models.ErrContextNilError
+	}
+
+	mses, err := h.UserRepo.GetChat(ctx, currentUser.ID, fromId, lastId)
+	if err != nil {
+		return nil, err
+	}
+
+	return mses, nil
+}
+
+func (h *userUsecase) SendMessage(c context.Context, ms models.Message) error {
+	ctx, cancel := context.WithTimeout(c, h.contextTimeout)
+	defer cancel()
+
+	currentUser, ok := ctx.Value(configs.ContextUser).(models.User)
+	if !ok {
+		return models.ErrContextNilError
+	}
+
+	err := h.UserRepo.SendMessage(ctx, currentUser.ID, ms.ToID, ms.Text)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
