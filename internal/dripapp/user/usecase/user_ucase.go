@@ -40,7 +40,7 @@ func (h *userUsecase) CurrentUser(c context.Context) (models.User, error) {
 	return currentUser, nil
 }
 
-func (h *userUsecase) EditProfile(c context.Context, newUserData models.User) (models.User, error) {
+func (h *userUsecase) EditProfile(c context.Context, newUserData models.User) (updatedUser models.User, err error) {
 	ctx, cancel := context.WithTimeout(c, h.contextTimeout)
 	defer cancel()
 
@@ -49,17 +49,19 @@ func (h *userUsecase) EditProfile(c context.Context, newUserData models.User) (m
 		return models.User{}, models.ErrContextNilError
 	}
 
-	err := currentUser.FillProfile(newUserData)
+	newUserData.ID = currentUser.ID
+	newUserData.Email = currentUser.Email
+	// newUserData.Age, err = models.GetAgeFromDate(newUserData.Date)
 	if err != nil {
 		return models.User{}, err
 	}
 
-	_, err = h.UserRepo.UpdateUser(c, currentUser)
+	updatedUser, err = h.UserRepo.UpdateUser(c, newUserData)
 	if err != nil {
 		return models.User{}, err
 	}
 
-	return currentUser, nil
+	return updatedUser, nil
 }
 
 func (h *userUsecase) AddPhoto(c context.Context, photo io.Reader, fileName string) (models.Photo, error) {
@@ -120,7 +122,7 @@ func (h *userUsecase) Login(c context.Context, logUserData models.LoginUser) (mo
 	}
 
 	if !hasher.CheckWithHash(identifiableUser.Password, logUserData.Password) {
-		return models.User{}, err
+		return models.User{}, models.ErrMismatch
 	}
 
 	return identifiableUser, nil
@@ -131,7 +133,7 @@ func (h *userUsecase) Signup(c context.Context, logUserData models.LoginUser) (m
 	defer cancel()
 
 	identifiableUser, _ := h.UserRepo.GetUser(ctx, logUserData.Email)
-	if !identifiableUser.IsEmpty() {
+	if len(identifiableUser.Email) != 0 {
 		return models.User{}, models.ErrEmailAlreadyExists
 	}
 
@@ -159,7 +161,7 @@ func (h *userUsecase) NextUser(c context.Context) ([]models.User, error) {
 		return nil, models.ErrContextNilError
 	}
 
-	nextUsers, err := h.UserRepo.GetNextUserForSwipe(ctx, currentUser.ID)
+	nextUsers, err := h.UserRepo.GetNextUserForSwipe(ctx, currentUser)
 	if err != nil {
 		return nil, err
 	}
@@ -203,6 +205,36 @@ func (h *userUsecase) UsersMatches(c context.Context) (models.Matches, error) {
 
 	// find matches
 	mathes, err := h.UserRepo.GetUsersMatches(ctx, currentUser.ID)
+	if err != nil {
+		return models.Matches{}, err
+	}
+
+	// count
+	counter := 0
+	var allMathesMap = make(map[uint64]models.User)
+	for _, value := range mathes {
+		allMathesMap[uint64(counter)] = value
+		counter++
+	}
+
+	var allMatches models.Matches
+	allMatches.AllUsers = allMathesMap
+	allMatches.Count = strconv.Itoa(counter)
+
+	return allMatches, nil
+}
+
+func (h *userUsecase) UsersMatchesWithSearching(c context.Context, searchData models.Search) (models.Matches, error) {
+	ctx, cancel := context.WithTimeout(c, h.contextTimeout)
+	defer cancel()
+
+	currentUser, ok := ctx.Value(configs.ContextUser).(models.User)
+	if !ok {
+		return models.Matches{}, models.ErrContextNilError
+	}
+
+	// find matches
+	mathes, err := h.UserRepo.GetUsersMatchesWithSearching(ctx, currentUser.ID, searchData.SearchingTmpl)
 	if err != nil {
 		return models.Matches{}, err
 	}
@@ -296,4 +328,55 @@ func (h *userUsecase) UserLikes(c context.Context) (models.Likes, error) {
 	allLikes.Count = strconv.Itoa(counter)
 
 	return allLikes, nil
+}
+
+func (h *userUsecase) GetChats(c context.Context) ([]models.Chat, error) {
+	ctx, cancel := context.WithTimeout(c, h.contextTimeout)
+	defer cancel()
+
+	currentUser, ok := ctx.Value(configs.ContextUser).(models.User)
+	if !ok {
+		return nil, models.ErrContextNilError
+	}
+
+	chats, err := h.UserRepo.GetChats(ctx, currentUser.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	return chats, nil
+}
+
+func (h *userUsecase) GetChat(c context.Context, fromId uint64, lastId uint64) ([]models.Message, error) {
+	ctx, cancel := context.WithTimeout(c, h.contextTimeout)
+	defer cancel()
+
+	currentUser, ok := ctx.Value(configs.ContextUser).(models.User)
+	if !ok {
+		return nil, models.ErrContextNilError
+	}
+
+	mses, err := h.UserRepo.GetChat(ctx, currentUser.ID, fromId, lastId)
+	if err != nil {
+		return nil, err
+	}
+
+	return mses, nil
+}
+
+func (h *userUsecase) SendMessage(c context.Context, ms models.Message) error {
+	ctx, cancel := context.WithTimeout(c, h.contextTimeout)
+	defer cancel()
+
+	currentUser, ok := ctx.Value(configs.ContextUser).(models.User)
+	if !ok {
+		return models.ErrContextNilError
+	}
+
+	err := h.UserRepo.SendMessage(ctx, currentUser.ID, ms.ToID, ms.Text)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

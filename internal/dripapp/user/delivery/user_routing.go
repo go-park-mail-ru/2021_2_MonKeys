@@ -32,12 +32,17 @@ func SetUserRouting(loggger logger.Logger, router *mux.Router, us models.UserUse
 	router.HandleFunc("/api/v1/user/likes", _p.SetCSRF(_p.CheckAuthenticated(userMid.GetCurrentUser(userHandler.LikesHandler)))).Methods("GET", "OPTIONS")
 
 	router.HandleFunc("/api/v1/matches", _p.SetCSRF(_p.CheckAuthenticated(userMid.GetCurrentUser(userHandler.MatchesHandler)))).Methods("GET", "OPTIONS")
+	router.HandleFunc("/api/v1/matches", _p.SetCSRF(userMid.GetCurrentUser(userHandler.SearchMatchesHandler))).Methods("POST", "OPTIONS")
 
 	router.HandleFunc("/api/v1/likes", _p.CheckCSRF(_p.CheckAuthenticated(userMid.GetCurrentUser(userHandler.ReactionHandler)))).Methods("POST", "OPTIONS")
 
 	router.HandleFunc("/api/v1/tags", _p.SetCSRF(_p.CheckAuthenticated(userHandler.GetAllTags))).Methods("GET", "OPTIONS")
 
 	router.HandleFunc("/api/v1/notifications", _p.SetCSRF(_p.CheckAuthenticated(userHandler.Notifications)))
+
+	router.HandleFunc("/api/v1/chat/{id:[0-9]+}&{lastId:[0-9]+}", _p.SetCSRF(_p.CheckAuthenticated(userMid.GetCurrentUser(userHandler.GetChat)))).Methods("GET", "OPTIONS")
+	router.HandleFunc("/api/v1/chats", _p.SetCSRF(_p.CheckAuthenticated(userMid.GetCurrentUser(userHandler.GetChats)))).Methods("GET", "OPTIONS")
+	router.HandleFunc("/api/v1/message", _p.SetCSRF(_p.CheckAuthenticated(userMid.GetCurrentUser(userHandler.SendMessage)))).Methods("POST", "OPTIONS")
 
 	router.PathPrefix("/api/documentation/").Handler(httpSwagger.WrapHandler)
 }

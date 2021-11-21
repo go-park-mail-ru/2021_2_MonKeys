@@ -73,17 +73,6 @@ func (us *UserMiddlware) GetCurrentUser(next http.HandlerFunc) http.HandlerFunc 
 				return
 			}
 
-			if len(currentUser.Date) != 0 {
-				currentUser.Age, err = models.GetAgeFromDate(currentUser.Date)
-				if err != nil {
-					responses.SendError(w, models.HTTPError{
-						Code:    http.StatusNotFound,
-						Message: err,
-					}, logger.DripLogger.ErrorLogging)
-					return
-				}
-			}
-
 			r = r.WithContext(context.WithValue(r.Context(), configs.ContextUser, currentUser))
 			next.ServeHTTP(w, r)
 		})
@@ -116,17 +105,17 @@ func SetCSRF(next http.HandlerFunc) http.HandlerFunc {
 func CheckCSRF(next http.HandlerFunc) http.HandlerFunc {
 	return http.HandlerFunc(
 		func(w http.ResponseWriter, r *http.Request) {
-			csrf := r.Header.Get("x-csrf-Token")
-			csrfCookie, err := r.Cookie("csrf")
+			// csrf := r.Header.Get("x-csrf-Token")
+			// csrfCookie, err := r.Cookie("csrf")
 
-			if err != nil || csrf == "" || csrfCookie.Value == "" || csrfCookie.Value != csrf {
-				responses.SendError(w, models.HTTPError{
-					Code:    http.StatusInternalServerError,
-					Message: models.ErrCSRF,
-				}, logger.DripLogger.ErrorLogging)
-				return
-			}
-			generateCsrfLogic(w)
+			// if err != nil || csrf == "" || csrfCookie.Value == "" || csrfCookie.Value != csrf {
+			// 	responses.SendError(w, models.HTTPError{
+			// 		Code:    models.StatusCsrfProtection,
+			// 		Message: models.ErrCSRF,
+			// 	}, logger.DripLogger.ErrorLogging)
+			// 	return
+			// }
+			// generateCsrfLogic(w)
 			next.ServeHTTP(w, r)
 		})
 

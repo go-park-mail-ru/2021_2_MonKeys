@@ -114,6 +114,52 @@ func (_m *UserUsecase) GetAllTags(c context.Context) (models.Tags, error) {
 	return r0, r1
 }
 
+// GetChat provides a mock function with given fields: c, fromId, lastId
+func (_m *UserUsecase) GetChat(c context.Context, fromId uint64, lastId uint64) ([]models.Message, error) {
+	ret := _m.Called(c, fromId, lastId)
+
+	var r0 []models.Message
+	if rf, ok := ret.Get(0).(func(context.Context, uint64, uint64) []models.Message); ok {
+		r0 = rf(c, fromId, lastId)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]models.Message)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, uint64, uint64) error); ok {
+		r1 = rf(c, fromId, lastId)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GetChats provides a mock function with given fields: c
+func (_m *UserUsecase) GetChats(c context.Context) ([]models.Chat, error) {
+	ret := _m.Called(c)
+
+	var r0 []models.Chat
+	if rf, ok := ret.Get(0).(func(context.Context) []models.Chat); ok {
+		r0 = rf(c)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]models.Chat)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context) error); ok {
+		r1 = rf(c)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // Login provides a mock function with given fields: c, logUserData
 func (_m *UserUsecase) Login(c context.Context, logUserData models.LoginUser) (models.User, error) {
 	ret := _m.Called(c, logUserData)
@@ -179,6 +225,20 @@ func (_m *UserUsecase) Reaction(c context.Context, reactionData models.UserReact
 	return r0, r1
 }
 
+// SendMessage provides a mock function with given fields: c, ms
+func (_m *UserUsecase) SendMessage(c context.Context, ms models.Message) error {
+	ret := _m.Called(c, ms)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, models.Message) error); ok {
+		r0 = rf(c, ms)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // Signup provides a mock function with given fields: c, logUserData
 func (_m *UserUsecase) Signup(c context.Context, logUserData models.LoginUser) (models.User, error) {
 	ret := _m.Called(c, logUserData)
@@ -235,6 +295,27 @@ func (_m *UserUsecase) UsersMatches(c context.Context) (models.Matches, error) {
 	var r1 error
 	if rf, ok := ret.Get(1).(func(context.Context) error); ok {
 		r1 = rf(c)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// UsersMatchesWithSearching provides a mock function with given fields: c, searchData
+func (_m *UserUsecase) UsersMatchesWithSearching(c context.Context, searchData models.Search) (models.Matches, error) {
+	ret := _m.Called(c, searchData)
+
+	var r0 models.Matches
+	if rf, ok := ret.Get(0).(func(context.Context, models.Search) models.Matches); ok {
+		r0 = rf(c, searchData)
+	} else {
+		r0 = ret.Get(0).(models.Matches)
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, models.Search) error); ok {
+		r1 = rf(c, searchData)
 	} else {
 		r1 = ret.Error(1)
 	}

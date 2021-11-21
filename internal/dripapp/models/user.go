@@ -2,19 +2,19 @@ package models
 
 import (
 	"context"
-	"dripapp/internal/pkg/hasher"
-	"dripapp/internal/pkg/logger"
-	"errors"
 	"io"
-	"strconv"
 	"time"
 )
 
 type User struct {
 	ID          uint64   `json:"id,omitempty"`
-	Name        string   `json:"name,omitempty"`
 	Email       string   `json:"email,omitempty"`
 	Password    string   `json:"-"`
+	Name        string   `json:"name,omitempty"`
+	Gender      string   `json:"gender,omitempty"`
+	Prefer      string   `json:"prefer,omitempty"`
+	FromAge     uint8    `json:"fromage,omitempty"`
+	ToAge       uint8    `json:"toage,omitempty"`
 	Date        string   `json:"date,omitempty"`
 	Age         string   `json:"age,omitempty"`
 	Description string   `json:"description,omitempty"`
@@ -56,48 +56,23 @@ type Likes struct {
 	Count    string          `json:"likesCount"`
 }
 
+type Search struct {
+	SearchingTmpl string `json:"searchTmpl"`
+}
+
 type Message struct {
-	Text string `json:"text"`
-	//fromID string `json:"fromID,omitempty"`
+	MessageID uint64    `json:"messageID" db:"message_id"`
+	FromID    uint64    `json:"fromID" db:"from_id"`
+	ToID      uint64    `json:"toID" db:"to_id"`
+	Text      string    `json:"text"`
+	Date      time.Time `json:"date"`
 }
 
-func MakeUser(id uint64, email string, password string) (User, error) {
-	hashedPass := hasher.HashAndSalt(nil, password)
-	return User{ID: id, Email: email, Password: hashedPass}, nil
-}
-
-func (user User) IsEmpty() bool {
-	return len(user.Email) == 0
-}
-
-func GetAgeFromDate(date string) (string, error) {
-	logger.DripLogger.DebugLogging(date)
-	birthday, err := time.Parse("2006-01-02", date)
-	if err != nil {
-		return "", errors.New("failed on userYear")
-	}
-
-	age := uint(time.Now().Year() - birthday.Year())
-	if time.Now().YearDay() < birthday.YearDay() {
-		age -= 1
-	}
-
-	return strconv.Itoa(int(age)), nil
-}
-
-func (user *User) FillProfile(newUserData User) (err error) {
-	user.Name = newUserData.Name
-	user.Date = newUserData.Date
-	user.Age, err = GetAgeFromDate(newUserData.Date)
-	if err != nil {
-		return err
-	}
-	user.Date = newUserData.Date
-	user.Description = newUserData.Description
-	user.Imgs = newUserData.Imgs
-	user.Tags = newUserData.Tags
-
-	return nil
+type Chat struct {
+	FromUserID  uint64  `json:"fromUserID"`
+	Name        string  `json:"name"`
+	Img         string  `json:"img"`
+	LastMessage Message `json:"lastMessage"`
 }
 
 // ArticleUsecase represent the article's usecases
@@ -113,6 +88,11 @@ type UserUsecase interface {
 	UsersMatches(c context.Context) (Matches, error)
 	Reaction(c context.Context, reactionData UserReaction) (Match, error)
 	UserLikes(c context.Context) (Likes, error)
+	UsersMatchesWithSearching(c context.Context, searchData Search) (Matches, error)
+
+	GetChats(c context.Context) ([]Chat, error)
+	GetChat(c context.Context, fromId uint64, lastId uint64) ([]Message, error)
+	SendMessage(c context.Context, ms Message) error
 }
 
 // ArticleRepository represent the article's repository contract
@@ -124,10 +104,15 @@ type UserRepository interface {
 	GetTags(ctx context.Context) (map[uint64]string, error)
 	UpdateImgs(ctx context.Context, id uint64, imgs []string) error
 	AddReaction(ctx context.Context, currentUserId uint64, swipedUserId uint64, reactionType uint64) error
-	GetNextUserForSwipe(ctx context.Context, currentUserId uint64) ([]User, error)
+	GetNextUserForSwipe(ctx context.Context, currentUser User) ([]User, error)
 	GetUsersMatches(ctx context.Context, currentUserId uint64) ([]User, error)
 	GetLikes(ctx context.Context, currentUserId uint64) ([]uint64, error)
 	DeleteLike(ctx context.Context, firstUser uint64, secondUser uint64) error
 	AddMatch(ctx context.Context, firstUser uint64, secondUser uint64) error
 	GetUsersLikes(ctx context.Context, currentUserId uint64) ([]User, error)
+	GetUsersMatchesWithSearching(ctx context.Context, currentUserId uint64, searchTmpl string) ([]User, error)
+
+	GetChats(ctx context.Context, currentUserId uint64) ([]Chat, error)
+	GetChat(ctx context.Context, currentId uint64, fromId uint64, lastId uint64) ([]Message, error)
+	SendMessage(ctx context.Context, currentId uint64, toId uint64, text string) error
 }
