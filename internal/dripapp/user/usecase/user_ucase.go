@@ -284,7 +284,7 @@ func (h *userUsecase) Reaction(c context.Context, reactionData models.UserReacti
 	for _, value := range likes {
 		if value == reactionData.Id {
 			currMath.Match = true
-			err = h.UserRepo.DeleteLike(ctx, currentUser.ID, reactionData.Id)
+			err = h.UserRepo.DeleteReaction(ctx, currentUser.ID, reactionData.Id)
 			if err != nil {
 				return models.Match{}, err
 			}
@@ -326,4 +326,99 @@ func (h *userUsecase) UserLikes(c context.Context) (models.Likes, error) {
 	allLikes.Count = strconv.Itoa(counter)
 
 	return allLikes, nil
+}
+
+func (h *userUsecase) GetAllReports(c context.Context) (models.Reports, error) {
+	ctx, cancel := context.WithTimeout(c, h.contextTimeout)
+	defer cancel()
+
+	allReports, err := h.UserRepo.GetReports(ctx)
+	if err != nil {
+		return models.Reports{}, err
+	}
+	var respReport models.Report
+	var currentAllReports = make(map[uint64]models.Report)
+	var respAllReports models.Reports
+	counter := 0
+
+	for _, value := range allReports {
+		respReport.ReportDesc = value
+		currentAllReports[uint64(counter)] = respReport
+		counter++
+	}
+
+	respAllReports.AllReports = currentAllReports
+	respAllReports.Count = uint64(counter)
+
+	return respAllReports, nil
+}
+
+func (h *userUsecase) AddReport(c context.Context, report models.NewReport) error {
+	ctx, cancel := context.WithTimeout(c, h.contextTimeout)
+	defer cancel()
+
+	currentUser, ok := ctx.Value(configs.ContextUser).(models.User)
+	if !ok {
+		return models.ErrContextNilError
+	}
+
+	// add new report
+	err := h.UserRepo.AddReport(ctx, report)
+	if err != nil {
+		return err
+	}
+
+	// delete likes with this user
+	err = h.UserRepo.DeleteReaction(ctx, currentUser.ID, report.ToId)
+	if err != nil {
+		return err
+	}
+	// delete matches with this user
+	err = h.UserRepo.DeleteMatches(ctx, currentUser.ID, report.ToId)
+	if err != nil {
+		return err
+	}
+
+	// added dislike(2) reaction in db
+	err = h.UserRepo.AddReaction(ctx, currentUser.ID, report.ToId, models.DislikeReaction)
+	if err != nil {
+		return err
+	}
+
+	// report's count ToId user
+	curCount, err := h.UserRepo.GetReportsCount(ctx, report.ToId)
+	if err != nil {
+		return err
+	}
+
+	// if report's count > limit -> ban
+	if curCount > models.ReportLimit {
+		banId, err := h.UserRepo.GetReportsWithMaxCountCount(ctx, report.ToId)
+		if err != nil {
+			return err
+		}
+		banDesc, err := h.UserRepo.GetReportDesc(ctx, banId)
+		if err != nil {
+			return err
+		}
+
+		var reportStatus string
+		switch banDesc {
+		case models.FakeReport:
+			reportStatus = "FAKE"
+		case models.AggressionReport:
+			reportStatus = "AGGRESSION"
+		case models.SkamReport:
+			reportStatus = "SKAM"
+		case models.UnderageReport:
+			reportStatus = "UNDERAGE"
+		}
+
+		err = h.UserRepo.UpdateReportStatus(ctx, report.ToId, reportStatus)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }

@@ -36,7 +36,8 @@ const (
 									op.name,
 									op.email,
 									op.date,
-									op.description
+									op.description,
+									op.reportstatus
 								from profile op
 								where op.id not in (
 									select r.id2
@@ -56,7 +57,8 @@ const (
 									op.name,
 									op.email,
 									op.date,
-									op.description
+									op.description,
+									op.reportstatus
 								from profile p
 								join matches m on (p.id = m.id1)
 								join matches om on (om.id1 = m.id2 and om.id2 = m.id1)
@@ -68,7 +70,8 @@ const (
 												op.name,
 												op.email,
 												op.date,
-												op.description
+												op.description,
+												op.reportstatus
 											from profile p
 											join matches m on (p.id = m.id1)
 											join matches om on (om.id1 = m.id2 and om.id2 = m.id1)
@@ -77,7 +80,9 @@ const (
 
 	GetLikesQuery = "select r.id1 from reactions r where r.id2 = $1 and r.type = 1;"
 
-	DeleteLikeQuery = "delete from reactions r where ((r.id1=$1 and r.id2=$2) or (r.id1=$2 and r.id2=$1)) returning id;"
+	DeleteReactionQuery = "delete from reactions r where ((r.id1=$1 and r.id2=$2) or (r.id1=$2 and r.id2=$1)) returning id;"
+
+	DeleteMatchQuery = "delete from matches r where ((r.id1=$1 and r.id2=$2) or (r.id1=$2 and r.id2=$1)) returning id;"
 
 	AddMatchQuery = "insert into matches(id1, id2) values ($1,$2),($2,$1) returning id;"
 
@@ -85,11 +90,30 @@ const (
 						   p.name,
 						   p.email,
 						   p.date,
-						   p.description
+						   p.description,
+						   p.reportstatus
 					from profile p
 					join reactions r on (r.id1 = p.id
 										 and r.id2 = $1
 										 and r.type = 1
 										 and p.name <> ''
 										 and p.date <> '');`
+
+	GetReportsQuery = "select reportdesc from reports;"
+
+	GetReportIdFromDescQuery      = "select r.id from reports r where r.reportdesc = $1;"
+	GetReportDescFromIdQuery      = "select reportdesc from reports r where r.id = $1;"
+	AddReportToProfileQuery       = "insert into profile_report(profile_id, report_id) values($1, $2);"
+	GetReportsCountQuery          = "select count(*) from profile_report where profile_id = $1;"
+	GetReportsIdWithMaxCountQuery = `select report_id
+									from profile_report
+									group by report_id
+									having count(*) = (
+													select max(counts.c) from (
+																				select count(*) c, report_id
+																				from profile_report
+																				where profile_id = $1
+																				group by report_id
+													) as counts);`
+	UpdateProfilesReportStatusQuery = "update profile set reportstatus = $2 where id = $1;"
 )

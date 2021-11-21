@@ -9,7 +9,8 @@ create table if not exists profile(
   password varchar(255) default '',
   date varchar(255) default '',
   description varchar(1000) default '',
-  imgs varchar(255) [] default array [] :: varchar []
+  imgs varchar(255) [] default array [] :: varchar [],
+  reportstatus varchar(255) default ''
 );
 
 create table if not exists tag(
@@ -40,9 +41,23 @@ create table if not exists matches(
   constraint fk_pt_profile1 foreign key (id1) REFERENCES profile (id),
   constraint fk_pt_profile2 foreign key (id2) REFERENCES profile (id)
 );
+create table if not exists reports(
+  id serial not null primary key,
+  reportdesc varchar(255) default ''
+);
+create table if not exists profile_report(
+  id serial not null primary key,
+  profile_id integer,
+  report_id integer,
+  constraint fk_pr_profile foreign key (profile_id) REFERENCES profile (id),
+  constraint fk_pr_report foreign key (report_id) REFERENCES reports (id)
+);
 insert into
   tag(tagname)
 values('anime'),('music'),('gaming'),('sport'),('science');
+insert into
+  reports(reportdesc)
+values('Фалишивый профиль/спам'),('Непристойное общение'),('Скам'),('Несовершеннолетний пользователь');
 
 -- foregn keys
 create index idx_react_id1 on reactions(id1);

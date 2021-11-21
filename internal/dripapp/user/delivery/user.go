@@ -284,3 +284,39 @@ func (h *UserHandler) LikesHandler(w http.ResponseWriter, r *http.Request) {
 
 	responses.SendData(w, likes)
 }
+
+func (h *UserHandler) GetAllReports(w http.ResponseWriter, r *http.Request) {
+	allReports, err := h.UserUCase.GetAllReports(r.Context())
+	if err != nil {
+		responses.SendError(w, models.HTTPError{
+			Code:    http.StatusNotFound,
+			Message: err,
+		}, h.Logger.ErrorLogging)
+		return
+	}
+
+	responses.SendData(w, allReports)
+}
+
+func (h *UserHandler) AddReport(w http.ResponseWriter, r *http.Request) {
+	var reportData models.NewReport
+	err := responses.ReadJSON(r, &reportData)
+	if err != nil {
+		responses.SendError(w, models.HTTPError{
+			Code:    http.StatusBadRequest,
+			Message: err,
+		}, h.Logger.ErrorLogging)
+		return
+	}
+
+	err = h.UserUCase.AddReport(r.Context(), reportData)
+	if err != nil {
+		responses.SendError(w, models.HTTPError{
+			Code:    http.StatusNotFound,
+			Message: err,
+		}, h.Logger.ErrorLogging)
+		return
+	}
+
+	responses.SendOK(w)
+}
