@@ -16,6 +16,7 @@ var (
 	StatusEmailAlreadyExists = 1001
 	StatusCsrfProtection     = 419
 
+	ErrMismatch           = errors.New("passwords mismatch")
 	ErrContextNilError    = errors.New("context nil error")
 	ErrConvertToSession   = errors.New("convert to model session error")
 	ErrConvertToUser      = errors.New("convert to model user error")

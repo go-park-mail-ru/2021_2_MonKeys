@@ -41,7 +41,5 @@ func SetUserRouting(loggger logger.Logger, router *mux.Router, us models.UserUse
 	router.HandleFunc("/api/v1/reports", _p.SetCSRF(_p.CheckAuthenticated(userHandler.GetAllReports))).Methods("GET", "OPTIONS")
 	router.HandleFunc("/api/v1/reports", _p.SetCSRF(userMid.GetCurrentUser(userHandler.AddReport))).Methods("POST", "OPTIONS")
 
-	router.HandleFunc("/api/v1/notifications", _p.SetCSRF(_p.CheckAuthenticated(userHandler.Notifications)))
-
 	router.PathPrefix("/api/documentation/").Handler(httpSwagger.WrapHandler)
 }

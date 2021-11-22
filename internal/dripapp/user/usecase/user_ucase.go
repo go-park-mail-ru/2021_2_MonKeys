@@ -121,7 +121,7 @@ func (h *userUsecase) Login(c context.Context, logUserData models.LoginUser) (mo
 	}
 
 	if !hasher.CheckWithHash(identifiableUser.Password, logUserData.Password) {
-		return models.User{}, err
+		return models.User{}, models.ErrMismatch
 	}
 
 	return identifiableUser, nil
@@ -132,7 +132,7 @@ func (h *userUsecase) Signup(c context.Context, logUserData models.LoginUser) (m
 	defer cancel()
 
 	identifiableUser, _ := h.UserRepo.GetUser(ctx, logUserData.Email)
-	if !identifiableUser.IsEmpty() {
+	if len(identifiableUser.Email) != 0 {
 		return models.User{}, models.ErrEmailAlreadyExists
 	}
 
@@ -160,7 +160,7 @@ func (h *userUsecase) NextUser(c context.Context) ([]models.User, error) {
 		return nil, models.ErrContextNilError
 	}
 
-	nextUsers, err := h.UserRepo.GetNextUserForSwipe(ctx, currentUser.ID, currentUser.Prefer)
+	nextUsers, err := h.UserRepo.GetNextUserForSwipe(ctx, currentUser)
 	if err != nil {
 		return nil, err
 	}

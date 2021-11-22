@@ -2,8 +2,25 @@ package models
 
 import (
 	"context"
-	"dripapp/internal/pkg/hasher"
+  "dripapp/internal/pkg/hasher"
 	"io"
+)
+
+type User struct {
+	ID          uint64   `json:"id,omitempty"`
+	Email       string   `json:"email,omitempty"`
+	Password    string   `json:"-"`
+	Name        string   `json:"name,omitempty"`
+	Gender      string   `json:"gender,omitempty"`
+	Prefer      string   `json:"prefer,omitempty"`
+	FromAge     uint8    `json:"fromage,omitempty"`
+	ToAge       uint8    `json:"toage,omitempty"`
+	Date        string   `json:"date,omitempty"`
+	Age         string   `json:"age,omitempty"`
+	Description string   `json:"description,omitempty"`
+	Imgs        []string `json:"imgs,omitempty"`
+	Tags        []string `json:"tags,omitempty"`
+  ReportStatus string   `json:"reportStatus,omitempty"`
 )
 
 const (
@@ -19,19 +36,6 @@ const (
 	UnderageReport   = "Несовершеннолетний пользователь"
 )
 
-type User struct {
-	ID           uint64   `json:"id,omitempty"`
-	Email        string   `json:"email,omitempty"`
-	Password     string   `json:"-"`
-	Name         string   `json:"name,omitempty"`
-	Gender       string   `json:"gender,omitempty"`
-	Prefer       string   `json:"prefer,omitempty"`
-	Date         string   `json:"date,omitempty"`
-	Age          string   `json:"age,omitempty"`
-	Description  string   `json:"description,omitempty"`
-	Imgs         []string `json:"imgs,omitempty"`
-	Tags         []string `json:"tags,omitempty"`
-	ReportStatus string   `json:"reportStatus,omitempty"`
 }
 
 type LoginUser struct {
@@ -90,19 +94,6 @@ type UserReportsCount struct {
 	Count uint64 `json:"userReportsCount"`
 }
 
-type Message struct {
-	Text string `json:"text"`
-	//fromID string `json:"fromID,omitempty"`
-}
-
-func MakeUser(id uint64, email string, password string) (User, error) {
-	hashedPass := hasher.HashAndSalt(nil, password)
-	return User{ID: id, Email: email, Password: hashedPass}, nil
-}
-
-func (user User) IsEmpty() bool {
-	return len(user.Email) == 0
-}
 
 // ArticleUsecase represent the article's usecases
 type UserUsecase interface {
@@ -131,7 +122,7 @@ type UserRepository interface {
 	GetTags(ctx context.Context) (map[uint64]string, error)
 	UpdateImgs(ctx context.Context, id uint64, imgs []string) error
 	AddReaction(ctx context.Context, currentUserId uint64, swipedUserId uint64, reactionType uint64) error
-	GetNextUserForSwipe(ctx context.Context, currentUserId uint64, prefer string) ([]User, error)
+	GetNextUserForSwipe(ctx context.Context, currentUser User) ([]User, error)
 	GetUsersMatches(ctx context.Context, currentUserId uint64) ([]User, error)
 	GetLikes(ctx context.Context, currentUserId uint64) ([]uint64, error)
 	DeleteReaction(ctx context.Context, firstUser uint64, secondUser uint64) error

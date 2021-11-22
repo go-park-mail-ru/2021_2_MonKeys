@@ -1,19 +1,19 @@
 package repository
 
 const (
-	GetUserQuery = `select id, email, password, name, gender, prefer, date, 
-	case when date <> '' then date_part('year', age(date::timestamp)) else 0 end as age,
+	GetUserQuery = `select id, email, password, name, gender, prefer, fromage, toage, date, 
+	case when date <> '' then date_part('year', age(date::date)) else 0 end as age,
 	description, imgs from profile where email = $1;`
 
-	GetUserByIdAQuery = `select id, email, password, name, gender, prefer, date, 
-	case when date <> '' then date_part('year', age(date::timestamp)) else 0 end as age,
+	GetUserByIdAQuery = `select id, email, password, name, gender, prefer, fromage, toage, date, 
+	case when date <> '' then date_part('year', age(date::date)) else 0 end as age,
 	description, imgs from profile where id = $1;`
 
 	CreateUserQuery = "INSERT into profile(email,password) VALUES($1,$2) RETURNING id, email, password;"
 
-	UpdateUserQuery = `update profile set name=$2, gender=$3, prefer=$4, date=$5, description=$6, imgs=$7 where email=$1
-RETURNING id, email, password, name, gender, prefer, date, 
-case when date <> '' then date_part('year', age(date::timestamp)) else 0 end as age, description, imgs;`
+	UpdateUserQuery = `update profile set name=$2, gender=$3, prefer=$4, fromage=$5, toage=$6, date=$7, description=$8, imgs=$9 where email=$1
+RETURNING id, email, password, name, gender, prefer, fromage, toage, date, 
+case when date <> '' then date_part('year', age(date::date)) else 0 end as age, description, imgs;`
 
 	DeleteTagsQuery = "delete from profile_tag where profile_id=$1 returning id;"
 
@@ -58,9 +58,11 @@ case when date <> '' then date_part('year', age(date::timestamp)) else 0 end as 
 								) and op.id <> $1
 									and op.name <> ''
 									and op.date <> ''
+									and (case when date <> '' then date_part('year', age(date::timestamp)) else 0 end)>=$2
+    								and (case when date <> '' then date_part('year', age(date::timestamp)) else 0 end)<=$3
 									`
 
-	GetNextUserForSwipeQueryPrefer = "and op.gender=$2\n"
+	GetNextUserForSwipeQueryPrefer = "and op.gender=$4\n"
 
 	Limit = " limit 5;"
 

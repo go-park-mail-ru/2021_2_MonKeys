@@ -5,8 +5,6 @@ import (
 	"dripapp/internal/pkg/logger"
 	"dripapp/internal/pkg/responses"
 	"net/http"
-
-	"github.com/gorilla/websocket"
 )
 
 const maxPhotoSize = 20 * 1024 * 1025
@@ -234,42 +232,6 @@ func (h *UserHandler) ReactionHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	responses.SendData(w, match)
-}
-
-var upgrader = websocket.Upgrader{
-	ReadBufferSize:  1024,
-	WriteBufferSize: 1024,
-}
-
-func (h *UserHandler) Notifications(w http.ResponseWriter, r *http.Request) {
-	ws, err := upgrader.Upgrade(w, r, nil)
-	if err != nil {
-		status := models.HTTPError{
-			Code:    http.StatusInternalServerError,
-			Message: err,
-		}
-		responses.SendError(w, status, h.Logger.ErrorLogging)
-		return
-	}
-	go h.sendNewMsgNotifications(ws)
-}
-
-func (h *UserHandler) sendNewMsgNotifications(client *websocket.Conn) {
-	for {
-		var msg models.Message
-
-		err := client.ReadJSON(&msg)
-		if err != nil {
-			h.Logger.ErrorLogging(http.StatusBadRequest, "ReadJSON: "+err.Error())
-			return
-		}
-
-		err = client.WriteJSON(msg)
-		if err != nil {
-			h.Logger.ErrorLogging(http.StatusBadRequest, "WriteJSON")
-			return
-		}
-	}
 }
 
 func (h *UserHandler) LikesHandler(w http.ResponseWriter, r *http.Request) {
