@@ -11,7 +11,7 @@ create table if not exists profile(
   prefer varchar(15) default '',
   date varchar(15) default '',
   description varchar(1023) default '',
-  imgs varchar(255) [] default array [] :: varchar []
+  imgs varchar(255) [] default array [] :: varchar [],
   reportstatus varchar(255) default ''
 );
 
