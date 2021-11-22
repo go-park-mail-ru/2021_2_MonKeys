@@ -3,11 +3,7 @@ package models
 import (
 	"context"
 	"dripapp/internal/pkg/hasher"
-	"dripapp/internal/pkg/logger"
-	"errors"
 	"io"
-	"strconv"
-	"time"
 )
 
 const (
@@ -24,18 +20,18 @@ const (
 )
 
 type User struct {
-	ID          uint64   `json:"id,omitempty"`
-	Email       string   `json:"email,omitempty"`
-	Password    string   `json:"-"`
-	Name        string   `json:"name,omitempty"`
-	Gender      string   `json:"gender,omitempty"`
-	Prefer      string   `json:"prefer,omitempty"`
-	Date        string   `json:"date,omitempty"`
-	Age         string   `json:"age,omitempty"`
-	Description string   `json:"description,omitempty"`
-	Imgs        []string `json:"imgs,omitempty"`
-	Tags        []string `json:"tags,omitempty"`
-  ReportStatus string   `json:"reportStatus,omitempty"`
+	ID           uint64   `json:"id,omitempty"`
+	Email        string   `json:"email,omitempty"`
+	Password     string   `json:"-"`
+	Name         string   `json:"name,omitempty"`
+	Gender       string   `json:"gender,omitempty"`
+	Prefer       string   `json:"prefer,omitempty"`
+	Date         string   `json:"date,omitempty"`
+	Age          string   `json:"age,omitempty"`
+	Description  string   `json:"description,omitempty"`
+	Imgs         []string `json:"imgs,omitempty"`
+	Tags         []string `json:"tags,omitempty"`
+	ReportStatus string   `json:"reportStatus,omitempty"`
 }
 
 type LoginUser struct {
@@ -106,38 +102,6 @@ func MakeUser(id uint64, email string, password string) (User, error) {
 
 func (user User) IsEmpty() bool {
 	return len(user.Email) == 0
-}
-
-func GetAgeFromDate(date string) (string, error) {
-	logger.DripLogger.DebugLogging(date)
-	birthday, err := time.Parse("2006-01-02", date)
-	if err != nil {
-		return "", errors.New("failed on userYear")
-	}
-
-	age := uint(time.Now().Year() - birthday.Year())
-	if time.Now().YearDay() < birthday.YearDay() {
-		age -= 1
-	}
-
-	return strconv.Itoa(int(age)), nil
-}
-
-func (user *User) FillProfile(newUserData User) (err error) {
-	user.Name = newUserData.Name
-	user.Gender = newUserData.Gender
-	user.Prefer = newUserData.Prefer
-	user.Date = newUserData.Date
-	user.Age, err = GetAgeFromDate(newUserData.Date)
-	if err != nil {
-		return err
-	}
-	user.Date = newUserData.Date
-	user.Description = newUserData.Description
-	user.Imgs = newUserData.Imgs
-	user.Tags = newUserData.Tags
-
-	return nil
 }
 
 // ArticleUsecase represent the article's usecases
