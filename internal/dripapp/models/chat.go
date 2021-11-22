@@ -2,7 +2,6 @@ package models
 
 import (
 	"context"
-	"github.com/gorilla/websocket"
 	"time"
 )
 
@@ -22,14 +21,13 @@ type Chat struct {
 }
 
 type ChatUseCase interface {
-	CreateClient(c context.Context, conn *websocket.Conn) error
+	ClientHandler(c context.Context, io IOMessage) error
 	GetChats(c context.Context) ([]Chat, error)
 	GetChat(c context.Context, fromId uint64, lastId uint64) ([]Message, error)
-	SaveMessage(currentUser User, message Message) (Message, error)
 }
 
 type ChatRepository interface {
-	GetChats(ctx context.Context, currentUserId uint64) ([]Chat, error)
-	GetChat(ctx context.Context, currentId uint64, fromId uint64, lastId uint64) ([]Message, error)
-	SendMessage(currentId uint64, toId uint64, text string) (Message, error)
+	GetChats(ctx context.Context, userId uint64) ([]Chat, error)
+	GetChat(ctx context.Context, userId uint64, fromId uint64, lastId uint64) ([]Message, error)
+	SaveMessage(userId uint64, toId uint64, text string) (Message, error)
 }

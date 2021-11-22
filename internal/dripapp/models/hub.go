@@ -1,20 +1,18 @@
-package usecase
-
-import "dripapp/internal/dripapp/models"
+package models
 
 type Hub struct {
-	clients    map[*Client]bool
-	broadcast  chan models.Message
-	register   chan *Client
-	unregister chan *Client
+	clients    map[*ChatClient]bool
+	broadcast  chan Message
+	register   chan *ChatClient
+	unregister chan *ChatClient
 }
 
 func NewHub() *Hub {
 	return &Hub{
-		broadcast:  make(chan models.Message),
-		register:   make(chan *Client),
-		unregister: make(chan *Client),
-		clients:    make(map[*Client]bool),
+		broadcast:  make(chan Message),
+		register:   make(chan *ChatClient),
+		unregister: make(chan *ChatClient),
+		clients:    make(map[*ChatClient]bool),
 	}
 }
 
@@ -42,4 +40,16 @@ func (h *Hub) Run() {
 			}
 		}
 	}
+}
+
+func (h *Hub) Register(client *ChatClient) {
+	h.register <- client
+}
+
+func (h *Hub) Unregister(client *ChatClient) {
+	h.unregister <- client
+}
+
+func (h *Hub) Broadcast(message Message) {
+	h.broadcast <- message
 }

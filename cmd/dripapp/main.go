@@ -65,13 +65,13 @@ func startRepo(r models.UserRepository, cr models.ChatRepository, f models.FileR
 	userID3 := createUser(r, f, 3)
 
 	// Message
-	_, err := cr.SendMessage(userID1, userID2, "")
-	_, err = cr.SendMessage(userID2, userID1, "")
-	_, err = cr.SendMessage(userID1, userID2, "AAAAAAAAA!")
+	_, err := cr.SaveMessage(userID1, userID2, "")
+	_, err = cr.SaveMessage(userID2, userID1, "")
+	_, err = cr.SaveMessage(userID1, userID2, "AAAAAAAAA!")
 
-	_, err = cr.SendMessage(userID1, userID3, "")
-	_, err = cr.SendMessage(userID3, userID1, "")
-	_, err = cr.SendMessage(userID1, userID3, "первое сообщение!")
+	_, err = cr.SaveMessage(userID1, userID3, "")
+	_, err = cr.SaveMessage(userID3, userID1, "")
+	_, err = cr.SaveMessage(userID1, userID3, "первое сообщение!")
 	fmt.Println("SendMessage: ", err)
 }
 
@@ -120,7 +120,7 @@ func main() {
 	)
 
 	// chat
-	hub := _chatUsecase.NewHub()
+	hub := models.NewHub()
 	go hub.Run()
 	chatRepo, err := _chatRepo.NewPostgresChatRepository(configs.Postgres)
 	if err != nil {

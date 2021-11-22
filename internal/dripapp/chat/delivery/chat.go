@@ -5,7 +5,6 @@ import (
 	"dripapp/internal/pkg/logger"
 	"dripapp/internal/pkg/responses"
 	"github.com/gorilla/mux"
-	"github.com/gorilla/websocket"
 	"net/http"
 	"strconv"
 )
@@ -14,57 +13,6 @@ type ChatHandler struct {
 	Chat   models.ChatUseCase
 	Logger logger.Logger
 }
-
-var upgrader = websocket.Upgrader{
-	ReadBufferSize:  1024,
-	WriteBufferSize: 1024,
-}
-
-func (h *ChatHandler) Notifications(w http.ResponseWriter, r *http.Request) {
-	conn, err := upgrader.Upgrade(w, r, nil)
-	if err != nil {
-		status := models.HTTPError{
-			Code:    http.StatusInternalServerError,
-			Message: err,
-		}
-		responses.SendError(w, status, h.Logger.ErrorLogging)
-		return
-	}
-
-	err = h.Chat.CreateClient(r.Context(), conn)
-	if err != nil {
-		status := models.HTTPError{
-			Code:    http.StatusNotFound,
-			Message: err,
-		}
-		responses.SendError(w, status, h.Logger.ErrorLogging)
-		return
-	}
-}
-
-//func (h *ChatHandler) sendNewMsgNotifications(currentUser models.User, client *websocket.Conn) {
-//	for {
-//		var msg models.Message
-//
-//		err := client.ReadJSON(&msg)
-//		if err != nil {
-//			h.Logger.ErrorLogging(http.StatusBadRequest, "ReadJSON: "+err.Error())
-//			return
-//		}
-//
-//		msg, err = h.Chat.SendMessage(currentUser, msg)
-//		if err != nil {
-//			h.Logger.ErrorLogging(http.StatusBadRequest, "UserUCase: "+err.Error())
-//			return
-//		}
-//
-//		err = client.WriteJSON(msg)
-//		if err != nil {
-//			h.Logger.ErrorLogging(http.StatusBadRequest, "WriteJSON")
-//			return
-//		}
-//	}
-//}
 
 func (h *ChatHandler) GetChat(w http.ResponseWriter, r *http.Request) {
 	fromId, err := strconv.Atoi(mux.Vars(r)["id"])

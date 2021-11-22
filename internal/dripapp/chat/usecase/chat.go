@@ -4,19 +4,18 @@ import (
 	"context"
 	"dripapp/configs"
 	"dripapp/internal/dripapp/models"
-	"github.com/gorilla/websocket"
 	"time"
 )
 
 type ChatUseCase struct {
 	ChatRepo       models.ChatRepository
-	hub            *Hub
+	hub            *models.Hub
 	contextTimeout time.Duration
 }
 
 func NewChatUseCase(
 	chatRepo models.ChatRepository,
-	hub *Hub,
+	hub *models.Hub,
 	timeout time.Duration) models.ChatUseCase {
 	return &ChatUseCase{
 		ChatRepo:       chatRepo,
@@ -25,7 +24,7 @@ func NewChatUseCase(
 	}
 }
 
-func (h *ChatUseCase) CreateClient(c context.Context, conn *websocket.Conn) error {
+func (h *ChatUseCase) ClientHandler(c context.Context, io models.IOMessage) error {
 	ctx, cancel := context.WithTimeout(c, h.contextTimeout)
 	defer cancel()
 
@@ -34,16 +33,10 @@ func (h *ChatUseCase) CreateClient(c context.Context, conn *websocket.Conn) erro
 		return models.ErrContextNilError
 	}
 
-	client := &Client{
-		user: currentUser,
-		uc:   h,
-		conn: conn,
-		send: make(chan models.Message),
-	}
-	h.hub.register <- client
+	client := models.NewChatClient(currentUser, h.hub, h.ChatRepo, io)
 
-	go client.writePump()
-	go client.readPump()
+	go client.WritePump()
+	go client.ReadPump()
 
 	return nil
 }
@@ -80,13 +73,4 @@ func (h *ChatUseCase) GetChat(c context.Context, fromId uint64, lastId uint64) (
 	}
 
 	return mses, nil
-}
-
-func (h *ChatUseCase) SaveMessage(currentUser models.User, message models.Message) (models.Message, error) {
-	msg, err := h.ChatRepo.SendMessage(currentUser.ID, message.ToID, message.Text)
-	if err != nil {
-		return models.Message{}, err
-	}
-
-	return msg, nil
 }
