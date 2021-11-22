@@ -952,7 +952,7 @@ func TestGetLikes(t *testing.T) {
 	})
 }
 
-func TestDeleteLikes(t *testing.T) {
+func TestDeleteReaction(t *testing.T) {
 	t.Parallel()
 	db, mock, err := sqlmock.New()
 	if err != nil {
@@ -969,7 +969,7 @@ func TestDeleteLikes(t *testing.T) {
 		rows := sqlmock.NewRows([]string{"id"}).AddRow(1)
 		mock.ExpectQuery("delete").WithArgs(1, 1).WillReturnRows(rows)
 
-		err := repo.DeleteLike(context.TODO(), 1, 1)
+		err := repo.DeleteReaction(context.TODO(), 1, 1)
 
 		if err != nil {
 			t.Errorf("unexpected err: %s", err)
@@ -983,7 +983,7 @@ func TestDeleteLikes(t *testing.T) {
 	t.Run("error delete likes", func(t *testing.T) {
 		mock.ExpectQuery("delete").WithArgs(1, 1).WillReturnError(sql.ErrNoRows)
 
-		err := repo.DeleteLike(context.TODO(), 1, 1)
+		err := repo.DeleteReaction(context.TODO(), 1, 1)
 
 		if err == nil {
 			t.Errorf("unexpected err: %s", err)
