@@ -282,10 +282,20 @@ func (p PostgreUserRepo) GetLikes(ctx context.Context, currentUserId uint64) ([]
 	return likes, nil
 }
 
-func (p PostgreUserRepo) DeleteLike(ctx context.Context, firstUser uint64, secondUser uint64) error {
+func (p PostgreUserRepo) DeleteReaction(ctx context.Context, firstUser uint64, secondUser uint64) error {
 	var id uint64
-	err := p.Conn.QueryRow(DeleteLikeQuery, firstUser, secondUser).Scan(&id)
-	if err != nil {
+	err := p.Conn.QueryRow(DeleteReactionQuery, firstUser, secondUser).Scan(&id)
+	if err != nil && err != sql.ErrNoRows {
+		return err
+	}
+
+	return nil
+}
+
+func (p PostgreUserRepo) DeleteMatches(ctx context.Context, firstUser uint64, secondUser uint64) error {
+	var id uint64
+	err := p.Conn.QueryRow(DeleteMatchQuery, firstUser, secondUser).Scan(&id)
+	if err != nil && err != sql.ErrNoRows {
 		return err
 	}
 
@@ -304,7 +314,7 @@ func (p PostgreUserRepo) AddMatch(ctx context.Context, firstUser uint64, secondU
 
 func (p PostgreUserRepo) GetUsersLikes(ctx context.Context, currentUserId uint64) ([]models.User, error) {
 	var likesUsers []models.User
-	err := p.Conn.Select(&likesUsers, GetUserLikes, currentUserId)
+	err := p.Conn.Select(&likesUsers, GetUserLikesQuery, currentUserId)
 	if err != nil {
 		return nil, err
 	}
@@ -346,106 +356,78 @@ func (p PostgreUserRepo) GetUsersMatchesWithSearching(ctx context.Context, curre
 	return matchesUsers, nil
 }
 
-// func (p PostgreUserRepo) IsSwiped(ctx context.Context, userID, swipedUserID uint64) (bool, error) {
-// 	query := `select exists(select id1, id2 from reactions where id1=$1 and id2=$2)`
+func (p PostgreUserRepo) GetReports(ctx context.Context) (map[uint64]string, error) {
+	var reports []models.Report
+	err := p.Conn.Select(&reports, GetReportsQuery)
+	fmt.Println(352, err)
+	if err != nil {
+		return nil, err
+	}
 
-// var resp bool
-// err := p.Conn.GetContext(ctx, &resp, query, userID, swipedUserID)
-// if err != nil {
-// 	return false, err
-// }
-// 	return resp, nil
-// }
+	reportsMap := make(map[uint64]string)
 
-// func (p PostgreUserRepo) CreateTag(ctx context.Context, tag_name string) error {
-// 	sel := "insert into tag(tag_name) values($1);"
+	var i uint64
+	for i = 0; i < uint64(len(reports)); i++ {
+		reportsMap[i] = reports[i].ReportDesc
+	}
 
-// 	if err := p.Conn.QueryRow(sel, tag_name).Scan(); err != nil {
-// 		return err
-// 	}
+	return reportsMap, nil
+}
 
-// 	return nil
-// }
+func (p PostgreUserRepo) AddReport(ctx context.Context, report models.NewReport) error {
+	var reportId uint64
+	if err := p.Conn.QueryRow(GetReportIdFromDescQuery, report.ReportDesc).Scan(&reportId); err != nil {
+		return err
+	}
 
-// func (p PostgreUserRepo) DropSwipes(ctx context.Context) error {
-// 	query := `delete from reactions`
+	var respId uint64
+	err := p.Conn.QueryRow(AddReportToProfileQuery, report.ToId, reportId).Scan(&respId)
 
-// 	if err := p.Conn.QueryRow(query).Scan(); err != nil {
-// 		return err
-// 	}
+	if err != nil {
+		if err != sql.ErrNoRows {
+			return err
+		}
+	}
 
-// 	return nil
-// }
+	return nil
+}
 
-// func (p PostgreUserRepo) DropUsers(ctx context.Context) error {
-// 	query := `
-// 	delete from profile_tag;
-// 	delete from matches;
-// 	delete from reactions;
-// 	delete from profile;`
+func (p PostgreUserRepo) GetReportsCount(ctx context.Context, userId uint64) (uint64, error) {
+	var curCount uint64
+	if err := p.Conn.QueryRow(GetReportsCountQuery, userId).Scan(&curCount); err != nil {
+		return curCount, err
+	}
 
-// 	if err := p.Conn.QueryRow(query).Scan(); err != nil {
-// 		return err
-// 	}
+	return curCount, nil
+}
 
-// 	return nil
-// }
+func (p PostgreUserRepo) GetReportsWithMaxCountCount(ctx context.Context, userId uint64) (uint64, error) {
+	var reportId uint64
+	if err := p.Conn.QueryRow(GetReportsIdWithMaxCountQuery, userId).Scan(&reportId); err != nil {
+		return reportId, err
+	}
 
-// func (p PostgreUserRepo) CreateUserAndProfile(ctx context.Context, user models.User) (models.User, error) {
-// 	query := `insert into profile(name, email, password, date, description, imgs)
-// 		values($1,$2,$3,$4,$5,$6)
-// 		RETURNING id, name, email, password, email, password, date, description;`
+	return reportId, nil
+}
 
-// 	var RespUser models.User
-// 	err := p.Conn.GetContext(ctx, &RespUser, query, user.Name, user.Email, user.Password, user.Date,
-// 		user.Description, pq.Array(&user.Imgs))
-// 	if err != nil {
-// 		return models.User{}, err
-// 	}
+func (p PostgreUserRepo) GetReportDesc(ctx context.Context, reportId uint64) (string, error) {
+	var reportDesc string
+	if err := p.Conn.QueryRow(GetReportDescFromIdQuery, reportId).Scan(&reportDesc); err != nil {
+		return reportDesc, err
+	}
 
-// 	err = p.insertTags(ctx, RespUser.ID, user.Tags)
-// 	if err != nil {
-// 		return models.User{}, err
-// 	}
+	return reportDesc, nil
+}
 
-// 	RespUser.Imgs, err = p.getImgsByID(ctx, RespUser.ID)
-// 	if err != nil {
-// 		return models.User{}, err
-// 	}
+func (p PostgreUserRepo) UpdateReportStatus(ctx context.Context, userId uint64, reportStatus string) error {
+	var respId uint64
+	err := p.Conn.QueryRow(UpdateProfilesReportStatusQuery, userId, reportStatus).Scan(&respId)
 
-// 	RespUser.Age, err = models.GetAgeFromDate(RespUser.Date)
-// 	if err != nil {
-// 		log.Fatal(err)
-// 	}
+	if err != nil {
+		if err != sql.ErrNoRows {
+			return err
+		}
+	}
 
-// 	RespUser.Tags, err = p.getTagsByID(ctx, RespUser.ID)
-// 	if err != nil {
-// 		return models.User{}, err
-// 	}
-
-// 	return RespUser, err
-// }
-
-// func (p PostgreUserRepo) Init() error {
-// 	query, err := ioutil.ReadFile("docker/postgres_scripts/dump.sql")
-// 	if err != nil {
-// 		return err
-// 	}
-// 	strQuery := string(query)
-
-// 	if _, err := p.Conn.Exec(strQuery); err != nil {
-// 		return err
-// 	}
-
-// 	return nil
-// }
-
-// func (p PostgreUserRepo) DeleteUser(ctx context.Context, user models.User) error {
-// 	query := `delete from profile where id=$1`
-
-// 	if err := p.Conn.QueryRow(query, user.ID).Scan(); err != nil {
-// 		return err
-// 	}
-
-// 	return nil
-// }
+	return nil
+}

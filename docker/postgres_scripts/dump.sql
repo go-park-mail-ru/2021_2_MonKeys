@@ -12,7 +12,8 @@ create table if not exists profile(
   toage smallint default 100,
   date varchar(15) default '',
   description varchar(1023) default '',
-  imgs varchar(255) [] default array [] :: varchar []
+  imgs varchar(255) [] default array [] :: varchar [],
+  reportstatus varchar(255) default ''
 );
 create table if not exists tag(
   id serial not null primary key,
@@ -55,9 +56,24 @@ create table message(
 -- message date index
   create index idx_ms_date on message(date) include (from_id, to_id, text);
 
+create table if not exists reports(
+  id serial not null primary key,
+  reportdesc varchar(255) default ''
+);
+create table if not exists profile_report(
+  id serial not null primary key,
+  profile_id integer,
+  report_id integer,
+  constraint fk_pr_profile foreign key (profile_id) REFERENCES profile (id),
+  constraint fk_pr_report foreign key (report_id) REFERENCES reports (id)
+);
 insert into
   tag(tagname)
 values('anime'),('music'),('gaming'),('sport'),('science');
+insert into
+  reports(reportdesc)
+values('Фалишивый профиль/спам'),('Непристойное общение'),('Скам'),('Несовершеннолетний пользователь');
+
 -- foregn keys
   create index idx_ms_from_id on message(from_id);
 create index idx_ms_to_id on message(to_id);
