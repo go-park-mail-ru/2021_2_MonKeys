@@ -120,11 +120,13 @@ func main() {
 	)
 
 	// chat
+	hub := _chatUsecase.NewHub()
+	go hub.Run()
 	chatRepo, err := _chatRepo.NewPostgresChatRepository(configs.Postgres)
 	if err != nil {
 		log.Fatal(err)
 	}
-	chatUseCase := _chatUsecase.NewChatUseCase(chatRepo, timeoutContext)
+	chatUseCase := _chatUsecase.NewChatUseCase(chatRepo, hub, timeoutContext)
 
 	// delivery
 	_userDelivery.SetUserRouting(logger.DripLogger, router, userUCase, sessionUcase, userRepo)
