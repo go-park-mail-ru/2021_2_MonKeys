@@ -314,7 +314,7 @@ func (p PostgreUserRepo) AddMatch(ctx context.Context, firstUser uint64, secondU
 
 func (p PostgreUserRepo) GetUsersLikes(ctx context.Context, currentUserId uint64) ([]models.User, error) {
 	var likesUsers []models.User
-	err := p.Conn.Select(&likesUsers, GetUserLikes, currentUserId)
+	err := p.Conn.Select(&likesUsers, GetUserLikesQuery, currentUserId)
 	if err != nil {
 		return nil, err
 	}

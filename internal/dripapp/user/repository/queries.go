@@ -45,7 +45,7 @@ case when date <> '' then date_part('year', age(date::timestamp)) else 0 end as 
 									op.date,
 									case when date <> '' then date_part('year', age(date::timestamp)) else 0 end as age,
 									op.description,
-                  op.reportstatus
+                  					op.reportstatus
 								from profile op
 								where op.id not in (
 									select r.id2
@@ -72,7 +72,7 @@ case when date <> '' then date_part('year', age(date::timestamp)) else 0 end as 
 									op.date,
 									case when op.date <> '' then date_part('year', age(op.date::timestamp)) else 0 end as age,
 									op.description,
-                  op.reportstatus
+                  					op.reportstatus
 								from profile p
 								join matches m on (p.id = m.id1)
 								join matches om on (om.id1 = m.id2 and om.id2 = m.id1)
@@ -85,8 +85,8 @@ case when date <> '' then date_part('year', age(date::timestamp)) else 0 end as 
 												op.email,
 												op.date,
 												case when op.date <> '' then date_part('year', age(op.date::timestamp)) else 0 end as age,
-												op.description
-                        op.reportstatus
+												op.description,
+                        						op.reportstatus
 											from profile p
 											join matches m on (p.id = m.id1)
 											join matches om on (om.id1 = m.id2 and om.id2 = m.id1)
@@ -101,13 +101,13 @@ case when date <> '' then date_part('year', age(date::timestamp)) else 0 end as 
 
 	AddMatchQuery = "insert into matches(id1, id2) values ($1,$2),($2,$1) returning id;"
 
-	GetUserLikes = `select p.id,
+	GetUserLikesQuery = `select p.id,
 						   p.name,
 						   p.email,
 						   p.date,
 						   case when p.date <> '' then date_part('year', age(p.date::timestamp)) else 0 end as age,
-						   p.description
-               p.reportstatus
+						   p.description,
+               			   p.reportstatus
 					from profile p
 					join reactions r on (r.id1 = p.id
 										 and r.id2 = $1
