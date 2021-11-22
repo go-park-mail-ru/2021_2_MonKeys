@@ -27,7 +27,7 @@ create table if not exists profile_tag(
   constraint fk_pt_tag foreign key (tag_id) REFERENCES tag (id)
 );
 create table if not exists reactions(
-  message_id serial not null primary key,
+  id serial not null primary key,
   id1 integer,
   id2 integer,
   type integer,
