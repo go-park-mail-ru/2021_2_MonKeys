@@ -61,6 +61,8 @@ var (
 
 	Server ServerConfig
 
+	ChatServer ServerConfig
+
 	FileStorage FileStorageConfig
 
 	Timeouts TimeoutsConfig
@@ -115,6 +117,13 @@ func SetConfig() {
 		Host:     viper.GetString(`server.host`),
 		CertFile: viper.GetString(`server.certFile`),
 		KeyFile:  viper.GetString(`server.keyFile`),
+	}
+
+	ChatServer = ServerConfig{
+		Port:     viper.GetString(`chat_server.port`),
+		Host:     viper.GetString(`chat_server.host`),
+		CertFile: viper.GetString(`chat_server.certFile`),
+		KeyFile:  viper.GetString(`chat_server.keyFile`),
 	}
 
 	FileStorage = FileStorageConfig{

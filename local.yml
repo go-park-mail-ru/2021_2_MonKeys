@@ -6,16 +6,6 @@ volumes:
   tarantool:
 
 services:
-  # main_service:
-  #   image: main_service
-  #   ports:
-  #     - "8000:8000"
-  #   volumes:
-  #     - $PWD/media:/dripapp/media
-  #   depends_on:
-  #     - tarantool
-  #     - postgres
-
   tarantool:
     image: "drip_tarantool"
     ports:

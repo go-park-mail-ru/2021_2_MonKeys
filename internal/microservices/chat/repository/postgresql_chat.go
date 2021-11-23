@@ -3,10 +3,11 @@ package repository
 import (
 	"context"
 	"dripapp/configs"
-	"dripapp/internal/dripapp/models"
+	"dripapp/internal/microservices/chat/models"
 	"fmt"
-	"github.com/jmoiron/sqlx"
 	"log"
+
+	"github.com/jmoiron/sqlx"
 )
 
 type PostgreChatRepo struct {
