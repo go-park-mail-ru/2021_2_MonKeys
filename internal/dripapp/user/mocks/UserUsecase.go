@@ -37,6 +37,20 @@ func (_m *UserUsecase) AddPhoto(c context.Context, photo io.Reader, fileName str
 	return r0, r1
 }
 
+// AddReport provides a mock function with given fields: c, report
+func (_m *UserUsecase) AddReport(c context.Context, report models.NewReport) error {
+	ret := _m.Called(c, report)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, models.NewReport) error); ok {
+		r0 = rf(c, report)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // CurrentUser provides a mock function with given fields: c
 func (_m *UserUsecase) CurrentUser(c context.Context) (models.User, error) {
 	ret := _m.Called(c)
@@ -93,15 +107,15 @@ func (_m *UserUsecase) EditProfile(c context.Context, newUserData models.User) (
 	return r0, r1
 }
 
-// GetAllTags provides a mock function with given fields: c
-func (_m *UserUsecase) GetAllTags(c context.Context) (models.Tags, error) {
+// GetAllReports provides a mock function with given fields: c
+func (_m *UserUsecase) GetAllReports(c context.Context) (models.Reports, error) {
 	ret := _m.Called(c)
 
-	var r0 models.Tags
-	if rf, ok := ret.Get(0).(func(context.Context) models.Tags); ok {
+	var r0 models.Reports
+	if rf, ok := ret.Get(0).(func(context.Context) models.Reports); ok {
 		r0 = rf(c)
 	} else {
-		r0 = ret.Get(0).(models.Tags)
+		r0 = ret.Get(0).(models.Reports)
 	}
 
 	var r1 error
@@ -114,40 +128,15 @@ func (_m *UserUsecase) GetAllTags(c context.Context) (models.Tags, error) {
 	return r0, r1
 }
 
-// GetChat provides a mock function with given fields: c, fromId, lastId
-func (_m *UserUsecase) GetChat(c context.Context, fromId uint64, lastId uint64) ([]models.Message, error) {
-	ret := _m.Called(c, fromId, lastId)
-
-	var r0 []models.Message
-	if rf, ok := ret.Get(0).(func(context.Context, uint64, uint64) []models.Message); ok {
-		r0 = rf(c, fromId, lastId)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]models.Message)
-		}
-	}
-
-	var r1 error
-	if rf, ok := ret.Get(1).(func(context.Context, uint64, uint64) error); ok {
-		r1 = rf(c, fromId, lastId)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
-// GetChats provides a mock function with given fields: c
-func (_m *UserUsecase) GetChats(c context.Context) ([]models.Chat, error) {
+// GetAllTags provides a mock function with given fields: c
+func (_m *UserUsecase) GetAllTags(c context.Context) (models.Tags, error) {
 	ret := _m.Called(c)
 
-	var r0 []models.Chat
-	if rf, ok := ret.Get(0).(func(context.Context) []models.Chat); ok {
+	var r0 models.Tags
+	if rf, ok := ret.Get(0).(func(context.Context) models.Tags); ok {
 		r0 = rf(c)
 	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]models.Chat)
-		}
+		r0 = ret.Get(0).(models.Tags)
 	}
 
 	var r1 error
@@ -223,20 +212,6 @@ func (_m *UserUsecase) Reaction(c context.Context, reactionData models.UserReact
 	}
 
 	return r0, r1
-}
-
-// SendMessage provides a mock function with given fields: c, ms
-func (_m *UserUsecase) SendMessage(c context.Context, ms models.Message) error {
-	ret := _m.Called(c, ms)
-
-	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, models.Message) error); ok {
-		r0 = rf(c, ms)
-	} else {
-		r0 = ret.Error(0)
-	}
-
-	return r0
 }
 
 // Signup provides a mock function with given fields: c, logUserData

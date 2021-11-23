@@ -2,26 +2,25 @@ package models
 
 import (
 	"context"
-  "dripapp/internal/pkg/hasher"
 	"io"
 )
 
 type User struct {
-	ID          uint64   `json:"id,omitempty"`
-	Email       string   `json:"email,omitempty"`
-	Password    string   `json:"-"`
-	Name        string   `json:"name,omitempty"`
-	Gender      string   `json:"gender,omitempty"`
-	Prefer      string   `json:"prefer,omitempty"`
-	FromAge     uint8    `json:"fromage,omitempty"`
-	ToAge       uint8    `json:"toage,omitempty"`
-	Date        string   `json:"date,omitempty"`
-	Age         string   `json:"age,omitempty"`
-	Description string   `json:"description,omitempty"`
-	Imgs        []string `json:"imgs,omitempty"`
-	Tags        []string `json:"tags,omitempty"`
-  ReportStatus string   `json:"reportStatus,omitempty"`
-)
+	ID           uint64   `json:"id,omitempty"`
+	Email        string   `json:"email,omitempty"`
+	Password     string   `json:"-"`
+	Name         string   `json:"name,omitempty"`
+	Gender       string   `json:"gender,omitempty"`
+	Prefer       string   `json:"prefer,omitempty"`
+	FromAge      uint8    `json:"fromage,omitempty"`
+	ToAge        uint8    `json:"toage,omitempty"`
+	Date         string   `json:"date,omitempty"`
+	Age          string   `json:"age,omitempty"`
+	Description  string   `json:"description,omitempty"`
+	Imgs         []string `json:"imgs,omitempty"`
+	Tags         []string `json:"tags,omitempty"`
+	ReportStatus string   `json:"reportStatus,omitempty"`
+}
 
 const (
 	LikeResction    = 1
@@ -35,8 +34,6 @@ const (
 	SkamReport       = "Скам"
 	UnderageReport   = "Несовершеннолетний пользователь"
 )
-
-}
 
 type LoginUser struct {
 	ID       uint64 `json:"id,omitempty"`
@@ -93,7 +90,6 @@ type NewReport struct {
 type UserReportsCount struct {
 	Count uint64 `json:"userReportsCount"`
 }
-
 
 // ArticleUsecase represent the article's usecases
 type UserUsecase interface {

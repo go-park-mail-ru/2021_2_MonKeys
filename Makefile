@@ -43,6 +43,7 @@ linter:
 
 ## clean: Clean all volumes, containers, media folders  and log files
 clean:
+	sudo service postgresql stop
 	docker rm -vf $$(docker ps -a -q) || true
 	sudo rm -rf media
 	sudo rm -rf logs.log

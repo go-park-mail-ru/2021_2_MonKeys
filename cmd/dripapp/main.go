@@ -22,7 +22,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"strconv"
 	"time"
 
 	_ "dripapp/docs"
@@ -30,9 +29,9 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func createUser(r models.UserRepository, f models.FileRepository, number int) uint64 {
+func createUser(r models.UserRepository, f models.FileRepository, name string) uint64 {
 	loginData := models.LoginUser{
-		Email:    "qwe" + strconv.Itoa(number) + "@qwe",
+		Email:    name + "@mail.ru",
 		Password: hasher.HashAndSalt(nil, "qweQWE12"),
 	}
 	user, err := r.CreateUser(context.Background(), loginData)
@@ -45,9 +44,12 @@ func createUser(r models.UserRepository, f models.FileRepository, number int) ui
 		ID:          user.ID,
 		Email:       user.Email,
 		Password:    user.Password,
-		Name:        "Vladimir" + strconv.Itoa(number),
+		Name:        name,
+		Gender:      "male",
+		FromAge:     18,
+		ToAge:       100,
 		Date:        "2004-01-02",
-		Description: "Description Description 123",
+		Description: "Всем привет меня зовут" + name,
 		Imgs:        []string{"wsx.webp"},
 	}
 	fmt.Println("FillProfile: ", err)
@@ -60,9 +62,9 @@ func createUser(r models.UserRepository, f models.FileRepository, number int) ui
 func startRepo(r models.UserRepository, cr models.ChatRepository, f models.FileRepository) {
 	time.Sleep(3 * time.Second)
 
-	userID1 := createUser(r, f, 1)
-	userID2 := createUser(r, f, 2)
-	userID3 := createUser(r, f, 3)
+	userID1 := createUser(r, f, "Ilyagu")
+	userID2 := createUser(r, f, "Vova")
+	userID3 := createUser(r, f, "Misha")
 
 	// Message
 	_, err := cr.SaveMessage(userID1, userID2, "")

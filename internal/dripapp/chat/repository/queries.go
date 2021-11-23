@@ -35,4 +35,16 @@ const (
 	where (m.from_id=$1 or m.to_id=$1) and (p.id<>$1)
 	group by p.id, p.name, p.imgs[1];
 	`
+
+	// GetChats = `
+	// select
+	// 	(case when p.id=$1 then op.id else p.id end) as FromUserID, p.name, p.imgs[1]as img
+	// from
+	// 	profile p
+	// 	join message m on p.id = m.from_id
+	// 	join profile op on op.id = m.to_id
+	// where (m.from_id=$1 or m.to_id=$1)
+	// group by p.id, p.name, p.imgs[1], op.id
+	// having count(*)=1;
+	// `
 )

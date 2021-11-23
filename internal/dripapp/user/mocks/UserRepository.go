@@ -42,6 +42,20 @@ func (_m *UserRepository) AddReaction(ctx context.Context, currentUserId uint64,
 	return r0
 }
 
+// AddReport provides a mock function with given fields: ctx, report
+func (_m *UserRepository) AddReport(ctx context.Context, report models.NewReport) error {
+	ret := _m.Called(ctx, report)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, models.NewReport) error); ok {
+		r0 = rf(ctx, report)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // CreateUser provides a mock function with given fields: ctx, logUserData
 func (_m *UserRepository) CreateUser(ctx context.Context, logUserData models.LoginUser) (models.User, error) {
 	ret := _m.Called(ctx, logUserData)
@@ -63,8 +77,8 @@ func (_m *UserRepository) CreateUser(ctx context.Context, logUserData models.Log
 	return r0, r1
 }
 
-// DeleteLike provides a mock function with given fields: ctx, firstUser, secondUser
-func (_m *UserRepository) DeleteLike(ctx context.Context, firstUser uint64, secondUser uint64) error {
+// DeleteMatches provides a mock function with given fields: ctx, firstUser, secondUser
+func (_m *UserRepository) DeleteMatches(ctx context.Context, firstUser uint64, secondUser uint64) error {
 	ret := _m.Called(ctx, firstUser, secondUser)
 
 	var r0 error
@@ -77,50 +91,18 @@ func (_m *UserRepository) DeleteLike(ctx context.Context, firstUser uint64, seco
 	return r0
 }
 
-// GetChat provides a mock function with given fields: ctx, currentId, fromId, lastId
-func (_m *UserRepository) GetChat(ctx context.Context, currentId uint64, fromId uint64, lastId uint64) ([]models.Message, error) {
-	ret := _m.Called(ctx, currentId, fromId, lastId)
+// DeleteReaction provides a mock function with given fields: ctx, firstUser, secondUser
+func (_m *UserRepository) DeleteReaction(ctx context.Context, firstUser uint64, secondUser uint64) error {
+	ret := _m.Called(ctx, firstUser, secondUser)
 
-	var r0 []models.Message
-	if rf, ok := ret.Get(0).(func(context.Context, uint64, uint64, uint64) []models.Message); ok {
-		r0 = rf(ctx, currentId, fromId, lastId)
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, uint64, uint64) error); ok {
+		r0 = rf(ctx, firstUser, secondUser)
 	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]models.Message)
-		}
+		r0 = ret.Error(0)
 	}
 
-	var r1 error
-	if rf, ok := ret.Get(1).(func(context.Context, uint64, uint64, uint64) error); ok {
-		r1 = rf(ctx, currentId, fromId, lastId)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
-// GetChats provides a mock function with given fields: ctx, currentUserId
-func (_m *UserRepository) GetChats(ctx context.Context, currentUserId uint64) ([]models.Chat, error) {
-	ret := _m.Called(ctx, currentUserId)
-
-	var r0 []models.Chat
-	if rf, ok := ret.Get(0).(func(context.Context, uint64) []models.Chat); ok {
-		r0 = rf(ctx, currentUserId)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]models.Chat)
-		}
-	}
-
-	var r1 error
-	if rf, ok := ret.Get(1).(func(context.Context, uint64) error); ok {
-		r1 = rf(ctx, currentUserId)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
+	return r0
 }
 
 // GetLikes provides a mock function with given fields: ctx, currentUserId
@@ -162,6 +144,92 @@ func (_m *UserRepository) GetNextUserForSwipe(ctx context.Context, currentUser m
 	var r1 error
 	if rf, ok := ret.Get(1).(func(context.Context, models.User) error); ok {
 		r1 = rf(ctx, currentUser)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GetReportDesc provides a mock function with given fields: ctx, reportId
+func (_m *UserRepository) GetReportDesc(ctx context.Context, reportId uint64) (string, error) {
+	ret := _m.Called(ctx, reportId)
+
+	var r0 string
+	if rf, ok := ret.Get(0).(func(context.Context, uint64) string); ok {
+		r0 = rf(ctx, reportId)
+	} else {
+		r0 = ret.Get(0).(string)
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, uint64) error); ok {
+		r1 = rf(ctx, reportId)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GetReports provides a mock function with given fields: ctx
+func (_m *UserRepository) GetReports(ctx context.Context) (map[uint64]string, error) {
+	ret := _m.Called(ctx)
+
+	var r0 map[uint64]string
+	if rf, ok := ret.Get(0).(func(context.Context) map[uint64]string); ok {
+		r0 = rf(ctx)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(map[uint64]string)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context) error); ok {
+		r1 = rf(ctx)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GetReportsCount provides a mock function with given fields: ctx, userId
+func (_m *UserRepository) GetReportsCount(ctx context.Context, userId uint64) (uint64, error) {
+	ret := _m.Called(ctx, userId)
+
+	var r0 uint64
+	if rf, ok := ret.Get(0).(func(context.Context, uint64) uint64); ok {
+		r0 = rf(ctx, userId)
+	} else {
+		r0 = ret.Get(0).(uint64)
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, uint64) error); ok {
+		r1 = rf(ctx, userId)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GetReportsWithMaxCountCount provides a mock function with given fields: ctx, userId
+func (_m *UserRepository) GetReportsWithMaxCountCount(ctx context.Context, userId uint64) (uint64, error) {
+	ret := _m.Called(ctx, userId)
+
+	var r0 uint64
+	if rf, ok := ret.Get(0).(func(context.Context, uint64) uint64); ok {
+		r0 = rf(ctx, userId)
+	} else {
+		r0 = ret.Get(0).(uint64)
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, uint64) error); ok {
+		r1 = rf(ctx, userId)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -303,20 +371,6 @@ func (_m *UserRepository) GetUsersMatchesWithSearching(ctx context.Context, curr
 	return r0, r1
 }
 
-// SendMessage provides a mock function with given fields: ctx, currentId, toId, text
-func (_m *UserRepository) SendMessage(ctx context.Context, currentId uint64, toId uint64, text string) error {
-	ret := _m.Called(ctx, currentId, toId, text)
-
-	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, uint64, uint64, string) error); ok {
-		r0 = rf(ctx, currentId, toId, text)
-	} else {
-		r0 = ret.Error(0)
-	}
-
-	return r0
-}
-
 // UpdateImgs provides a mock function with given fields: ctx, id, imgs
 func (_m *UserRepository) UpdateImgs(ctx context.Context, id uint64, imgs []string) error {
 	ret := _m.Called(ctx, id, imgs)
@@ -324,6 +378,20 @@ func (_m *UserRepository) UpdateImgs(ctx context.Context, id uint64, imgs []stri
 	var r0 error
 	if rf, ok := ret.Get(0).(func(context.Context, uint64, []string) error); ok {
 		r0 = rf(ctx, id, imgs)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// UpdateReportStatus provides a mock function with given fields: ctx, userId, reportStatus
+func (_m *UserRepository) UpdateReportStatus(ctx context.Context, userId uint64, reportStatus string) error {
+	ret := _m.Called(ctx, userId, reportStatus)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, uint64, string) error); ok {
+		r0 = rf(ctx, userId, reportStatus)
 	} else {
 		r0 = ret.Error(0)
 	}
