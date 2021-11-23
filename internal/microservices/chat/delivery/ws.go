@@ -1,11 +1,13 @@
 package delivery
 
 import (
-	"dripapp/internal/dripapp/models"
+	_userModels "dripapp/internal/dripapp/models"
+	"dripapp/internal/microservices/chat/models"
 	"dripapp/internal/pkg/logger"
 	"dripapp/internal/pkg/responses"
-	"github.com/gorilla/websocket"
 	"net/http"
+
+	"github.com/gorilla/websocket"
 )
 
 type MessagesWS struct {
@@ -21,7 +23,7 @@ var upgrader = websocket.Upgrader{
 func (h *ChatHandler) UpgradeWS(w http.ResponseWriter, r *http.Request) {
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
-		status := models.HTTPError{
+		status := _userModels.HTTPError{
 			Code:    http.StatusInternalServerError,
 			Message: err,
 		}
@@ -36,7 +38,7 @@ func (h *ChatHandler) UpgradeWS(w http.ResponseWriter, r *http.Request) {
 
 	err = h.Chat.ClientHandler(r.Context(), io)
 	if err != nil {
-		status := models.HTTPError{
+		status := _userModels.HTTPError{
 			Code:    http.StatusNotFound,
 			Message: err,
 		}

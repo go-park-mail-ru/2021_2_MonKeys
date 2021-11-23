@@ -4,7 +4,7 @@ package mocks
 
 import (
 	context "context"
-	models "dripapp/internal/dripapp/models"
+	models "dripapp/internal/microservices/chat/models"
 
 	mock "github.com/stretchr/testify/mock"
 )

@@ -3,7 +3,8 @@ package usecase
 import (
 	"context"
 	"dripapp/configs"
-	"dripapp/internal/dripapp/models"
+	_userModels "dripapp/internal/dripapp/models"
+	"dripapp/internal/microservices/chat/models"
 	"time"
 )
 
@@ -28,9 +29,9 @@ func (h *ChatUseCase) ClientHandler(c context.Context, io models.IOMessage) erro
 	ctx, cancel := context.WithTimeout(c, h.contextTimeout)
 	defer cancel()
 
-	currentUser, ok := ctx.Value(configs.ContextUser).(models.User)
+	currentUser, ok := ctx.Value(configs.ContextUser).(_userModels.User)
 	if !ok {
-		return models.ErrContextNilError
+		return _userModels.ErrContextNilError
 	}
 
 	client := models.NewChatClient(currentUser, h.hub, h.ChatRepo, io)
@@ -45,9 +46,9 @@ func (h *ChatUseCase) GetChats(c context.Context) ([]models.Chat, error) {
 	ctx, cancel := context.WithTimeout(c, h.contextTimeout)
 	defer cancel()
 
-	currentUser, ok := ctx.Value(configs.ContextUser).(models.User)
+	currentUser, ok := ctx.Value(configs.ContextUser).(_userModels.User)
 	if !ok {
-		return nil, models.ErrContextNilError
+		return nil, _userModels.ErrContextNilError
 	}
 
 	chats, err := h.ChatRepo.GetChats(ctx, currentUser.ID)
@@ -62,9 +63,9 @@ func (h *ChatUseCase) GetChat(c context.Context, fromId uint64, lastId uint64) (
 	ctx, cancel := context.WithTimeout(c, h.contextTimeout)
 	defer cancel()
 
-	currentUser, ok := ctx.Value(configs.ContextUser).(models.User)
+	currentUser, ok := ctx.Value(configs.ContextUser).(_userModels.User)
 	if !ok {
-		return nil, models.ErrContextNilError
+		return nil, _userModels.ErrContextNilError
 	}
 
 	mses, err := h.ChatRepo.GetChat(ctx, currentUser.ID, fromId, lastId)

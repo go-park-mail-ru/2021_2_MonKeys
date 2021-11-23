@@ -1,14 +1,16 @@
 package models
 
+import "dripapp/internal/dripapp/models"
+
 type ChatClient struct {
-	user User
+	user models.User
 	hub  *Hub
 	repo ClientRepository
 	io   IOMessage
 	send chan Message
 }
 
-func NewChatClient(user User, hub *Hub, repo ClientRepository, io IOMessage) (client *ChatClient) {
+func NewChatClient(user models.User, hub *Hub, repo ClientRepository, io IOMessage) (client *ChatClient) {
 	client = &ChatClient{
 		user: user,
 		hub:  hub,
