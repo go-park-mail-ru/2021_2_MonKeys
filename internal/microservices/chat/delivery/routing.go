@@ -1,15 +1,17 @@
 package delivery
 
 import (
-	"dripapp/internal/dripapp/models"
+	_userModels "dripapp/internal/dripapp/models"
+	"dripapp/internal/microservices/chat/models"
 	"dripapp/internal/pkg/logger"
 	_p "dripapp/internal/pkg/permissions"
+
 	"github.com/gorilla/mux"
 )
 
-func SetChatRouting(logger logger.Logger, router *mux.Router, chatRepo models.ChatUseCase, ur models.UserRepository) {
+func SetChatRouting(logger logger.Logger, router *mux.Router, chatUCase models.ChatUseCase, ur _userModels.UserRepository) {
 	chatHandler := &ChatHandler{
-		Chat:   chatRepo,
+		Chat:   chatUCase,
 		Logger: logger,
 	}
 
