@@ -12,10 +12,10 @@ type User struct {
 	Name         string   `json:"name,omitempty"`
 	Gender       string   `json:"gender,omitempty"`
 	Prefer       string   `json:"prefer,omitempty"`
-	FromAge      uint8    `json:"fromage,omitempty"`
-	ToAge        uint8    `json:"toage,omitempty"`
+	FromAge      uint32   `json:"fromage,omitempty"`
+	ToAge        uint32   `json:"toage,omitempty"`
 	Date         string   `json:"date,omitempty"`
-	Age          string   `json:"age,omitempty"`
+	Age          uint32   `json:"age,omitempty"`
 	Description  string   `json:"description,omitempty"`
 	Imgs         []string `json:"imgs,omitempty"`
 	Tags         []string `json:"tags,omitempty"`

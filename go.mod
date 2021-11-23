@@ -17,6 +17,7 @@ require (
 require (
 	github.com/chai2010/webp v1.1.0
 	github.com/go-openapi/spec v0.20.4 // indirect
+	github.com/golang/protobuf v1.5.2
 	github.com/gorilla/websocket v1.4.2
 	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/spf13/viper v1.9.0
@@ -25,5 +26,7 @@ require (
 	golang.org/x/net v0.0.0-20211112202133-69e39bad7dc2 // indirect
 	golang.org/x/sys v0.0.0-20211116061358-0a5406a5449c // indirect
 	golang.org/x/tools v0.1.7 // indirect
+	google.golang.org/grpc v1.42.0
+	google.golang.org/protobuf v1.27.1
 	gopkg.in/vmihailenco/msgpack.v2 v2.9.2 // indirect
 )
