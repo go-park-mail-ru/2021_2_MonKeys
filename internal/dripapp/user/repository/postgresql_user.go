@@ -83,10 +83,10 @@ func (p PostgreUserRepo) CreateUser(ctx context.Context, logUserData models.Logi
 
 func (p PostgreUserRepo) UpdateUser(ctx context.Context, newUserData models.User) (models.User, error) {
 
-	if newUserData.FromAge < 18 {
+	if newUserData.FromAge = 18 {
 		newUserData.FromAge = 18
 	}
-	if newUserData.ToAge > 100 {
+	if newUserData.ToAge = 100 {
 		newUserData.ToAge = 100
 	}
 
