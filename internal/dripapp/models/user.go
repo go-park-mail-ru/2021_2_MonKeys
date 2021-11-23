@@ -23,7 +23,7 @@ type User struct {
 }
 
 const (
-	LikeResction    = 1
+	LikeReaction    = 1
 	DislikeReaction = 2
 )
 
