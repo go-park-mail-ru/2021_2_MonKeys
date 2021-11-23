@@ -1,4 +1,5 @@
 MAIN_SERVICE_BINARY=main_service
+CHAT_SERVICE_BINARY=chat_service
 
 PROJECT_DIR := ${CURDIR}
 
@@ -14,12 +15,14 @@ install-dependencies:
 build-go:
 	go mod tidy
 	go build -o ${MAIN_SERVICE_BINARY} cmd/dripapp/main.go
+	go build -o ${CHAT_SERVICE_BINARY} cmd/chat/main.go
 
 ## build-docker: Builds all docker containers
 build-docker:
 	docker build -t dependencies -f ${DOCKER_DIR}/builder.Dockerfile .
 	docker build -t drip_tarantool -f ${DOCKER_DIR}/drip_tarantool.Dockerfile .
 	docker build -t main_service -f ${DOCKER_DIR}/main_service.Dockerfile .
+	docker build -t chat_service -f ${DOCKER_DIR}/chat_service.Dockerfile .
 
 ## test-coverage: get final code coverage
 test-coverage:
@@ -77,13 +80,18 @@ build:
 ## run: Run app
 run:
 	docker-compose -f local.yml up --build --no-deps -d
-	go run cmd/dripapp/main.go
+# go run cmd/dripapp/main.go
+
+run-chat:
+# docker build -t drip_tarantool -f ${DOCKER_DIR}/drip_tarantool.Dockerfile .
+	docker-compose -f local.yml up --build --no-deps -d
+	go run cmd/chat/main.go
 
 ## app: Build and run app
 app: build run
 
 ## app-clean: Build and run app with clean
-app-clean:clean build run
+app-clean:clean build-docker run
 
 
 down:
