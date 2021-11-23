@@ -22,7 +22,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"strconv"
 	"time"
 
 	_ "dripapp/docs"
@@ -30,9 +29,9 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func createUser(r models.UserRepository, f models.FileRepository, number int) uint64 {
+func createUser(r models.UserRepository, f models.FileRepository, name string) uint64 {
 	loginData := models.LoginUser{
-		Email:    "qwe" + strconv.Itoa(number) + "@qwe",
+		Email:    name + "@mail.ru",
 		Password: hasher.HashAndSalt(nil, "qweQWE12"),
 	}
 	user, err := r.CreateUser(context.Background(), loginData)
@@ -45,7 +44,7 @@ func createUser(r models.UserRepository, f models.FileRepository, number int) ui
 		ID:          user.ID,
 		Email:       user.Email,
 		Password:    user.Password,
-		Name:        "Vladimir" + strconv.Itoa(number),
+		Name:        name,
 		Date:        "2004-01-02",
 		Description: "Description Description 123",
 		Imgs:        []string{"wsx.webp"},
