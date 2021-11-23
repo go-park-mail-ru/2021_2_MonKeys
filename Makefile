@@ -76,6 +76,7 @@ deploy-app-clean: clean deploy-build deploy-run
 
 ## build: Build and start docker with new changes
 build:
+	
 	docker build -t drip_tarantool -f ${DOCKER_DIR}/drip_tarantool.Dockerfile .
 
 ## run: Run app
