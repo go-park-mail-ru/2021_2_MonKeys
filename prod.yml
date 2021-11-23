@@ -48,3 +48,19 @@ services:
     restart: on-failure
     healthcheck:
       test: "exit 0"
+  
+  prometheus:
+    image: prom/prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - "./prometheus:/etc/prometheus"
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+  grafana:
+    image: grafana/grafana
+    user: "grafana"
+    depends_on:
+      - prometheus
+    ports:
+      - 3000:3000
