@@ -66,12 +66,16 @@ func startRepo(r models.UserRepository, cr models.ChatRepository, f models.FileR
 	userID2 := createUser(r, f, "Vova")
 	userID3 := createUser(r, f, "Misha")
 
-	// Message
-	_, err := cr.SaveMessage(userID1, userID2, "")
-	_, err = cr.SaveMessage(userID2, userID1, "")
-	_, err = cr.SaveMessage(userID1, userID2, "AAAAAAAAA!")
+	ctx := context.Background()
+	r.AddReaction(ctx, userID1, userID2, 1)
+	//r.AddReaction(ctx, userID2, userID1, 1)
 
-	_, err = cr.SaveMessage(userID1, userID3, "")
+	// Message
+	//_, err := cr.SaveMessage(userID1, userID2, "")
+	//_, err = cr.SaveMessage(userID2, userID1, "")
+	//_, err = cr.SaveMessage(userID1, userID2, "AAAAAAAAA!")
+
+	_, err := cr.SaveMessage(userID1, userID3, "")
 	_, err = cr.SaveMessage(userID3, userID1, "")
 	_, err = cr.SaveMessage(userID1, userID3, "первое сообщение!")
 	fmt.Println("SendMessage: ", err)
