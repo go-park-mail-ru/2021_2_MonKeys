@@ -7,6 +7,11 @@ scrape_configs:
     static_configs:
       - targets: ['2021_2_monkeys_backend-main_service-1:8000']
 
+
+  - job_name: 'chat'
+    static_configs:
+      - targets: ['2021_2_monkeys_backend-main_service-1:8001']
+
   - job_name: 'system'
     static_configs:
       - targets: ['2021_2_monkeys_backend-node-exporter-1:9100']
