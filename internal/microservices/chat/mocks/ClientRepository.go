@@ -3,7 +3,7 @@
 package mocks
 
 import (
-	models "dripapp/internal/dripapp/models"
+	models "dripapp/internal/microservices/chat/models"
 
 	mock "github.com/stretchr/testify/mock"
 )

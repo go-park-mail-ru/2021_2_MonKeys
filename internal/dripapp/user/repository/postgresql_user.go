@@ -86,7 +86,7 @@ func (p PostgreUserRepo) UpdateUser(ctx context.Context, newUserData models.User
 	if newUserData.FromAge < 18 {
 		newUserData.FromAge = 18
 	}
-	if newUserData.ToAge > 100 {
+	if newUserData.ToAge == 0 {
 		newUserData.ToAge = 100
 	}
 
