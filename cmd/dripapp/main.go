@@ -59,9 +59,9 @@ func createUser(r models.UserRepository, f models.FileRepository, name string) u
 func startRepo(r models.UserRepository, cr models.ChatRepository, f models.FileRepository) {
 	time.Sleep(3 * time.Second)
 
-	userID1 := createUser(r, f, 1)
-	userID2 := createUser(r, f, 2)
-	userID3 := createUser(r, f, 3)
+	userID1 := createUser(r, f, "Ilyagu")
+	userID2 := createUser(r, f, "Vova")
+	userID3 := createUser(r, f, "Misha")
 
 	// Message
 	_, err := cr.SaveMessage(userID1, userID2, "")
