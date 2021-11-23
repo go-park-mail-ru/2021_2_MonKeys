@@ -17,8 +17,8 @@ func SetChatRouting(logger logger.Logger, router *mux.Router, chatRepo models.Ch
 		UserRepo: ur,
 	}
 
-	router.HandleFunc("/api/v1/notifications",
-		_p.SetCSRF(_p.CheckAuthenticated(userMid.GetCurrentUser(chatHandler.Notifications))))
+	router.HandleFunc("/api/v1/apiws",
+		_p.SetCSRF(_p.CheckAuthenticated(userMid.GetCurrentUser(chatHandler.UpgradeWS))))
 
 	router.HandleFunc("/api/v1/chat/{id:[0-9]+}&{lastId:[0-9]+}",
 		_p.SetCSRF(_p.CheckAuthenticated(userMid.GetCurrentUser(chatHandler.GetChat)))).
