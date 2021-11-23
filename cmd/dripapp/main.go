@@ -45,8 +45,11 @@ func createUser(r models.UserRepository, f models.FileRepository, name string) u
 		Email:       user.Email,
 		Password:    user.Password,
 		Name:        name,
+		Gender:      "male",
+		FromAge:     18,
+		ToAge:       100,
 		Date:        "2004-01-02",
-		Description: "Description Description 123",
+		Description: "Всем привет меня зовут" + name,
 		Imgs:        []string{"wsx.webp"},
 	}
 	fmt.Println("FillProfile: ", err)

@@ -82,6 +82,14 @@ func (p PostgreUserRepo) CreateUser(ctx context.Context, logUserData models.Logi
 }
 
 func (p PostgreUserRepo) UpdateUser(ctx context.Context, newUserData models.User) (models.User, error) {
+
+	if newUserData.FromAge < 18 {
+		newUserData.FromAge = 18
+	}
+	if newUserData.ToAge > 100 {
+		newUserData.ToAge = 100
+	}
+
 	var RespUser models.User
 	err := p.Conn.QueryRow(UpdateUserQuery, newUserData.Email, newUserData.Name, newUserData.Gender, newUserData.Prefer,
 		newUserData.FromAge, newUserData.ToAge, newUserData.Date, newUserData.Description, pq.Array(&newUserData.Imgs)).
