@@ -12,10 +12,10 @@ type User struct {
 	Name         string   `json:"name,omitempty"`
 	Gender       string   `json:"gender,omitempty"`
 	Prefer       string   `json:"prefer,omitempty"`
-	FromAge      uint8    `json:"fromage,omitempty"`
-	ToAge        uint8    `json:"toage,omitempty"`
+	FromAge      uint32   `json:"fromage,omitempty"`
+	ToAge        uint32   `json:"toage,omitempty"`
 	Date         string   `json:"date,omitempty"`
-	Age          string   `json:"age,omitempty"`
+	Age          uint32   `json:"age,omitempty"`
 	Description  string   `json:"description,omitempty"`
 	Imgs         []string `json:"imgs,omitempty"`
 	Tags         []string `json:"tags,omitempty"`
@@ -23,16 +23,16 @@ type User struct {
 }
 
 const (
-	LikeReaction    = 1
-	DislikeReaction = 2
+	LikeReaction    uint64 = 1
+	DislikeReaction uint64 = 2
 )
 
 const (
-	ReportLimit      = 3
-	FakeReport       = "Фалишивый профиль/спам"
-	AggressionReport = "Непристойное общение"
-	SkamReport       = "Скам"
-	UnderageReport   = "Несовершеннолетний пользователь"
+	ReportLimit      uint64 = 3
+	FakeReport       string = "Фалишивый профиль/спам"
+	AggressionReport string = "Непристойное общение"
+	SkamReport       string = "Скам"
+	UnderageReport   string = "Несовершеннолетний пользователь"
 )
 
 type LoginUser struct {
@@ -129,7 +129,7 @@ type UserRepository interface {
 	GetReports(ctx context.Context) (map[uint64]string, error)
 	AddReport(ctx context.Context, report NewReport) error
 	GetReportsCount(ctx context.Context, userId uint64) (uint64, error)
-	GetReportsWithMaxCountCount(ctx context.Context, userId uint64) (uint64, error)
+	GetReportsWithMaxCount(ctx context.Context, userId uint64) (uint64, error)
 	GetReportDesc(ctx context.Context, reportId uint64) (string, error)
 	UpdateReportStatus(ctx context.Context, userId uint64, reportStatus string) error
 }

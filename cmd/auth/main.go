@@ -3,18 +3,16 @@ package main
 import (
 	"dripapp/configs"
 	"dripapp/internal/dripapp/file"
-	_fileDelivery "dripapp/internal/dripapp/file/delivery"
 	"dripapp/internal/dripapp/middleware"
-	_userDelivery "dripapp/internal/dripapp/user/delivery"
 	_userRepo "dripapp/internal/dripapp/user/repository"
-	_userUsecase "dripapp/internal/dripapp/user/usecase"
+	_userUCase "dripapp/internal/dripapp/user/usecase"
 	_authClient "dripapp/internal/microservices/auth/delivery/grpc/client"
+	grpcServer "dripapp/internal/microservices/auth/delivery/grpc/grpc_server"
 	_sessionDelivery "dripapp/internal/microservices/auth/delivery/http"
 	_sessionRepo "dripapp/internal/microservices/auth/repository"
-	_sessionUcase "dripapp/internal/microservices/auth/usecase"
-	"log"
-
+	_sessionUCase "dripapp/internal/microservices/auth/usecase"
 	"dripapp/internal/pkg/logger"
+	"log"
 	"net/http"
 	"os"
 
@@ -42,47 +40,42 @@ func main() {
 	// router
 	router := mux.NewRouter()
 
-	// repository
-	userRepo, err := _userRepo.NewPostgresUserRepository(configs.Postgres)
-	if err != nil {
-		log.Fatal(err)
-	}
+	timeoutContext := configs.Timeouts.ContextTimeout
 
+	// repository
 	sm, err := _sessionRepo.NewTarantoolConnection(configs.Tarantool)
 	if err != nil {
 		log.Fatal(err)
 	}
-
+	userRepo, err := _userRepo.NewPostgresUserRepository(configs.Postgres)
+	if err != nil {
+		log.Fatal(err)
+	}
 	fileManager, err := file.NewFileManager(configs.FileStorage)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	timeoutContext := configs.Timeouts.ContextTimeout
-
 	// usecase
-	sessionUcase := _sessionUcase.NewSessionUsecase(sm, timeoutContext)
-	userUCase := _userUsecase.NewUserUsecase(
-		userRepo,
-		fileManager,
-		timeoutContext,
-	)
+	sessionUCase := _sessionUCase.NewSessionUsecase(sm, timeoutContext)
+	userUCase := _userUCase.NewUserUsecase(userRepo, fileManager, timeoutContext)
+
+	// new auth server
+	go grpcServer.StartStaffGrpcServer(sm, userRepo, configs.AuthServer.GrpcUrl)
 
 	// auth client
 	grpcConn, _ := grpc.Dial(configs.AuthServer.GrpcUrl, grpc.WithInsecure())
 	grpcAuthClient := _authClient.NewStaffClient(grpcConn)
 
 	// delivery
-	_userDelivery.SetUserRouting(logger.DripLogger, router, userUCase, sessionUcase, *grpcAuthClient)
-	_sessionDelivery.SetSessionRouting(logger.DripLogger, router, userUCase, sessionUcase, *grpcAuthClient)
-	_fileDelivery.SetFileRouting(router, *fileManager)
+	_sessionDelivery.SetSessionRouting(logger.DripLogger, router, userUCase, sessionUCase, *grpcAuthClient)
 
 	// middleware
 	middleware.NewMiddleware(router, sm, logFile, logger.DripLogger)
 
 	srv := &http.Server{
 		Handler:      router,
-		Addr:         configs.Server.HttpPort,
+		Addr:         configs.AuthServer.HttpPort,
 		WriteTimeout: http.DefaultClient.Timeout,
 		ReadTimeout:  http.DefaultClient.Timeout,
 	}

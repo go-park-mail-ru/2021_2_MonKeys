@@ -1,12 +1,14 @@
-package delivery
+package http
 
 import (
 	"bytes"
 	"context"
 	"dripapp/configs"
 	"dripapp/internal/dripapp/models"
-	_s "dripapp/internal/dripapp/session/mocks"
 	"dripapp/internal/dripapp/user/mocks"
+	_authClient "dripapp/internal/microservices/auth/delivery/grpc/client"
+	_s "dripapp/internal/microservices/auth/mocks"
+	_sessionModels "dripapp/internal/microservices/auth/models"
 	"dripapp/internal/pkg/logger"
 	"errors"
 	"io"
@@ -16,6 +18,7 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/stretchr/testify/mock"
+	"google.golang.org/grpc"
 )
 
 type TestCase struct {
@@ -112,7 +115,7 @@ func TestLogin(t *testing.T) {
 
 	for caseNum, item := range cases {
 		r := httptest.NewRequest("POST", "/api/v1/login", item.BodyReq)
-		r = r.WithContext(context.WithValue(r.Context(), configs.ContextUserID, models.Session{
+		r = r.WithContext(context.WithValue(r.Context(), configs.ContextUserID, _sessionModels.Session{
 			UserID: 0,
 			Cookie: "",
 		}))
@@ -179,7 +182,7 @@ func TestLogout(t *testing.T) {
 	for caseNum, item := range cases {
 		r := httptest.NewRequest("GET", "/api/v1/logout", item.BodyReq)
 		r.AddCookie(&item.SessionCookie)
-		r = r.WithContext(context.WithValue(r.Context(), configs.ContextUserID, models.Session{
+		r = r.WithContext(context.WithValue(r.Context(), configs.ContextUserID, _sessionModels.Session{
 			UserID: 0,
 			Cookie: "",
 		}))
@@ -205,6 +208,8 @@ func TestLogout(t *testing.T) {
 func TestSetRouting(t *testing.T) {
 	mockUserUseCase := &mocks.UserUsecase{}
 	mockSessionUseCase := &_s.SessionUsecase{}
+	grpcConn, _ := grpc.Dial(configs.AuthServer.GrpcUrl, grpc.WithInsecure())
+	grpcAuthClient := _authClient.NewStaffClient(grpcConn)
 
-	SetSessionRouting(logger.DripLogger, mux.NewRouter(), mockUserUseCase, mockSessionUseCase)
+	SetSessionRouting(logger.DripLogger, mux.NewRouter(), mockUserUseCase, mockSessionUseCase, *grpcAuthClient)
 }

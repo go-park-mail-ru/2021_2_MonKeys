@@ -3,8 +3,8 @@ package main
 import (
 	"dripapp/configs"
 	"dripapp/internal/dripapp/middleware"
-	_sessionRepo "dripapp/internal/dripapp/session/repository"
-	_userRepo "dripapp/internal/dripapp/user/repository"
+	_authClient "dripapp/internal/microservices/auth/delivery/grpc/client"
+	_sessionRepo "dripapp/internal/microservices/auth/repository"
 	_chatDelivery "dripapp/internal/microservices/chat/delivery"
 	"dripapp/internal/microservices/chat/models"
 	_chatRepo "dripapp/internal/microservices/chat/repository"
@@ -17,6 +17,7 @@ import (
 	_ "dripapp/docs"
 
 	"github.com/gorilla/mux"
+	"google.golang.org/grpc"
 )
 
 func main() {
@@ -46,10 +47,6 @@ func main() {
 
 	// chat
 	// repository
-	userRepo, err := _userRepo.NewPostgresUserRepository(configs.Postgres)
-	if err != nil {
-		log.Fatal(err)
-	}
 	hub := models.NewHub()
 	go hub.Run()
 	chatRepo, err := _chatRepo.NewPostgresChatRepository(configs.Postgres)
@@ -60,15 +57,19 @@ func main() {
 	// usecase
 	chatUseCase := _chatUsecase.NewChatUseCase(chatRepo, hub, timeoutContext)
 
+	// auth client
+	grpcConn, _ := grpc.Dial(configs.AuthServer.GrpcUrl, grpc.WithInsecure())
+	grpcAuthClient := _authClient.NewStaffClient(grpcConn)
+
 	// delivery
-	_chatDelivery.SetChatRouting(logger.DripLogger, router, chatUseCase, userRepo)
+	_chatDelivery.SetChatRouting(logger.DripLogger, router, chatUseCase, *grpcAuthClient)
 
 	// middleware
 	middleware.NewMiddleware(router, sm, logFile, logger.DripLogger)
 
 	srv := &http.Server{
 		Handler:      router,
-		Addr:         configs.ChatServer.Port,
+		Addr:         configs.ChatServer.HttpPort,
 		WriteTimeout: http.DefaultClient.Timeout,
 		ReadTimeout:  http.DefaultClient.Timeout,
 	}

@@ -8,6 +8,7 @@ import (
 	"log"
 
 	"github.com/jmoiron/sqlx"
+	_ "github.com/lib/pq"
 )
 
 type PostgreChatRepo struct {
@@ -23,6 +24,8 @@ func NewPostgresChatRepository(config configs.PostgresConfig) (models.ChatReposi
 		config.Password,
 		config.Host)
 
+	fmt.Println(ConnStr)
+
 	Conn, err := sqlx.Open("postgres", ConnStr)
 	if err != nil {
 		return nil, err
@@ -34,14 +37,14 @@ func NewPostgresChatRepository(config configs.PostgresConfig) (models.ChatReposi
 
 func (p PostgreChatRepo) GetChats(ctx context.Context, userId uint64) ([]models.Chat, error) {
 	var chats []models.Chat
-	err := p.Conn.Select(&chats, GetChats, userId)
+	err := p.Conn.Select(&chats, GetChatsQuery, userId)
 	if err != nil {
 		return nil, err
 	}
 
 	for idx := range chats {
 		var ms models.Message
-		err := p.Conn.GetContext(ctx, &ms, GetLastMessage, userId, chats[idx].FromUserID)
+		err := p.Conn.GetContext(ctx, &ms, GetLastMessageQuery, userId, chats[idx].FromUserID)
 		if err != nil {
 			return nil, err
 		}
@@ -53,7 +56,7 @@ func (p PostgreChatRepo) GetChats(ctx context.Context, userId uint64) ([]models.
 
 func (p PostgreChatRepo) GetChat(ctx context.Context, userId uint64, fromId uint64, lastId uint64) ([]models.Message, error) {
 	var mses []models.Message
-	err := p.Conn.Select(&mses, GetMessages, userId, fromId, lastId)
+	err := p.Conn.Select(&mses, GetMessagesQuery, userId, fromId, lastId)
 	if err != nil {
 		return nil, err
 	}
@@ -63,7 +66,7 @@ func (p PostgreChatRepo) GetChat(ctx context.Context, userId uint64, fromId uint
 
 func (p PostgreChatRepo) SaveMessage(userId uint64, toId uint64, text string) (models.Message, error) {
 	var msg models.Message
-	err := p.Conn.Get(&msg, SendNessage, userId, toId, text)
+	err := p.Conn.Get(&msg, SendMessageQuery, userId, toId, text)
 	if err != nil {
 		return models.Message{}, err
 	}

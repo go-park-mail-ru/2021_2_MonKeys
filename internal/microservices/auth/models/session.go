@@ -3,6 +3,7 @@ package models
 import (
 	"context"
 	"crypto/md5"
+	"dripapp/internal/dripapp/models"
 	"fmt"
 	"net/http"
 	"time"
@@ -13,7 +14,7 @@ type Session struct {
 	UserID uint64
 }
 
-func CreateSessionCookie(user LoginUser) http.Cookie {
+func CreateSessionCookie(user models.LoginUser) http.Cookie {
 	expiration := time.Now().Add(10 * time.Hour)
 
 	data := user.Password + time.Now().String()
@@ -26,6 +27,7 @@ func CreateSessionCookie(user LoginUser) http.Cookie {
 		Secure:   true,
 		HttpOnly: true,
 		SameSite: http.SameSiteNoneMode,
+		Path:     "/api/v1",
 	}
 
 	return cookie
@@ -39,8 +41,6 @@ type SessionRepository interface {
 	GetSessionByCookie(sessionCookie string) (Session, error)
 	NewSessionCookie(sessionCookie string, userId uint64) error
 	DeleteSessionCookie(sessionCookie string) error
-	IsSessionByCookie(sessionCookie string) bool
-	DropCookies()
 }
 
 type SessionUsecase interface {

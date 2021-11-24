@@ -4,7 +4,9 @@ import (
 	"context"
 	"dripapp/configs"
 	"dripapp/internal/dripapp/models"
+	_sessionModels "dripapp/internal/microservices/auth/models"
 	"dripapp/internal/pkg/hasher"
+	"fmt"
 	"io"
 	"strconv"
 	"time"
@@ -12,7 +14,7 @@ import (
 
 type userUsecase struct {
 	UserRepo       models.UserRepository
-	Session        models.SessionRepository
+	Session        _sessionModels.SessionRepository
 	File           models.FileRepository
 	contextTimeout time.Duration
 }
@@ -33,6 +35,7 @@ func (h *userUsecase) CurrentUser(c context.Context) (models.User, error) {
 	defer cancel()
 
 	currentUser, ok := ctx.Value(configs.ContextUser).(models.User)
+	fmt.Println(currentUser, ok)
 	if !ok {
 		return models.User{}, models.ErrContextNilError
 	}
@@ -51,9 +54,9 @@ func (h *userUsecase) EditProfile(c context.Context, newUserData models.User) (u
 
 	newUserData.ID = currentUser.ID
 	newUserData.Email = currentUser.Email
-	if err != nil {
-		return models.User{}, err
-	}
+	// if err != nil {
+	// 	return models.User{}, err
+	// }
 
 	updatedUser, err = h.UserRepo.UpdateUser(c, newUserData)
 	if err != nil {
@@ -394,7 +397,7 @@ func (h *userUsecase) AddReport(c context.Context, report models.NewReport) erro
 
 	// if report's count > limit -> ban
 	if curCount > models.ReportLimit {
-		banId, err := h.UserRepo.GetReportsWithMaxCountCount(ctx, report.ToId)
+		banId, err := h.UserRepo.GetReportsWithMaxCount(ctx, report.ToId)
 		if err != nil {
 			return err
 		}
