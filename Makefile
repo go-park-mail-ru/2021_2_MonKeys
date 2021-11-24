@@ -43,6 +43,12 @@ clean:
 	sudo rm -rf logs.log
 	docker volume prune
 
+clean-deploy:
+	docker rm -vf $$(docker ps -a -q) || true
+	sudo rm -rf media
+	sudo rm -rf logs.log
+	docker volume prune
+
 
 ##################################### deploy
 
@@ -59,11 +65,11 @@ build:
 deploy-run:
 	docker-compose -f prod.yml up --build --no-deps -d
 
-## deploy-app: Deploy build and run app
+## deploy: Deploy build and run app
 deploy: build deploy-run
 
-## deploy-app-clean: Deploy build and run app with clean
-redeploy: clean build deploy-run
+## redeploy: Deploy build and run app with clean
+redeploy: clean-deploy build deploy-run
 
 ######################################## local
 
@@ -90,6 +96,8 @@ debug:
 	cat debug.json > config.json
 	docker build -t drip_tarantool -f ${DOCKER_DIR}/drip_tarantool.Dockerfile .
 	docker-compose -f debug.yml up --build --no-deps -d
+
+run-dripapp:
 	go run cmd/dripapp/main.go
 
 run-chat:
