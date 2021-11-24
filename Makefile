@@ -77,6 +77,8 @@ local-build:
 
 local: local-build deploy-run
 
+relocal: clean local-build deploy-run
+
 ######################################## debug
 
 ## build: Build and start docker with new changes
