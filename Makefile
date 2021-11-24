@@ -56,13 +56,13 @@ build:
 
 ## deploy-run: Deploy run app
 deploy-run:
-	docker-compose -f prod.yml up --build --no-deps
+	docker-compose -f prod.yml up --build --no-deps -d
 
 ## deploy-app: Deploy build and run app
 deploy: build deploy-run
 
 ## deploy-app-clean: Deploy build and run app with clean
-deploy-clean: clean build deploy-run
+redeploy: clean build deploy-run
 
 ######################################## local
 
