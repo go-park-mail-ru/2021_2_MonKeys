@@ -15,19 +15,19 @@
   "auth_server": {
     "host": "127.0.0.1",
     "httpPort": ":8002",
-    "grpcUrl": "127.0.0.1:8003",
+    "grpcUrl": "auth_service:8003",
     "certFile": "api.ijia.me.crt",
     "keyFile": "api.ijia.me.key"
   },
   "database": {
-      "host": "127.0.0.1",
+      "host": "postgres",
       "port": ":5432",
       "user": "admin",
       "pass": "lolkek",
       "name": "drip"
   },
   "session": {
-      "host": "127.0.0.1",
+      "host": "taranool",
       "port": ":3301",
       "user": "admin",
       "pass": "pass",

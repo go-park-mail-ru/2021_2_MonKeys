@@ -18,6 +18,7 @@ type SessionManager struct {
 
 func NewTarantoolConnection(tntConfig configs.TarantoolConfig) (_sessionModels.SessionRepository, error) {
 	addrPort := fmt.Sprintf("%s%s", tntConfig.Host, tntConfig.Port)
+
 	conn, err := tarantool.Connect(addrPort, tarantool.Opts{
 		User: "guest",
 	})

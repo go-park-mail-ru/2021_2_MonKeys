@@ -23,7 +23,6 @@ import (
 type TestCase struct {
 	BodyReq         io.Reader
 	mockUserUseCase []interface{}
-	mockSessUseCase []interface{}
 	StatusCode      int
 	BodyResp        string
 }
