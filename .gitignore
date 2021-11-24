@@ -23,6 +23,8 @@ coverage2.out.tmp
 #binary
 main-service
 
+config.json
+
 # envs
 envs/
 
