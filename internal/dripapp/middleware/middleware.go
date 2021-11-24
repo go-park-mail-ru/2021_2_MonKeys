@@ -15,8 +15,8 @@ func NewMiddleware(r *mux.Router, sp models.SessionRepository, logFile *os.File,
 	}
 	metrics := monitoring.RegisterMetrics(r)
 
-	r.Use(Logger(logFile, l,metrics))
+	r.Use(Logger(logFile, l, metrics))
 	//r.Use(CORS(l))
-	r.Use(PanicRecovery(l,metrics))
+	r.Use(PanicRecovery(l, metrics))
 	r.Use(sm.SessionMiddleware(l))
 }

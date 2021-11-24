@@ -49,15 +49,15 @@ var (
 
 	chat1 = models.Chat{
 		FromUserID: 1,
-		Name: "chat name",
-		Img: "chat.img",
-		Messages: messages,
+		Name:       "chat name",
+		Img:        "chat.img",
+		Messages:   messages,
 	}
 	chat2 = models.Chat{
 		FromUserID: 2,
-		Name: "chat name",
-		Img: "chat.img",
-		Messages: messages,
+		Name:       "chat name",
+		Img:        "chat.img",
+		Messages:   messages,
 	}
 	chats = []models.Chat{
 		chat1,
@@ -67,7 +67,7 @@ var (
 )
 
 func objToJsonStr(v interface{}) string {
-	j, _  := json.Marshal(v)
+	j, _ := json.Marshal(v)
 	return string(j)
 }
 
@@ -107,7 +107,7 @@ func TestGetChat(t *testing.T) {
 				nil,
 			},
 			StatusCode: http.StatusOK,
-			BodyResp:   `{"status":200,"body":`+messagesStr+`}`,
+			BodyResp:   `{"status":200,"body":` + messagesStr + `}`,
 		},
 		{
 			MockChat: []interface{}{
@@ -159,7 +159,7 @@ func TestGetChats(t *testing.T) {
 				nil,
 			},
 			StatusCode: http.StatusOK,
-			BodyResp:   `{"status":200,"body":`+chatsStr+`}`,
+			BodyResp:   `{"status":200,"body":` + chatsStr + `}`,
 		},
 		{
 			MockChat: []interface{}{

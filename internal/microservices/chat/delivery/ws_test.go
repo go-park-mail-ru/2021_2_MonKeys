@@ -11,7 +11,7 @@ import (
 
 type TestCaseWS struct {
 	MockWS []interface{}
-	err error
+	err    error
 }
 
 var (

@@ -54,8 +54,8 @@ var (
 	tagsMapStr   = `{"1":{"tagText":"chill"},"2":{"tagText":"sport"},"3":{"tagText":"music"}}`
 	tagsCountStr = "3"
 
-	usersMapStr     = `{"1":{"id":1,"email":"test@mail.ru"},"2":{"id":2,"email":"test2@mail.ru"}}`
-	matches = models.Matches{
+	usersMapStr = `{"1":{"id":1,"email":"test@mail.ru"},"2":{"id":2,"email":"test2@mail.ru"}}`
+	matches     = models.Matches{
 		AllUsers: map[uint64]models.User{
 			1: user,
 			2: user2,
@@ -82,7 +82,7 @@ var (
 		},
 		Count: 2,
 	}
-	reportsMapStr = `{"1":{"reportDesc":"`+ report1.ReportDesc +`"},"2":{"reportDesc":"`+ report2.ReportDesc +`"}}`
+	reportsMapStr = `{"1":{"reportDesc":"` + report1.ReportDesc + `"},"2":{"reportDesc":"` + report2.ReportDesc + `"}}`
 
 	reactionStr = "0"
 	match       = models.Match{Match: true}
