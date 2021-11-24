@@ -1,7 +1,6 @@
 package http
 
 import (
-	"crypto/md5"
 	_userModels "dripapp/internal/dripapp/models"
 	_sessionModels "dripapp/internal/microservices/auth/models"
 	"dripapp/internal/pkg/logger"
@@ -15,24 +14,6 @@ type SessionHandler struct {
 	Logger       logger.Logger
 	UserUCase    _userModels.UserUsecase
 	SessionUcase _sessionModels.SessionUsecase
-}
-
-func createSessionCookie(user _userModels.LoginUser) http.Cookie {
-	expiration := time.Now().Add(10 * time.Hour)
-
-	data := user.Password + time.Now().String()
-	md5CookieValue := fmt.Sprintf("%x", md5.Sum([]byte(data)))
-
-	cookie := http.Cookie{
-		Name:     "sessionId",
-		Value:    md5CookieValue,
-		Expires:  expiration,
-		Secure:   true,
-		HttpOnly: true,
-		SameSite: http.SameSiteNoneMode,
-	}
-
-	return cookie
 }
 
 func (h *SessionHandler) LoginHandler(w http.ResponseWriter, r *http.Request) {
@@ -55,7 +36,7 @@ func (h *SessionHandler) LoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	sessionCookie := createSessionCookie(logUserData)
+	sessionCookie := _sessionModels.CreateSessionCookie(logUserData)
 
 	sess := _sessionModels.Session{
 		Cookie: sessionCookie.Value,
@@ -143,6 +124,8 @@ func (h *SessionHandler) SignupHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	cookie := _sessionModels.CreateSessionCookie(logUserData)
+	fmt.Println(cookie.Domain)
+	fmt.Println(cookie.Path)
 
 	sess := _sessionModels.Session{
 		Cookie: cookie.Value,
