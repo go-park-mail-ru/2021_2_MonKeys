@@ -19,14 +19,6 @@ build-go:
 	go build -o ${CHAT_SERVICE_BINARY} cmd/chat/main.go
 	go build -o ${AUTH_SERVICE_BINARY} cmd/auth/main.go
 
-## build-docker: Builds all docker containers
-build-docker:
-	docker build -t dependencies -f ${DOCKER_DIR}/builder.Dockerfile .
-	docker build -t drip_tarantool -f ${DOCKER_DIR}/drip_tarantool.Dockerfile .
-	docker build -t main_service -f ${DOCKER_DIR}/main_service.Dockerfile .
-	docker build -t chat_service -f ${DOCKER_DIR}/chat_service.Dockerfile .
-	docker build -t auth_service -f ${DOCKER_DIR}/auth_service.Dockerfile .
-
 ## test-coverage: get final code coverage
 test-coverage:
 	go test -coverprofile=coverage.out.tmp -coverpkg=./...  ./...
@@ -55,7 +47,7 @@ clean:
 ##################################### deploy
 
 ## deploy-build: Deply build and start docker with new changes
-deploy-build:
+build:
 	docker build -t dependencies -f ${DOCKER_DIR}/builder.Dockerfile .
 	docker build -t drip_tarantool -f ${DOCKER_DIR}/drip_tarantool.Dockerfile .
 	docker build -t main_service -f ${DOCKER_DIR}/main_service.Dockerfile .
@@ -64,23 +56,19 @@ deploy-build:
 
 ## deploy-run: Deploy run app
 deploy-run:
-	docker-compose -f prod.yml up --build --no-deps -d
+	docker-compose -f prod.yml up --build --no-deps
 
 ## deploy-app: Deploy build and run app
-deploy-app: deploy-build deploy-run
+deploy: build deploy-run
 
 ## deploy-app-clean: Deploy build and run app with clean
-deploy-app-clean: clean deploy-build deploy-run
+deploy-clean: clean build deploy-run
 
 ######################################## local
 
 ## build: Build and start docker with new changes
-build:
-	
+debug:
 	docker build -t drip_tarantool -f ${DOCKER_DIR}/drip_tarantool.Dockerfile .
-
-## run: Run app
-run:
 	docker-compose -f local.yml up --build --no-deps -d
 	go run cmd/dripapp/main.go
 
@@ -90,20 +78,8 @@ run-chat:
 run-auth:
 	go run cmd/auth/main.go
 
-## app: Build and run app
-app: build run
-
 ## app-clean: Build and run app with clean
-app-clean:clean build run
-
-
-down:
-	docker-compose down
-
-## get: get all dependencies
-get:
-	go mod tidy
-	go get ./...
+debug-clean:clean debug
 
 .PHONY: help
 all: help

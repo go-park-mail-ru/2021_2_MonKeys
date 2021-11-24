@@ -21,9 +21,9 @@ func SetSessionRouting(loggger logger.Logger, router *mux.Router, us _userModels
 		AuthClient: sc,
 	}
 
-	router.HandleFunc("/api/v1/session", _p.SetCSRF(sessionHandler.LoginHandler)).Methods("POST", "OPTIONS")
-	router.HandleFunc("/api/v1/session", perm.CheckAuth(sessionHandler.LogoutHandler)).Methods("DELETE", "OPTIONS")
+	router.HandleFunc("/api/v1/auth/session", _p.SetCSRF(sessionHandler.LoginHandler)).Methods("POST", "OPTIONS")
+	router.HandleFunc("/api/v1/auth/session", perm.CheckAuth(sessionHandler.LogoutHandler)).Methods("DELETE", "OPTIONS")
 
-	router.HandleFunc("/api/v1/profile", _p.SetCSRF(perm.CheckAuth(perm.GetCurrentUser(sessionHandler.CurrentUser)))).Methods("GET", "OPTIONS")
-	router.HandleFunc("/api/v1/profile", _p.SetCSRF(sessionHandler.SignupHandler)).Methods("POST", "OPTIONS")
+	router.HandleFunc("/api/v1/auth/profile", _p.SetCSRF(perm.CheckAuth(perm.GetCurrentUser(sessionHandler.CurrentUser)))).Methods("GET", "OPTIONS")
+	router.HandleFunc("/api/v1/auth/profile", _p.SetCSRF(sessionHandler.SignupHandler)).Methods("POST", "OPTIONS")
 }

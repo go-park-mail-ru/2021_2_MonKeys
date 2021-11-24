@@ -44,30 +44,6 @@ func (perm *Permission) CheckAuth(next http.HandlerFunc) http.HandlerFunc {
 	})
 }
 
-// func CheckAuthenticated(next http.HandlerFunc) http.HandlerFunc {
-// 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-
-// 		logger.DripLogger.DebugLogging("check middlware")
-// 		session, ok := r.Context().Value(configs.ContextUserID).(_sessionModels.Session)
-// 		if !ok {
-// 			responses.SendError(w, _userModels.HTTPError{
-// 				Code:    http.StatusForbidden,
-// 				Message: _userModels.ErrExtractContext,
-// 			}, logger.DripLogger.ErrorLogging)
-// 			return
-// 		}
-// 		if session.UserID == 0 {
-// 			responses.SendError(w, _userModels.HTTPError{
-// 				Code:    http.StatusForbidden,
-// 				Message: _userModels.ErrAuth,
-// 			}, logger.DripLogger.WarnLogging)
-// 			return
-// 		}
-
-// 		next.ServeHTTP(w, r)
-// 	})
-// }
-
 func (perm *Permission) GetCurrentUser(next http.HandlerFunc) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 

@@ -6,6 +6,8 @@ import (
 	"dripapp/internal/dripapp/file"
 	_fileDelivery "dripapp/internal/dripapp/file/delivery"
 	"dripapp/internal/dripapp/middleware"
+	"dripapp/internal/dripapp/models"
+	_models "dripapp/internal/dripapp/models"
 	_userDelivery "dripapp/internal/dripapp/user/delivery"
 	_userRepo "dripapp/internal/dripapp/user/repository"
 	_userUsecase "dripapp/internal/dripapp/user/usecase"
@@ -14,6 +16,7 @@ import (
 	_sessionRepo "dripapp/internal/microservices/auth/repository"
 	_sessionUcase "dripapp/internal/microservices/auth/usecase"
 
+	"dripapp/internal/pkg/hasher"
 	"dripapp/internal/pkg/logger"
 	"fmt"
 	"log"
@@ -27,8 +30,8 @@ import (
 	"google.golang.org/grpc"
 )
 
-func createUser(r models.UserRepository, f models.FileRepository, name string) uint64 {
-	loginData := models.LoginUser{
+func createUser(r _models.UserRepository, f _models.FileRepository, name string) uint64 {
+	loginData := _models.LoginUser{
 		Email:    name + "@mail.ru",
 		Password: hasher.HashAndSalt(nil, "qweQWE12"),
 	}
