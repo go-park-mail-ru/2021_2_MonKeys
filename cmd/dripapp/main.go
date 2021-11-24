@@ -6,14 +6,14 @@ import (
 	"dripapp/internal/dripapp/file"
 	_fileDelivery "dripapp/internal/dripapp/file/delivery"
 	"dripapp/internal/dripapp/middleware"
-	"dripapp/internal/dripapp/models"
-	_sessionDelivery "dripapp/internal/dripapp/session/delivery"
-	_sessionRepo "dripapp/internal/dripapp/session/repository"
-	_sessionUcase "dripapp/internal/dripapp/session/usecase"
 	_userDelivery "dripapp/internal/dripapp/user/delivery"
 	_userRepo "dripapp/internal/dripapp/user/repository"
 	_userUsecase "dripapp/internal/dripapp/user/usecase"
-	"dripapp/internal/pkg/hasher"
+	_authClient "dripapp/internal/microservices/auth/delivery/grpc/client"
+	_sessionDelivery "dripapp/internal/microservices/auth/delivery/http"
+	_sessionRepo "dripapp/internal/microservices/auth/repository"
+	_sessionUcase "dripapp/internal/microservices/auth/usecase"
+
 	"dripapp/internal/pkg/logger"
 	"fmt"
 	"log"
@@ -24,6 +24,7 @@ import (
 	_ "dripapp/docs"
 
 	"github.com/gorilla/mux"
+	"google.golang.org/grpc"
 )
 
 func createUser(r models.UserRepository, f models.FileRepository, name string) uint64 {
@@ -114,9 +115,13 @@ func main() {
 		timeoutContext,
 	)
 
+	// auth client
+	grpcConn, _ := grpc.Dial(configs.AuthServer.GrpcUrl, grpc.WithInsecure())
+	grpcAuthClient := _authClient.NewStaffClient(grpcConn)
+
 	// delivery
-	_userDelivery.SetUserRouting(logger.DripLogger, router, userUCase, sessionUcase, userRepo)
-	_sessionDelivery.SetSessionRouting(logger.DripLogger, router, userUCase, sessionUcase)
+	_userDelivery.SetUserRouting(logger.DripLogger, router, userUCase, sessionUcase, *grpcAuthClient)
+	_sessionDelivery.SetSessionRouting(logger.DripLogger, router, userUCase, sessionUcase, *grpcAuthClient)
 	_fileDelivery.SetFileRouting(router, *fileManager)
 
 	// middleware
@@ -124,7 +129,7 @@ func main() {
 
 	srv := &http.Server{
 		Handler:      router,
-		Addr:         configs.Server.Port,
+		Addr:         configs.Server.HttpPort,
 		WriteTimeout: http.DefaultClient.Timeout,
 		ReadTimeout:  http.DefaultClient.Timeout,
 	}

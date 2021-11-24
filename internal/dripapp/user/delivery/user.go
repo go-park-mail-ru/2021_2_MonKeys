@@ -2,6 +2,7 @@ package delivery
 
 import (
 	"dripapp/internal/dripapp/models"
+	_sessionModels "dripapp/internal/microservices/auth/models"
 	"dripapp/internal/pkg/logger"
 	"dripapp/internal/pkg/responses"
 	"net/http"
@@ -10,23 +11,23 @@ import (
 const maxPhotoSize = 20 * 1024 * 1025
 
 type UserHandler struct {
-	SessionUcase models.SessionUsecase
+	SessionUcase _sessionModels.SessionUsecase
 	UserUCase    models.UserUsecase
 	Logger       logger.Logger
 }
 
-func (h *UserHandler) CurrentUser(w http.ResponseWriter, r *http.Request) {
-	user, err := h.UserUCase.CurrentUser(r.Context())
-	if err != nil {
-		responses.SendError(w, models.HTTPError{
-			Code:    http.StatusNotFound,
-			Message: err,
-		}, h.Logger.ErrorLogging)
-		return
-	}
+// func (h *UserHandler) CurrentUser(w http.ResponseWriter, r *http.Request) {
+// 	user, err := h.UserUCase.CurrentUser(r.Context())
+// 	if err != nil {
+// 		responses.SendError(w, models.HTTPError{
+// 			Code:    http.StatusNotFound,
+// 			Message: err,
+// 		}, h.Logger.ErrorLogging)
+// 		return
+// 	}
 
-	responses.SendData(w, user)
-}
+// 	responses.SendData(w, user)
+// }
 
 func (h *UserHandler) EditProfileHandler(w http.ResponseWriter, r *http.Request) {
 	var newUserData models.User
@@ -106,48 +107,48 @@ func (h *UserHandler) DeletePhoto(w http.ResponseWriter, r *http.Request) {
 	responses.SendOK(w)
 }
 
-func (h *UserHandler) SignupHandler(w http.ResponseWriter, r *http.Request) {
-	var logUserData models.LoginUser
-	err := responses.ReadJSON(r, &logUserData)
-	if err != nil {
-		responses.SendError(w, models.HTTPError{
-			Code:    http.StatusBadRequest,
-			Message: err,
-		}, h.Logger.ErrorLogging)
-		return
-	}
+// func (h *UserHandler) SignupHandler(w http.ResponseWriter, r *http.Request) {
+// 	var logUserData models.LoginUser
+// 	err := responses.ReadJSON(r, &logUserData)
+// 	if err != nil {
+// 		responses.SendError(w, models.HTTPError{
+// 			Code:    http.StatusBadRequest,
+// 			Message: err,
+// 		}, h.Logger.ErrorLogging)
+// 		return
+// 	}
 
-	user, err := h.UserUCase.Signup(r.Context(), logUserData)
-	if err != nil {
-		code := http.StatusNotFound
-		if err == models.ErrEmailAlreadyExists {
-			code = models.StatusEmailAlreadyExists
-		}
-		responses.SendError(w, models.HTTPError{
-			Code:    code,
-			Message: err,
-		}, h.Logger.ErrorLogging)
-		return
-	}
-	cookie := models.CreateSessionCookie(logUserData)
+// 	user, err := h.UserUCase.Signup(r.Context(), logUserData)
+// 	if err != nil {
+// 		code := http.StatusNotFound
+// 		if err == models.ErrEmailAlreadyExists {
+// 			code = models.StatusEmailAlreadyExists
+// 		}
+// 		responses.SendError(w, models.HTTPError{
+// 			Code:    code,
+// 			Message: err,
+// 		}, h.Logger.ErrorLogging)
+// 		return
+// 	}
+// 	cookie := _sessionModels.CreateSessionCookie(logUserData)
 
-	sess := models.Session{
-		Cookie: cookie.Value,
-		UserID: user.ID,
-	}
-	err = h.SessionUcase.AddSession(r.Context(), sess)
-	if err != nil {
-		responses.SendError(w, models.HTTPError{
-			Code:    http.StatusInternalServerError,
-			Message: err,
-		}, h.Logger.WarnLogging)
-		return
-	}
+// 	sess := _sessionModels.Session{
+// 		Cookie: cookie.Value,
+// 		UserID: user.ID,
+// 	}
+// 	err = h.SessionUcase.AddSession(r.Context(), sess)
+// 	if err != nil {
+// 		responses.SendError(w, models.HTTPError{
+// 			Code:    http.StatusInternalServerError,
+// 			Message: err,
+// 		}, h.Logger.WarnLogging)
+// 		return
+// 	}
 
-	http.SetCookie(w, &cookie)
+// 	http.SetCookie(w, &cookie)
 
-	responses.SendData(w, user)
-}
+// 	responses.SendData(w, user)
+// }
 
 func (h *UserHandler) NextUserHandler(w http.ResponseWriter, r *http.Request) {
 	nextUser, err := h.UserUCase.NextUser(r.Context())

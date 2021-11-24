@@ -1,9 +1,9 @@
-package usecase_test
+package usecase
 
 import (
 	"context"
 	"dripapp/configs"
-	"dripapp/internal/dripapp/models"
+	_sessionModels "dripapp/internal/microservices/auth/models"
 	"errors"
 	"fmt"
 	"io"
@@ -11,8 +11,7 @@ import (
 	"testing"
 	"time"
 
-	sessionMocks "dripapp/internal/dripapp/session/mocks"
-	"dripapp/internal/dripapp/session/usecase"
+	sessionMocks "dripapp/internal/microservices/auth/mocks"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -23,7 +22,7 @@ func CreateMultipartRequest(method, target string, body io.Reader) (*http.Reques
 	if err != nil {
 		return nil, err
 	}
-	r = r.WithContext(context.WithValue(r.Context(), configs.ContextUserID, models.Session{
+	r = r.WithContext(context.WithValue(r.Context(), configs.ContextUserID, _sessionModels.Session{
 		UserID: 0,
 		Cookie: "",
 	}))
@@ -33,13 +32,13 @@ func CreateMultipartRequest(method, target string, body io.Reader) (*http.Reques
 
 func TestUserUsecase_AddSession(t *testing.T) {
 	type TestCase struct {
-		session models.Session
+		session _sessionModels.Session
 		err     error
 	}
 	testCases := []TestCase{
 		// Test OK
 		{
-			session: models.Session{
+			session: _sessionModels.Session{
 				Cookie: "",
 				UserID: 0,
 			},
@@ -47,7 +46,7 @@ func TestUserUsecase_AddSession(t *testing.T) {
 		},
 		// Test Err
 		{
-			session: models.Session{
+			session: _sessionModels.Session{
 				Cookie: "",
 				UserID: 0,
 			},
@@ -79,7 +78,7 @@ func TestUserUsecase_AddSession(t *testing.T) {
 		mockSessionRepository := new(sessionMocks.SessionRepository)
 		mockSessionRepository.On("NewSessionCookie", mock.AnythingOfType("string"), mock.AnythingOfType("uint64")).Return(MockResultCases[i].err)
 
-		testSessionUsecase := usecase.NewSessionUsecase(mockSessionRepository, time.Second*2)
+		testSessionUsecase := NewSessionUsecase(mockSessionRepository, time.Second*2)
 		err = testSessionUsecase.AddSession(r.Context(), testCase.session)
 
 		assert.Equal(t, testCase.err, err, testCase.err, message)
@@ -88,13 +87,13 @@ func TestUserUsecase_AddSession(t *testing.T) {
 
 func TestUserUsecase_DeleteSession(t *testing.T) {
 	type TestCase struct {
-		session models.Session
+		session _sessionModels.Session
 		err     error
 	}
 	testCases := []TestCase{
 		// Test OK
 		{
-			session: models.Session{
+			session: _sessionModels.Session{
 				Cookie: "",
 				UserID: 0,
 			},
@@ -102,7 +101,7 @@ func TestUserUsecase_DeleteSession(t *testing.T) {
 		},
 		// Test Err
 		{
-			session: models.Session{
+			session: _sessionModels.Session{
 				Cookie: "",
 				UserID: 1,
 			},
@@ -110,7 +109,7 @@ func TestUserUsecase_DeleteSession(t *testing.T) {
 		},
 		// Test ErrDeleteSessionCookie
 		{
-			session: models.Session{
+			session: _sessionModels.Session{
 				Cookie: "",
 				UserID: 0,
 			},
@@ -148,7 +147,7 @@ func TestUserUsecase_DeleteSession(t *testing.T) {
 		mockSessionRepository := new(sessionMocks.SessionRepository)
 		mockSessionRepository.On("DeleteSessionCookie", mock.AnythingOfType("string")).Return(MockResultCases[i].err)
 
-		testSessionUsecase := usecase.NewSessionUsecase(mockSessionRepository, time.Second*2)
+		testSessionUsecase := NewSessionUsecase(mockSessionRepository, time.Second*2)
 		err = testSessionUsecase.DeleteSession(r.Context())
 
 		assert.Equal(t, testCase.err, err, testCase.err, message)

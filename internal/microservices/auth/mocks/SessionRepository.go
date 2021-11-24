@@ -3,7 +3,7 @@
 package mocks
 
 import (
-	models "dripapp/internal/dripapp/models"
+	models "dripapp/internal/microservices/auth/models"
 
 	mock "github.com/stretchr/testify/mock"
 )
@@ -27,11 +27,6 @@ func (_m *SessionRepository) DeleteSessionCookie(sessionCookie string) error {
 	return r0
 }
 
-// DropCookies provides a mock function with given fields:
-func (_m *SessionRepository) DropCookies() {
-	_m.Called()
-}
-
 // GetSessionByCookie provides a mock function with given fields: sessionCookie
 func (_m *SessionRepository) GetSessionByCookie(sessionCookie string) (models.Session, error) {
 	ret := _m.Called(sessionCookie)
@@ -51,20 +46,6 @@ func (_m *SessionRepository) GetSessionByCookie(sessionCookie string) (models.Se
 	}
 
 	return r0, r1
-}
-
-// IsSessionByCookie provides a mock function with given fields: sessionCookie
-func (_m *SessionRepository) IsSessionByCookie(sessionCookie string) bool {
-	ret := _m.Called(sessionCookie)
-
-	var r0 bool
-	if rf, ok := ret.Get(0).(func(string) bool); ok {
-		r0 = rf(sessionCookie)
-	} else {
-		r0 = ret.Get(0).(bool)
-	}
-
-	return r0
 }
 
 // NewSessionCookie provides a mock function with given fields: sessionCookie, userId

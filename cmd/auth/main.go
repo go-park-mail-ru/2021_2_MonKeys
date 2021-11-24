@@ -2,13 +2,15 @@ package main
 
 import (
 	"dripapp/configs"
+	"dripapp/internal/dripapp/file"
 	"dripapp/internal/dripapp/middleware"
+	_userRepo "dripapp/internal/dripapp/user/repository"
+	_userUCase "dripapp/internal/dripapp/user/usecase"
 	_authClient "dripapp/internal/microservices/auth/delivery/grpc/client"
+	grpcServer "dripapp/internal/microservices/auth/delivery/grpc/grpc_server"
+	_sessionDelivery "dripapp/internal/microservices/auth/delivery/http"
 	_sessionRepo "dripapp/internal/microservices/auth/repository"
-	_chatDelivery "dripapp/internal/microservices/chat/delivery"
-	"dripapp/internal/microservices/chat/models"
-	_chatRepo "dripapp/internal/microservices/chat/repository"
-	_chatUsecase "dripapp/internal/microservices/chat/usecase"
+	_sessionUCase "dripapp/internal/microservices/auth/usecase"
 	"dripapp/internal/pkg/logger"
 	"log"
 	"net/http"
@@ -38,38 +40,42 @@ func main() {
 	// router
 	router := mux.NewRouter()
 
+	timeoutContext := configs.Timeouts.ContextTimeout
+
+	// repository
 	sm, err := _sessionRepo.NewTarantoolConnection(configs.Tarantool)
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	timeoutContext := configs.Timeouts.ContextTimeout
-
-	// chat
-	// repository
-	hub := models.NewHub()
-	go hub.Run()
-	chatRepo, err := _chatRepo.NewPostgresChatRepository(configs.Postgres)
+	userRepo, err := _userRepo.NewPostgresUserRepository(configs.Postgres)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fileManager, err := file.NewFileManager(configs.FileStorage)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	// usecase
-	chatUseCase := _chatUsecase.NewChatUseCase(chatRepo, hub, timeoutContext)
+	sessionUCase := _sessionUCase.NewSessionUsecase(sm, timeoutContext)
+	userUCase := _userUCase.NewUserUsecase(userRepo, fileManager, timeoutContext)
+
+	// new auth server
+	go grpcServer.StartStaffGrpcServer(sm, userRepo, configs.AuthServer.GrpcUrl)
 
 	// auth client
 	grpcConn, _ := grpc.Dial(configs.AuthServer.GrpcUrl, grpc.WithInsecure())
 	grpcAuthClient := _authClient.NewStaffClient(grpcConn)
 
 	// delivery
-	_chatDelivery.SetChatRouting(logger.DripLogger, router, chatUseCase, *grpcAuthClient)
+	_sessionDelivery.SetSessionRouting(logger.DripLogger, router, userUCase, sessionUCase, *grpcAuthClient)
 
 	// middleware
 	middleware.NewMiddleware(router, sm, logFile, logger.DripLogger)
 
 	srv := &http.Server{
 		Handler:      router,
-		Addr:         configs.ChatServer.HttpPort,
+		Addr:         configs.AuthServer.HttpPort,
 		WriteTimeout: http.DefaultClient.Timeout,
 		ReadTimeout:  http.DefaultClient.Timeout,
 	}
