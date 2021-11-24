@@ -87,11 +87,14 @@ create index idx_pt_tag_id on profile_tag(tag_id);
   create unique index uniq_email ON profile(email);
 -- search
   create index idx_profile_imgs_gin on profile using gin (imgs);
-create
-  or replace function moddatetime() returns trigger as $ $ begin NEW.update_time = NOW();
+create or replace function moddatetime()
+returns trigger
+as $$ 
+  begin
+    NEW.update_time = NOW();
 return NEW;
 end;
-$ $ language plpgsql;
+$$ language plpgsql;
 create trigger modify_payment_update_time before
 update
   on profile for each row execute procedure moddatetime();

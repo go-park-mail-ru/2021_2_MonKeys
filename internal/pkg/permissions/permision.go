@@ -3,7 +3,9 @@ package permissions
 import (
 	"context"
 	"dripapp/configs"
-	"dripapp/internal/dripapp/models"
+	_userModels "dripapp/internal/dripapp/models"
+	_authClient "dripapp/internal/microservices/auth/delivery/grpc/client"
+	_sessionModels "dripapp/internal/microservices/auth/models"
 	"dripapp/internal/pkg/logger"
 	"dripapp/internal/pkg/responses"
 
@@ -13,77 +15,100 @@ import (
 	uuid "github.com/nu7hatch/gouuid"
 )
 
-type UserMiddlware struct {
-	UserRepo models.UserRepository
+type Permission struct {
+	AuthClient _authClient.SessionClient
 }
 
-func CheckAuthenticated(next http.HandlerFunc) http.HandlerFunc {
-	return http.HandlerFunc(
-		func(w http.ResponseWriter, r *http.Request) {
-
-			logger.DripLogger.DebugLogging("check middlware")
-			session, ok := r.Context().Value(configs.ContextUserID).(models.Session)
-			if !ok {
-				responses.SendError(w, models.HTTPError{
+func (perm *Permission) CheckAuth(next http.HandlerFunc) http.HandlerFunc {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		var userSession _sessionModels.Session
+		session, err := r.Cookie("sessionId")
+		if err != nil {
+			responses.SendError(w, _userModels.HTTPError{
+				Code:    http.StatusForbidden,
+				Message: _userModels.ErrAuth,
+			}, logger.DripLogger.WarnLogging)
+			return
+		} else {
+			userSession, err = perm.AuthClient.GetFromSession(r.Context(), session.Value)
+			if err != nil {
+				responses.SendError(w, _userModels.HTTPError{
 					Code:    http.StatusForbidden,
-					Message: models.ErrExtractContext,
-				}, logger.DripLogger.ErrorLogging)
-				return
-			}
-			if session.UserID == 0 {
-				responses.SendError(w, models.HTTPError{
-					Code:    http.StatusForbidden,
-					Message: models.ErrAuth,
+					Message: _userModels.ErrAuth,
 				}, logger.DripLogger.WarnLogging)
 				return
 			}
-
-			next.ServeHTTP(w, r)
-		})
+		}
+		r = r.WithContext(context.WithValue(r.Context(), configs.ContextUserID, userSession))
+		next.ServeHTTP(w, r)
+	})
 }
 
-func (us *UserMiddlware) GetCurrentUser(next http.HandlerFunc) http.HandlerFunc {
-	return http.HandlerFunc(
-		func(w http.ResponseWriter, r *http.Request) {
+// func CheckAuthenticated(next http.HandlerFunc) http.HandlerFunc {
+// 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
-			logger.DripLogger.DebugLogging("get current")
-			ctxSession := r.Context().Value(configs.ContextUserID)
-			if ctxSession == nil {
-				responses.SendError(w, models.HTTPError{
-					Code:    http.StatusForbidden,
-					Message: models.ErrExtractContext,
-				}, logger.DripLogger.ErrorLogging)
-				return
-			}
-			currentSession, ok := ctxSession.(models.Session)
-			if !ok {
-				responses.SendError(w, models.HTTPError{
-					Code:    http.StatusForbidden,
-					Message: models.ErrExtractContext,
-				}, logger.DripLogger.ErrorLogging)
-				return
-			}
+// 		logger.DripLogger.DebugLogging("check middlware")
+// 		session, ok := r.Context().Value(configs.ContextUserID).(_sessionModels.Session)
+// 		if !ok {
+// 			responses.SendError(w, _userModels.HTTPError{
+// 				Code:    http.StatusForbidden,
+// 				Message: _userModels.ErrExtractContext,
+// 			}, logger.DripLogger.ErrorLogging)
+// 			return
+// 		}
+// 		if session.UserID == 0 {
+// 			responses.SendError(w, _userModels.HTTPError{
+// 				Code:    http.StatusForbidden,
+// 				Message: _userModels.ErrAuth,
+// 			}, logger.DripLogger.WarnLogging)
+// 			return
+// 		}
 
-			currentUser, err := us.UserRepo.GetUserByID(r.Context(), currentSession.UserID)
-			if err != nil {
-				responses.SendError(w, models.HTTPError{
-					Code:    http.StatusNotFound,
-					Message: err,
-				}, logger.DripLogger.ErrorLogging)
-				return
-			}
+// 		next.ServeHTTP(w, r)
+// 	})
+// }
 
-			r = r.WithContext(context.WithValue(r.Context(), configs.ContextUser, currentUser))
-			next.ServeHTTP(w, r)
-		})
+func (perm *Permission) GetCurrentUser(next http.HandlerFunc) http.HandlerFunc {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
+		logger.DripLogger.DebugLogging("get current")
+		ctxSession := r.Context().Value(configs.ContextUserID)
+		if ctxSession == nil {
+			responses.SendError(w, _userModels.HTTPError{
+				Code:    http.StatusForbidden,
+				Message: _userModels.ErrExtractContext,
+			}, logger.DripLogger.ErrorLogging)
+			return
+		}
+		currentSession, ok := ctxSession.(_sessionModels.Session)
+		if !ok {
+			responses.SendError(w, _userModels.HTTPError{
+				Code:    http.StatusForbidden,
+				Message: _userModels.ErrExtractContext,
+			}, logger.DripLogger.ErrorLogging)
+			return
+		}
+
+		currentUser, err := perm.AuthClient.GetById(r.Context(), currentSession)
+		if err != nil {
+			responses.SendError(w, _userModels.HTTPError{
+				Code:    http.StatusNotFound,
+				Message: err,
+			}, logger.DripLogger.ErrorLogging)
+			return
+		}
+
+		r = r.WithContext(context.WithValue(r.Context(), configs.ContextUser, currentUser))
+		next.ServeHTTP(w, r)
+	})
 }
 
 func generateCsrfLogic(w http.ResponseWriter) {
 	csrf, err := uuid.NewV4()
 	if err != nil {
-		responses.SendError(w, models.HTTPError{
+		responses.SendError(w, _userModels.HTTPError{
 			Code:    http.StatusForbidden,
-			Message: models.ErrNoPermission,
+			Message: _userModels.ErrNoPermission,
 		}, logger.DripLogger.ErrorLogging)
 		return
 	}

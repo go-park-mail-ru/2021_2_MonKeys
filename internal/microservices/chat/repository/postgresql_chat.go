@@ -8,6 +8,7 @@ import (
 	"log"
 
 	"github.com/jmoiron/sqlx"
+	_ "github.com/lib/pq"
 )
 
 type PostgreChatRepo struct {
@@ -22,6 +23,8 @@ func NewPostgresChatRepository(config configs.PostgresConfig) (models.ChatReposi
 		config.DBName,
 		config.Password,
 		config.Host)
+
+	fmt.Println(ConnStr)
 
 	Conn, err := sqlx.Open("postgres", ConnStr)
 	if err != nil {
