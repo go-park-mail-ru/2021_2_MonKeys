@@ -27,7 +27,7 @@
       "name": "drip"
   },
   "session": {
-      "host": "taranool",
+      "host": "tarantool",
       "port": ":3301",
       "user": "admin",
       "pass": "pass",
