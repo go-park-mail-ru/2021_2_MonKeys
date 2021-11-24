@@ -122,26 +122,12 @@ func TestUserUsecase_EditProfile(t *testing.T) {
 			},
 			err: models.ErrContextNilError,
 		},
-		// Test ErrFailedToSaveAge
-		{
-			user: models.User{
-				ID: 0,
-			},
-			err: errors.New("failed on userYear"),
-		},
 		// Test ErrUpdateUser
 		{
 			user: models.User{
 				ID: 0,
 			},
 			err: errors.New(""),
-		},
-		// Test ErrFailedToSaveAgeNewProfile
-		{
-			user: models.User{
-				ID: 0,
-			},
-			err: errors.New("failed on userYear"),
 		},
 	}
 
@@ -175,21 +161,6 @@ func TestUserUsecase_EditProfile(t *testing.T) {
 			newUser: models.User{},
 			err:     nil,
 		},
-		// Test ErrFailedToSaveAge
-		{
-			newUser: models.User{
-				ID:          0,
-				Name:        "DripDrip",
-				Email:       "drip@app.ru",
-				Password:    "hahahahi",
-				Date:        "22-02-2001",
-				Age:         19,
-				Description: "vsem poka",
-				Imgs:        []string{"1", "5"},
-				Tags:        []string{"anime"},
-			},
-			err: nil,
-		},
 		// Test ErrUpdateUser
 		{
 			newUser: models.User{
@@ -204,21 +175,6 @@ func TestUserUsecase_EditProfile(t *testing.T) {
 				Tags:        []string{"anime"},
 			},
 			err: errors.New(""),
-		},
-		// Test ErrFailedToSaveAgeNewProfile
-		{
-			newUser: models.User{
-				ID:          0,
-				Name:        "DripDrip",
-				Email:       "drip@app.ru",
-				Password:    "hahahahi",
-				Date:        "22-02-2001",
-				Age:         19,
-				Description: "vsem poka",
-				Imgs:        []string{"1", "5"},
-				Tags:        []string{"anime"},
-			},
-			err: nil,
 		},
 	}
 
@@ -549,7 +505,7 @@ func TestUserUsecase_Login(t *testing.T) {
 				Password: "VBif222!!",
 			},
 			user: models.User{},
-			err:  nil,
+			err:  models.ErrMismatch,
 		},
 	}
 
@@ -946,7 +902,7 @@ func TestUserUsecase_NextUser(t *testing.T) {
 		mockUserRepository := new(userMocks.UserRepository)
 		mockUserRepository.On("GetNextUserForSwipe",
 			mock.AnythingOfType("*context.timerCtx"),
-			mock.AnythingOfType("uint64")).Return(MockResultCases[i].nextUsers, MockResultCases[i].errGetNextUsers)
+			mock.AnythingOfType("models.User")).Return(MockResultCases[i].nextUsers, MockResultCases[i].errGetNextUsers)
 		mockFileRepository := new(fileMocks.FileRepository)
 
 		testUserUsecase := usecase.NewUserUsecase(mockUserRepository, mockFileRepository, time.Second*2)
@@ -1315,84 +1271,84 @@ func TestUserUsecase_Reaction(t *testing.T) {
 	}
 
 	type MockResultCase struct {
-		likes          []uint64
-		errAddReaction error
-		errGetLikes    error
-		errDeleteLike  error
-		errAddMatch    error
+		likes             []uint64
+		errAddReaction    error
+		errGetLikes       error
+		errDeleteReaction error
+		errAddMatch       error
 	}
 	MockResultCases := []MockResultCase{
 		// Test OK and Match
 		{
-			likes:          []uint64{1, 2, 3},
-			errAddReaction: nil,
-			errGetLikes:    nil,
-			errDeleteLike:  nil,
-			errAddMatch:    nil,
+			likes:             []uint64{1, 2, 3},
+			errAddReaction:    nil,
+			errGetLikes:       nil,
+			errDeleteReaction: nil,
+			errAddMatch:       nil,
 		},
 		// Test OK and no Match
 		{
-			likes:          []uint64{1, 2, 3},
-			errAddReaction: nil,
-			errGetLikes:    nil,
-			errDeleteLike:  nil,
-			errAddMatch:    nil,
+			likes:             []uint64{1, 2, 3},
+			errAddReaction:    nil,
+			errGetLikes:       nil,
+			errDeleteReaction: nil,
+			errAddMatch:       nil,
 		},
 		// Test OK and no Match
 		{
-			likes:          []uint64{1, 2, 3},
-			errAddReaction: nil,
-			errGetLikes:    nil,
-			errDeleteLike:  nil,
-			errAddMatch:    nil,
+			likes:             []uint64{1, 2, 3},
+			errAddReaction:    nil,
+			errGetLikes:       nil,
+			errDeleteReaction: nil,
+			errAddMatch:       nil,
 		},
 		// Test ErrorNotFound
 		{
-			likes:          []uint64{},
-			errAddReaction: nil,
-			errGetLikes:    nil,
-			errDeleteLike:  nil,
-			errAddMatch:    nil,
+			likes:             []uint64{},
+			errAddReaction:    nil,
+			errGetLikes:       nil,
+			errDeleteReaction: nil,
+			errAddMatch:       nil,
 		},
 		// Test ErrContextNilError
 		{
-			likes:          []uint64{},
-			errAddReaction: nil,
-			errGetLikes:    nil,
-			errDeleteLike:  nil,
-			errAddMatch:    nil,
+			likes:             []uint64{},
+			errAddReaction:    nil,
+			errGetLikes:       nil,
+			errDeleteReaction: nil,
+			errAddMatch:       nil,
 		},
 		// Test ErrAddReaction
 		{
-			likes:          []uint64{},
-			errAddReaction: errors.New(""),
-			errGetLikes:    nil,
-			errDeleteLike:  nil,
-			errAddMatch:    nil,
+			likes:             []uint64{},
+			errAddReaction:    errors.New(""),
+			errGetLikes:       nil,
+			errDeleteReaction: nil,
+			errAddMatch:       nil,
 		},
 		// Test ErrGetLikes
 		{
-			likes:          []uint64{},
-			errAddReaction: nil,
-			errGetLikes:    errors.New(""),
-			errDeleteLike:  nil,
-			errAddMatch:    nil,
+			likes:             []uint64{},
+			errAddReaction:    nil,
+			errGetLikes:       errors.New(""),
+			errDeleteReaction: nil,
+			errAddMatch:       nil,
 		},
 		// Test ErrDeleteLike
 		{
-			likes:          []uint64{1, 2, 3},
-			errAddReaction: nil,
-			errGetLikes:    nil,
-			errDeleteLike:  errors.New(""),
-			errAddMatch:    nil,
+			likes:             []uint64{1, 2, 3},
+			errAddReaction:    nil,
+			errGetLikes:       nil,
+			errDeleteReaction: errors.New(""),
+			errAddMatch:       nil,
 		},
 		// Test ErrAddMatch
 		{
-			likes:          []uint64{1, 2, 3},
-			errAddReaction: nil,
-			errGetLikes:    nil,
-			errDeleteLike:  nil,
-			errAddMatch:    errors.New(""),
+			likes:             []uint64{1, 2, 3},
+			errAddReaction:    nil,
+			errGetLikes:       nil,
+			errDeleteReaction: nil,
+			errAddMatch:       errors.New(""),
 		},
 	}
 
@@ -1414,10 +1370,10 @@ func TestUserUsecase_Reaction(t *testing.T) {
 		mockUserRepository.On("GetLikes",
 			mock.AnythingOfType("*context.timerCtx"),
 			mock.AnythingOfType("uint64")).Return(MockResultCases[i].likes, MockResultCases[i].errGetLikes)
-		mockUserRepository.On("DeleteLike",
+		mockUserRepository.On("DeleteReaction",
 			mock.AnythingOfType("*context.timerCtx"),
 			mock.AnythingOfType("uint64"),
-			mock.AnythingOfType("uint64")).Return(MockResultCases[i].errDeleteLike)
+			mock.AnythingOfType("uint64")).Return(MockResultCases[i].errDeleteReaction)
 		mockUserRepository.On("AddMatch",
 			mock.AnythingOfType("*context.timerCtx"),
 			mock.AnythingOfType("uint64"),
@@ -1429,6 +1385,610 @@ func TestUserUsecase_Reaction(t *testing.T) {
 
 		assert.Equal(t, testCase.err, status, message)
 		reflect.DeepEqual(testCase.match, match)
+
+	}
+}
+
+func TestUserUsecase_UsersMatchesWithSearching(t *testing.T) {
+	type TestCase struct {
+		user          models.User
+		matches       models.Matches
+		searchingData models.Search
+		err           error
+	}
+	testCases := []TestCase{
+		// Test OK
+		{
+			user: models.User{
+				ID:          0,
+				Name:        "Drip",
+				Email:       "drip@app.com",
+				Password:    "hahaha",
+				Date:        "2000-02-22",
+				Description: "vsem privet",
+				Imgs:        []string{"1", "2"},
+				Tags:        []string{"anime", "BMSTU"},
+			},
+			matches: models.Matches{
+				AllUsers: map[uint64]models.User{
+					0: {
+						ID:          1,
+						Name:        "Владимир",
+						Email:       "drip@app.ru",
+						Password:    "hah",
+						Date:        "2001-02-22",
+						Age:         19,
+						Description: "vsem privet",
+						Imgs:        []string{"4", "3"},
+						Tags:        []string{"BMSTU"},
+					},
+					1: {
+						ID:          2,
+						Name:        "влаД",
+						Email:       "dr@app.ru",
+						Password:    "hah",
+						Date:        "2000-02-22",
+						Age:         20,
+						Description: "em privet",
+						Imgs:        []string{"4", "3"},
+						Tags:        []string{"JS"},
+					},
+				},
+				Count: "2",
+			},
+			searchingData: models.Search{SearchingTmpl: "влад"},
+			err:           nil,
+		},
+		// Test ErrContextNilError
+		{
+			user: models.User{
+				ID: 2,
+			},
+			err: models.ErrContextNilError,
+		},
+		// Test ErrorNotFound
+		{
+			user:    models.User{},
+			matches: models.Matches{},
+			err:     errors.New(""),
+		},
+	}
+
+	type MockResultCase struct {
+		matches       []models.User
+		errGetMatches error
+	}
+	MockResultCases := []MockResultCase{
+		// Test OK
+		{
+			matches: []models.User{
+				{
+					ID:          1,
+					Name:        "Drip))",
+					Email:       "drip@app.ru",
+					Password:    "hah",
+					Date:        "2001-02-22",
+					Age:         19,
+					Description: "vsem privet",
+					Imgs:        []string{"4", "3"},
+					Tags:        []string{"BMSTU"},
+				},
+				{
+					ID:          2,
+					Name:        "Dr))",
+					Email:       "dr@app.ru",
+					Password:    "hah",
+					Date:        "2000-02-22",
+					Age:         20,
+					Description: "em privet",
+					Imgs:        []string{"4", "3"},
+					Tags:        []string{"JS"},
+				},
+			},
+			errGetMatches: nil,
+		},
+		// Test ErrContextNilError
+		{
+			matches:       []models.User{},
+			errGetMatches: nil,
+		},
+		// Test ErrorNotFound
+		{
+			matches:       []models.User{},
+			errGetMatches: errors.New(""),
+		},
+	}
+
+	for i, testCase := range testCases {
+		message := fmt.Sprintf("test case number: %d", i)
+
+		r, err := http.NewRequest(http.MethodGet, "test", nil)
+		assert.NoError(t, err)
+		if testCase.user.ID != 2 {
+			r = r.WithContext(context.WithValue(r.Context(), configs.ContextUser, testCase.user))
+		}
+
+		mockUserRepository := new(userMocks.UserRepository)
+		mockUserRepository.On("GetUsersMatchesWithSearching",
+			mock.AnythingOfType("*context.timerCtx"),
+			mock.AnythingOfType("uint64"),
+			mock.AnythingOfType("string")).Return(MockResultCases[i].matches, MockResultCases[i].errGetMatches)
+		mockFileRepository := new(fileMocks.FileRepository)
+
+		testUserUsecase := usecase.NewUserUsecase(mockUserRepository, mockFileRepository, time.Second*2)
+		allMatches, status := testUserUsecase.UsersMatchesWithSearching(r.Context(), testCase.searchingData)
+
+		assert.Equal(t, testCase.err, status, message)
+		reflect.DeepEqual(testCase.matches, allMatches)
+
+	}
+}
+
+func TestUserUsecase_UserLikes(t *testing.T) {
+	type TestCase struct {
+		user  models.User
+		likes models.Likes
+		err   error
+	}
+	testCases := []TestCase{
+		// Test OK
+		{
+			user: models.User{
+				ID:          0,
+				Name:        "Drip",
+				Email:       "drip@app.com",
+				Password:    "hahaha",
+				Date:        "2000-02-22",
+				Description: "vsem privet",
+				Imgs:        []string{"1", "2"},
+				Tags:        []string{"anime", "BMSTU"},
+			},
+			likes: models.Likes{
+				AllUsers: map[uint64]models.User{
+					0: {
+						ID:          1,
+						Name:        "Владимир",
+						Email:       "drip@app.ru",
+						Password:    "hah",
+						Date:        "2001-02-22",
+						Age:         19,
+						Description: "vsem privet",
+						Imgs:        []string{"4", "3"},
+						Tags:        []string{"BMSTU"},
+					},
+					1: {
+						ID:          2,
+						Name:        "влаД",
+						Email:       "dr@app.ru",
+						Password:    "hah",
+						Date:        "2000-02-22",
+						Age:         20,
+						Description: "em privet",
+						Imgs:        []string{"4", "3"},
+						Tags:        []string{"JS"},
+					},
+				},
+				Count: "2",
+			},
+			err: nil,
+		},
+		// Test ErrContextNilError
+		{
+			user: models.User{
+				ID: 2,
+			},
+			err: models.ErrContextNilError,
+		},
+		// Test ErrorNotFound
+		{
+			user:  models.User{},
+			likes: models.Likes{},
+			err:   errors.New(""),
+		},
+	}
+
+	type MockResultCase struct {
+		likes         []models.User
+		errGetMatches error
+	}
+	MockResultCases := []MockResultCase{
+		// Test OK
+		{
+			likes: []models.User{
+				{
+					ID:          1,
+					Name:        "Drip))",
+					Email:       "drip@app.ru",
+					Password:    "hah",
+					Date:        "2001-02-22",
+					Age:         19,
+					Description: "vsem privet",
+					Imgs:        []string{"4", "3"},
+					Tags:        []string{"BMSTU"},
+				},
+				{
+					ID:          2,
+					Name:        "Dr))",
+					Email:       "dr@app.ru",
+					Password:    "hah",
+					Date:        "2000-02-22",
+					Age:         20,
+					Description: "em privet",
+					Imgs:        []string{"4", "3"},
+					Tags:        []string{"JS"},
+				},
+			},
+			errGetMatches: nil,
+		},
+		// Test ErrContextNilError
+		{
+			likes:         []models.User{},
+			errGetMatches: nil,
+		},
+		// Test ErrorNotFound
+		{
+			likes:         []models.User{},
+			errGetMatches: errors.New(""),
+		},
+	}
+
+	for i, testCase := range testCases {
+		message := fmt.Sprintf("test case number: %d", i)
+
+		r, err := http.NewRequest(http.MethodGet, "test", nil)
+		assert.NoError(t, err)
+		if testCase.user.ID != 2 {
+			r = r.WithContext(context.WithValue(r.Context(), configs.ContextUser, testCase.user))
+		}
+
+		mockUserRepository := new(userMocks.UserRepository)
+		mockUserRepository.On("GetUsersLikes",
+			mock.AnythingOfType("*context.timerCtx"),
+			mock.AnythingOfType("uint64")).Return(MockResultCases[i].likes, MockResultCases[i].errGetMatches)
+		mockFileRepository := new(fileMocks.FileRepository)
+
+		testUserUsecase := usecase.NewUserUsecase(mockUserRepository, mockFileRepository, time.Second*2)
+		allLikes, status := testUserUsecase.UserLikes(r.Context())
+
+		assert.Equal(t, testCase.err, status, message)
+		reflect.DeepEqual(testCase.likes, allLikes)
+
+	}
+}
+
+func TestUserUsecase_GetAllReports(t *testing.T) {
+	type TestCase struct {
+		user    models.User
+		reports models.Reports
+		err     error
+	}
+	testCases := []TestCase{
+		// Test OK
+		{
+			user: models.User{},
+			reports: models.Reports{
+				AllReports: map[uint64]models.Report{
+					0: {ReportDesc: "anime"},
+					1: {ReportDesc: "BMSTU"},
+					2: {ReportDesc: "walk"},
+					3: {ReportDesc: "netflix"},
+					4: {ReportDesc: "prikolchiki"},
+				},
+				Count: 5,
+			},
+			err: nil,
+		},
+		// Test ErrGetTags
+		{
+			user: models.User{
+				ID:          0,
+				Name:        "Drip",
+				Email:       "drip@app.com",
+				Password:    "hahaha",
+				Date:        "2000-02-22",
+				Description: "vsem privet",
+				Imgs:        []string{"1", "2"},
+				Tags:        []string{"anime", "BMSTU"},
+			},
+			reports: models.Reports{},
+			err:     errors.New(""),
+		},
+	}
+
+	type MockResultCase struct {
+		reports       map[uint64]string
+		errGetReports error
+	}
+	MockResultCases := []MockResultCase{
+		// Test OK
+		{
+			reports: map[uint64]string{
+				0: "anime",
+				1: "BMSTU",
+				2: "walk",
+				3: "netflix",
+				4: "prikolchiki",
+			},
+			errGetReports: nil,
+		},
+		// Test ErrGetTags
+		{
+			reports:       map[uint64]string{},
+			errGetReports: errors.New(""),
+		},
+	}
+
+	for i, testCase := range testCases {
+		message := fmt.Sprintf("test case number: %d", i)
+
+		r, err := http.NewRequest(http.MethodGet, "test", nil)
+		assert.NoError(t, err)
+		if testCase.user.ID != 2 {
+			r = r.WithContext(context.WithValue(r.Context(), configs.ContextUser, testCase.user))
+		}
+
+		mockUserRepository := new(userMocks.UserRepository)
+		mockUserRepository.On("GetReports",
+			mock.AnythingOfType("*context.timerCtx")).Return(MockResultCases[i].reports, MockResultCases[i].errGetReports)
+		mockFileRepository := new(fileMocks.FileRepository)
+
+		testUserUsecase := usecase.NewUserUsecase(mockUserRepository, mockFileRepository, time.Second*2)
+		allReports, status := testUserUsecase.GetAllReports(r.Context())
+
+		assert.Equal(t, testCase.err, status, message)
+		reflect.DeepEqual(testCase.reports, allReports)
+
+	}
+}
+
+func TestUserUsecase_AddReport(t *testing.T) {
+	type TestCase struct {
+		user   models.User
+		report models.NewReport
+		err    error
+	}
+	testCases := []TestCase{
+		// Test OK FAKE
+		{
+			user: models.User{},
+			report: models.NewReport{
+				ToId:       0,
+				ReportDesc: models.FakeReport,
+			},
+			err: nil,
+		},
+		// Test OK AGGRESSION
+		{
+			user: models.User{},
+			report: models.NewReport{
+				ToId:       0,
+				ReportDesc: models.AggressionReport,
+			},
+			err: nil,
+		},
+		// Test OK SKAM
+		{
+			user: models.User{},
+			report: models.NewReport{
+				ToId:       0,
+				ReportDesc: models.SkamReport,
+			},
+			err: nil,
+		},
+		// Test OK UNDERAGE
+		{
+			user: models.User{},
+			report: models.NewReport{
+				ToId:       0,
+				ReportDesc: models.UnderageReport,
+			},
+			err: nil,
+		},
+		// Test ErrContextNilError
+		{
+			user: models.User{
+				ID: 2,
+			},
+			report: models.NewReport{},
+			err:    models.ErrContextNilError,
+		},
+		// Test ErrAddReport
+		{
+			user:   models.User{},
+			report: models.NewReport{},
+			err:    errors.New(""),
+		},
+		// Test ErrDeleteReaction
+		{
+			user:   models.User{},
+			report: models.NewReport{},
+			err:    errors.New(""),
+		},
+		// Test ErrDeleteMatches
+		{
+			user:   models.User{},
+			report: models.NewReport{},
+			err:    errors.New(""),
+		},
+		// Test ErrAddReaction
+		{
+			user:   models.User{},
+			report: models.NewReport{},
+			err:    errors.New(""),
+		},
+		// Test ErrGetReportsCount
+		{
+			user:   models.User{},
+			report: models.NewReport{},
+			err:    errors.New(""),
+		},
+		// Test ErrGetReportsWithMaxCount
+		{
+			user:   models.User{},
+			report: models.NewReport{},
+			err:    errors.New(""),
+		},
+		// Test ErrGetReportDesc
+		{
+			user:   models.User{},
+			report: models.NewReport{},
+			err:    errors.New(""),
+		},
+		// Test ErrUpdateReportStatus
+		{
+			user:   models.User{},
+			report: models.NewReport{},
+			err:    errors.New(""),
+		},
+	}
+
+	type MockResultCase struct {
+		reportsCount              uint64
+		banId                     uint64
+		banDesc                   string
+		errAddReport              error
+		errDeleteReaction         error
+		errDeleteMatches          error
+		errAddReaction            error
+		errGetReportsCount        error
+		errGetReportsWithMaxCount error
+		errGetReportDesc          error
+		errUpdateReportStatus     error
+	}
+	MockResultCases := []MockResultCase{
+		// Test OK FAKE
+		{
+			reportsCount: 5,
+			banId:        2,
+			banDesc:      models.FakeReport,
+		},
+		// Test OK AGGRESSION
+		{
+			reportsCount: 5,
+			banId:        2,
+			banDesc:      models.AggressionReport,
+		},
+		// Test OK SKAM
+		{
+			reportsCount: 5,
+			banId:        2,
+			banDesc:      models.SkamReport,
+		},
+		// Test OK UNDERAGE
+		{
+			reportsCount: 5,
+			banId:        2,
+			banDesc:      models.UnderageReport,
+		},
+		// Test ErrContextNilError
+		{
+			reportsCount: 5,
+			banId:        2,
+			banDesc:      "",
+		},
+		// Test ErrAddReport
+		{
+			reportsCount: 5,
+			banId:        2,
+			banDesc:      "",
+			errAddReport: errors.New(""),
+		},
+		// Test ErrDeleteReaction
+		{
+			reportsCount:      5,
+			banId:             2,
+			banDesc:           "",
+			errDeleteReaction: errors.New(""),
+		},
+		// Test ErrDeleteMatches
+		{
+			reportsCount:     5,
+			banId:            2,
+			banDesc:          "",
+			errDeleteMatches: errors.New(""),
+		},
+		// Test ErrAddReaction
+		{
+			reportsCount:   5,
+			banId:          2,
+			banDesc:        "",
+			errAddReaction: errors.New(""),
+		},
+		// Test ErrGetReportsCount
+		{
+			reportsCount:       5,
+			banId:              2,
+			banDesc:            "",
+			errGetReportsCount: errors.New(""),
+		},
+		// Test ErrGetReportsWithMaxCount
+		{
+			reportsCount:              5,
+			banId:                     2,
+			banDesc:                   "",
+			errGetReportsWithMaxCount: errors.New(""),
+		},
+		// Test ErrGetReportDesc
+		{
+			reportsCount:     5,
+			banId:            2,
+			banDesc:          "",
+			errGetReportDesc: errors.New(""),
+		},
+		// Test ErrUpdateReportStatus
+		{
+			reportsCount:          5,
+			banId:                 2,
+			banDesc:               "",
+			errUpdateReportStatus: errors.New(""),
+		},
+	}
+
+	for i, testCase := range testCases {
+		message := fmt.Sprintf("test case number: %d", i)
+
+		r, err := http.NewRequest(http.MethodGet, "test", nil)
+		assert.NoError(t, err)
+		if testCase.user.ID != 2 {
+			r = r.WithContext(context.WithValue(r.Context(), configs.ContextUser, testCase.user))
+		}
+
+		mockUserRepository := new(userMocks.UserRepository)
+		mockUserRepository.On("AddReport",
+			mock.AnythingOfType("*context.timerCtx"),
+			mock.AnythingOfType("models.NewReport")).Return(MockResultCases[i].errAddReport)
+		mockUserRepository.On("DeleteReaction",
+			mock.AnythingOfType("*context.timerCtx"),
+			mock.AnythingOfType("uint64"),
+			mock.AnythingOfType("uint64")).Return(MockResultCases[i].errDeleteReaction)
+		mockUserRepository.On("DeleteMatches",
+			mock.AnythingOfType("*context.timerCtx"),
+			mock.AnythingOfType("uint64"),
+			mock.AnythingOfType("uint64")).Return(MockResultCases[i].errDeleteMatches)
+		mockUserRepository.On("AddReaction",
+			mock.AnythingOfType("*context.timerCtx"),
+			mock.AnythingOfType("uint64"),
+			mock.AnythingOfType("uint64"),
+			mock.AnythingOfType("uint64")).Return(MockResultCases[i].errAddReaction)
+		mockUserRepository.On("GetReportsCount",
+			mock.AnythingOfType("*context.timerCtx"),
+			mock.AnythingOfType("uint64")).Return(MockResultCases[i].reportsCount, MockResultCases[i].errGetReportsCount)
+		mockUserRepository.On("GetReportsWithMaxCount",
+			mock.AnythingOfType("*context.timerCtx"),
+			mock.AnythingOfType("uint64")).Return(MockResultCases[i].banId, MockResultCases[i].errGetReportsWithMaxCount)
+		mockUserRepository.On("GetReportDesc",
+			mock.AnythingOfType("*context.timerCtx"),
+			mock.AnythingOfType("uint64")).Return(MockResultCases[i].banDesc, MockResultCases[i].errGetReportDesc)
+		mockUserRepository.On("UpdateReportStatus",
+			mock.AnythingOfType("*context.timerCtx"),
+			mock.AnythingOfType("uint64"),
+			mock.AnythingOfType("string")).Return(MockResultCases[i].errUpdateReportStatus)
+		mockFileRepository := new(fileMocks.FileRepository)
+
+		testUserUsecase := usecase.NewUserUsecase(mockUserRepository, mockFileRepository, time.Second*2)
+		err = testUserUsecase.AddReport(r.Context(), testCase.report)
+
+		assert.Equal(t, testCase.err, err, message)
 
 	}
 }

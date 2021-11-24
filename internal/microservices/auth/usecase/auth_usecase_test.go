@@ -6,7 +6,6 @@ import (
 	_sessionModels "dripapp/internal/microservices/auth/models"
 	"errors"
 	"fmt"
-	"io"
 	"net/http"
 	"testing"
 	"time"
@@ -17,20 +16,7 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
-func CreateMultipartRequest(method, target string, body io.Reader) (*http.Request, error) {
-	r, err := http.NewRequest(method, target, body)
-	if err != nil {
-		return nil, err
-	}
-	r = r.WithContext(context.WithValue(r.Context(), configs.ContextUserID, _sessionModels.Session{
-		UserID: 0,
-		Cookie: "",
-	}))
-
-	return r, nil
-}
-
-func TestUserUsecase_AddSession(t *testing.T) {
+func TestAuthUsecase_AddSession(t *testing.T) {
 	type TestCase struct {
 		session _sessionModels.Session
 		err     error
@@ -85,7 +71,7 @@ func TestUserUsecase_AddSession(t *testing.T) {
 	}
 }
 
-func TestUserUsecase_DeleteSession(t *testing.T) {
+func TestAuthUsecase_DeleteSession(t *testing.T) {
 	type TestCase struct {
 		session _sessionModels.Session
 		err     error
