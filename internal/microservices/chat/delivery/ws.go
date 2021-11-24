@@ -10,8 +10,13 @@ import (
 	"github.com/gorilla/websocket"
 )
 
+type WS interface {
+	ReadJSON(interface{}) error
+	WriteJSON(interface{}) error
+}
+
 type MessagesWS struct {
-	conn   *websocket.Conn
+	conn   WS
 	logger logger.Logger
 }
 
