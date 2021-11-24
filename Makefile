@@ -75,6 +75,10 @@ local-build:
 	docker build -t chat_service -f ${DOCKER_DIR}/chat_service.Dockerfile .
 	docker build -t auth_service -f ${DOCKER_DIR}/auth_service.Dockerfile .
 
+## deploy-run: Deploy run app on background
+local-run:
+	docker-compose -f local.yml up --build --no-deps
+
 local: local-build deploy-run
 
 relocal: clean local-build deploy-run
@@ -85,7 +89,7 @@ relocal: clean local-build deploy-run
 debug:
 	cat debug.json > config.json
 	docker build -t drip_tarantool -f ${DOCKER_DIR}/drip_tarantool.Dockerfile .
-	docker-compose -f local.yml up --build --no-deps -d
+	docker-compose -f debug.yml up --build --no-deps -d
 	go run cmd/dripapp/main.go
 
 run-chat:
