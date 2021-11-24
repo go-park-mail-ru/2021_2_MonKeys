@@ -48,13 +48,14 @@ clean:
 
 ## deploy-build: Deply build and start docker with new changes
 build:
+	cat prod.json > config.json
 	docker build -t dependencies -f ${DOCKER_DIR}/builder.Dockerfile .
 	docker build -t drip_tarantool -f ${DOCKER_DIR}/drip_tarantool.Dockerfile .
 	docker build -t main_service -f ${DOCKER_DIR}/main_service.Dockerfile .
 	docker build -t chat_service -f ${DOCKER_DIR}/chat_service.Dockerfile .
 	docker build -t auth_service -f ${DOCKER_DIR}/auth_service.Dockerfile .
 
-## deploy-run: Deploy run app
+## deploy-run: Deploy run app on background
 deploy-run:
 	docker-compose -f prod.yml up --build --no-deps -d
 
@@ -66,8 +67,21 @@ redeploy: clean build deploy-run
 
 ######################################## local
 
+local-build:
+	cat local.json > config.json
+	docker build -t dependencies -f ${DOCKER_DIR}/builder.Dockerfile .
+	docker build -t drip_tarantool -f ${DOCKER_DIR}/drip_tarantool.Dockerfile .
+	docker build -t main_service -f ${DOCKER_DIR}/main_service.Dockerfile .
+	docker build -t chat_service -f ${DOCKER_DIR}/chat_service.Dockerfile .
+	docker build -t auth_service -f ${DOCKER_DIR}/auth_service.Dockerfile .
+
+local: local-build deploy-run
+
+######################################## debug
+
 ## build: Build and start docker with new changes
 debug:
+	cat debug.json > config.json
 	docker build -t drip_tarantool -f ${DOCKER_DIR}/drip_tarantool.Dockerfile .
 	docker-compose -f local.yml up --build --no-deps -d
 	go run cmd/dripapp/main.go
@@ -78,8 +92,8 @@ run-chat:
 run-auth:
 	go run cmd/auth/main.go
 
-## app-clean: Build and run app with clean
-debug-clean:clean debug
+## redebug: Build and debug app with clean
+redebug:clean debug
 
 .PHONY: help
 all: help
