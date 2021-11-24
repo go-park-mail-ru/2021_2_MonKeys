@@ -54,9 +54,9 @@ func (h *userUsecase) EditProfile(c context.Context, newUserData models.User) (u
 
 	newUserData.ID = currentUser.ID
 	newUserData.Email = currentUser.Email
-	if err != nil {
-		return models.User{}, err
-	}
+	// if err != nil {
+	// 	return models.User{}, err
+	// }
 
 	updatedUser, err = h.UserRepo.UpdateUser(c, newUserData)
 	if err != nil {
@@ -397,7 +397,7 @@ func (h *userUsecase) AddReport(c context.Context, report models.NewReport) erro
 
 	// if report's count > limit -> ban
 	if curCount > models.ReportLimit {
-		banId, err := h.UserRepo.GetReportsWithMaxCountCount(ctx, report.ToId)
+		banId, err := h.UserRepo.GetReportsWithMaxCount(ctx, report.ToId)
 		if err != nil {
 			return err
 		}

@@ -216,8 +216,8 @@ func (_m *UserRepository) GetReportsCount(ctx context.Context, userId uint64) (u
 	return r0, r1
 }
 
-// GetReportsWithMaxCountCount provides a mock function with given fields: ctx, userId
-func (_m *UserRepository) GetReportsWithMaxCountCount(ctx context.Context, userId uint64) (uint64, error) {
+// GetReportsWithMaxCount provides a mock function with given fields: ctx, userId
+func (_m *UserRepository) GetReportsWithMaxCount(ctx context.Context, userId uint64) (uint64, error) {
 	ret := _m.Called(ctx, userId)
 
 	var r0 uint64

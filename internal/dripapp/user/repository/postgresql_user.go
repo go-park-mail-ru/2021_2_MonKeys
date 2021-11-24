@@ -409,7 +409,7 @@ func (p PostgreUserRepo) GetReportsCount(ctx context.Context, userId uint64) (ui
 	return curCount, nil
 }
 
-func (p PostgreUserRepo) GetReportsWithMaxCountCount(ctx context.Context, userId uint64) (uint64, error) {
+func (p PostgreUserRepo) GetReportsWithMaxCount(ctx context.Context, userId uint64) (uint64, error) {
 	var reportId uint64
 	if err := p.Conn.QueryRow(GetReportsIdWithMaxCountQuery, userId).Scan(&reportId); err != nil {
 		return reportId, err
