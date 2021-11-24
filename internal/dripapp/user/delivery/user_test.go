@@ -54,6 +54,7 @@ var (
 	tagsMapStr   = `{"1":{"tagText":"chill"},"2":{"tagText":"sport"},"3":{"tagText":"music"}}`
 	tagsCountStr = "3"
 
+	usersMapStr     = `{"1":{"id":1,"email":"test@mail.ru"},"2":{"id":2,"email":"test2@mail.ru"}}`
 	matches = models.Matches{
 		AllUsers: map[uint64]models.User{
 			1: user,
@@ -61,8 +62,27 @@ var (
 		},
 		Count: "2",
 	}
-	usersMapStr     = `{"1":{"id":1,"email":"test@mail.ru"},"2":{"id":2,"email":"test2@mail.ru"}}`
-	matchesCountStr = "2"
+	likes = models.Likes{
+		AllUsers: map[uint64]models.User{
+			1: user,
+			2: user2,
+		},
+		Count: "2",
+	}
+	report1 = models.Report{
+		ReportDesc: "spam",
+	}
+	report2 = models.Report{
+		ReportDesc: "ad",
+	}
+	reports = models.Reports{
+		AllReports: map[uint64]models.Report{
+			1: report1,
+			2: report2,
+		},
+		Count: 2,
+	}
+	reportsMapStr = `{"1":{"reportDesc":"`+ report1.ReportDesc +`"},"2":{"reportDesc":"`+ report2.ReportDesc +`"}}`
 
 	reactionStr = "0"
 	match       = models.Match{Match: true}
@@ -383,7 +403,7 @@ func TestMatches(t *testing.T) {
 				nil,
 			},
 			StatusCode: http.StatusOK,
-			BodyResp:   `{"status":200,"body":{"allUsers":` + usersMapStr + `,"matchesCount":"` + matchesCountStr + `"}}`,
+			BodyResp:   `{"status":200,"body":{"allUsers":` + usersMapStr + `,"matchesCount":"` + matches.Count + `"}}`,
 		},
 		{
 			mockUserUseCase: []interface{}{
@@ -587,6 +607,200 @@ func TestDeletePhoto(t *testing.T) {
 			mock.AnythingOfType("models.Photo")).Return(item.mockUserUseCase...)
 
 		userHandler.DeletePhoto(w, r)
+
+		CheckResponse(t, w, caseNum, item)
+	}
+}
+
+func TestSearchMatches(t *testing.T) {
+	t.Parallel()
+
+	mockUserUseCase := &mocks.UserUsecase{}
+	mockSessionUseCase := &_s.SessionUsecase{}
+
+	userHandler := &UserHandler{
+		Logger:       logger.DripLogger,
+		UserUCase:    mockUserUseCase,
+		SessionUcase: mockSessionUseCase,
+	}
+
+	cases := []TestCase{
+		{
+			BodyReq: bytes.NewReader([]byte(`{"searchTmpl":"search"}`)),
+			mockUserUseCase: []interface{}{
+				matches,
+				nil,
+			},
+			StatusCode: http.StatusOK,
+			BodyResp:   `{"status":200,"body":{"allUsers":{"1":{"id":1,"email":"test@mail.ru"},"2":{"id":2,"email":"test2@mail.ru"}},"matchesCount":"2"}}`,
+		},
+		{
+			BodyReq:    bytes.NewReader([]byte(`wrong input data`)),
+			StatusCode: http.StatusOK,
+			BodyResp:   `{"status":400,"body":null}`,
+		},
+		{
+			BodyReq: bytes.NewReader([]byte(`{"searchTmpl":"search"}`)),
+			mockUserUseCase: []interface{}{
+				matches,
+				errors.New(""),
+			},
+			StatusCode: http.StatusOK,
+			BodyResp:   `{"status":404,"body":null}`,
+		},
+	}
+
+	for caseNum, item := range cases {
+		r := CreateRequest("POST", "/api/v1/matches", item.BodyReq)
+		w := httptest.NewRecorder()
+
+		mockUserUseCase.ExpectedCalls = nil
+		mockUserUseCase.On("UsersMatchesWithSearching",
+			r.Context(),
+			mock.AnythingOfType("models.Search")).Return(item.mockUserUseCase...)
+
+		userHandler.SearchMatchesHandler(w, r)
+
+		CheckResponse(t, w, caseNum, item)
+	}
+}
+
+func TestLikes(t *testing.T) {
+	t.Parallel()
+
+	mockUserUseCase := &mocks.UserUsecase{}
+	mockSessionUseCase := &_s.SessionUsecase{}
+
+	call := mockUserUseCase.On("UserLikes", context.Background())
+
+	userHandler := &UserHandler{
+		Logger:       logger.DripLogger,
+		UserUCase:    mockUserUseCase,
+		SessionUcase: mockSessionUseCase,
+	}
+
+	cases := []TestCase{
+		{
+			mockUserUseCase: []interface{}{
+				likes,
+				nil,
+			},
+			StatusCode: http.StatusOK,
+			BodyResp:   `{"status":200,"body":{"allUsers":` + usersMapStr + `,"likesCount":"` + likes.Count + `"}}`,
+		},
+		{
+			mockUserUseCase: []interface{}{
+				likes,
+				errors.New(""),
+			},
+			StatusCode: http.StatusOK,
+			BodyResp:   `{"status":404,"body":null}`,
+		},
+	}
+
+	for caseNum, item := range cases {
+		call.Return(item.mockUserUseCase...)
+
+		r := httptest.NewRequest("GET", "/api/v1/likes", nil)
+		w := httptest.NewRecorder()
+
+		userHandler.LikesHandler(w, r)
+
+		CheckResponse(t, w, caseNum, item)
+	}
+}
+
+func TestGetAllReports(t *testing.T) {
+	t.Parallel()
+
+	mockUserUseCase := &mocks.UserUsecase{}
+	mockSessionUseCase := &_s.SessionUsecase{}
+
+	call := mockUserUseCase.On("GetAllReports", context.Background())
+
+	userHandler := &UserHandler{
+		Logger:       logger.DripLogger,
+		UserUCase:    mockUserUseCase,
+		SessionUcase: mockSessionUseCase,
+	}
+
+	cases := []TestCase{
+		{
+			mockUserUseCase: []interface{}{
+				reports,
+				nil,
+			},
+			StatusCode: http.StatusOK,
+			BodyResp:   `{"status":200,"body":{"allReports":` + reportsMapStr + `,"reportsCount":2}}`,
+		},
+		{
+			mockUserUseCase: []interface{}{
+				reports,
+				errors.New(""),
+			},
+			StatusCode: http.StatusOK,
+			BodyResp:   `{"status":404,"body":null}`,
+		},
+	}
+
+	for caseNum, item := range cases {
+		call.Return(item.mockUserUseCase...)
+
+		r := httptest.NewRequest("GET", "/api/v1/reports", nil)
+		w := httptest.NewRecorder()
+
+		userHandler.GetAllReports(w, r)
+
+		CheckResponse(t, w, caseNum, item)
+	}
+}
+
+func TestAddReport(t *testing.T) {
+	t.Parallel()
+
+	mockUserUseCase := &mocks.UserUsecase{}
+	mockSessionUseCase := &_s.SessionUsecase{}
+
+	userHandler := &UserHandler{
+		Logger:       logger.DripLogger,
+		UserUCase:    mockUserUseCase,
+		SessionUcase: mockSessionUseCase,
+	}
+
+	cases := []TestCase{
+		{
+			BodyReq: bytes.NewReader([]byte(`{"toId":` + idStr + `,"reportDesc":"` + report1.ReportDesc + `"}`)),
+			mockUserUseCase: []interface{}{
+				nil,
+			},
+			StatusCode: http.StatusOK,
+			BodyResp:   `{"status":200,"body":null}`,
+		},
+		{
+			BodyReq:    bytes.NewReader([]byte(`wrong input data`)),
+			StatusCode: http.StatusOK,
+			BodyResp:   `{"status":400,"body":null}`,
+		},
+		{
+			BodyReq: bytes.NewReader([]byte(`{"toId":` + idStr + `,"reportDesc":"` + report1.ReportDesc + `"}`)),
+			mockUserUseCase: []interface{}{
+				errors.New(""),
+			},
+			StatusCode: http.StatusOK,
+			BodyResp:   `{"status":404,"body":null}`,
+		},
+	}
+
+	for caseNum, item := range cases {
+		r := CreateRequest("POST", "/api/v1/reports", item.BodyReq)
+		w := httptest.NewRecorder()
+
+		mockUserUseCase.ExpectedCalls = nil
+		mockUserUseCase.On("AddReport",
+			r.Context(),
+			mock.AnythingOfType("models.NewReport")).Return(item.mockUserUseCase...)
+
+		userHandler.AddReport(w, r)
 
 		CheckResponse(t, w, caseNum, item)
 	}
