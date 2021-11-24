@@ -27,6 +27,7 @@ func CreateSessionCookie(user models.LoginUser) http.Cookie {
 		Secure:   true,
 		HttpOnly: true,
 		SameSite: http.SameSiteNoneMode,
+		Path:     "/api/v1",
 	}
 
 	return cookie
