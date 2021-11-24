@@ -1,33 +1,33 @@
 {
-    "log_level": "DEBUG",
+    "log_level": "ERROR",
     "server": {
-      "host": "127.0.0.1",
-      "httpPort": ":8000",
-      "certFile": "api.ijia.me.crt",
-      "keyFile": "api.ijia.me.key"
+      "host": "api.monkeys.team",
+      "httpPort": ":443",
+      "certFile": "star.monkeys.team.crt",
+      "keyFile": "star.monkeys.team.key"
     },
     "chat_server": {
-      "host": "127.0.0.1",
-      "httpPort": ":8001",
-      "certFile": "api.ijia.me.crt",
-      "keyFile": "api.ijia.me.key"
+      "host": "api.monkeys.team",
+      "httpPort": ":443",
+      "certFile": "star.monkeys.team.crt",
+      "keyFile": "star.monkeys.team.key"
     },
     "auth_server": {
-      "host": "127.0.0.1",
-      "httpPort": ":8002",
-      "grpcUrl": ":8003",
-      "certFile": "api.ijia.me.crt",
-      "keyFile": "api.ijia.me.key"
+      "host": "api.monkeys.team",
+      "httpPort": ":443",
+      "grpcUrl": "auth_service:8003",
+      "certFile": "star.monkeys.team.crt",
+      "keyFile": "star.monkeys.team.key"
     },
     "database": {
-        "host": "127.0.0.1",
+        "host": "postgres",
         "port": ":5432",
         "user": "admin",
         "pass": "lolkek",
         "name": "drip"
     },
     "session": {
-        "host": "127.0.0.1",
+        "host": "tarantool",
         "port": ":3301",
         "user": "admin",
         "pass": "pass",

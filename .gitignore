@@ -8,6 +8,8 @@ build
 # ssl keys
 api.ijia.me.key
 api.ijia.me.crt
+star.monkeys.team.key
+star.monkeys.team.crt
 
 logs.log
 fmt
