@@ -3,24 +3,24 @@ package usecase
 import (
 	"context"
 	"dripapp/configs"
-	"dripapp/internal/dripapp/models"
+	_sessionModels "dripapp/internal/microservices/auth/models"
 	"errors"
 	"time"
 )
 
 type sessionUsecase struct {
-	Session        models.SessionRepository
+	Session        _sessionModels.SessionRepository
 	contextTimeout time.Duration
 }
 
-func NewSessionUsecase(sess models.SessionRepository, timeout time.Duration) models.SessionUsecase {
+func NewSessionUsecase(sess _sessionModels.SessionRepository, timeout time.Duration) _sessionModels.SessionUsecase {
 	return &sessionUsecase{
 		Session:        sess,
 		contextTimeout: timeout,
 	}
 }
 
-func (s *sessionUsecase) AddSession(c context.Context, session models.Session) error {
+func (s *sessionUsecase) AddSession(c context.Context, session _sessionModels.Session) error {
 	err := s.Session.NewSessionCookie(session.Cookie, session.UserID)
 	if err != nil {
 		return err
@@ -36,7 +36,7 @@ func (s *sessionUsecase) DeleteSession(c context.Context) error {
 	if ctxSession == nil {
 		return errors.New("context nil error")
 	}
-	currentSession, ok := ctxSession.(models.Session)
+	currentSession, ok := ctxSession.(_sessionModels.Session)
 	if !ok {
 		return errors.New("convert to model session error")
 	}

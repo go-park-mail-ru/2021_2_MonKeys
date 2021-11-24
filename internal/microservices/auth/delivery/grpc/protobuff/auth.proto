@@ -6,20 +6,17 @@ option go_package = ".;auth";
 
 
 service AuthGrpcHandler{
-  rpc Login(LoginUser) returns (User);
-  rpc Signup(LoginUser) returns (User);
-  rpc CheckAuth(Cookie) returns (User);
+  rpc GetById(Session) returns (User);
+  rpc GetFromSession(Cookie) returns (Session);
 }
 
 message Cookie{
   string Cookie = 1;
-  uint64 UserID = 2;
 }
 
-message LoginUser{
-  uint64 ID = 1;
-  string Email = 2;
-  string Password = 3;
+message Session{
+  uint64 UserID = 1;
+  string Cookie = 2;
 }
 
 message User{

@@ -4,7 +4,9 @@ import (
 	"context"
 	"dripapp/configs"
 	"dripapp/internal/dripapp/models"
+	_sessionModels "dripapp/internal/microservices/auth/models"
 	"dripapp/internal/pkg/hasher"
+	"fmt"
 	"io"
 	"strconv"
 	"time"
@@ -12,7 +14,7 @@ import (
 
 type userUsecase struct {
 	UserRepo       models.UserRepository
-	Session        models.SessionRepository
+	Session        _sessionModels.SessionRepository
 	File           models.FileRepository
 	contextTimeout time.Duration
 }
@@ -33,6 +35,7 @@ func (h *userUsecase) CurrentUser(c context.Context) (models.User, error) {
 	defer cancel()
 
 	currentUser, ok := ctx.Value(configs.ContextUser).(models.User)
+	fmt.Println(currentUser, ok)
 	if !ok {
 		return models.User{}, models.ErrContextNilError
 	}

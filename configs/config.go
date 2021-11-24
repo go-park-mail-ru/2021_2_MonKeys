@@ -32,7 +32,8 @@ type TarantoolConfig struct {
 
 type ServerConfig struct {
 	Host     string
-	Port     string
+	HttpPort string
+	GrpcUrl  string
 	CertFile string
 	KeyFile  string
 }
@@ -62,6 +63,8 @@ var (
 	Server ServerConfig
 
 	ChatServer ServerConfig
+
+	AuthServer ServerConfig
 
 	FileStorage FileStorageConfig
 
@@ -113,17 +116,25 @@ func SetConfig() {
 	}
 
 	Server = ServerConfig{
-		Port:     viper.GetString(`server.port`),
+		HttpPort: viper.GetString(`server.httpPort`),
 		Host:     viper.GetString(`server.host`),
 		CertFile: viper.GetString(`server.certFile`),
 		KeyFile:  viper.GetString(`server.keyFile`),
 	}
 
 	ChatServer = ServerConfig{
-		Port:     viper.GetString(`chat_server.port`),
+		HttpPort: viper.GetString(`chat_server.httpPort`),
 		Host:     viper.GetString(`chat_server.host`),
 		CertFile: viper.GetString(`chat_server.certFile`),
 		KeyFile:  viper.GetString(`chat_server.keyFile`),
+	}
+
+	AuthServer = ServerConfig{
+		HttpPort: viper.GetString(`auth_server.httpPort`),
+		GrpcUrl:  viper.GetString(`auth_server.grpcUrl`),
+		Host:     viper.GetString(`auth_server.host`),
+		CertFile: viper.GetString(`auth_server.certFile`),
+		KeyFile:  viper.GetString(`auth_server.keyFile`),
 	}
 
 	FileStorage = FileStorageConfig{

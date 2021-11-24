@@ -1,5 +1,6 @@
 MAIN_SERVICE_BINARY=main_service
 CHAT_SERVICE_BINARY=chat_service
+AUTH_SERVICE_BINARY=auth_service
 
 PROJECT_DIR := ${CURDIR}
 
@@ -16,6 +17,7 @@ build-go:
 	go mod tidy
 	go build -o ${MAIN_SERVICE_BINARY} cmd/dripapp/main.go
 	go build -o ${CHAT_SERVICE_BINARY} cmd/chat/main.go
+	go build -o ${AUTH_SERVICE_BINARY} cmd/auth/main.go
 
 ## build-docker: Builds all docker containers
 build-docker:
@@ -23,6 +25,7 @@ build-docker:
 	docker build -t drip_tarantool -f ${DOCKER_DIR}/drip_tarantool.Dockerfile .
 	docker build -t main_service -f ${DOCKER_DIR}/main_service.Dockerfile .
 	docker build -t chat_service -f ${DOCKER_DIR}/chat_service.Dockerfile .
+	docker build -t auth_service -f ${DOCKER_DIR}/chat_service.Dockerfile .
 
 ## test-coverage: get final code coverage
 test-coverage:
@@ -33,10 +36,6 @@ test-coverage:
 
 test:
 	go test ./...
-
-## run-background: run process in background(available after build)
-run-background:
-	docker-compose up --build --no-deps -d
 
 ## linter: linterint all files
 linter:
@@ -61,6 +60,7 @@ deploy-build:
 	docker build -t drip_tarantool -f ${DOCKER_DIR}/drip_tarantool.Dockerfile .
 	docker build -t main_service -f ${DOCKER_DIR}/main_service.Dockerfile .
 	docker build -t chat_service -f ${DOCKER_DIR}/chat_service.Dockerfile .
+	docker build -t auth_service -f ${DOCKER_DIR}/chat_service.Dockerfile .
 
 ## deploy-run: Deploy run app
 deploy-run:
@@ -86,6 +86,9 @@ run:
 
 run-chat:
 	go run cmd/chat/main.go
+
+run-auth:
+	go run cmd/auth/main.go
 
 ## app: Build and run app
 app: build run

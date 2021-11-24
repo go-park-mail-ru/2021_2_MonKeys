@@ -24,6 +24,15 @@ services:
       - tarantool
       - postgres
 
+  auth_service:
+    image: auth_service
+    ports:
+      - "8002:8002"
+      - "8003:8003"
+    depends_on:
+      - tarantool
+      - postgres
+
   tarantool:
     image: "drip_tarantool"
     ports:
