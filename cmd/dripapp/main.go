@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"dripapp/configs"
 	"dripapp/internal/dripapp/file"
 	_fileDelivery "dripapp/internal/dripapp/file/delivery"
@@ -12,10 +13,13 @@ import (
 	_sessionDelivery "dripapp/internal/microservices/auth/delivery/http"
 	_sessionRepo "dripapp/internal/microservices/auth/repository"
 	_sessionUcase "dripapp/internal/microservices/auth/usecase"
+
 	"dripapp/internal/pkg/logger"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	_ "dripapp/docs"
 
@@ -23,53 +27,49 @@ import (
 	"google.golang.org/grpc"
 )
 
-// func createUser(r models.UserRepository, f models.FileRepository, name string) uint64 {
-// 	loginData := models.LoginUser{
-// 		Email:    name + "@mail.ru",
-// 		Password: hasher.HashAndSalt(nil, "qweQWE12"),
-// 	}
-// 	user, err := r.CreateUser(context.Background(), loginData)
-// 	fmt.Println("CreateUser: ", err)
+func createUser(r models.UserRepository, f models.FileRepository, name string) uint64 {
+	loginData := models.LoginUser{
+		Email:    name + "@mail.ru",
+		Password: hasher.HashAndSalt(nil, "qweQWE12"),
+	}
+	user, err := r.CreateUser(context.Background(), loginData)
+	fmt.Println("CreateUser: ", err)
 
-// 	err = f.CreateFoldersForNewUser(user)
-// 	fmt.Println("CreateFoldersForNewUser: ", err)
+	err = f.CreateFoldersForNewUser(user)
+	fmt.Println("CreateFoldersForNewUser: ", err)
 
-// 	userData := models.User{
-// 		ID:          user.ID,
-// 		Email:       user.Email,
-// 		Password:    user.Password,
-// 		Name:        name,
-// 		Gender:      "male",
-// 		FromAge:     18,
-// 		ToAge:       100,
-// 		Date:        "2004-01-02",
-// 		Description: "Всем привет меня зовут" + name,
-// 		Imgs:        []string{"wsx.webp"},
-// 	}
-// 	fmt.Println("FillProfile: ", err)
+	userData := models.User{
+		ID:          user.ID,
+		Email:       user.Email,
+		Password:    user.Password,
+		Name:        name,
+		Gender:      "male",
+		FromAge:     18,
+		ToAge:       100,
+		Date:        "2004-01-02",
+		Description: "Всем привет меня зовут" + name,
+		Imgs:        []string{"wsx.webp"},
+	}
+	fmt.Println("FillProfile: ", err)
 
-// 	_, _ = r.UpdateUser(context.Background(), userData)
+	_, _ = r.UpdateUser(context.Background(), userData)
 
-// 	return user.ID
-// }
+	return user.ID
+}
 
-// func startRepo(r models.UserRepository, cr models.ChatRepository, f models.FileRepository) {
-// 	time.Sleep(3 * time.Second)
+func startRepo(r models.UserRepository, f models.FileRepository) {
+	time.Sleep(3 * time.Second)
 
-// 	userID1 := createUser(r, f, "Ilyagu")
-// 	userID2 := createUser(r, f, "Vova")
-// 	userID3 := createUser(r, f, "Misha")
+	userID1 := createUser(r, f, "Ilyagu")
+	userID2 := createUser(r, f, "Vova")
+	_ = createUser(r, f, "Misha")
 
-// 	// Message
-// 	_, err := cr.SaveMessage(userID1, userID2, "")
-// 	_, err = cr.SaveMessage(userID2, userID1, "")
-// 	_, err = cr.SaveMessage(userID1, userID2, "AAAAAAAAA!")
+	ctx := context.Background()
+	r.AddReaction(ctx, userID1, userID2, 1)
+	//r.AddReaction(ctx, userID2, userID1, 1)
 
-// 	_, err = cr.SaveMessage(userID1, userID3, "")
-// 	_, err = cr.SaveMessage(userID3, userID1, "")
-// 	_, err = cr.SaveMessage(userID1, userID3, "первое сообщение!")
-// 	fmt.Println("SendMessage: ", err)
-// }
+	//fmt.Println("SendMessage: ", err)
+}
 
 func main() {
 	// logfile
@@ -136,7 +136,7 @@ func main() {
 
 	log.Printf("STD starting server at %s\n", srv.Addr)
 
-	// go startRepo(userRepo, chatRepo, fileManager)
+	go startRepo(userRepo, fileManager)
 	// for local
 	log.Fatal(srv.ListenAndServe())
 	// for deploy
