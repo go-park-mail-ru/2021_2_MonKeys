@@ -1,22 +1,23 @@
-drop table if exists matches;
-drop table if exists reactions;
-drop table if exists profile_tag;
-drop table if exists tag;
-drop table if exists profile;
+CREATE extension IF NOT EXISTS citext;
 create table if not exists profile(
   id serial not null primary key,
-  create_time date default now(),
-  update_time date default now(),
-  name varchar(255) default '',
-  email varchar(255) default '',
-  password varchar(255) default '',
-  date varchar(255) default '',
-  description varchar(1000) default '',
-  imgs varchar(255) [] default array [] :: varchar []
+  create_time timestamp default now(),
+  update_time timestamp default now(),
+  email citext,
+  password varchar(100) default '',
+  name varchar(63) default '',
+  gender varchar(15) default '',
+  prefer varchar(15) default '',
+  fromage smallint default 18,
+  toage smallint default 100,
+  date varchar(15) default '',
+  description varchar(1023) default '',
+  imgs varchar(255) [] default array [] :: varchar [],
+  reportstatus varchar(255) default ''
 );
 create table if not exists tag(
   id serial not null primary key,
-  tag_name varchar(255) default ''
+  tagname varchar(255) default ''
 );
 create table if not exists profile_tag(
   id serial not null primary key,
@@ -42,34 +43,59 @@ create table if not exists matches(
   constraint fk_pt_profile1 foreign key (id1) REFERENCES profile (id),
   constraint fk_pt_profile2 foreign key (id2) REFERENCES profile (id)
 );
-insert into
-  tag(tag_name)
-values('anime'),('music'),('gaming'),('sport'),('scince');
+create table message(
+  message_id serial not null primary key,
+  from_id integer,
+  to_id integer,
+  text text default '',
+  date timestamptz default now(),
+  constraint fk_ms_profile1 foreign key (from_id) REFERENCES profile (id),
+  constraint fk_ms_profile2 foreign key (to_id) REFERENCES profile (id)
+);
 
-insert into
-  profile(name, email, password, date, description)
-values('lol1', 'lol1@mail.ru', 'oJnNPGsi805543a8fbee141b373962de3e347822de9ccb8e', '2000-02-20', 'ochen kryto'),
-      ('lol2', 'lol2@mail.ru', 'oJnNPGsi805543a8fbee141b373962de3e347822de9ccb8e', '2000-02-20', 'ochen kryto'),
-      ('lol3', 'lol3@mail.ru', 'oJnNPGsi805543a8fbee141b373962de3e347822de9ccb8e', '2000-02-20', 'ochen kryto'),
-      ('lol4', 'lol4@mail.ru', 'oJnNPGsi805543a8fbee141b373962de3e347822de9ccb8e', '2000-02-20', 'ochen kryto'),
-      ('lol5', 'lol5@mail.ru', 'oJnNPGsi805543a8fbee141b373962de3e347822de9ccb8e', '2000-02-20', 'ochen kryto'),
-      ('lol6', 'lol6@mail.ru', 'oJnNPGsi805543a8fbee141b373962de3e347822de9ccb8e', '2000-02-20', 'ochen kryto'),
-      ('lol7', 'lol7@mail.ru', 'oJnNPGsi805543a8fbee141b373962de3e347822de9ccb8e', '2000-02-20', 'ochen kryto'),
-      ('lol8', 'lol8@mail.ru', 'oJnNPGsi805543a8fbee141b373962de3e347822de9ccb8e', '2000-02-20', 'ochen kryto'),
-      ('lol9', 'lol9@mail.ru', 'oJnNPGsi805543a8fbee141b373962de3e347822de9ccb8e', '2000-02-20', 'ochen kryto'),
-      ('lol10', 'lol10@mail.ru', 'oJnNPGsi805543a8fbee141b373962de3e347822de9ccb8e', '2000-02-20', 'ochen kryto'),
-      ('lol11', 'lol11@mail.ru', 'oJnNPGsi805543a8fbee141b373962de3e347822de9ccb8e', '2000-02-20', 'ochen kryto'),
-      ('lol12', 'lol12@mail.ru', 'oJnNPGsi805543a8fbee141b373962de3e347822de9ccb8e', '2000-02-20', 'ochen kryto'),
-      ('lol13', 'lol13@mail.ru', 'oJnNPGsi805543a8fbee141b373962de3e347822de9ccb8e', '2000-02-20', 'ochen kryto');
+-- message date index
+  create index idx_ms_date on message(date) include (from_id, to_id, text);
 
+create table if not exists reports(
+  id serial not null primary key,
+  reportdesc varchar(255) default ''
+);
+create table if not exists profile_report(
+  id serial not null primary key,
+  profile_id integer,
+  report_id integer,
+  constraint fk_pr_profile foreign key (profile_id) REFERENCES profile (id),
+  constraint fk_pr_report foreign key (report_id) REFERENCES reports (id)
+);
 insert into
-  profile(email, password)
-values('lol4@mail.ru', 'oJnNPGsi805543a8fbee141b373962de3e347822de9ccb8e'),
-      ('lol5@mail.ru', 'oJnNPGsi805543a8fbee141b373962de3e347822de9ccb8e');
+  tag(tagname)
+values('anime'),('music'),('gaming'),('sport'),('science');
+insert into
+  reports(reportdesc)
+values('Фалишивый профиль/спам'),('Непристойное общение'),('Скам'),('Несовершеннолетний пользователь');
 
--- insert into
---   matches(id1, id2)
--- values(1, 2),
---       (2, 1),
---       (1, 3),
---       (3, 2);
+-- foregn keys
+  create index idx_ms_from_id on message(from_id);
+create index idx_ms_to_id on message(to_id);
+create index idx_react_id1 on reactions(id1);
+create index idx_react_id2 on reactions(id2);
+create index idx_match_id1 on matches(id1);
+create index idx_match_id2 on matches(id1);
+create index idx_pt_profile_id on profile_tag(profile_id);
+create index idx_pt_tag_id on profile_tag(tag_id);
+-- lower
+  create unique index uniq_email ON profile(email);
+-- search
+  create index idx_profile_imgs_gin on profile using gin (imgs);
+create or replace function moddatetime()
+returns trigger
+as $$ 
+  begin
+    NEW.update_time = NOW();
+return NEW;
+end;
+$$ language plpgsql;
+create trigger modify_payment_update_time before
+update
+  on profile for each row execute procedure moddatetime();
+vacuum full analyze;

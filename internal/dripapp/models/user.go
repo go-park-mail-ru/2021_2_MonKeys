@@ -2,24 +2,38 @@ package models
 
 import (
 	"context"
-	"dripapp/internal/pkg/hasher"
-	"errors"
 	"io"
-	"strconv"
-	"time"
 )
 
 type User struct {
-	ID          uint64   `json:"id,omitempty"`
-	Name        string   `json:"name,omitempty"`
-	Email       string   `json:"email,omitempty"`
-	Password    string   `json:"-"`
-	Date        string   `json:"date,omitempty"`
-	Age         string   `json:"age,omitempty"`
-	Description string   `json:"description,omitempty"`
-	Imgs        []string `json:"imgs,omitempty"`
-	Tags        []string `json:"tags,omitempty"`
+	ID           uint64   `json:"id,omitempty"`
+	Email        string   `json:"email,omitempty"`
+	Password     string   `json:"-"`
+	Name         string   `json:"name,omitempty"`
+	Gender       string   `json:"gender,omitempty"`
+	Prefer       string   `json:"prefer,omitempty"`
+	FromAge      uint32   `json:"fromage,omitempty"`
+	ToAge        uint32   `json:"toage,omitempty"`
+	Date         string   `json:"date,omitempty"`
+	Age          uint32   `json:"age,omitempty"`
+	Description  string   `json:"description,omitempty"`
+	Imgs         []string `json:"imgs,omitempty"`
+	Tags         []string `json:"tags,omitempty"`
+	ReportStatus string   `json:"reportStatus,omitempty"`
 }
+
+const (
+	LikeReaction    uint64 = 1
+	DislikeReaction uint64 = 2
+)
+
+const (
+	ReportLimit      uint64 = 3
+	FakeReport       string = "Фалишивый профиль/спам"
+	AggressionReport string = "Непристойное общение"
+	SkamReport       string = "Скам"
+	UnderageReport   string = "Несовершеннолетний пользователь"
+)
 
 type LoginUser struct {
 	ID       uint64 `json:"id,omitempty"`
@@ -37,7 +51,7 @@ type Match struct {
 }
 
 type Tag struct {
-	Tag_Name string `json:"tagText"`
+	TagName string `json:"tagText"`
 }
 
 type Tags struct {
@@ -50,56 +64,49 @@ type Matches struct {
 	Count    string          `json:"matchesCount"`
 }
 
-func MakeUser(id uint64, email string, password string) (User, error) {
-	hashedPass := hasher.HashAndSalt(nil, password)
-	return User{ID: id, Email: email, Password: hashedPass}, nil
+type Likes struct {
+	AllUsers map[uint64]User `json:"allUsers"`
+	Count    string          `json:"likesCount"`
 }
 
-func (user User) IsEmpty() bool {
-	return len(user.Email) == 0
+type Search struct {
+	SearchingTmpl string `json:"searchTmpl"`
 }
 
-func GetAgeFromDate(date string) (string, error) {
-	birthday, err := time.Parse("2006-01-02", date)
-	if err != nil {
-		return "", errors.New("failed on userYear")
-	}
-
-	age := uint(time.Now().Year() - birthday.Year())
-	if time.Now().YearDay() < birthday.YearDay() {
-		age -= 1
-	}
-
-	return strconv.Itoa(int(age)), nil
+type Report struct {
+	ReportDesc string `json:"reportDesc"`
 }
 
-func (user *User) FillProfile(newUserData User) (err error) {
-	user.Name = newUserData.Name
-	user.Date = newUserData.Date
-	user.Age, err = GetAgeFromDate(newUserData.Date)
-	if err != nil {
-		return errors.New("failed to save age")
-	}
-	user.Date = newUserData.Date
-	user.Description = newUserData.Description
-	user.Imgs = newUserData.Imgs
-	user.Tags = newUserData.Tags
+type Reports struct {
+	AllReports map[uint64]Report `json:"allReports"`
+	Count      uint64            `json:"reportsCount"`
+}
 
-	return nil
+type NewReport struct {
+	ToId       uint64 `json:"toId"`
+	ReportDesc string `json:"reportDesc"`
+}
+
+type UserReportsCount struct {
+	Count uint64 `json:"userReportsCount"`
 }
 
 // ArticleUsecase represent the article's usecases
 type UserUsecase interface {
-	CurrentUser(c context.Context) (User, HTTPError)
-	EditProfile(c context.Context, newUserData User) (User, HTTPError)
-	AddPhoto(c context.Context, photo io.Reader, fileName string) (Photo, HTTPError)
-	DeletePhoto(c context.Context, photo Photo) HTTPError
-	Login(c context.Context, logUserData LoginUser) (User, HTTPError)
-	Signup(c context.Context, logUserData LoginUser) (User, HTTPError)
-	NextUser(c context.Context) ([]User, HTTPError)
-	GetAllTags(c context.Context) (Tags, HTTPError)
-	UsersMatches(c context.Context) (Matches, HTTPError)
-	Reaction(c context.Context, reactionData UserReaction) (Match, HTTPError)
+	CurrentUser(c context.Context) (User, error)
+	EditProfile(c context.Context, newUserData User) (User, error)
+	AddPhoto(c context.Context, photo io.Reader, fileName string) (Photo, error)
+	DeletePhoto(c context.Context, photo Photo) error
+	Login(c context.Context, logUserData LoginUser) (User, error)
+	Signup(c context.Context, logUserData LoginUser) (User, error)
+	NextUser(c context.Context) ([]User, error)
+	GetAllTags(c context.Context) (Tags, error)
+	UsersMatches(c context.Context) (Matches, error)
+	Reaction(c context.Context, reactionData UserReaction) (Match, error)
+	UserLikes(c context.Context) (Likes, error)
+	UsersMatchesWithSearching(c context.Context, searchData Search) (Matches, error)
+	GetAllReports(c context.Context) (Reports, error)
+	AddReport(c context.Context, report NewReport) error
 }
 
 // ArticleRepository represent the article's repository contract
@@ -111,17 +118,18 @@ type UserRepository interface {
 	GetTags(ctx context.Context) (map[uint64]string, error)
 	UpdateImgs(ctx context.Context, id uint64, imgs []string) error
 	AddReaction(ctx context.Context, currentUserId uint64, swipedUserId uint64, reactionType uint64) error
-	GetNextUserForSwipe(ctx context.Context, currentUserId uint64) ([]User, error)
+	GetNextUserForSwipe(ctx context.Context, currentUser User) ([]User, error)
 	GetUsersMatches(ctx context.Context, currentUserId uint64) ([]User, error)
 	GetLikes(ctx context.Context, currentUserId uint64) ([]uint64, error)
-	DeleteLike(ctx context.Context, firstUser uint64, secondUser uint64) error
+	DeleteReaction(ctx context.Context, firstUser uint64, secondUser uint64) error
+	DeleteMatches(ctx context.Context, firstUser uint64, secondUser uint64) error
 	AddMatch(ctx context.Context, firstUser uint64, secondUser uint64) error
-
-	// CreateUserAndProfile(ctx context.Context, user User) (User, error)
-	// IsSwiped(ctx context.Context, userID, swipedUserID uint64) (bool, error)
-	// CreateTag(ctx context.Context, tag_name string) error
-	// Init() error
-	// DropSwipes(ctx context.Context) error
-	// DropUsers(ctx context.Context) error
-	// DeleteTags(ctx context.Context, userId uint64) error
+	GetUsersLikes(ctx context.Context, currentUserId uint64) ([]User, error)
+	GetUsersMatchesWithSearching(ctx context.Context, currentUserId uint64, searchTmpl string) ([]User, error)
+	GetReports(ctx context.Context) (map[uint64]string, error)
+	AddReport(ctx context.Context, report NewReport) error
+	GetReportsCount(ctx context.Context, userId uint64) (uint64, error)
+	GetReportsWithMaxCount(ctx context.Context, userId uint64) (uint64, error)
+	GetReportDesc(ctx context.Context, reportId uint64) (string, error)
+	UpdateReportStatus(ctx context.Context, userId uint64, reportStatus string) error
 }

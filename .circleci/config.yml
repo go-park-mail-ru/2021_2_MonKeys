@@ -126,5 +126,3 @@ workflows:
       - test-coverage:
           requires:
             - build
-
-            

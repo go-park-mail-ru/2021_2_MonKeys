@@ -5,32 +5,24 @@ import (
 	"dripapp/internal/dripapp/file"
 	_fileDelivery "dripapp/internal/dripapp/file/delivery"
 	"dripapp/internal/dripapp/middleware"
-	"dripapp/internal/dripapp/session"
-	_sessionUcase "dripapp/internal/dripapp/session/usecase"
 	_userDelivery "dripapp/internal/dripapp/user/delivery"
 	_userRepo "dripapp/internal/dripapp/user/repository"
 	_userUsecase "dripapp/internal/dripapp/user/usecase"
-	"dripapp/internal/pkg/logger"
+	_authClient "dripapp/internal/microservices/auth/delivery/grpc/client"
+	_sessionRepo "dripapp/internal/microservices/auth/repository"
+	_sessionUcase "dripapp/internal/microservices/auth/usecase"
 	"log"
+
+	"dripapp/internal/pkg/logger"
 	"net/http"
 	"os"
 
 	_ "dripapp/docs"
 
 	"github.com/gorilla/mux"
+	"google.golang.org/grpc"
 )
 
-// @title Drip API
-// @version 1.0
-// @description API for Drip.
-// @termsOfService http://swagger.io/terms/
-
-// @host api.ijia.me
-// @BasePath /api/v1
-
-// @securityDefinitions.apikey ApiKeyAuth
-// @in header
-// @name Set-Cookie
 func main() {
 	// logfile
 	logFile, err := os.OpenFile("logs.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
@@ -54,16 +46,8 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	// err = userRepo.Init()
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
 
-	// userRepo := _userRepo.NewMockDB()
-	// userRepo.Init()
-	// sm := session.NewSessionDB()
-
-	sm, err := session.NewTarantoolConnection(configs.Tarantool)
+	sm, err := _sessionRepo.NewTarantoolConnection(configs.Tarantool)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -83,23 +67,28 @@ func main() {
 		timeoutContext,
 	)
 
+	// auth client
+	grpcConn, _ := grpc.Dial(configs.AuthServer.GrpcUrl, grpc.WithInsecure())
+	grpcAuthClient := _authClient.NewAuthClient(grpcConn)
+
 	// delivery
-	_userDelivery.SetRouting(logger.DripLogger, router, userUCase, sessionUcase)
+	_userDelivery.SetUserRouting(logger.DripLogger, router, userUCase, sessionUcase, *grpcAuthClient)
+	_fileDelivery.SetFileRouting(router, *fileManager)
 
 	// middleware
-	middleware.NewMiddleware(router, sm, logFile)
-
-	_fileDelivery.SetFileRouting(router, *fileManager)
+	middleware.NewMiddleware(router, sm, logFile, logger.DripLogger)
 
 	srv := &http.Server{
 		Handler:      router,
-		Addr:         configs.Server.Port,
+		Addr:         configs.Server.HttpPort,
 		WriteTimeout: http.DefaultClient.Timeout,
 		ReadTimeout:  http.DefaultClient.Timeout,
 	}
 
 	log.Printf("STD starting server at %s\n", srv.Addr)
 
+	// for local
 	log.Fatal(srv.ListenAndServe())
+	// for deploy
 	// log.Fatal(srv.ListenAndServeTLS(certFile, keyFile))
 }

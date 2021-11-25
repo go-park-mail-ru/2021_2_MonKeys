@@ -5,8 +5,9 @@ import (
 	"context"
 	"dripapp/configs"
 	"dripapp/internal/dripapp/models"
-	_s "dripapp/internal/dripapp/session/mocks"
 	"dripapp/internal/dripapp/user/mocks"
+	_authClient "dripapp/internal/microservices/auth/delivery/grpc/client"
+	_s "dripapp/internal/microservices/auth/mocks"
 	"dripapp/internal/pkg/logger"
 	"errors"
 	"io"
@@ -16,17 +17,12 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/stretchr/testify/mock"
-)
-
-const (
-	correctCase = iota + 1
-	wrongCase
+	"google.golang.org/grpc"
 )
 
 type TestCase struct {
 	BodyReq         io.Reader
 	mockUserUseCase []interface{}
-	mockSessUseCase []interface{}
 	StatusCode      int
 	BodyResp        string
 }
@@ -49,24 +45,44 @@ var (
 
 	tags = models.Tags{
 		AllTags: map[uint64]models.Tag{
-			1: {Tag_Name: "chill"},
-			2: {Tag_Name: "sport"},
-			3: {Tag_Name: "music"},
+			1: {TagName: "chill"},
+			2: {TagName: "sport"},
+			3: {TagName: "music"},
 		},
 		Count: 3,
 	}
 	tagsMapStr   = `{"1":{"tagText":"chill"},"2":{"tagText":"sport"},"3":{"tagText":"music"}}`
 	tagsCountStr = "3"
 
-	matches = models.Matches{
+	usersMapStr = `{"1":{"id":1,"email":"test@mail.ru"},"2":{"id":2,"email":"test2@mail.ru"}}`
+	matches     = models.Matches{
 		AllUsers: map[uint64]models.User{
 			1: user,
 			2: user2,
 		},
 		Count: "2",
 	}
-	usersMapStr     = `{"1":{"id":1,"email":"test@mail.ru"},"2":{"id":2,"email":"test2@mail.ru"}}`
-	matchesCountStr = "2"
+	likes = models.Likes{
+		AllUsers: map[uint64]models.User{
+			1: user,
+			2: user2,
+		},
+		Count: "2",
+	}
+	report1 = models.Report{
+		ReportDesc: "spam",
+	}
+	report2 = models.Report{
+		ReportDesc: "ad",
+	}
+	reports = models.Reports{
+		AllReports: map[uint64]models.Report{
+			1: report1,
+			2: report2,
+		},
+		Count: 2,
+	}
+	reportsMapStr = `{"1":{"reportDesc":"` + report1.ReportDesc + `"},"2":{"reportDesc":"` + report2.ReportDesc + `"}}`
 
 	reactionStr = "0"
 	match       = models.Match{Match: true}
@@ -92,144 +108,9 @@ func CheckResponse(t *testing.T, w *httptest.ResponseRecorder, caseNum int, test
 
 func CreateRequest(method, target string, body io.Reader) (r *http.Request) {
 	r = httptest.NewRequest(method, target, body)
-	r = r.WithContext(context.WithValue(r.Context(), configs.ForContext, models.Session{
-		UserID: 0,
-		Cookie: "",
-	}))
+	r = r.WithContext(context.WithValue(r.Context(), configs.ContextUser, models.User{}))
 
 	return
-}
-
-func TestCurrentUser(t *testing.T) {
-	t.Parallel()
-
-	mockUserUseCase := &mocks.UserUsecase{}
-	mockSessionUseCase := &_s.SessionUsecase{}
-
-	call := mockUserUseCase.On("CurrentUser", context.Background())
-
-	userHandler := &UserHandler{
-		Logger:       logger.DripLogger,
-		UserUCase:    mockUserUseCase,
-		SessionUcase: mockSessionUseCase,
-	}
-
-	cases := []TestCase{
-		{
-			mockUserUseCase: []interface{}{
-				user,
-				models.StatusOk200,
-			},
-			StatusCode: http.StatusOK,
-			BodyResp:   `{"status":200,"body":{"id":` + idStr + `,"email":"` + email + `"}}`,
-		},
-		{
-			mockUserUseCase: []interface{}{
-				models.User{},
-				models.HTTPError{
-					Code:    http.StatusNotFound,
-					Message: models.ErrContextNilError,
-				},
-			},
-			StatusCode: http.StatusOK,
-			BodyResp:   `{"status":404,"body":null}`,
-		},
-	}
-
-	for caseNum, item := range cases {
-		call.Return(item.mockUserUseCase...)
-
-		r := httptest.NewRequest("GET", "/api/v1/currentuser", nil)
-		w := httptest.NewRecorder()
-
-		userHandler.CurrentUser(w, r)
-
-		CheckResponse(t, w, caseNum, item)
-	}
-}
-
-func TestSignup(t *testing.T) {
-	t.Parallel()
-
-	mockUserUseCase := &mocks.UserUsecase{}
-	mockSessionUseCase := &_s.SessionUsecase{}
-
-	userHandler := &UserHandler{
-		Logger:       logger.DripLogger,
-		UserUCase:    mockUserUseCase,
-		SessionUcase: mockSessionUseCase,
-	}
-
-	cases := []TestCase{
-		{
-			BodyReq: bytes.NewReader([]byte(`{"email":"` + email + `","password":"` + password + `"}`)),
-			mockUserUseCase: []interface{}{
-				user,
-				models.StatusOk200,
-			},
-			mockSessUseCase: []interface{}{
-				nil,
-			},
-			StatusCode: http.StatusOK,
-			BodyResp:   `{"status":200,"body":{"id":` + idStr + `,"email":"` + email + `"}}`,
-		},
-		{
-			BodyReq: bytes.NewReader([]byte(`wrong input data`)),
-			mockUserUseCase: []interface{}{
-				user,
-				models.StatusOk200,
-			},
-			mockSessUseCase: []interface{}{
-				nil,
-			},
-			StatusCode: http.StatusOK,
-			BodyResp:   `{"status":400,"body":null}`,
-		},
-		{
-			BodyReq: bytes.NewReader([]byte(`{"email":"wrongEmail","password":"wrongPassword"}`)),
-			mockUserUseCase: []interface{}{
-				models.User{},
-				models.HTTPError{
-					Code: models.StatusEmailAlreadyExists,
-				},
-			},
-			mockSessUseCase: []interface{}{
-				nil,
-			},
-			StatusCode: http.StatusOK,
-			BodyResp:   `{"status":1001,"body":null}`,
-		},
-		{
-			BodyReq: bytes.NewReader([]byte(`{"email":"` + email + `","password":"` + password + `"}`)),
-			mockUserUseCase: []interface{}{
-				user,
-				models.StatusOk200,
-			},
-			mockSessUseCase: []interface{}{
-				errors.New("session already exists"),
-			},
-			StatusCode: http.StatusOK,
-			BodyResp:   `{"status":500,"body":null}`,
-		},
-	}
-
-	for caseNum, item := range cases {
-		r := CreateRequest("POST", "/api/v1/signup", item.BodyReq)
-		w := httptest.NewRecorder()
-
-		mockUserUseCase.ExpectedCalls = nil
-		mockUserUseCase.On("Signup",
-			r.Context(),
-			mock.AnythingOfType("models.LoginUser")).Return(item.mockUserUseCase...)
-		mockSessionUseCase.ExpectedCalls = nil
-		mockSessionUseCase.On("AddSession",
-			r.Context(),
-			mock.AnythingOfType("models.Session")).Return(item.mockSessUseCase...)
-
-		userHandler.SignupHandler(w, r)
-
-		CheckResponse(t, w, caseNum, item)
-	}
 }
 
 func TestNextUser(t *testing.T) {
@@ -248,7 +129,7 @@ func TestNextUser(t *testing.T) {
 		{
 			mockUserUseCase: []interface{}{
 				[]models.User{user},
-				models.StatusOk200,
+				nil,
 			},
 			StatusCode: http.StatusOK,
 			BodyResp:   `{"status":200,"body":[{"id":` + idStr + `,"email":"` + email + `"}]}`,
@@ -256,7 +137,7 @@ func TestNextUser(t *testing.T) {
 		{
 			mockUserUseCase: []interface{}{
 				[]models.User{},
-				models.HTTPError{Code: http.StatusNotFound},
+				errors.New(""),
 			},
 			StatusCode: http.StatusOK,
 			BodyResp:   `{"status":404,"body":null}`,
@@ -293,7 +174,7 @@ func TestEditProfile(t *testing.T) {
 			BodyReq: bytes.NewReader([]byte(`{"email":"` + email + `","password":"` + password + `"}`)),
 			mockUserUseCase: []interface{}{
 				user,
-				models.StatusOk200,
+				nil,
 			},
 			StatusCode: http.StatusOK,
 			BodyResp:   `{"status":200,"body":{"id":` + idStr + `,"email":"` + email + `"}}`,
@@ -307,10 +188,10 @@ func TestEditProfile(t *testing.T) {
 			BodyReq: bytes.NewReader([]byte(`{"name":"testEdit","date":"wrong-format-data","description":"Description Description Description Description","imgSrc":"/img/testEdit/","tags":["Tags","Tags","Tags","Tags","Tags"]}`)),
 			mockUserUseCase: []interface{}{
 				models.User{},
-				models.HTTPError{Code: http.StatusBadRequest},
+				errors.New(""),
 			},
 			StatusCode: http.StatusOK,
-			BodyResp:   `{"status":400,"body":null}`,
+			BodyResp:   `{"status":404,"body":null}`,
 		},
 	}
 
@@ -347,7 +228,7 @@ func TestGetAllTags(t *testing.T) {
 		{
 			mockUserUseCase: []interface{}{
 				tags,
-				models.StatusOk200,
+				nil,
 			},
 			StatusCode: http.StatusOK,
 			BodyResp:   `{"status":200,"body":{"allTags":` + tagsMapStr + `,"tagsCount":` + tagsCountStr + `}}`,
@@ -355,9 +236,7 @@ func TestGetAllTags(t *testing.T) {
 		{
 			mockUserUseCase: []interface{}{
 				models.Tags{},
-				models.HTTPError{
-					Code: http.StatusNotFound,
-				},
+				errors.New(""),
 			},
 			StatusCode: http.StatusOK,
 			BodyResp:   `{"status":404,"body":null}`,
@@ -394,17 +273,15 @@ func TestMatches(t *testing.T) {
 		{
 			mockUserUseCase: []interface{}{
 				matches,
-				models.StatusOk200,
+				nil,
 			},
 			StatusCode: http.StatusOK,
-			BodyResp:   `{"status":200,"body":{"allUsers":` + usersMapStr + `,"matchesCount":"` + matchesCountStr + `"}}`,
+			BodyResp:   `{"status":200,"body":{"allUsers":` + usersMapStr + `,"matchesCount":"` + matches.Count + `"}}`,
 		},
 		{
 			mockUserUseCase: []interface{}{
 				models.Matches{},
-				models.HTTPError{
-					Code: http.StatusNotFound,
-				},
+				errors.New(""),
 			},
 			StatusCode: http.StatusOK,
 			BodyResp:   `{"status":404,"body":null}`,
@@ -440,7 +317,7 @@ func TestReaction(t *testing.T) {
 			BodyReq: bytes.NewReader([]byte(`{"id":` + idStr + `,"reaction":` + reactionStr + `}`)),
 			mockUserUseCase: []interface{}{
 				match,
-				models.StatusOk200,
+				nil,
 			},
 			StatusCode: http.StatusOK,
 			BodyResp:   `{"status":200,"body":{"match":` + matchStr + `}}`,
@@ -449,7 +326,7 @@ func TestReaction(t *testing.T) {
 			BodyReq: bytes.NewReader([]byte(`{"id":` + idStr + `,"reaction":` + reactionStr + `}`)),
 			mockUserUseCase: []interface{}{
 				notMatch,
-				models.StatusOk200,
+				nil,
 			},
 			StatusCode: http.StatusOK,
 			BodyResp:   `{"status":200,"body":{"match":` + notMatchStr + `}}`,
@@ -463,7 +340,7 @@ func TestReaction(t *testing.T) {
 			BodyReq: bytes.NewReader([]byte(`{"id":` + idStr + `,"reaction":` + reactionStr + `}`)),
 			mockUserUseCase: []interface{}{
 				models.Match{},
-				models.HTTPError{Code: http.StatusNotFound},
+				errors.New(""),
 			},
 			StatusCode: http.StatusOK,
 			BodyResp:   `{"status":404,"body":null}`,
@@ -503,11 +380,10 @@ func TestUploadPhoto(t *testing.T) {
 Content-Disposition: form-data; name="photo"; filename="photo.jpg"
 Content-Type: image/jpeg
 
-
 ------boundary--`)),
 			mockUserUseCase: []interface{}{
 				photo,
-				models.StatusOk200,
+				nil,
 			},
 			StatusCode: http.StatusOK,
 			BodyResp:   `{"status":200,"body":{"photo":"` + photo.Path + `"}}`,
@@ -522,7 +398,6 @@ Content-Type: image/jpeg
 Content-Disposition: form-data; name="wrong name"; filename="photo.jpg"
 Content-Type: image/jpeg
 
-
 ------boundary--`)),
 			StatusCode: http.StatusOK,
 			BodyResp:   `{"status":400,"body":null}`,
@@ -532,11 +407,10 @@ Content-Type: image/jpeg
 Content-Disposition: form-data; name="photo"; filename="photo.jpg"
 Content-Type: image/jpeg
 
-
 ------boundary--`)),
 			mockUserUseCase: []interface{}{
 				models.Photo{},
-				models.HTTPError{Code: http.StatusInternalServerError},
+				errors.New(""),
 			},
 			StatusCode: http.StatusOK,
 			BodyResp:   `{"status":500,"body":null}`,
@@ -576,7 +450,7 @@ func TestDeletePhoto(t *testing.T) {
 		{
 			BodyReq: bytes.NewReader([]byte(`{"photo":"` + photo.Path + `"}`)),
 			mockUserUseCase: []interface{}{
-				models.StatusOk200,
+				nil,
 			},
 			StatusCode: http.StatusOK,
 			BodyResp:   `{"status":200,"body":null}`,
@@ -589,10 +463,10 @@ func TestDeletePhoto(t *testing.T) {
 		{
 			BodyReq: bytes.NewReader([]byte(`{"photo":"` + photo.Path + `"}`)),
 			mockUserUseCase: []interface{}{
-				models.HTTPError{Code: http.StatusBadRequest},
+				errors.New(""),
 			},
 			StatusCode: http.StatusOK,
-			BodyResp:   `{"status":400,"body":null}`,
+			BodyResp:   `{"status":404,"body":null}`,
 		},
 	}
 
@@ -611,9 +485,205 @@ func TestDeletePhoto(t *testing.T) {
 	}
 }
 
-func TestSetRouting(t *testing.T) {
+func TestSearchMatches(t *testing.T) {
+	t.Parallel()
+
 	mockUserUseCase := &mocks.UserUsecase{}
 	mockSessionUseCase := &_s.SessionUsecase{}
 
-	SetRouting(logger.DripLogger, mux.NewRouter(), mockUserUseCase, mockSessionUseCase)
+	userHandler := &UserHandler{
+		Logger:       logger.DripLogger,
+		UserUCase:    mockUserUseCase,
+		SessionUcase: mockSessionUseCase,
+	}
+
+	cases := []TestCase{
+		{
+			BodyReq: bytes.NewReader([]byte(`{"searchTmpl":"search"}`)),
+			mockUserUseCase: []interface{}{
+				matches,
+				nil,
+			},
+			StatusCode: http.StatusOK,
+			BodyResp:   `{"status":200,"body":{"allUsers":{"1":{"id":1,"email":"test@mail.ru"},"2":{"id":2,"email":"test2@mail.ru"}},"matchesCount":"2"}}`,
+		},
+		{
+			BodyReq:    bytes.NewReader([]byte(`wrong input data`)),
+			StatusCode: http.StatusOK,
+			BodyResp:   `{"status":400,"body":null}`,
+		},
+		{
+			BodyReq: bytes.NewReader([]byte(`{"searchTmpl":"search"}`)),
+			mockUserUseCase: []interface{}{
+				matches,
+				errors.New(""),
+			},
+			StatusCode: http.StatusOK,
+			BodyResp:   `{"status":404,"body":null}`,
+		},
+	}
+
+	for caseNum, item := range cases {
+		r := CreateRequest("POST", "/api/v1/matches", item.BodyReq)
+		w := httptest.NewRecorder()
+
+		mockUserUseCase.ExpectedCalls = nil
+		mockUserUseCase.On("UsersMatchesWithSearching",
+			r.Context(),
+			mock.AnythingOfType("models.Search")).Return(item.mockUserUseCase...)
+
+		userHandler.SearchMatchesHandler(w, r)
+
+		CheckResponse(t, w, caseNum, item)
+	}
+}
+
+func TestLikes(t *testing.T) {
+	t.Parallel()
+
+	mockUserUseCase := &mocks.UserUsecase{}
+	mockSessionUseCase := &_s.SessionUsecase{}
+
+	call := mockUserUseCase.On("UserLikes", context.Background())
+
+	userHandler := &UserHandler{
+		Logger:       logger.DripLogger,
+		UserUCase:    mockUserUseCase,
+		SessionUcase: mockSessionUseCase,
+	}
+
+	cases := []TestCase{
+		{
+			mockUserUseCase: []interface{}{
+				likes,
+				nil,
+			},
+			StatusCode: http.StatusOK,
+			BodyResp:   `{"status":200,"body":{"allUsers":` + usersMapStr + `,"likesCount":"` + likes.Count + `"}}`,
+		},
+		{
+			mockUserUseCase: []interface{}{
+				likes,
+				errors.New(""),
+			},
+			StatusCode: http.StatusOK,
+			BodyResp:   `{"status":404,"body":null}`,
+		},
+	}
+
+	for caseNum, item := range cases {
+		call.Return(item.mockUserUseCase...)
+
+		r := httptest.NewRequest("GET", "/api/v1/likes", nil)
+		w := httptest.NewRecorder()
+
+		userHandler.LikesHandler(w, r)
+
+		CheckResponse(t, w, caseNum, item)
+	}
+}
+
+func TestGetAllReports(t *testing.T) {
+	t.Parallel()
+
+	mockUserUseCase := &mocks.UserUsecase{}
+	mockSessionUseCase := &_s.SessionUsecase{}
+
+	call := mockUserUseCase.On("GetAllReports", context.Background())
+
+	userHandler := &UserHandler{
+		Logger:       logger.DripLogger,
+		UserUCase:    mockUserUseCase,
+		SessionUcase: mockSessionUseCase,
+	}
+
+	cases := []TestCase{
+		{
+			mockUserUseCase: []interface{}{
+				reports,
+				nil,
+			},
+			StatusCode: http.StatusOK,
+			BodyResp:   `{"status":200,"body":{"allReports":` + reportsMapStr + `,"reportsCount":2}}`,
+		},
+		{
+			mockUserUseCase: []interface{}{
+				reports,
+				errors.New(""),
+			},
+			StatusCode: http.StatusOK,
+			BodyResp:   `{"status":404,"body":null}`,
+		},
+	}
+
+	for caseNum, item := range cases {
+		call.Return(item.mockUserUseCase...)
+
+		r := httptest.NewRequest("GET", "/api/v1/reports", nil)
+		w := httptest.NewRecorder()
+
+		userHandler.GetAllReports(w, r)
+
+		CheckResponse(t, w, caseNum, item)
+	}
+}
+
+func TestAddReport(t *testing.T) {
+	t.Parallel()
+
+	mockUserUseCase := &mocks.UserUsecase{}
+	mockSessionUseCase := &_s.SessionUsecase{}
+
+	userHandler := &UserHandler{
+		Logger:       logger.DripLogger,
+		UserUCase:    mockUserUseCase,
+		SessionUcase: mockSessionUseCase,
+	}
+
+	cases := []TestCase{
+		{
+			BodyReq: bytes.NewReader([]byte(`{"toId":` + idStr + `,"reportDesc":"` + report1.ReportDesc + `"}`)),
+			mockUserUseCase: []interface{}{
+				nil,
+			},
+			StatusCode: http.StatusOK,
+			BodyResp:   `{"status":200,"body":null}`,
+		},
+		{
+			BodyReq:    bytes.NewReader([]byte(`wrong input data`)),
+			StatusCode: http.StatusOK,
+			BodyResp:   `{"status":400,"body":null}`,
+		},
+		{
+			BodyReq: bytes.NewReader([]byte(`{"toId":` + idStr + `,"reportDesc":"` + report1.ReportDesc + `"}`)),
+			mockUserUseCase: []interface{}{
+				errors.New(""),
+			},
+			StatusCode: http.StatusOK,
+			BodyResp:   `{"status":404,"body":null}`,
+		},
+	}
+
+	for caseNum, item := range cases {
+		r := CreateRequest("POST", "/api/v1/reports", item.BodyReq)
+		w := httptest.NewRecorder()
+
+		mockUserUseCase.ExpectedCalls = nil
+		mockUserUseCase.On("AddReport",
+			r.Context(),
+			mock.AnythingOfType("models.NewReport")).Return(item.mockUserUseCase...)
+
+		userHandler.AddReport(w, r)
+
+		CheckResponse(t, w, caseNum, item)
+	}
+}
+
+func TestSetRouting(t *testing.T) {
+	mockUserUseCase := &mocks.UserUsecase{}
+	mockSessionUseCase := &_s.SessionUsecase{}
+	grpcConn, _ := grpc.Dial(configs.AuthServer.GrpcUrl, grpc.WithInsecure())
+	grpcAuthClient := _authClient.NewAuthClient(grpcConn)
+
+	SetUserRouting(logger.DripLogger, mux.NewRouter(), mockUserUseCase, mockSessionUseCase, *grpcAuthClient)
 }

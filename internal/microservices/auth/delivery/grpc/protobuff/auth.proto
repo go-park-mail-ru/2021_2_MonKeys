@@ -1,0 +1,37 @@
+//protoc --go_out=plugins=grpc:. *.proto
+syntax = "proto3";
+import "google/protobuf/timestamp.proto";
+package auth;
+option go_package = ".;auth";
+
+
+service AuthGrpcHandler{
+  rpc GetById(Session) returns (User);
+  rpc GetFromSession(Cookie) returns (Session);
+}
+
+message Cookie{
+  string Cookie = 1;
+}
+
+message Session{
+  uint64 UserID = 1;
+  string Cookie = 2;
+}
+
+message User{
+    uint64 ID = 1;
+    string Email = 2;
+    string Password = 3;
+    string Name = 4;
+    string Gender = 5;
+    string Prefer = 6;
+    uint32 FromAge = 7;
+    uint32 ToAge = 8;
+    string Date = 9;
+    uint32 Age = 10;
+    string Description = 11;
+    repeated string Imgs = 12;
+    repeated string Tags = 13;
+    string ReportStatus = 14;
+}

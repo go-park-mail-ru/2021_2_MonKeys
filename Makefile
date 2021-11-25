@@ -1,4 +1,6 @@
 MAIN_SERVICE_BINARY=main_service
+CHAT_SERVICE_BINARY=chat_service
+AUTH_SERVICE_BINARY=auth_service
 
 PROJECT_DIR := ${CURDIR}
 
@@ -7,66 +9,106 @@ DOCKER_DIR := ${CURDIR}/docker
 ## install-dependencies: Install docker
 install-dependencies:
 	sudo apt install docker.io
+	sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+	sudo chmod +x /usr/local/bin/docker-compose
 
 ## build-go: Build compiles project
 build-go:
-	go mod tidy
 	go build -o ${MAIN_SERVICE_BINARY} cmd/dripapp/main.go
-
-## build-docker: Builds all docker containers
-build-docker:
-	docker build -t dependencies -f ${DOCKER_DIR}/builder.Dockerfile .
-	docker build -t drip_tarantool -f ${DOCKER_DIR}/drip_tarantool.Dockerfile .
-	docker build -t main_service -f ${DOCKER_DIR}/main_service.Dockerfile .
+	go build -o ${CHAT_SERVICE_BINARY} cmd/chat/main.go
+	go build -o ${AUTH_SERVICE_BINARY} cmd/auth/main.go
 
 ## test-coverage: get final code coverage
 test-coverage:
-	go test -coverprofile=coverage.out.tmp ./...
-	go tool cover -html=coverage.out.tmp
+	go test -coverprofile=coverage.out.tmp -coverpkg=./...  ./...
+	cat coverage.out.tmp | grep -v mock > coverage2.out.tmp
+	cat coverage2.out.tmp | grep -v cmd > coverage.out.tmp
+	go tool cover -func=coverage.out.tmp
+	go tool cover -html=coverage.out.tmp -o cover.html
 
-## test: launch all tests
+## test: test code
 test:
-	go test -coverprofile=coverage.out.tmp ./...
-
-## run-background: run process in background(available after build)
-run-background:
-	docker-compose up --build --no-deps -d
+	go test ./...
 
 ## linter: linterint all files
 linter:
 	go get github.com/golangci/golangci-lint/cmd/golangci-lint@v1.42.1
-	go run github.com/golangci/golangci-lint/cmd/golangci-lint run ./... --disable unused --disable deadcode
+	go run github.com/golangci/golangci-lint/cmd/golangci-lint run ./... --disable unused
 	go mod tidy
 
-## build: Build and start docker with new changes
-build:
+## clean: Clean all volumes, containers, media folders  and log files
+clean:
+	sudo service postgresql stop
 	docker rm -vf $$(docker ps -a -q) || true
+	sudo rm -rf media
+	sudo rm -rf logs.log
+	docker volume prune
+
+clean-deploy:
+	docker-compose rm postgres
+	docker rm -vf $$(docker ps -a -q) || true
+	sudo rm -rf media
+	sudo rm -rf logs.log
+	docker volume prune
+
+##################################### deploy
+
+## deploy-build: Deply build and start docker with new changes
+build:
+	cat prod.json > config.json
 	docker build -t dependencies -f ${DOCKER_DIR}/builder.Dockerfile .
 	docker build -t drip_tarantool -f ${DOCKER_DIR}/drip_tarantool.Dockerfile .
 	docker build -t main_service -f ${DOCKER_DIR}/main_service.Dockerfile .
+	docker build -t chat_service -f ${DOCKER_DIR}/chat_service.Dockerfile .
+	docker build -t auth_service -f ${DOCKER_DIR}/auth_service.Dockerfile .
 
-## run: Run app
-run:
-# docker-compose up --build --no-deps
-	docker-compose up --build --no-deps -d
-	go run cmd/dripapp/main.go
+## deploy-run: Deploy run app on background
+deploy-run:
+	docker-compose -f prod.yml up --build --no-deps -d
 
-## app: Build and run app
-app:
-# build run
-	docker rm -vf $$(docker ps -a -q) || true
-# rm -rf media
+## deploy: Deploy build and run app
+deploy: build deploy-run
+
+## redeploy: Deploy build and run app with clean
+redeploy: clean-deploy build deploy-run
+
+######################################## local
+
+local-build:
+	cat local.json > config.json
+	docker build -t dependencies -f ${DOCKER_DIR}/builder.Dockerfile .
 	docker build -t drip_tarantool -f ${DOCKER_DIR}/drip_tarantool.Dockerfile .
-	docker-compose up --build --no-deps -d
+	docker build -t main_service -f ${DOCKER_DIR}/main_service.Dockerfile .
+	docker build -t chat_service -f ${DOCKER_DIR}/chat_service.Dockerfile .
+	docker build -t auth_service -f ${DOCKER_DIR}/auth_service.Dockerfile .
+
+## deploy-run: Deploy run app on background
+local-run:
+	docker-compose -f local.yml up --build --no-deps
+
+local: local-build local-run
+
+relocal: clean local-build local-run
+
+######################################## debug
+
+## build: Build and start docker with new changes
+debug:
+	cat debug.json > config.json
+	docker build -t drip_tarantool -f ${DOCKER_DIR}/drip_tarantool.Dockerfile .
+	docker-compose -f debug.yml up --build --no-deps -d
+
+run-dripapp:
 	go run cmd/dripapp/main.go
 
-down:
-	docker-compose down
+run-chat:
+	go run cmd/chat/main.go
 
-## get: get all dependencies
-get:
-	go mod tidy
-	go get ./...
+run-auth:
+	go run cmd/auth/main.go
+
+## redebug: Build and debug app with clean
+redebug:clean debug
 
 .PHONY: help
 all: help

@@ -6,9 +6,15 @@ import (
 	"dripapp/internal/pkg/hasher"
 	"errors"
 	"fmt"
+	"image"
+	"image/gif"
+	"image/jpeg"
+	"image/png"
 	"io"
 	"os"
 	"strings"
+
+	"github.com/chai2010/webp"
 
 	uuid "github.com/nu7hatch/gouuid"
 )
@@ -16,6 +22,12 @@ import (
 type FileManager struct {
 	RootFolder  string
 	PhotoFolder string
+}
+
+type Image struct {
+	img     image.Image
+	gif     *gif.GIF
+	imgType string
 }
 
 func NewFileManager(config configs.FileStorageConfig) (fm *FileManager, err error) {
@@ -57,24 +69,19 @@ func (fm FileManager) CreateFoldersForNewUser(user models.User) error {
 }
 
 func (fm FileManager) SaveUserPhoto(user models.User, file io.Reader, fileName string) (path string, err error) {
-	fileType, err := getFileType(fileName)
+	img, err := decodeImg(file, fileName)
 	if err != nil {
 		return
 	}
 
-	err = validImgType(fileType)
+	newPhoto, err := getNewFilename()
 	if err != nil {
 		return
 	}
 
-	newPhoto, err := createNameToNewPhoto(fileType)
-	if err != nil {
-		return
-	}
+	path = fmt.Sprintf("%s/%s.webp", fm.getPathToUserPhoto(user), newPhoto)
 
-	path = fmt.Sprintf("%s/%s", fm.getPathToUserPhoto(user), newPhoto)
-
-	err = fm.save(path, file)
+	err = img.saveAsWebp(path)
 	return
 }
 
@@ -86,14 +93,14 @@ func (FileManager) createFolder(title string) error {
 	return os.Mkdir(title, os.ModePerm)
 }
 
-func (FileManager) save(path string, file io.Reader) error {
-	saved, err := os.Create(path)
+func (FileManager) save(file io.Reader, path string) error {
+	fileOnDisk, err := os.Create(path)
 	if err != nil {
 		return err
 	}
-	defer saved.Close()
+	defer fileOnDisk.Close()
 
-	_, err = io.Copy(saved, file)
+	_, err = io.Copy(fileOnDisk, file)
 	if err != nil {
 		return err
 	}
@@ -117,13 +124,13 @@ func getFileType(fileName string) (string, error) {
 	return strings.ToLower(fileType), nil
 }
 
-func createNameToNewPhoto(fileType string) (string, error) {
+func getNewFilename() (string, error) {
 	u, err := uuid.NewV4()
 	if err != nil {
 		return "", err
 	}
 
-	return fmt.Sprintf("%s.%s", u.String(), fileType), nil
+	return u.String(), nil
 }
 
 func (FileManager) isNotExists(path string) (bool, error) {
@@ -139,13 +146,51 @@ func (FileManager) isNotExists(path string) (bool, error) {
 	return false, err
 }
 
-func validImgType(fileType string) error {
-	if fileType != "png" &&
-		fileType != "jpg" &&
-		fileType != "jpeg" &&
-		fileType != "gif" {
-		return errors.New("wrong file type")
+func decodeImg(file io.Reader, fileName string) (img Image, err error) {
+	fileType, err := getFileType(fileName)
+	if err != nil {
+		return
+	}
+
+	switch fileType {
+	case "jpeg":
+		img.img, err = jpeg.Decode(file)
+	case "jpg":
+		img.img, err = jpeg.Decode(file)
+	case "png":
+		img.img, err = png.Decode(file)
+	case "gif":
+		img.gif, err = gif.DecodeAll(file)
+	case "webp":
+		img.img, err = webp.Decode(file)
+	default:
+		err = errors.New("Unsupported file type")
+	}
+
+	img.imgType = fileType
+
+	return
+}
+
+func (img Image) saveAsWebp(path string) error {
+	fileOnDisk, err := os.Create(path)
+	if err != nil {
+		return err
+	}
+	defer fileOnDisk.Close()
+
+	if img.imgType == "gif" {
+		err = gif.EncodeAll(fileOnDisk, img.gif)
+	} else {
+		err = webp.Encode(fileOnDisk, img.img, nil)
+	}
+	if err != nil {
+		return err
 	}
 
 	return nil
+}
+
+func (img Image) getType() string {
+	return img.imgType
 }

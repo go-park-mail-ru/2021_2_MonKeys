@@ -22,47 +22,10 @@ import (
 
 func TestUserUsecase_CurrentUser(t *testing.T) {
 	type TestCase struct {
-		userSession models.Session
-		err         models.HTTPError
-	}
-	testCases := []TestCase{
-		// Test OK
-		{
-			userSession: models.Session{
-				UserID: 0,
-				Cookie: "",
-			},
-			err: models.StatusOk200,
-		},
-		// Test ErrorNotFound
-		{
-			userSession: models.Session{
-				UserID: 1,
-				Cookie: "",
-			},
-			err: models.HTTPError{
-				Code:    http.StatusNotFound,
-				Message: "",
-			},
-		},
-		// Test ErrContextNilError
-		{
-			userSession: models.Session{
-				UserID: 2,
-				Cookie: "",
-			},
-			err: models.HTTPError{
-				Code:    http.StatusNotFound,
-				Message: models.ErrContextNilError,
-			},
-		},
-	}
-
-	type MockResultCase struct {
 		user models.User
 		err  error
 	}
-	MockResultCases := []MockResultCase{
+	testCases := []TestCase{
 		// Test OK
 		{
 			user: models.User{
@@ -77,336 +40,17 @@ func TestUserUsecase_CurrentUser(t *testing.T) {
 			},
 			err: nil,
 		},
-		// Test ErrorNotFound
+		// // Test ErrContextNilError
 		{
-			user: models.User{},
-			err:  errors.New(""),
-		},
-		// Test ErrContextNilError
-		{
-			user: models.User{},
-			err:  nil,
-		},
-	}
-
-	for i, testCase := range testCases {
-		message := fmt.Sprintf("test case number: %d", i)
-
-		r, err := http.NewRequest(http.MethodGet, "test", nil)
-		assert.NoError(t, err)
-		if testCase.userSession.UserID != 2 {
-			r = r.WithContext(context.WithValue(r.Context(), configs.ForContext, testCase.userSession))
-		}
-
-		mockUserRepository := new(userMocks.UserRepository)
-		mockUserRepository.On("GetUserByID",
-			r.Context(),
-			mock.AnythingOfType("uint64")).Return(MockResultCases[i].user, MockResultCases[i].err)
-		mockFileRepository := new(fileMocks.FileRepository)
-
-		testUserUsecase := usecase.NewUserUsecase(mockUserRepository, mockFileRepository, time.Second*2)
-		user, status := testUserUsecase.CurrentUser(r.Context())
-
-		assert.Equal(t, testCase.err, status, message)
-		reflect.DeepEqual(MockResultCases[i].user, user)
-
-	}
-}
-
-func TestUserUsecase_EditProfile(t *testing.T) {
-	type TestCase struct {
-		userSession models.Session
-		err         models.HTTPError
-	}
-	testCases := []TestCase{
-		// Test OK
-		{
-			userSession: models.Session{
-				UserID: 0,
-				Cookie: "",
+			user: models.User{
+				ID: 2,
 			},
-			err: models.StatusOk200,
-		},
-		// Test ErrorNotFound
-		{
-			userSession: models.Session{
-				UserID: 1,
-				Cookie: "",
-			},
-			err: models.HTTPError{
-				Code:    http.StatusNotFound,
-				Message: "",
-			},
-		},
-		// Test ErrContextNilError
-		{
-			userSession: models.Session{
-				UserID: 2,
-				Cookie: "",
-			},
-			err: models.HTTPError{
-				Code:    http.StatusNotFound,
-				Message: models.ErrContextNilError,
-			},
-		},
-		// Test ErrFailedToSaveAge
-		{
-			userSession: models.Session{
-				UserID: 0,
-				Cookie: "",
-			},
-			err: models.HTTPError{
-				Code:    http.StatusBadRequest,
-				Message: ("failed to save age"),
-			},
-		},
-		// Test ErrUpdateUser
-		{
-			userSession: models.Session{
-				UserID: 0,
-				Cookie: "",
-			},
-			err: models.HTTPError{
-				Code:    http.StatusInternalServerError,
-				Message: "",
-			},
-		},
-		// Test ErrFailedToSaveAgeNewProfile
-		{
-			userSession: models.Session{
-				UserID: 0,
-				Cookie: "",
-			},
-			err: models.HTTPError{
-				Code:    http.StatusBadRequest,
-				Message: ("failed to save age"),
-			},
+			err: models.ErrContextNilError,
 		},
 	}
 
 	type MockResultCase struct {
-		oldUser   models.User
-		newUser   models.User
-		errFirst  error
-		errSecond error
-	}
-	MockResultCases := []MockResultCase{
-		// Test OK
-		{
-			oldUser: models.User{
-				ID:          0,
-				Name:        "Drip",
-				Email:       "drip@app.com",
-				Password:    "hahaha",
-				Date:        "2001-02-22",
-				Description: "vsem privet",
-				Imgs:        []string{"1", "2"},
-				Tags:        []string{"anime", "BMSTU"},
-			},
-			newUser: models.User{
-				ID:          0,
-				Name:        "DripDrip",
-				Email:       "drip@app.ru",
-				Password:    "hahahahi",
-				Date:        "2001-02-22",
-				Age:         "19",
-				Description: "vsem poka",
-				Imgs:        []string{"1", "5"},
-				Tags:        []string{"anime"},
-			},
-			errFirst:  nil,
-			errSecond: nil,
-		},
-		// Test ErrorNotFound
-		{
-			oldUser:   models.User{},
-			newUser:   models.User{},
-			errFirst:  errors.New(""),
-			errSecond: errors.New(""),
-		},
-		// Test ErrContextNilError
-		{
-			oldUser:   models.User{},
-			newUser:   models.User{},
-			errFirst:  nil,
-			errSecond: nil,
-		},
-		// Test ErrFailedToSaveAge
-		{
-			oldUser: models.User{
-				ID:          0,
-				Name:        "Drip",
-				Email:       "drip@app.com",
-				Password:    "hahaha",
-				Date:        "22-02-2001",
-				Description: "vsem privet",
-				Imgs:        []string{"1", "2"},
-				Tags:        []string{"anime", "BMSTU"},
-			},
-			newUser: models.User{
-				ID:          0,
-				Name:        "DripDrip",
-				Email:       "drip@app.ru",
-				Password:    "hahahahi",
-				Date:        "22-02-2001",
-				Age:         "19",
-				Description: "vsem poka",
-				Imgs:        []string{"1", "5"},
-				Tags:        []string{"anime"},
-			},
-			errFirst:  nil,
-			errSecond: nil,
-		},
-		// Test ErrUpdateUser
-		{
-			oldUser: models.User{
-				ID:          0,
-				Name:        "Drip",
-				Email:       "drip@app.com",
-				Password:    "hahaha",
-				Date:        "2000-02-22",
-				Description: "vsem privet",
-				Imgs:        []string{"1", "2"},
-				Tags:        []string{"anime", "BMSTU"},
-			},
-			newUser: models.User{
-				ID:          0,
-				Name:        "DripDrip",
-				Email:       "drip@app.ru",
-				Password:    "hahahahi",
-				Date:        "2001-02-22",
-				Age:         "19",
-				Description: "vsem poka",
-				Imgs:        []string{"1", "5"},
-				Tags:        []string{"anime"},
-			},
-			errFirst:  nil,
-			errSecond: errors.New(""),
-		},
-		// Test ErrFailedToSaveAgeNewProfile
-		{
-			oldUser: models.User{
-				ID:          0,
-				Name:        "Drip",
-				Email:       "drip@app.com",
-				Password:    "hahaha",
-				Date:        "2000-02-22",
-				Description: "vsem privet",
-				Imgs:        []string{"1", "2"},
-				Tags:        []string{"anime", "BMSTU"},
-			},
-			newUser: models.User{
-				ID:          0,
-				Name:        "DripDrip",
-				Email:       "drip@app.ru",
-				Password:    "hahahahi",
-				Date:        "22-02-2001",
-				Age:         "19",
-				Description: "vsem poka",
-				Imgs:        []string{"1", "5"},
-				Tags:        []string{"anime"},
-			},
-			errFirst:  nil,
-			errSecond: nil,
-		},
-	}
-
-	for i, testCase := range testCases {
-		message := fmt.Sprintf("test case number: %d", i)
-
-		r, err := http.NewRequest(http.MethodGet, "test", nil)
-		assert.NoError(t, err)
-		if testCase.userSession.UserID != 2 {
-			r = r.WithContext(context.WithValue(r.Context(), configs.ForContext, testCase.userSession))
-		}
-
-		mockUserRepository := new(userMocks.UserRepository)
-		mockUserRepository.On("GetUserByID",
-			r.Context(),
-			mock.AnythingOfType("uint64")).Return(MockResultCases[i].oldUser, MockResultCases[i].errFirst)
-		mockUserRepository.On("UpdateUser",
-			r.Context(),
-			mock.AnythingOfType("models.User")).Return(MockResultCases[i].newUser, MockResultCases[i].errSecond)
-		mockFileRepository := new(fileMocks.FileRepository)
-
-		testUserUsecase := usecase.NewUserUsecase(mockUserRepository, mockFileRepository, time.Second*2)
-
-		user, status := testUserUsecase.EditProfile(r.Context(), MockResultCases[i].newUser)
-
-		assert.Equal(t, testCase.err, status, message)
-		reflect.DeepEqual(MockResultCases[i].newUser, user)
-
-	}
-}
-
-func TestUserUsecase_AddPhoto(t *testing.T) {
-	type TestCase struct {
-		userSession models.Session
-		path        string
-		err         models.HTTPError
-	}
-	testCases := []TestCase{
-		// Test OK
-		{
-			userSession: models.Session{
-				UserID: 0,
-				Cookie: "",
-			},
-			path: "",
-			err:  models.StatusOk200,
-		},
-		// Test ErrorNotFound
-		{
-			userSession: models.Session{
-				UserID: 1,
-				Cookie: "",
-			},
-			err: models.HTTPError{
-				Code:    http.StatusNotFound,
-				Message: "",
-			},
-		},
-		// Test ErrContextNilError
-		{
-			userSession: models.Session{
-				UserID: 2,
-				Cookie: "",
-			},
-			err: models.HTTPError{
-				Code:    http.StatusNotFound,
-				Message: models.ErrContextNilError,
-			},
-		},
-		// Test ErrSaveUserPhoto
-		{
-			userSession: models.Session{
-				UserID: 0,
-				Cookie: "",
-			},
-			err: models.HTTPError{
-				Code:    http.StatusInternalServerError,
-				Message: "",
-			},
-		},
-		// Test ErrUpdateImgs
-		{
-			userSession: models.Session{
-				UserID: 0,
-				Cookie: "",
-			},
-			err: models.HTTPError{
-				Code:    http.StatusInternalServerError,
-				Message: "",
-			},
-		},
-	}
-
-	type MockResultCase struct {
-		user          models.User
-		path          string
-		errGetUser    error
-		errSavePhoto  error
-		errUpdateImgs error
+		user models.User
 	}
 	MockResultCases := []MockResultCase{
 		// Test OK
@@ -421,36 +65,218 @@ func TestUserUsecase_AddPhoto(t *testing.T) {
 				Imgs:        []string{"1", "2"},
 				Tags:        []string{"anime", "BMSTU"},
 			},
+		},
+		// Test ErrContextNilError
+		{
+			user: models.User{
+				ID: 2,
+			},
+		},
+	}
+
+	for i, testCase := range testCases {
+		message := fmt.Sprintf("test case number: %d", i)
+
+		r, err := http.NewRequest(http.MethodGet, "test", nil)
+		assert.NoError(t, err)
+		if testCase.user.ID != 2 {
+			r = r.WithContext(context.WithValue(r.Context(), configs.ContextUser, testCase.user))
+		}
+
+		mockUserRepository := new(userMocks.UserRepository)
+		mockFileRepository := new(fileMocks.FileRepository)
+
+		testUserUsecase := usecase.NewUserUsecase(mockUserRepository, mockFileRepository, time.Second*2)
+		user, status := testUserUsecase.CurrentUser(r.Context())
+
+		assert.Equal(t, testCase.err, status, message)
+		reflect.DeepEqual(MockResultCases[i].user, user)
+
+	}
+}
+
+func TestUserUsecase_EditProfile(t *testing.T) {
+	type TestCase struct {
+		user models.User
+		err  error
+	}
+	testCases := []TestCase{
+		// Test OK
+		{
+			user: models.User{
+				ID: 0,
+			},
+			err: nil,
+		},
+		// Test ErrorNotFound
+		{
+			user: models.User{
+				ID: 1,
+			},
+			err: errors.New("failed on userYear"),
+		},
+		// Test ErrContextNilError
+		{
+			user: models.User{
+				ID: 2,
+			},
+			err: models.ErrContextNilError,
+		},
+		// Test ErrUpdateUser
+		{
+			user: models.User{
+				ID: 0,
+			},
+			err: errors.New(""),
+		},
+	}
+
+	type MockResultCase struct {
+		newUser models.User
+		err     error
+	}
+	MockResultCases := []MockResultCase{
+		// Test OK
+		{
+			newUser: models.User{
+				ID:          1,
+				Name:        "DripDrip",
+				Email:       "drip@app.ru",
+				Password:    "hahahahi",
+				Date:        "2001-02-22",
+				Age:         19,
+				Description: "vsem poka",
+				Imgs:        []string{"1", "5"},
+				Tags:        []string{"anime"},
+			},
+			err: nil,
+		},
+		// Test ErrorNotFound
+		{
+			newUser: models.User{},
+			err:     errors.New("failed on userYear"),
+		},
+		// Test ErrContextNilError
+		{
+			newUser: models.User{},
+			err:     nil,
+		},
+		// Test ErrUpdateUser
+		{
+			newUser: models.User{
+				ID:          0,
+				Name:        "DripDrip",
+				Email:       "drip@app.ru",
+				Password:    "hahahahi",
+				Date:        "2001-02-22",
+				Age:         19,
+				Description: "vsem poka",
+				Imgs:        []string{"1", "5"},
+				Tags:        []string{"anime"},
+			},
+			err: errors.New(""),
+		},
+	}
+
+	for i, testCase := range testCases {
+		message := fmt.Sprintf("test case number: %d", i)
+
+		r, err := http.NewRequest(http.MethodGet, "test", nil)
+		assert.NoError(t, err)
+		if testCase.user.ID != 2 {
+			r = r.WithContext(context.WithValue(r.Context(), configs.ContextUser, testCase.user))
+		}
+
+		mockUserRepository := new(userMocks.UserRepository)
+		mockUserRepository.On("UpdateUser",
+			r.Context(),
+			mock.AnythingOfType("models.User")).Return(MockResultCases[i].newUser, MockResultCases[i].err)
+		mockFileRepository := new(fileMocks.FileRepository)
+
+		testUserUsecase := usecase.NewUserUsecase(mockUserRepository, mockFileRepository, time.Second*2)
+
+		user, status := testUserUsecase.EditProfile(r.Context(), MockResultCases[i].newUser)
+
+		assert.Equal(t, testCase.err, status, message)
+		reflect.DeepEqual(MockResultCases[i].newUser, user)
+
+	}
+}
+
+func TestUserUsecase_AddPhoto(t *testing.T) {
+	type TestCase struct {
+		user models.User
+		path string
+		err  error
+	}
+	testCases := []TestCase{
+		// Test OK
+		{
+			user: models.User{
+				ID: 1,
+			},
+			path: "",
+			err:  nil,
+		},
+		// Test ErrorNotFound
+		{
+			user: models.User{
+				ID: 1,
+			},
+			err: nil,
+		},
+		// Test ErrContextNilError
+		{
+			user: models.User{
+				ID: 2,
+			},
+			err: models.ErrContextNilError,
+		},
+		// Test ErrSaveUserPhoto
+		{
+			user: models.User{
+				ID: 0,
+			},
+			err: errors.New(""),
+		},
+		// Test ErrUpdateImgs
+		{
+			user: models.User{
+				ID: 0,
+			},
+			err: errors.New(""),
+		},
+	}
+
+	type MockResultCase struct {
+		path          string
+		errSavePhoto  error
+		errUpdateImgs error
+	}
+	MockResultCases := []MockResultCase{
+		// Test OK
+		{
 			path:          "",
-			errGetUser:    nil,
 			errSavePhoto:  nil,
 			errUpdateImgs: nil,
 		},
 		// Test ErrorNotFound
 		{
-			user:          models.User{},
-			errGetUser:    errors.New(""),
 			errSavePhoto:  nil,
 			errUpdateImgs: nil,
 		},
 		// Test ErrContextNilError
 		{
-			user:          models.User{},
-			errGetUser:    nil,
 			errSavePhoto:  nil,
 			errUpdateImgs: nil,
 		},
 		// Test ErrSaveUserPhoto
 		{
-			user:          models.User{},
-			errGetUser:    nil,
 			errSavePhoto:  errors.New(""),
 			errUpdateImgs: nil,
 		},
 		// Test ErrUpdateImgs
 		{
-			user:          models.User{},
-			errGetUser:    nil,
 			errSavePhoto:  nil,
 			errUpdateImgs: errors.New(""),
 		},
@@ -467,14 +293,11 @@ Content-Type: image/jpeg
 		r, err := http.NewRequest("POST", "test", body)
 		assert.NoError(t, err)
 		r.Header.Add("Content-type", "multipart/form-data; boundary=----boundary")
-		if testCase.userSession.UserID != 2 {
-			r = r.WithContext(context.WithValue(r.Context(), configs.ForContext, testCase.userSession))
+		if testCase.user.ID != 2 {
+			r = r.WithContext(context.WithValue(r.Context(), configs.ContextUser, testCase.user))
 		}
 
 		mockUserRepository := new(userMocks.UserRepository)
-		mockUserRepository.On("GetUserByID",
-			r.Context(),
-			mock.AnythingOfType("uint64")).Return(MockResultCases[i].user, MockResultCases[i].errGetUser)
 		mockUserRepository.On("UpdateImgs",
 			r.Context(),
 			mock.AnythingOfType("uint64"),
@@ -501,168 +324,107 @@ Content-Type: image/jpeg
 
 func TestUserUsecase_DeletePhoto(t *testing.T) {
 	type TestCase struct {
-		userSession models.Session
-		photo       models.Photo
-		err         models.HTTPError
+		user  models.User
+		photo models.Photo
+		err   error
 	}
 	testCases := []TestCase{
 		// Test OK
 		{
-			userSession: models.Session{
-				UserID: 0,
-				Cookie: "",
+			user: models.User{
+				ID:          1,
+				Name:        "Drip",
+				Email:       "drip@app.com",
+				Password:    "hahaha",
+				Date:        "2000-02-22",
+				Description: "vsem privet",
+				Imgs:        []string{"1", "2"},
+				Tags:        []string{"anime", "BMSTU"},
 			},
 			photo: models.Photo{
-				Path: "",
+				Path: "1",
 			},
-			err: models.StatusOk200,
-		},
-		// Test ErrorNotFound
-		{
-			userSession: models.Session{
-				UserID: 1,
-				Cookie: "",
-			},
-			photo: models.Photo{},
-			err: models.HTTPError{
-				Code:    http.StatusNotFound,
-				Message: "",
-			},
+			err: nil,
 		},
 		// Test ErrContextNilError
 		{
-			userSession: models.Session{
-				UserID: 2,
-				Cookie: "",
+			user: models.User{
+				ID: 2,
 			},
 			photo: models.Photo{},
-			err: models.HTTPError{
-				Code:    http.StatusNotFound,
-				Message: models.ErrContextNilError,
-			},
+			err:   models.ErrContextNilError,
 		},
 		// Test ErrDelete
 		{
-			userSession: models.Session{
-				UserID: 0,
-				Cookie: "",
+			user: models.User{
+				ID:          0,
+				Name:        "Drip",
+				Email:       "drip@app.com",
+				Password:    "hahaha",
+				Date:        "2000-02-22",
+				Description: "vsem privet",
+				Imgs:        []string{"1", "2"},
+				Tags:        []string{"anime", "BMSTU"},
 			},
 			photo: models.Photo{
 				Path: "",
 			},
-			err: models.HTTPError{
-				Code:    http.StatusInternalServerError,
-				Message: "",
-			},
+			err: errors.New(""),
 		},
 		// Test ErrUpdateImgs
 		{
-			userSession: models.Session{
-				UserID: 0,
-				Cookie: "",
+			user: models.User{
+				ID:          0,
+				Name:        "Drip",
+				Email:       "drip@app.com",
+				Password:    "hahaha",
+				Date:        "2000-02-22",
+				Description: "vsem privet",
+				Imgs:        []string{"1", "2"},
+				Tags:        []string{"anime", "BMSTU"},
 			},
 			photo: models.Photo{
 				Path: "",
 			},
-			err: models.HTTPError{
-				Code:    http.StatusInternalServerError,
-				Message: "",
-			},
+			err: errors.New(""),
 		},
 		// Test ErrDeletePhoto
 		{
-			userSession: models.Session{
-				UserID: 0,
-				Cookie: "",
-			},
+			user: models.User{},
 			photo: models.Photo{
 				Path: "",
 			},
-			err: models.HTTPError{
-				Code:    http.StatusBadRequest,
-				Message: "user does not have such a photo",
-			},
+			err: errors.New("user does not have such a photo"),
 		},
 	}
 
 	type MockResultCase struct {
-		user          models.User
-		path          string
-		errGetUser    error
 		errDelete     error
 		errUpdateImgs error
 	}
 	MockResultCases := []MockResultCase{
 		// Test OK
 		{
-			user: models.User{
-				ID:          0,
-				Name:        "Drip",
-				Email:       "drip@app.com",
-				Password:    "hahaha",
-				Date:        "2000-02-22",
-				Description: "vsem privet",
-				Imgs:        []string{"1", "2"},
-				Tags:        []string{"anime", "BMSTU"},
-			},
-			path:          "",
-			errGetUser:    nil,
-			errDelete:     nil,
-			errUpdateImgs: nil,
-		},
-		// Test ErrorNotFound
-		{
-			user:          models.User{},
-			errGetUser:    errors.New(""),
 			errDelete:     nil,
 			errUpdateImgs: nil,
 		},
 		// Test ErrContextNilError
 		{
-			user:          models.User{},
-			errGetUser:    nil,
 			errDelete:     nil,
 			errUpdateImgs: nil,
 		},
 		// Test ErrDelete
 		{
-			user: models.User{
-				ID:          0,
-				Name:        "Drip",
-				Email:       "drip@app.com",
-				Password:    "hahaha",
-				Date:        "2000-02-22",
-				Description: "vsem privet",
-				Imgs:        []string{"1", "2"},
-				Tags:        []string{"anime", "BMSTU"},
-			},
-			path:          "",
-			errGetUser:    nil,
 			errDelete:     errors.New(""),
 			errUpdateImgs: nil,
 		},
 		// Test ErrUpdateImgs
 		{
-			user: models.User{
-				ID:          0,
-				Name:        "Drip",
-				Email:       "drip@app.com",
-				Password:    "hahaha",
-				Date:        "2000-02-22",
-				Description: "vsem privet",
-				Imgs:        []string{"1", "2"},
-				Tags:        []string{"anime", "BMSTU"},
-			},
-			path:          "",
-			errGetUser:    nil,
 			errDelete:     nil,
 			errUpdateImgs: errors.New(""),
 		},
 		// Test ErrDeletePhoto
 		{
-			user:          models.User{},
-			path:          "",
-			errGetUser:    nil,
 			errDelete:     nil,
 			errUpdateImgs: nil,
 		},
@@ -679,14 +441,11 @@ Content-Type: image/jpeg
 		r, err := http.NewRequest("POST", "test", body)
 		assert.NoError(t, err)
 		r.Header.Add("Content-type", "multipart/form-data; boundary=----boundary")
-		if testCase.userSession.UserID != 2 {
-			r = r.WithContext(context.WithValue(r.Context(), configs.ForContext, testCase.userSession))
+		if testCase.user.ID != 2 {
+			r = r.WithContext(context.WithValue(r.Context(), configs.ContextUser, testCase.user))
 		}
 
 		mockUserRepository := new(userMocks.UserRepository)
-		mockUserRepository.On("GetUserByID",
-			r.Context(),
-			mock.AnythingOfType("uint64")).Return(MockResultCases[i].user, MockResultCases[i].errGetUser)
 		mockUserRepository.On("UpdateImgs",
 			r.Context(),
 			mock.AnythingOfType("uint64"),
@@ -705,15 +464,13 @@ Content-Type: image/jpeg
 
 func TestUserUsecase_Login(t *testing.T) {
 	type TestCase struct {
-		userSession models.Session
 		logUserData models.LoginUser
 		user        models.User
-		err         models.HTTPError
+		err         error
 	}
 	testCases := []TestCase{
 		// Test OK
 		{
-			userSession: models.Session{},
 			logUserData: models.LoginUser{
 				ID:       0,
 				Email:    "drip@app.com",
@@ -728,35 +485,27 @@ func TestUserUsecase_Login(t *testing.T) {
 				Description: "vsem privet",
 				Imgs:        []string{"1", "2"},
 				Tags:        []string{"anime", "BMSTU"}},
-			err: models.StatusOk200,
+			err: nil,
 		},
 		// Test ErrorNotFoundEmail
 		{
-			userSession: models.Session{},
 			logUserData: models.LoginUser{
 				ID:       0,
 				Email:    "drip@app.ru",
 				Password: "VBif222!",
 			},
 			user: models.User{},
-			err: models.HTTPError{
-				Code:    http.StatusNotFound,
-				Message: "",
-			},
+			err:  errors.New(""),
 		},
 		// Test ErrorNotFoundPassword
 		{
-			userSession: models.Session{},
 			logUserData: models.LoginUser{
 				ID:       0,
 				Email:    "drip@app.com",
 				Password: "VBif222!!",
 			},
 			user: models.User{},
-			err: models.HTTPError{
-				Code:    http.StatusNotFound,
-				Message: "",
-			},
+			err:  models.ErrMismatch,
 		},
 	}
 
@@ -804,7 +553,6 @@ func TestUserUsecase_Login(t *testing.T) {
 
 		r, err := http.NewRequest(http.MethodGet, "test", nil)
 		assert.NoError(t, err)
-		r = r.WithContext(context.WithValue(r.Context(), configs.ForContext, testCase.userSession))
 
 		mockUserRepository := new(userMocks.UserRepository)
 		mockUserRepository.On("GetUser",
@@ -821,18 +569,15 @@ func TestUserUsecase_Login(t *testing.T) {
 
 	}
 }
-
 func TestUserUsecase_Signup(t *testing.T) {
 	type TestCase struct {
-		userSession models.Session
 		logUserData models.LoginUser
 		user        models.User
-		err         models.HTTPError
+		err         error
 	}
 	testCases := []TestCase{
 		// Test OK
 		{
-			userSession: models.Session{},
 			logUserData: models.LoginUser{
 				ID:       0,
 				Email:    "drip@app.com",
@@ -848,25 +593,20 @@ func TestUserUsecase_Signup(t *testing.T) {
 				Imgs:        []string{"1", "2"},
 				Tags:        []string{"anime", "BMSTU"},
 			},
-			err: models.StatusOk200,
+			err: nil,
 		},
 		// Test ErrEmailAlreadyExists
 		{
-			userSession: models.Session{},
 			logUserData: models.LoginUser{
 				ID:       0,
 				Email:    "drip@app.com",
 				Password: "VBif222!",
 			},
 			user: models.User{},
-			err: models.HTTPError{
-				Code:    models.StatusEmailAlreadyExists,
-				Message: "",
-			},
+			err:  models.ErrEmailAlreadyExists,
 		},
 		// Test ErrCreateUser
 		{
-			userSession: models.Session{},
 			logUserData: models.LoginUser{
 				ID:       0,
 				Email:    "drip@app.com",
@@ -882,14 +622,10 @@ func TestUserUsecase_Signup(t *testing.T) {
 				Imgs:        []string{"1", "2"},
 				Tags:        []string{"anime", "BMSTU"},
 			},
-			err: models.HTTPError{
-				Code:    http.StatusInternalServerError,
-				Message: "",
-			},
+			err: errors.New(""),
 		},
 		// Test ErrCreateFolder
 		{
-			userSession: models.Session{},
 			logUserData: models.LoginUser{
 				ID:       0,
 				Email:    "drip@app.com",
@@ -905,10 +641,7 @@ func TestUserUsecase_Signup(t *testing.T) {
 				Imgs:        []string{"1", "2"},
 				Tags:        []string{"anime", "BMSTU"},
 			},
-			err: models.HTTPError{
-				Code:    http.StatusInternalServerError,
-				Message: "",
-			},
+			err: errors.New(""),
 		},
 	}
 
@@ -1004,26 +737,31 @@ func TestUserUsecase_Signup(t *testing.T) {
 
 		testUserUsecase := usecase.NewUserUsecase(mockUserRepository, mockFileRepository, time.Second*2)
 
-		user, status := testUserUsecase.Signup(r.Context(), testCase.logUserData)
+		user, err := testUserUsecase.Signup(r.Context(), testCase.logUserData)
 
-		assert.Equal(t, testCase.err, status, message)
+		assert.Equal(t, testCase.err, err, message)
 		reflect.DeepEqual(testCase.user, user)
-
 	}
 }
 
 func TestUserUsecase_NextUser(t *testing.T) {
 	type TestCase struct {
-		userSession models.Session
-		nextUsers   []models.User
-		err         models.HTTPError
+		user      models.User
+		nextUsers []models.User
+		err       error
 	}
 	testCases := []TestCase{
 		// Test OK
 		{
-			userSession: models.Session{
-				UserID: 0,
-				Cookie: "",
+			user: models.User{
+				ID:          0,
+				Name:        "Drip",
+				Email:       "drip@app.com",
+				Password:    "hahaha",
+				Date:        "2000-02-22",
+				Description: "vsem privet",
+				Imgs:        []string{"1", "2"},
+				Tags:        []string{"anime", "BMSTU"},
 			},
 			nextUsers: []models.User{
 				{
@@ -1032,7 +770,7 @@ func TestUserUsecase_NextUser(t *testing.T) {
 					Email:       "drip@app.ru",
 					Password:    "hah",
 					Date:        "2001-02-22",
-					Age:         "19",
+					Age:         19,
 					Description: "vsem privet",
 					Imgs:        []string{"4", "3"},
 					Tags:        []string{"BMSTU"},
@@ -1043,7 +781,7 @@ func TestUserUsecase_NextUser(t *testing.T) {
 					Email:       "dr@app.ru",
 					Password:    "hah",
 					Date:        "2000-02-22",
-					Age:         "20",
+					Age:         20,
 					Description: "em privet",
 					Imgs:        []string{"4", "3"},
 					Tags:        []string{"JS"},
@@ -1054,71 +792,52 @@ func TestUserUsecase_NextUser(t *testing.T) {
 					Email:       "p@app.ru",
 					Password:    "ah",
 					Date:        "2001-02-22",
-					Age:         "19",
+					Age:         19,
 					Description: "vs privet",
 					Imgs:        []string{"3"},
 					Tags:        []string{"BMSTU"},
 				},
 			},
-			err: models.StatusOk200,
+			err: nil,
 		},
 		// Test ErrorNotFound
 		{
-			userSession: models.Session{
-				UserID: 1,
-				Cookie: "",
-			},
+			user:      models.User{},
 			nextUsers: nil,
-			err: models.HTTPError{
-				Code:    http.StatusNotFound,
-				Message: "",
-			},
+			err:       nil,
 		},
 		// Test ErrContextNilError
 		{
-			userSession: models.Session{
-				UserID: 2,
-				Cookie: "",
+			user: models.User{
+				ID: 2,
 			},
 			nextUsers: nil,
-			err: models.HTTPError{
-				Code:    http.StatusNotFound,
-				Message: models.ErrContextNilError,
-			},
+			err:       models.ErrContextNilError,
 		},
 		// Test ErrGetNextUserForSwipe
 		{
-			userSession: models.Session{
-				UserID: 0,
-				Cookie: "",
+			user: models.User{
+				ID:          0,
+				Name:        "Drip",
+				Email:       "drip@app.com",
+				Password:    "hahaha",
+				Date:        "2000-02-22",
+				Description: "vsem privet",
+				Imgs:        []string{"1", "2"},
+				Tags:        []string{"anime", "BMSTU"},
 			},
 			nextUsers: nil,
-			err: models.HTTPError{
-				Code:    http.StatusNotFound,
-				Message: models.ErrContextNilError,
-			},
+			err:       errors.New(""),
 		},
 	}
 
 	type MockResultCase struct {
-		user            models.User
 		nextUsers       []models.User
-		errGetUser      error
 		errGetNextUsers error
 	}
 	MockResultCases := []MockResultCase{
 		// Test OK
 		{
-			user: models.User{
-				ID:          0,
-				Name:        "Drip",
-				Email:       "drip@app.com",
-				Password:    "hahaha",
-				Date:        "2000-02-22",
-				Description: "vsem privet",
-				Imgs:        []string{"1", "2"},
-				Tags:        []string{"anime", "BMSTU"},
-			},
 			nextUsers: []models.User{
 				{
 					ID:          1,
@@ -1126,7 +845,7 @@ func TestUserUsecase_NextUser(t *testing.T) {
 					Email:       "drip@app.ru",
 					Password:    "hah",
 					Date:        "2001-02-22",
-					Age:         "19",
+					Age:         19,
 					Description: "vsem privet",
 					Imgs:        []string{"4", "3"},
 					Tags:        []string{"BMSTU"},
@@ -1137,7 +856,7 @@ func TestUserUsecase_NextUser(t *testing.T) {
 					Email:       "dr@app.ru",
 					Password:    "hah",
 					Date:        "2000-02-22",
-					Age:         "20",
+					Age:         20,
 					Description: "em privet",
 					Imgs:        []string{"4", "3"},
 					Tags:        []string{"JS"},
@@ -1148,41 +867,25 @@ func TestUserUsecase_NextUser(t *testing.T) {
 					Email:       "p@app.ru",
 					Password:    "ah",
 					Date:        "2001-02-22",
-					Age:         "19",
+					Age:         19,
 					Description: "vs privet",
 					Imgs:        []string{"3"},
 					Tags:        []string{"BMSTU"},
 				},
 			},
-			errGetUser:      nil,
 			errGetNextUsers: nil,
 		},
 		// Test ErrorNotFound
 		{
-			user:            models.User{},
-			errGetUser:      errors.New(""),
 			errGetNextUsers: nil,
 		},
 		// Test ErrContextNilError
 		{
-			user:            models.User{},
-			errGetUser:      nil,
 			errGetNextUsers: nil,
 		},
 		// Test ErrGetNextUserForSwipe
 		{
-			user: models.User{
-				ID:          0,
-				Name:        "Drip",
-				Email:       "drip@app.com",
-				Password:    "hahaha",
-				Date:        "2000-02-22",
-				Description: "vsem privet",
-				Imgs:        []string{"1", "2"},
-				Tags:        []string{"anime", "BMSTU"},
-			},
 			nextUsers:       nil,
-			errGetUser:      nil,
 			errGetNextUsers: errors.New(""),
 		},
 	}
@@ -1192,17 +895,14 @@ func TestUserUsecase_NextUser(t *testing.T) {
 
 		r, err := http.NewRequest(http.MethodGet, "test", nil)
 		assert.NoError(t, err)
-		if testCase.userSession.UserID != 2 {
-			r = r.WithContext(context.WithValue(r.Context(), configs.ForContext, testCase.userSession))
+		if testCase.user.ID != 2 {
+			r = r.WithContext(context.WithValue(r.Context(), configs.ContextUser, testCase.user))
 		}
 
 		mockUserRepository := new(userMocks.UserRepository)
-		mockUserRepository.On("GetUserByID",
-			r.Context(),
-			mock.AnythingOfType("uint64")).Return(MockResultCases[i].user, MockResultCases[i].errGetUser)
 		mockUserRepository.On("GetNextUserForSwipe",
 			mock.AnythingOfType("*context.timerCtx"),
-			mock.AnythingOfType("uint64")).Return(MockResultCases[i].nextUsers, MockResultCases[i].errGetNextUsers)
+			mock.AnythingOfType("models.User")).Return(MockResultCases[i].nextUsers, MockResultCases[i].errGetNextUsers)
 		mockFileRepository := new(fileMocks.FileRepository)
 
 		testUserUsecase := usecase.NewUserUsecase(mockUserRepository, mockFileRepository, time.Second*2)
@@ -1216,102 +916,27 @@ func TestUserUsecase_NextUser(t *testing.T) {
 
 func TestUserUsecase_GetAllTags(t *testing.T) {
 	type TestCase struct {
-		userSession models.Session
-		tags        models.Tags
-		err         models.HTTPError
+		user models.User
+		tags models.Tags
+		err  error
 	}
 	testCases := []TestCase{
 		// Test OK
 		{
-			userSession: models.Session{
-				UserID: 0,
-				Cookie: "",
-			},
+			user: models.User{},
 			tags: models.Tags{
 				AllTags: map[uint64]models.Tag{
-					0: {Tag_Name: "anime"},
-					1: {Tag_Name: "BMSTU"},
-					2: {Tag_Name: "walk"},
-					3: {Tag_Name: "netflix"},
-					4: {Tag_Name: "prikolchiki"},
+					0: {TagName: "anime"},
+					1: {TagName: "BMSTU"},
+					2: {TagName: "walk"},
+					3: {TagName: "netflix"},
+					4: {TagName: "prikolchiki"},
 				},
 				Count: 5,
 			},
-			err: models.StatusOk200,
-		},
-		// Test ErrorNotFound
-		{
-			userSession: models.Session{
-				UserID: 1,
-				Cookie: "",
-			},
-			tags: models.Tags{},
-			err: models.HTTPError{
-				Code:    http.StatusNotFound,
-				Message: "",
-			},
-		},
-		// Test ErrContextNilError
-		{
-			userSession: models.Session{
-				UserID: 2,
-				Cookie: "",
-			},
-			tags: models.Tags{},
-			err: models.HTTPError{
-				Code:    http.StatusNotFound,
-				Message: models.ErrContextNilError,
-			},
+			err: nil,
 		},
 		// Test ErrGetTags
-		{
-			userSession: models.Session{
-				UserID: 0,
-				Cookie: "",
-			},
-			tags: models.Tags{},
-			err: models.HTTPError{
-				Code:    http.StatusNotFound,
-				Message: "",
-			},
-		},
-	}
-
-	type MockResultCase struct {
-		user       models.User
-		tags       map[uint64]string
-		errGetUser error
-		errGetTags error
-	}
-	MockResultCases := []MockResultCase{
-		// Test OK
-		{
-			user: models.User{},
-			tags: map[uint64]string{
-				0: "anime",
-				1: "BMSTU",
-				2: "walk",
-				3: "netflix",
-				4: "prikolchiki",
-			},
-			errGetUser: nil,
-			errGetTags: nil,
-		},
-		// Test ErrorNotFound
-		{
-			user:       models.User{},
-			tags:       map[uint64]string{},
-			errGetUser: errors.New(""),
-			errGetTags: nil,
-		},
-		// Test ErrContextNilError
-		{
-			user:       models.User{},
-			tags:       map[uint64]string{},
-			errGetUser: nil,
-			errGetTags: nil,
-		},
-		// Test ErrGetNextUserForSwipe
 		{
 			user: models.User{
 				ID:          0,
@@ -1323,8 +948,30 @@ func TestUserUsecase_GetAllTags(t *testing.T) {
 				Imgs:        []string{"1", "2"},
 				Tags:        []string{"anime", "BMSTU"},
 			},
+			tags: models.Tags{},
+			err:  errors.New(""),
+		},
+	}
+
+	type MockResultCase struct {
+		tags       map[uint64]string
+		errGetTags error
+	}
+	MockResultCases := []MockResultCase{
+		// Test OK
+		{
+			tags: map[uint64]string{
+				0: "anime",
+				1: "BMSTU",
+				2: "walk",
+				3: "netflix",
+				4: "prikolchiki",
+			},
+			errGetTags: nil,
+		},
+		// Test ErrGetTags
+		{
 			tags:       map[uint64]string{},
-			errGetUser: nil,
 			errGetTags: errors.New(""),
 		},
 	}
@@ -1334,14 +981,11 @@ func TestUserUsecase_GetAllTags(t *testing.T) {
 
 		r, err := http.NewRequest(http.MethodGet, "test", nil)
 		assert.NoError(t, err)
-		if testCase.userSession.UserID != 2 {
-			r = r.WithContext(context.WithValue(r.Context(), configs.ForContext, testCase.userSession))
+		if testCase.user.ID != 2 {
+			r = r.WithContext(context.WithValue(r.Context(), configs.ContextUser, testCase.user))
 		}
 
 		mockUserRepository := new(userMocks.UserRepository)
-		mockUserRepository.On("GetUserByID",
-			r.Context(),
-			mock.AnythingOfType("uint64")).Return(MockResultCases[i].user, MockResultCases[i].errGetUser)
 		mockUserRepository.On("GetTags",
 			mock.AnythingOfType("*context.timerCtx")).Return(MockResultCases[i].tags, MockResultCases[i].errGetTags)
 		mockFileRepository := new(fileMocks.FileRepository)
@@ -1357,16 +1001,22 @@ func TestUserUsecase_GetAllTags(t *testing.T) {
 
 func TestUserUsecase_UsersMatches(t *testing.T) {
 	type TestCase struct {
-		userSession models.Session
-		matches     models.Matches
-		err         models.HTTPError
+		user    models.User
+		matches models.Matches
+		err     error
 	}
 	testCases := []TestCase{
 		// Test OK
 		{
-			userSession: models.Session{
-				UserID: 0,
-				Cookie: "",
+			user: models.User{
+				ID:          0,
+				Name:        "Drip",
+				Email:       "drip@app.com",
+				Password:    "hahaha",
+				Date:        "2000-02-22",
+				Description: "vsem privet",
+				Imgs:        []string{"1", "2"},
+				Tags:        []string{"anime", "BMSTU"},
 			},
 			matches: models.Matches{
 				AllUsers: map[uint64]models.User{
@@ -1376,7 +1026,7 @@ func TestUserUsecase_UsersMatches(t *testing.T) {
 						Email:       "drip@app.ru",
 						Password:    "hah",
 						Date:        "2001-02-22",
-						Age:         "19",
+						Age:         19,
 						Description: "vsem privet",
 						Imgs:        []string{"4", "3"},
 						Tags:        []string{"BMSTU"},
@@ -1387,7 +1037,7 @@ func TestUserUsecase_UsersMatches(t *testing.T) {
 						Email:       "dr@app.ru",
 						Password:    "hah",
 						Date:        "2000-02-22",
-						Age:         "20",
+						Age:         20,
 						Description: "em privet",
 						Imgs:        []string{"4", "3"},
 						Tags:        []string{"JS"},
@@ -1395,54 +1045,23 @@ func TestUserUsecase_UsersMatches(t *testing.T) {
 				},
 				Count: "2",
 			},
-			err: models.StatusOk200,
+			err: nil,
 		},
 		// Test ErrorNotFound
 		{
-			userSession: models.Session{
-				UserID: 1,
-				Cookie: "",
-			},
+			user:    models.User{},
 			matches: models.Matches{},
-			err: models.HTTPError{
-				Code:    http.StatusNotFound,
-				Message: "",
-			},
+			err:     nil,
 		},
 		// Test ErrContextNilError
 		{
-			userSession: models.Session{
-				UserID: 2,
-				Cookie: "",
+			user: models.User{
+				ID: 2,
 			},
 			matches: models.Matches{},
-			err: models.HTTPError{
-				Code:    http.StatusNotFound,
-				Message: models.ErrContextNilError,
-			},
+			err:     models.ErrContextNilError,
 		},
 		// Test ErrGetTags
-		{
-			userSession: models.Session{
-				UserID: 0,
-				Cookie: "",
-			},
-			matches: models.Matches{},
-			err: models.HTTPError{
-				Code:    http.StatusNotFound,
-				Message: "",
-			},
-		},
-	}
-
-	type MockResultCase struct {
-		user          models.User
-		matches       []models.User
-		errGetUser    error
-		errGetMatches error
-	}
-	MockResultCases := []MockResultCase{
-		// Test OK
 		{
 			user: models.User{
 				ID:          0,
@@ -1454,6 +1073,18 @@ func TestUserUsecase_UsersMatches(t *testing.T) {
 				Imgs:        []string{"1", "2"},
 				Tags:        []string{"anime", "BMSTU"},
 			},
+			matches: models.Matches{},
+			err:     errors.New(""),
+		},
+	}
+
+	type MockResultCase struct {
+		matches       []models.User
+		errGetMatches error
+	}
+	MockResultCases := []MockResultCase{
+		// Test OK
+		{
 			matches: []models.User{
 				{
 					ID:          1,
@@ -1461,7 +1092,7 @@ func TestUserUsecase_UsersMatches(t *testing.T) {
 					Email:       "drip@app.ru",
 					Password:    "hah",
 					Date:        "2001-02-22",
-					Age:         "19",
+					Age:         19,
 					Description: "vsem privet",
 					Imgs:        []string{"4", "3"},
 					Tags:        []string{"BMSTU"},
@@ -1472,43 +1103,27 @@ func TestUserUsecase_UsersMatches(t *testing.T) {
 					Email:       "dr@app.ru",
 					Password:    "hah",
 					Date:        "2000-02-22",
-					Age:         "20",
+					Age:         20,
 					Description: "em privet",
 					Imgs:        []string{"4", "3"},
 					Tags:        []string{"JS"},
 				},
 			},
-			errGetUser:    nil,
 			errGetMatches: nil,
 		},
 		// Test ErrorNotFound
 		{
-			user:          models.User{},
 			matches:       []models.User{},
-			errGetUser:    errors.New(""),
 			errGetMatches: nil,
 		},
 		// Test ErrContextNilError
 		{
-			user:          models.User{},
 			matches:       []models.User{},
-			errGetUser:    nil,
 			errGetMatches: nil,
 		},
 		// Test ErrGetNextUserForSwipe
 		{
-			user: models.User{
-				ID:          0,
-				Name:        "Drip",
-				Email:       "drip@app.com",
-				Password:    "hahaha",
-				Date:        "2000-02-22",
-				Description: "vsem privet",
-				Imgs:        []string{"1", "2"},
-				Tags:        []string{"anime", "BMSTU"},
-			},
 			matches:       []models.User{},
-			errGetUser:    nil,
 			errGetMatches: errors.New(""),
 		},
 	}
@@ -1518,14 +1133,11 @@ func TestUserUsecase_UsersMatches(t *testing.T) {
 
 		r, err := http.NewRequest(http.MethodGet, "test", nil)
 		assert.NoError(t, err)
-		if testCase.userSession.UserID != 2 {
-			r = r.WithContext(context.WithValue(r.Context(), configs.ForContext, testCase.userSession))
+		if testCase.user.ID != 2 {
+			r = r.WithContext(context.WithValue(r.Context(), configs.ContextUser, testCase.user))
 		}
 
 		mockUserRepository := new(userMocks.UserRepository)
-		mockUserRepository.On("GetUserByID",
-			r.Context(),
-			mock.AnythingOfType("uint64")).Return(MockResultCases[i].user, MockResultCases[i].errGetUser)
 		mockUserRepository.On("GetUsersMatches",
 			mock.AnythingOfType("*context.timerCtx"),
 			mock.AnythingOfType("uint64")).Return(MockResultCases[i].matches, MockResultCases[i].errGetMatches)
@@ -1542,17 +1154,16 @@ func TestUserUsecase_UsersMatches(t *testing.T) {
 
 func TestUserUsecase_Reaction(t *testing.T) {
 	type TestCase struct {
-		userSession  models.Session
+		user         models.User
 		reactionData models.UserReaction
 		match        models.Match
-		err          models.HTTPError
+		err          error
 	}
 	testCases := []TestCase{
 		// Test OK and Match
 		{
-			userSession: models.Session{
-				UserID: 0,
-				Cookie: "",
+			user: models.User{
+				ID: 0,
 			},
 			reactionData: models.UserReaction{
 				Id:       2,
@@ -1561,13 +1172,12 @@ func TestUserUsecase_Reaction(t *testing.T) {
 			match: models.Match{
 				Match: true,
 			},
-			err: models.StatusOk200,
+			err: nil,
 		},
 		// Test OK and no Match
 		{
-			userSession: models.Session{
-				UserID: 0,
-				Cookie: "",
+			user: models.User{
+				ID: 0,
 			},
 			reactionData: models.UserReaction{
 				Id:       5,
@@ -1576,13 +1186,12 @@ func TestUserUsecase_Reaction(t *testing.T) {
 			match: models.Match{
 				Match: false,
 			},
-			err: models.StatusOk200,
+			err: nil,
 		},
 		// Test OK and no Match
 		{
-			userSession: models.Session{
-				UserID: 0,
-				Cookie: "",
+			user: models.User{
+				ID: 0,
 			},
 			reactionData: models.UserReaction{
 				Id:       2,
@@ -1591,199 +1200,155 @@ func TestUserUsecase_Reaction(t *testing.T) {
 			match: models.Match{
 				Match: false,
 			},
-			err: models.StatusOk200,
+			err: nil,
 		},
 		// Test ErrorNotFound
 		{
-			userSession: models.Session{
-				UserID: 1,
-				Cookie: "",
+			user: models.User{
+				ID: 1,
 			},
 			reactionData: models.UserReaction{},
 			match:        models.Match{},
-			err: models.HTTPError{
-				Code:    http.StatusNotFound,
-				Message: "",
-			},
+			err:          nil,
 		},
 		// Test ErrContextNilError
 		{
-			userSession: models.Session{
-				UserID: 2,
-				Cookie: "",
+			user: models.User{
+				ID: 2,
 			},
 			reactionData: models.UserReaction{},
 			match:        models.Match{},
-			err: models.HTTPError{
-				Code:    http.StatusNotFound,
-				Message: models.ErrContextNilError,
-			},
+			err:          models.ErrContextNilError,
 		},
 		// Test ErrAddReaction
 		{
-			userSession: models.Session{
-				UserID: 0,
-				Cookie: "",
+			user: models.User{
+				ID: 0,
 			},
 			reactionData: models.UserReaction{
 				Id:       2,
 				Reaction: 1,
 			},
 			match: models.Match{},
-			err: models.HTTPError{
-				Code:    http.StatusInternalServerError,
-				Message: "",
-			},
+			err:   errors.New(""),
 		},
 		// Test ErrGetLikes
 		{
-			userSession: models.Session{
-				UserID: 0,
-				Cookie: "",
+			user: models.User{
+				ID: 0,
 			},
 			reactionData: models.UserReaction{
 				Id:       2,
 				Reaction: 1,
 			},
 			match: models.Match{},
-			err: models.HTTPError{
-				Code:    http.StatusNotFound,
-				Message: "",
-			},
+			err:   errors.New(""),
 		},
 		// Test ErrDeleteLike
 		{
-			userSession: models.Session{
-				UserID: 0,
-				Cookie: "",
+			user: models.User{
+				ID: 0,
 			},
 			reactionData: models.UserReaction{
 				Id:       2,
 				Reaction: 1,
 			},
 			match: models.Match{},
-			err: models.HTTPError{
-				Code:    http.StatusInternalServerError,
-				Message: "",
-			},
+			err:   errors.New(""),
 		},
 		// Test ErrAddMatch
 		{
-			userSession: models.Session{
-				UserID: 0,
-				Cookie: "",
+			user: models.User{
+				ID: 0,
 			},
 			reactionData: models.UserReaction{
 				Id:       2,
 				Reaction: 1,
 			},
 			match: models.Match{},
-			err: models.HTTPError{
-				Code:    http.StatusInternalServerError,
-				Message: "",
-			},
+			err:   errors.New(""),
 		},
 	}
 
 	type MockResultCase struct {
-		user           models.User
-		likes          []uint64
-		errGetUser     error
-		errAddReaction error
-		errGetLikes    error
-		errDeleteLike  error
-		errAddMatch    error
+		likes             []uint64
+		errAddReaction    error
+		errGetLikes       error
+		errDeleteReaction error
+		errAddMatch       error
 	}
 	MockResultCases := []MockResultCase{
 		// Test OK and Match
 		{
-			user:           models.User{},
-			likes:          []uint64{1, 2, 3},
-			errGetUser:     nil,
-			errAddReaction: nil,
-			errGetLikes:    nil,
-			errDeleteLike:  nil,
-			errAddMatch:    nil,
+			likes:             []uint64{1, 2, 3},
+			errAddReaction:    nil,
+			errGetLikes:       nil,
+			errDeleteReaction: nil,
+			errAddMatch:       nil,
 		},
 		// Test OK and no Match
 		{
-			user:           models.User{},
-			likes:          []uint64{1, 2, 3},
-			errGetUser:     nil,
-			errAddReaction: nil,
-			errGetLikes:    nil,
-			errDeleteLike:  nil,
-			errAddMatch:    nil,
+			likes:             []uint64{1, 2, 3},
+			errAddReaction:    nil,
+			errGetLikes:       nil,
+			errDeleteReaction: nil,
+			errAddMatch:       nil,
 		},
 		// Test OK and no Match
 		{
-			user:           models.User{},
-			likes:          []uint64{1, 2, 3},
-			errGetUser:     nil,
-			errAddReaction: nil,
-			errGetLikes:    nil,
-			errDeleteLike:  nil,
-			errAddMatch:    nil,
+			likes:             []uint64{1, 2, 3},
+			errAddReaction:    nil,
+			errGetLikes:       nil,
+			errDeleteReaction: nil,
+			errAddMatch:       nil,
 		},
 		// Test ErrorNotFound
 		{
-			user:           models.User{},
-			likes:          []uint64{},
-			errGetUser:     errors.New(""),
-			errAddReaction: nil,
-			errGetLikes:    nil,
-			errDeleteLike:  nil,
-			errAddMatch:    nil,
+			likes:             []uint64{},
+			errAddReaction:    nil,
+			errGetLikes:       nil,
+			errDeleteReaction: nil,
+			errAddMatch:       nil,
 		},
 		// Test ErrContextNilError
 		{
-			user:           models.User{},
-			likes:          []uint64{},
-			errGetUser:     nil,
-			errAddReaction: nil,
-			errGetLikes:    nil,
-			errDeleteLike:  nil,
-			errAddMatch:    nil,
+			likes:             []uint64{},
+			errAddReaction:    nil,
+			errGetLikes:       nil,
+			errDeleteReaction: nil,
+			errAddMatch:       nil,
 		},
 		// Test ErrAddReaction
 		{
-			user:           models.User{},
-			likes:          []uint64{},
-			errGetUser:     nil,
-			errAddReaction: errors.New(""),
-			errGetLikes:    nil,
-			errDeleteLike:  nil,
-			errAddMatch:    nil,
+			likes:             []uint64{},
+			errAddReaction:    errors.New(""),
+			errGetLikes:       nil,
+			errDeleteReaction: nil,
+			errAddMatch:       nil,
 		},
 		// Test ErrGetLikes
 		{
-			user:           models.User{},
-			likes:          []uint64{},
-			errGetUser:     nil,
-			errAddReaction: nil,
-			errGetLikes:    errors.New(""),
-			errDeleteLike:  nil,
-			errAddMatch:    nil,
+			likes:             []uint64{},
+			errAddReaction:    nil,
+			errGetLikes:       errors.New(""),
+			errDeleteReaction: nil,
+			errAddMatch:       nil,
 		},
 		// Test ErrDeleteLike
 		{
-			user:           models.User{},
-			likes:          []uint64{1, 2, 3},
-			errGetUser:     nil,
-			errAddReaction: nil,
-			errGetLikes:    nil,
-			errDeleteLike:  errors.New(""),
-			errAddMatch:    nil,
+			likes:             []uint64{1, 2, 3},
+			errAddReaction:    nil,
+			errGetLikes:       nil,
+			errDeleteReaction: errors.New(""),
+			errAddMatch:       nil,
 		},
 		// Test ErrAddMatch
 		{
-			user:           models.User{},
-			likes:          []uint64{1, 2, 3},
-			errGetUser:     nil,
-			errAddReaction: nil,
-			errGetLikes:    nil,
-			errDeleteLike:  nil,
-			errAddMatch:    errors.New(""),
+			likes:             []uint64{1, 2, 3},
+			errAddReaction:    nil,
+			errGetLikes:       nil,
+			errDeleteReaction: nil,
+			errAddMatch:       errors.New(""),
 		},
 	}
 
@@ -1792,14 +1357,11 @@ func TestUserUsecase_Reaction(t *testing.T) {
 
 		r, err := http.NewRequest(http.MethodGet, "test", nil)
 		assert.NoError(t, err)
-		if testCase.userSession.UserID != 2 {
-			r = r.WithContext(context.WithValue(r.Context(), configs.ForContext, testCase.userSession))
+		if testCase.user.ID != 2 {
+			r = r.WithContext(context.WithValue(r.Context(), configs.ContextUser, testCase.user))
 		}
 
 		mockUserRepository := new(userMocks.UserRepository)
-		mockUserRepository.On("GetUserByID",
-			r.Context(),
-			mock.AnythingOfType("uint64")).Return(MockResultCases[i].user, MockResultCases[i].errGetUser)
 		mockUserRepository.On("AddReaction",
 			mock.AnythingOfType("*context.timerCtx"),
 			mock.AnythingOfType("uint64"),
@@ -1808,10 +1370,10 @@ func TestUserUsecase_Reaction(t *testing.T) {
 		mockUserRepository.On("GetLikes",
 			mock.AnythingOfType("*context.timerCtx"),
 			mock.AnythingOfType("uint64")).Return(MockResultCases[i].likes, MockResultCases[i].errGetLikes)
-		mockUserRepository.On("DeleteLike",
+		mockUserRepository.On("DeleteReaction",
 			mock.AnythingOfType("*context.timerCtx"),
 			mock.AnythingOfType("uint64"),
-			mock.AnythingOfType("uint64")).Return(MockResultCases[i].errDeleteLike)
+			mock.AnythingOfType("uint64")).Return(MockResultCases[i].errDeleteReaction)
 		mockUserRepository.On("AddMatch",
 			mock.AnythingOfType("*context.timerCtx"),
 			mock.AnythingOfType("uint64"),
@@ -1823,6 +1385,610 @@ func TestUserUsecase_Reaction(t *testing.T) {
 
 		assert.Equal(t, testCase.err, status, message)
 		reflect.DeepEqual(testCase.match, match)
+
+	}
+}
+
+func TestUserUsecase_UsersMatchesWithSearching(t *testing.T) {
+	type TestCase struct {
+		user          models.User
+		matches       models.Matches
+		searchingData models.Search
+		err           error
+	}
+	testCases := []TestCase{
+		// Test OK
+		{
+			user: models.User{
+				ID:          0,
+				Name:        "Drip",
+				Email:       "drip@app.com",
+				Password:    "hahaha",
+				Date:        "2000-02-22",
+				Description: "vsem privet",
+				Imgs:        []string{"1", "2"},
+				Tags:        []string{"anime", "BMSTU"},
+			},
+			matches: models.Matches{
+				AllUsers: map[uint64]models.User{
+					0: {
+						ID:          1,
+						Name:        "Владимир",
+						Email:       "drip@app.ru",
+						Password:    "hah",
+						Date:        "2001-02-22",
+						Age:         19,
+						Description: "vsem privet",
+						Imgs:        []string{"4", "3"},
+						Tags:        []string{"BMSTU"},
+					},
+					1: {
+						ID:          2,
+						Name:        "влаД",
+						Email:       "dr@app.ru",
+						Password:    "hah",
+						Date:        "2000-02-22",
+						Age:         20,
+						Description: "em privet",
+						Imgs:        []string{"4", "3"},
+						Tags:        []string{"JS"},
+					},
+				},
+				Count: "2",
+			},
+			searchingData: models.Search{SearchingTmpl: "влад"},
+			err:           nil,
+		},
+		// Test ErrContextNilError
+		{
+			user: models.User{
+				ID: 2,
+			},
+			err: models.ErrContextNilError,
+		},
+		// Test ErrorNotFound
+		{
+			user:    models.User{},
+			matches: models.Matches{},
+			err:     errors.New(""),
+		},
+	}
+
+	type MockResultCase struct {
+		matches       []models.User
+		errGetMatches error
+	}
+	MockResultCases := []MockResultCase{
+		// Test OK
+		{
+			matches: []models.User{
+				{
+					ID:          1,
+					Name:        "Drip))",
+					Email:       "drip@app.ru",
+					Password:    "hah",
+					Date:        "2001-02-22",
+					Age:         19,
+					Description: "vsem privet",
+					Imgs:        []string{"4", "3"},
+					Tags:        []string{"BMSTU"},
+				},
+				{
+					ID:          2,
+					Name:        "Dr))",
+					Email:       "dr@app.ru",
+					Password:    "hah",
+					Date:        "2000-02-22",
+					Age:         20,
+					Description: "em privet",
+					Imgs:        []string{"4", "3"},
+					Tags:        []string{"JS"},
+				},
+			},
+			errGetMatches: nil,
+		},
+		// Test ErrContextNilError
+		{
+			matches:       []models.User{},
+			errGetMatches: nil,
+		},
+		// Test ErrorNotFound
+		{
+			matches:       []models.User{},
+			errGetMatches: errors.New(""),
+		},
+	}
+
+	for i, testCase := range testCases {
+		message := fmt.Sprintf("test case number: %d", i)
+
+		r, err := http.NewRequest(http.MethodGet, "test", nil)
+		assert.NoError(t, err)
+		if testCase.user.ID != 2 {
+			r = r.WithContext(context.WithValue(r.Context(), configs.ContextUser, testCase.user))
+		}
+
+		mockUserRepository := new(userMocks.UserRepository)
+		mockUserRepository.On("GetUsersMatchesWithSearching",
+			mock.AnythingOfType("*context.timerCtx"),
+			mock.AnythingOfType("uint64"),
+			mock.AnythingOfType("string")).Return(MockResultCases[i].matches, MockResultCases[i].errGetMatches)
+		mockFileRepository := new(fileMocks.FileRepository)
+
+		testUserUsecase := usecase.NewUserUsecase(mockUserRepository, mockFileRepository, time.Second*2)
+		allMatches, status := testUserUsecase.UsersMatchesWithSearching(r.Context(), testCase.searchingData)
+
+		assert.Equal(t, testCase.err, status, message)
+		reflect.DeepEqual(testCase.matches, allMatches)
+
+	}
+}
+
+func TestUserUsecase_UserLikes(t *testing.T) {
+	type TestCase struct {
+		user  models.User
+		likes models.Likes
+		err   error
+	}
+	testCases := []TestCase{
+		// Test OK
+		{
+			user: models.User{
+				ID:          0,
+				Name:        "Drip",
+				Email:       "drip@app.com",
+				Password:    "hahaha",
+				Date:        "2000-02-22",
+				Description: "vsem privet",
+				Imgs:        []string{"1", "2"},
+				Tags:        []string{"anime", "BMSTU"},
+			},
+			likes: models.Likes{
+				AllUsers: map[uint64]models.User{
+					0: {
+						ID:          1,
+						Name:        "Владимир",
+						Email:       "drip@app.ru",
+						Password:    "hah",
+						Date:        "2001-02-22",
+						Age:         19,
+						Description: "vsem privet",
+						Imgs:        []string{"4", "3"},
+						Tags:        []string{"BMSTU"},
+					},
+					1: {
+						ID:          2,
+						Name:        "влаД",
+						Email:       "dr@app.ru",
+						Password:    "hah",
+						Date:        "2000-02-22",
+						Age:         20,
+						Description: "em privet",
+						Imgs:        []string{"4", "3"},
+						Tags:        []string{"JS"},
+					},
+				},
+				Count: "2",
+			},
+			err: nil,
+		},
+		// Test ErrContextNilError
+		{
+			user: models.User{
+				ID: 2,
+			},
+			err: models.ErrContextNilError,
+		},
+		// Test ErrorNotFound
+		{
+			user:  models.User{},
+			likes: models.Likes{},
+			err:   errors.New(""),
+		},
+	}
+
+	type MockResultCase struct {
+		likes         []models.User
+		errGetMatches error
+	}
+	MockResultCases := []MockResultCase{
+		// Test OK
+		{
+			likes: []models.User{
+				{
+					ID:          1,
+					Name:        "Drip))",
+					Email:       "drip@app.ru",
+					Password:    "hah",
+					Date:        "2001-02-22",
+					Age:         19,
+					Description: "vsem privet",
+					Imgs:        []string{"4", "3"},
+					Tags:        []string{"BMSTU"},
+				},
+				{
+					ID:          2,
+					Name:        "Dr))",
+					Email:       "dr@app.ru",
+					Password:    "hah",
+					Date:        "2000-02-22",
+					Age:         20,
+					Description: "em privet",
+					Imgs:        []string{"4", "3"},
+					Tags:        []string{"JS"},
+				},
+			},
+			errGetMatches: nil,
+		},
+		// Test ErrContextNilError
+		{
+			likes:         []models.User{},
+			errGetMatches: nil,
+		},
+		// Test ErrorNotFound
+		{
+			likes:         []models.User{},
+			errGetMatches: errors.New(""),
+		},
+	}
+
+	for i, testCase := range testCases {
+		message := fmt.Sprintf("test case number: %d", i)
+
+		r, err := http.NewRequest(http.MethodGet, "test", nil)
+		assert.NoError(t, err)
+		if testCase.user.ID != 2 {
+			r = r.WithContext(context.WithValue(r.Context(), configs.ContextUser, testCase.user))
+		}
+
+		mockUserRepository := new(userMocks.UserRepository)
+		mockUserRepository.On("GetUsersLikes",
+			mock.AnythingOfType("*context.timerCtx"),
+			mock.AnythingOfType("uint64")).Return(MockResultCases[i].likes, MockResultCases[i].errGetMatches)
+		mockFileRepository := new(fileMocks.FileRepository)
+
+		testUserUsecase := usecase.NewUserUsecase(mockUserRepository, mockFileRepository, time.Second*2)
+		allLikes, status := testUserUsecase.UserLikes(r.Context())
+
+		assert.Equal(t, testCase.err, status, message)
+		reflect.DeepEqual(testCase.likes, allLikes)
+
+	}
+}
+
+func TestUserUsecase_GetAllReports(t *testing.T) {
+	type TestCase struct {
+		user    models.User
+		reports models.Reports
+		err     error
+	}
+	testCases := []TestCase{
+		// Test OK
+		{
+			user: models.User{},
+			reports: models.Reports{
+				AllReports: map[uint64]models.Report{
+					0: {ReportDesc: "anime"},
+					1: {ReportDesc: "BMSTU"},
+					2: {ReportDesc: "walk"},
+					3: {ReportDesc: "netflix"},
+					4: {ReportDesc: "prikolchiki"},
+				},
+				Count: 5,
+			},
+			err: nil,
+		},
+		// Test ErrGetTags
+		{
+			user: models.User{
+				ID:          0,
+				Name:        "Drip",
+				Email:       "drip@app.com",
+				Password:    "hahaha",
+				Date:        "2000-02-22",
+				Description: "vsem privet",
+				Imgs:        []string{"1", "2"},
+				Tags:        []string{"anime", "BMSTU"},
+			},
+			reports: models.Reports{},
+			err:     errors.New(""),
+		},
+	}
+
+	type MockResultCase struct {
+		reports       map[uint64]string
+		errGetReports error
+	}
+	MockResultCases := []MockResultCase{
+		// Test OK
+		{
+			reports: map[uint64]string{
+				0: "anime",
+				1: "BMSTU",
+				2: "walk",
+				3: "netflix",
+				4: "prikolchiki",
+			},
+			errGetReports: nil,
+		},
+		// Test ErrGetTags
+		{
+			reports:       map[uint64]string{},
+			errGetReports: errors.New(""),
+		},
+	}
+
+	for i, testCase := range testCases {
+		message := fmt.Sprintf("test case number: %d", i)
+
+		r, err := http.NewRequest(http.MethodGet, "test", nil)
+		assert.NoError(t, err)
+		if testCase.user.ID != 2 {
+			r = r.WithContext(context.WithValue(r.Context(), configs.ContextUser, testCase.user))
+		}
+
+		mockUserRepository := new(userMocks.UserRepository)
+		mockUserRepository.On("GetReports",
+			mock.AnythingOfType("*context.timerCtx")).Return(MockResultCases[i].reports, MockResultCases[i].errGetReports)
+		mockFileRepository := new(fileMocks.FileRepository)
+
+		testUserUsecase := usecase.NewUserUsecase(mockUserRepository, mockFileRepository, time.Second*2)
+		allReports, status := testUserUsecase.GetAllReports(r.Context())
+
+		assert.Equal(t, testCase.err, status, message)
+		reflect.DeepEqual(testCase.reports, allReports)
+
+	}
+}
+
+func TestUserUsecase_AddReport(t *testing.T) {
+	type TestCase struct {
+		user   models.User
+		report models.NewReport
+		err    error
+	}
+	testCases := []TestCase{
+		// Test OK FAKE
+		{
+			user: models.User{},
+			report: models.NewReport{
+				ToId:       0,
+				ReportDesc: models.FakeReport,
+			},
+			err: nil,
+		},
+		// Test OK AGGRESSION
+		{
+			user: models.User{},
+			report: models.NewReport{
+				ToId:       0,
+				ReportDesc: models.AggressionReport,
+			},
+			err: nil,
+		},
+		// Test OK SKAM
+		{
+			user: models.User{},
+			report: models.NewReport{
+				ToId:       0,
+				ReportDesc: models.SkamReport,
+			},
+			err: nil,
+		},
+		// Test OK UNDERAGE
+		{
+			user: models.User{},
+			report: models.NewReport{
+				ToId:       0,
+				ReportDesc: models.UnderageReport,
+			},
+			err: nil,
+		},
+		// Test ErrContextNilError
+		{
+			user: models.User{
+				ID: 2,
+			},
+			report: models.NewReport{},
+			err:    models.ErrContextNilError,
+		},
+		// Test ErrAddReport
+		{
+			user:   models.User{},
+			report: models.NewReport{},
+			err:    errors.New(""),
+		},
+		// Test ErrDeleteReaction
+		{
+			user:   models.User{},
+			report: models.NewReport{},
+			err:    errors.New(""),
+		},
+		// Test ErrDeleteMatches
+		{
+			user:   models.User{},
+			report: models.NewReport{},
+			err:    errors.New(""),
+		},
+		// Test ErrAddReaction
+		{
+			user:   models.User{},
+			report: models.NewReport{},
+			err:    errors.New(""),
+		},
+		// Test ErrGetReportsCount
+		{
+			user:   models.User{},
+			report: models.NewReport{},
+			err:    errors.New(""),
+		},
+		// Test ErrGetReportsWithMaxCount
+		{
+			user:   models.User{},
+			report: models.NewReport{},
+			err:    errors.New(""),
+		},
+		// Test ErrGetReportDesc
+		{
+			user:   models.User{},
+			report: models.NewReport{},
+			err:    errors.New(""),
+		},
+		// Test ErrUpdateReportStatus
+		{
+			user:   models.User{},
+			report: models.NewReport{},
+			err:    errors.New(""),
+		},
+	}
+
+	type MockResultCase struct {
+		reportsCount              uint64
+		banId                     uint64
+		banDesc                   string
+		errAddReport              error
+		errDeleteReaction         error
+		errDeleteMatches          error
+		errAddReaction            error
+		errGetReportsCount        error
+		errGetReportsWithMaxCount error
+		errGetReportDesc          error
+		errUpdateReportStatus     error
+	}
+	MockResultCases := []MockResultCase{
+		// Test OK FAKE
+		{
+			reportsCount: 5,
+			banId:        2,
+			banDesc:      models.FakeReport,
+		},
+		// Test OK AGGRESSION
+		{
+			reportsCount: 5,
+			banId:        2,
+			banDesc:      models.AggressionReport,
+		},
+		// Test OK SKAM
+		{
+			reportsCount: 5,
+			banId:        2,
+			banDesc:      models.SkamReport,
+		},
+		// Test OK UNDERAGE
+		{
+			reportsCount: 5,
+			banId:        2,
+			banDesc:      models.UnderageReport,
+		},
+		// Test ErrContextNilError
+		{
+			reportsCount: 5,
+			banId:        2,
+			banDesc:      "",
+		},
+		// Test ErrAddReport
+		{
+			reportsCount: 5,
+			banId:        2,
+			banDesc:      "",
+			errAddReport: errors.New(""),
+		},
+		// Test ErrDeleteReaction
+		{
+			reportsCount:      5,
+			banId:             2,
+			banDesc:           "",
+			errDeleteReaction: errors.New(""),
+		},
+		// Test ErrDeleteMatches
+		{
+			reportsCount:     5,
+			banId:            2,
+			banDesc:          "",
+			errDeleteMatches: errors.New(""),
+		},
+		// Test ErrAddReaction
+		{
+			reportsCount:   5,
+			banId:          2,
+			banDesc:        "",
+			errAddReaction: errors.New(""),
+		},
+		// Test ErrGetReportsCount
+		{
+			reportsCount:       5,
+			banId:              2,
+			banDesc:            "",
+			errGetReportsCount: errors.New(""),
+		},
+		// Test ErrGetReportsWithMaxCount
+		{
+			reportsCount:              5,
+			banId:                     2,
+			banDesc:                   "",
+			errGetReportsWithMaxCount: errors.New(""),
+		},
+		// Test ErrGetReportDesc
+		{
+			reportsCount:     5,
+			banId:            2,
+			banDesc:          "",
+			errGetReportDesc: errors.New(""),
+		},
+		// Test ErrUpdateReportStatus
+		{
+			reportsCount:          5,
+			banId:                 2,
+			banDesc:               "",
+			errUpdateReportStatus: errors.New(""),
+		},
+	}
+
+	for i, testCase := range testCases {
+		message := fmt.Sprintf("test case number: %d", i)
+
+		r, err := http.NewRequest(http.MethodGet, "test", nil)
+		assert.NoError(t, err)
+		if testCase.user.ID != 2 {
+			r = r.WithContext(context.WithValue(r.Context(), configs.ContextUser, testCase.user))
+		}
+
+		mockUserRepository := new(userMocks.UserRepository)
+		mockUserRepository.On("AddReport",
+			mock.AnythingOfType("*context.timerCtx"),
+			mock.AnythingOfType("models.NewReport")).Return(MockResultCases[i].errAddReport)
+		mockUserRepository.On("DeleteReaction",
+			mock.AnythingOfType("*context.timerCtx"),
+			mock.AnythingOfType("uint64"),
+			mock.AnythingOfType("uint64")).Return(MockResultCases[i].errDeleteReaction)
+		mockUserRepository.On("DeleteMatches",
+			mock.AnythingOfType("*context.timerCtx"),
+			mock.AnythingOfType("uint64"),
+			mock.AnythingOfType("uint64")).Return(MockResultCases[i].errDeleteMatches)
+		mockUserRepository.On("AddReaction",
+			mock.AnythingOfType("*context.timerCtx"),
+			mock.AnythingOfType("uint64"),
+			mock.AnythingOfType("uint64"),
+			mock.AnythingOfType("uint64")).Return(MockResultCases[i].errAddReaction)
+		mockUserRepository.On("GetReportsCount",
+			mock.AnythingOfType("*context.timerCtx"),
+			mock.AnythingOfType("uint64")).Return(MockResultCases[i].reportsCount, MockResultCases[i].errGetReportsCount)
+		mockUserRepository.On("GetReportsWithMaxCount",
+			mock.AnythingOfType("*context.timerCtx"),
+			mock.AnythingOfType("uint64")).Return(MockResultCases[i].banId, MockResultCases[i].errGetReportsWithMaxCount)
+		mockUserRepository.On("GetReportDesc",
+			mock.AnythingOfType("*context.timerCtx"),
+			mock.AnythingOfType("uint64")).Return(MockResultCases[i].banDesc, MockResultCases[i].errGetReportDesc)
+		mockUserRepository.On("UpdateReportStatus",
+			mock.AnythingOfType("*context.timerCtx"),
+			mock.AnythingOfType("uint64"),
+			mock.AnythingOfType("string")).Return(MockResultCases[i].errUpdateReportStatus)
+		mockFileRepository := new(fileMocks.FileRepository)
+
+		testUserUsecase := usecase.NewUserUsecase(mockUserRepository, mockFileRepository, time.Second*2)
+		err = testUserUsecase.AddReport(r.Context(), testCase.report)
+
+		assert.Equal(t, testCase.err, err, message)
 
 	}
 }

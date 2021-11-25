@@ -1,23 +1,41 @@
 {
-    "debug": true,
+    "log_level": "INFO",
     "server": {
       "host": "127.0.0.1",
-      "port": ":8000",
-      "sertFile": "api.ijia.me.crt",
+      "httpPort": ":8000",
+      "certFile": "api.ijia.me.crt",
+      "keyFile": "api.ijia.me.key"
+    },
+    "chat_server": {
+      "host": "127.0.0.1",
+      "httpPort": ":8000",
+      "certFile": "api.ijia.me.crt",
+      "keyFile": "api.ijia.me.key"
+    },
+    "auth_server": {
+      "host": "127.0.0.1",
+      "httpPort": ":8002",
+      "grpcUrl": "auth_service:8003",
+      "certFile": "api.ijia.me.crt",
       "keyFile": "api.ijia.me.key"
     },
     "database": {
-        "host": "127.0.0.1",
+        "host": "postgres",
         "port": ":5432",
         "user": "admin",
         "pass": "lolkek",
-        "name": "postgres"
+        "name": "drip"
     },
     "session": {
-        "host": "127.0.0.1",
+        "host": "tarantool",
         "port": ":3301",
         "user": "admin",
         "pass": "pass",
         "name": "drip"
+    },
+    "file_storage": {
+      "root_folder": "media",
+      "profile_photo_path": "profile_photos"
     }
   }
+  

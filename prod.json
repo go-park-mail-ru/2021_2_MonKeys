@@ -1,0 +1,41 @@
+{
+    "log_level": "ERROR",
+    "server": {
+      "host": "api.monkeys.team",
+      "httpPort": ":443",
+      "certFile": "star.monkeys.team.crt",
+      "keyFile": "star.monkeys.team.key"
+    },
+    "chat_server": {
+      "host": "api.monkeys.team",
+      "httpPort": ":443",
+      "certFile": "star.monkeys.team.crt",
+      "keyFile": "star.monkeys.team.key"
+    },
+    "auth_server": {
+      "host": "api.monkeys.team",
+      "httpPort": ":443",
+      "grpcUrl": "auth_service:8003",
+      "certFile": "star.monkeys.team.crt",
+      "keyFile": "star.monkeys.team.key"
+    },
+    "database": {
+        "host": "postgres",
+        "port": ":5432",
+        "user": "admin",
+        "pass": "lolkek",
+        "name": "drip"
+    },
+    "session": {
+        "host": "tarantool",
+        "port": ":3301",
+        "user": "admin",
+        "pass": "pass",
+        "name": "drip"
+    },
+    "file_storage": {
+      "root_folder": "media",
+      "profile_photo_path": "profile_photos"
+    }
+  }
+  

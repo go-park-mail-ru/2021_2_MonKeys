@@ -4,7 +4,7 @@ import (
 	"dripapp/internal/dripapp/models"
 	"dripapp/internal/pkg/logger"
 	"encoding/json"
-	"log"
+	"io/ioutil"
 	"net/http"
 )
 
@@ -13,47 +13,83 @@ type JSON struct {
 	Body   interface{} `json:"body"`
 }
 
-func SendOKResp(resp JSON, w http.ResponseWriter) {
-	byteResp, err := json.Marshal(resp)
-	if err != nil {
-		SendErrorResponse(w, models.HTTPError{
-			Code:    http.StatusInternalServerError,
-			Message: "Error encoding json",
-		},
-			logger.DripLogger.ErrorLogging,
-		)
-		return
+func SendOK(w http.ResponseWriter) {
+	resp := JSON{
+		Status: http.StatusOK,
 	}
-	w.WriteHeader(http.StatusOK)
-	_, err = w.Write(byteResp)
-	if err != nil {
-		SendErrorResponse(w, models.HTTPError{
-			Code:    http.StatusInternalServerError,
-			Message: "Error write byte",
-		},
-			logger.DripLogger.ErrorLogging,
-		)
-		return
-	}
-	log.Printf("CODE %d", resp.Status)
 
+	err := WriteJSON(w, resp)
+	if err != nil {
+		SendError(w, models.HTTPError{
+			Code:    http.StatusInternalServerError,
+			Message: models.ErrWriteByte,
+		},
+			logger.DripLogger.ErrorLogging,
+		)
+		return
+	}
+
+	logger.DripLogger.Info.Printf("CODE %d", resp.Status)
 }
 
-func SendErrorResponse(w http.ResponseWriter, httpErr models.HTTPError, logging func(int, string)) {
-	var resp JSON
-	resp.Status = httpErr.Code
+func SendData(w http.ResponseWriter, v interface{}) {
+	resp := JSON{
+		Status: http.StatusOK,
+		Body:   v,
+	}
 
-	body, err := json.Marshal(resp)
+	err := WriteJSON(w, resp)
+	if err != nil {
+		SendError(w, models.HTTPError{
+			Code:    http.StatusInternalServerError,
+			Message: models.ErrWriteByte,
+		},
+			logger.DripLogger.ErrorLogging,
+		)
+		return
+	}
+
+	logger.DripLogger.Info.Printf("CODE %d", resp.Status)
+}
+
+func SendError(w http.ResponseWriter, httpErr models.HTTPError, logging func(int, string)) {
+	resp := JSON{
+		Status: httpErr.Code,
+	}
+
+	err := WriteJSON(w, resp)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
-	_, err = w.Write(body)
+	logging(httpErr.Code, httpErr.Message.Error())
+}
+
+func ReadJSON(r *http.Request, v interface{}) error {
+	byteReq, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		return
+		return err
 	}
 
-	logging(httpErr.Code, httpErr.Message)
+	err = json.Unmarshal(byteReq, v)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func WriteJSON(w http.ResponseWriter, v interface{}) error {
+	byteResp, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	_, err = w.Write(byteResp)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

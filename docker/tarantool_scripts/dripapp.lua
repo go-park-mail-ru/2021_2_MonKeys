@@ -7,14 +7,12 @@ box.cfg {
 
 
 function init()
-    if box.space.sessions then box.space.sessions:drop() end
-
-    s = box.schema.create_space('sessions')
+    s = box.schema.space.create('sessions', {if_not_exists=true})
     s:format({
         { name = 'cookie', type = 'string' },
         { name = 'user_id', type = 'unsigned' }
     })
-    s:create_index('primary', { type = 'HASH', parts = {'cookie'} })
+    s:create_index('primary', { type = 'HASH', parts = {'cookie'}, if_not_exists = true })
 
     print('create space sessions')
 end
