@@ -1,23 +1,23 @@
 {
-    "log_level": "ERROR",
+    "log_level": "INFO",
     "server": {
-      "host": "api.monkeys.team",
-      "httpPort": ":443",
-      "certFile": "star.monkeys.team.crt",
-      "keyFile": "star.monkeys.team.key"
+      "host": "127.0.0.1",
+      "httpPort": ":8000",
+      "certFile": "api.ijia.me.crt",
+      "keyFile": "api.ijia.me.key"
     },
     "chat_server": {
-      "host": "api.monkeys.team",
-      "httpPort": ":443",
-      "certFile": "star.monkeys.team.crt",
-      "keyFile": "star.monkeys.team.key"
+      "host": "127.0.0.1",
+      "httpPort": ":8000",
+      "certFile": "api.ijia.me.crt",
+      "keyFile": "api.ijia.me.key"
     },
     "auth_server": {
-      "host": "api.monkeys.team",
-      "httpPort": ":443",
+      "host": "127.0.0.1",
+      "httpPort": ":8002",
       "grpcUrl": "auth_service:8003",
-      "certFile": "star.monkeys.team.crt",
-      "keyFile": "star.monkeys.team.key"
+      "certFile": "api.ijia.me.crt",
+      "keyFile": "api.ijia.me.key"
     },
     "database": {
         "host": "postgres",

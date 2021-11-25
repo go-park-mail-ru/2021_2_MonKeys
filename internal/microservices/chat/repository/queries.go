@@ -22,7 +22,7 @@ const (
 
 	GetChatsQuery = `
 	select
-		op.id as FromUserID, op.name as name, op.imgs[1] as img
+		op.id, op.name as name, op.imgs[1] as img
 	from
 		profile p
 		join message m on p.id = m.from_id

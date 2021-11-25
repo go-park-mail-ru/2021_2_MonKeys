@@ -21,7 +21,7 @@ build-go:
 ## test-coverage: get final code coverage
 test-coverage:
 	go test -coverprofile=coverage.out.tmp -coverpkg=./...  ./...
-    cat coverage.out.tmp | grep -v mock > coverage2.out.tmp
+	cat coverage.out.tmp | grep -v mock > coverage2.out.tmp
 	cat coverage2.out.tmp | grep -v cmd > coverage.out.tmp
 	go tool cover -func=coverage.out.tmp
 	go tool cover -html=coverage.out.tmp -o cover.html
@@ -50,7 +50,6 @@ clean-deploy:
 	sudo rm -rf media
 	sudo rm -rf logs.log
 	docker volume prune
-
 
 ##################################### deploy
 
@@ -87,9 +86,9 @@ local-build:
 local-run:
 	docker-compose -f local.yml up --build --no-deps
 
-local: local-build deploy-run
+local: local-build local-run
 
-relocal: clean local-build deploy-run
+relocal: clean local-build local-run
 
 ######################################## debug
 

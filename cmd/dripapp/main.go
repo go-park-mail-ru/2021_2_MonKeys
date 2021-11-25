@@ -9,9 +9,12 @@ import (
 	_userRepo "dripapp/internal/dripapp/user/repository"
 	_userUsecase "dripapp/internal/dripapp/user/usecase"
 	_authClient "dripapp/internal/microservices/auth/delivery/grpc/client"
-	_sessionDelivery "dripapp/internal/microservices/auth/delivery/http"
 	_sessionRepo "dripapp/internal/microservices/auth/repository"
 	_sessionUcase "dripapp/internal/microservices/auth/usecase"
+	_chatDelivery "dripapp/internal/microservices/chat/delivery"
+	"dripapp/internal/microservices/chat/models"
+	_chatRepo "dripapp/internal/microservices/chat/repository"
+	_chatUsecase "dripapp/internal/microservices/chat/usecase"
 	"log"
 
 	"dripapp/internal/pkg/logger"
@@ -61,6 +64,16 @@ func main() {
 	timeoutContext := configs.Timeouts.ContextTimeout
 
 	// usecase
+	hub := models.NewHub()
+	go hub.Run()
+	chatRepo, err := _chatRepo.NewPostgresChatRepository(configs.Postgres)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// usecase
+	chatUseCase := _chatUsecase.NewChatUseCase(chatRepo, hub, timeoutContext)
+
 	sessionUcase := _sessionUcase.NewSessionUsecase(sm, timeoutContext)
 	userUCase := _userUsecase.NewUserUsecase(
 		userRepo,
@@ -74,8 +87,8 @@ func main() {
 
 	// delivery
 	_userDelivery.SetUserRouting(logger.DripLogger, router, userUCase, sessionUcase, *grpcAuthClient)
-	_sessionDelivery.SetSessionRouting(logger.DripLogger, router, userUCase, sessionUcase, *grpcAuthClient)
 	_fileDelivery.SetFileRouting(router, *fileManager)
+	_chatDelivery.SetChatRouting(logger.DripLogger, router, chatUseCase, *grpcAuthClient)
 
 	// middleware
 	middleware.NewMiddleware(router, sm, logFile, logger.DripLogger)

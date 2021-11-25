@@ -23,6 +23,8 @@ coverage2.out.tmp
 cover.html
 *.out
 
+config.json
+
 #binary
 main-service
 
