@@ -17,4 +17,4 @@
 <br><a href="https://github.com/VladimirLunkin">🕵️Владимир Лункин🧙</a>
 </h2>
 <img alt="Website" src="https://img.shields.io/website?url=https%3A%2F%2Fapi.ijia.me">
-<h1> <a href="https://ijia.me"> deployment (https://ijia.me) </a> </h1>
+<h1> <a href="https://ijia.me"> deployment (https://drip.monkeys.team/) </a> </h1>
