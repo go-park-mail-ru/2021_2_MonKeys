@@ -1,0 +1,3822 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>configs: Go Coverage Report</title>
+		<style>
+			body {
+				background: black;
+				color: rgb(80, 80, 80);
+			}
+			body, pre, #legend span {
+				font-family: Menlo, monospace;
+				font-weight: bold;
+			}
+			#topbar {
+				background: black;
+				position: fixed;
+				top: 0; left: 0; right: 0;
+				height: 42px;
+				border-bottom: 1px solid rgb(80, 80, 80);
+			}
+			#content {
+				margin-top: 50px;
+			}
+			#nav, #legend {
+				float: left;
+				margin-left: 10px;
+			}
+			#legend {
+				margin-top: 12px;
+			}
+			#nav {
+				margin-top: 10px;
+			}
+			#legend span {
+				margin: 0 5px;
+			}
+			.cov0 { color: rgb(192, 0, 0) }
+.cov1 { color: rgb(128, 128, 128) }
+.cov2 { color: rgb(116, 140, 131) }
+.cov3 { color: rgb(104, 152, 134) }
+.cov4 { color: rgb(92, 164, 137) }
+.cov5 { color: rgb(80, 176, 140) }
+.cov6 { color: rgb(68, 188, 143) }
+.cov7 { color: rgb(56, 200, 146) }
+.cov8 { color: rgb(44, 212, 149) }
+.cov9 { color: rgb(32, 224, 152) }
+.cov10 { color: rgb(20, 236, 155) }
+
+		</style>
+	</head>
+	<body>
+		<div id="topbar">
+			<div id="nav">
+				<select id="files">
+				
+				<option value="file0">dripapp/configs/config.go (0.0%)</option>
+				
+				<option value="file1">dripapp/internal/dripapp/file/delivery/routing.go (0.0%)</option>
+				
+				<option value="file2">dripapp/internal/dripapp/file/manager.go (0.0%)</option>
+				
+				<option value="file3">dripapp/internal/dripapp/middleware/cors.go (0.0%)</option>
+				
+				<option value="file4">dripapp/internal/dripapp/middleware/logger.go (0.0%)</option>
+				
+				<option value="file5">dripapp/internal/dripapp/middleware/middleware.go (0.0%)</option>
+				
+				<option value="file6">dripapp/internal/dripapp/middleware/panic.go (0.0%)</option>
+				
+				<option value="file7">dripapp/internal/dripapp/models/file.go (75.0%)</option>
+				
+				<option value="file8">dripapp/internal/dripapp/user/delivery/user.go (100.0%)</option>
+				
+				<option value="file9">dripapp/internal/dripapp/user/delivery/user_routing.go (100.0%)</option>
+				
+				<option value="file10">dripapp/internal/dripapp/user/repository/postgresql_user.go (99.0%)</option>
+				
+				<option value="file11">dripapp/internal/dripapp/user/usecase/user_ucase.go (100.0%)</option>
+				
+				<option value="file12">dripapp/internal/microservices/auth/delivery/grpc/client/client.go (89.5%)</option>
+				
+				<option value="file13">dripapp/internal/microservices/auth/delivery/grpc/grpc_server/server.go (82.6%)</option>
+				
+				<option value="file14">dripapp/internal/microservices/auth/delivery/grpc/protobuff/auth.pb.go (39.1%)</option>
+				
+				<option value="file15">dripapp/internal/microservices/auth/delivery/http/auth_handler.go (90.6%)</option>
+				
+				<option value="file16">dripapp/internal/microservices/auth/delivery/http/auth_routing.go (100.0%)</option>
+				
+				<option value="file17">dripapp/internal/microservices/auth/models/session.go (83.3%)</option>
+				
+				<option value="file18">dripapp/internal/microservices/auth/repository/manager.go (0.0%)</option>
+				
+				<option value="file19">dripapp/internal/microservices/auth/usecase/auth_usecase.go (94.1%)</option>
+				
+				<option value="file20">dripapp/internal/microservices/chat/delivery/chat.go (77.8%)</option>
+				
+				<option value="file21">dripapp/internal/microservices/chat/delivery/routing.go (100.0%)</option>
+				
+				<option value="file22">dripapp/internal/microservices/chat/delivery/ws.go (42.1%)</option>
+				
+				<option value="file23">dripapp/internal/microservices/chat/models/chatClient.go (0.0%)</option>
+				
+				<option value="file24">dripapp/internal/microservices/chat/models/hub.go (6.7%)</option>
+				
+				<option value="file25">dripapp/internal/microservices/chat/repository/postgresql_chat.go (96.4%)</option>
+				
+				<option value="file26">dripapp/internal/microservices/chat/usecase/chat.go (67.9%)</option>
+				
+				<option value="file27">dripapp/internal/pkg/hasher/hasher.go (100.0%)</option>
+				
+				<option value="file28">dripapp/internal/pkg/logger/logger.go (42.9%)</option>
+				
+				<option value="file29">dripapp/internal/pkg/monitoring/monitoring.go (0.0%)</option>
+				
+				<option value="file30">dripapp/internal/pkg/permissions/permissions.go (48.8%)</option>
+				
+				<option value="file31">dripapp/internal/pkg/responses/responses.go (71.9%)</option>
+				
+				</select>
+			</div>
+			<div id="legend">
+				<span>not tracked</span>
+			
+				<span class="cov0">not covered</span>
+				<span class="cov8">covered</span>
+			
+			</div>
+		</div>
+		<div id="content">
+		
+		<pre class="file" id="file0" style="display: none">package configs
+
+import (
+        "log"
+        "time"
+
+        "github.com/spf13/viper"
+)
+
+const (
+        DEBUG   = 1
+        INFO    = 2
+        WARNING = 3
+        ERROR   = 4
+)
+
+type PostgresConfig struct {
+        User     string
+        Password string
+        Port     string
+        Host     string
+        DBName   string
+}
+
+type TarantoolConfig struct {
+        User     string
+        Password string
+        Port     string
+        Host     string
+        DBName   string
+}
+
+type ServerConfig struct {
+        Host     string
+        HttpPort string
+        GrpcUrl  string
+        CertFile string
+        KeyFile  string
+}
+
+type FileStorageConfig struct {
+        RootFolder       string
+        ProfilePhotoPath string
+}
+
+type TimeoutsConfig struct {
+        WriteTimeout   time.Duration
+        ReadTimeout    time.Duration
+        ContextTimeout time.Duration
+}
+
+type logLevel int
+
+type contextUserID string
+
+type contextUser string
+
+var (
+        Postgres PostgresConfig
+
+        Tarantool TarantoolConfig
+
+        Server ServerConfig
+
+        ChatServer ServerConfig
+
+        AuthServer ServerConfig
+
+        FileStorage FileStorageConfig
+
+        Timeouts TimeoutsConfig
+
+        LogLevel logLevel
+
+        ContextUserID contextUserID
+
+        ContextUser contextUser
+)
+
+func SetConfig() <span class="cov0" title="0">{
+        viper.SetConfigFile("config.json")
+        err := viper.ReadInConfig()
+        if err != nil </span><span class="cov0" title="0">{
+                log.Fatal(err)
+        }</span>
+
+        <span class="cov0" title="0">logLevelStr := viper.GetString(`log_level`)
+
+        log.Printf("Service RUN on %s mode", logLevelStr)
+
+        switch logLevelStr </span>{
+        case "DEBUG":<span class="cov0" title="0">
+                LogLevel = DEBUG</span>
+        case "INFO":<span class="cov0" title="0">
+                LogLevel = INFO</span>
+        case "WARNING":<span class="cov0" title="0">
+                LogLevel = WARNING</span>
+        case "ERROR":<span class="cov0" title="0">
+                LogLevel = ERROR</span>
+        }
+
+        <span class="cov0" title="0">Postgres = PostgresConfig{
+                Port:     viper.GetString(`database.port`),
+                Host:     viper.GetString(`database.host`),
+                User:     viper.GetString(`database.user`),
+                Password: viper.GetString(`database.pass`),
+                DBName:   viper.GetString(`database.name`),
+        }
+
+        Tarantool = TarantoolConfig{
+                Port:     viper.GetString(`session.port`),
+                Host:     viper.GetString(`session.host`),
+                User:     viper.GetString(`session.user`),
+                Password: viper.GetString(`session.pass`),
+                DBName:   viper.GetString(`session.name`),
+        }
+
+        Server = ServerConfig{
+                HttpPort: viper.GetString(`server.httpPort`),
+                Host:     viper.GetString(`server.host`),
+                CertFile: viper.GetString(`server.certFile`),
+                KeyFile:  viper.GetString(`server.keyFile`),
+        }
+
+        ChatServer = ServerConfig{
+                HttpPort: viper.GetString(`chat_server.httpPort`),
+                Host:     viper.GetString(`chat_server.host`),
+                CertFile: viper.GetString(`chat_server.certFile`),
+                KeyFile:  viper.GetString(`chat_server.keyFile`),
+        }
+
+        AuthServer = ServerConfig{
+                HttpPort: viper.GetString(`auth_server.httpPort`),
+                GrpcUrl:  viper.GetString(`auth_server.grpcUrl`),
+                Host:     viper.GetString(`auth_server.host`),
+                CertFile: viper.GetString(`auth_server.certFile`),
+                KeyFile:  viper.GetString(`auth_server.keyFile`),
+        }
+
+        FileStorage = FileStorageConfig{
+                RootFolder:       viper.GetString(`file_storage.root_folder`),
+                ProfilePhotoPath: viper.GetString(`file_storage.profile_photo_path`),
+        }
+
+        Timeouts = TimeoutsConfig{
+                WriteTimeout:   15 * time.Second,
+                ReadTimeout:    15 * time.Second,
+                ContextTimeout: time.Second * 2,
+        }
+
+        ContextUserID = "userID"
+
+        ContextUser = "user"</span>
+}
+</pre>
+		
+		<pre class="file" id="file1" style="display: none">package delivery
+
+import (
+        "dripapp/internal/dripapp/file"
+        "fmt"
+        "net/http"
+
+        "github.com/gorilla/mux"
+)
+
+func SetFileRouting(router *mux.Router, fm file.FileManager) <span class="cov0" title="0">{
+        router.PathPrefix(fmt.Sprintf("/%s/", fm.RootFolder)).Handler(
+                http.StripPrefix(fmt.Sprintf("/%s/", fm.RootFolder),
+                        http.FileServer(http.Dir("./"+fm.RootFolder))))
+
+        http.Handle("/", router)
+}</span>
+</pre>
+		
+		<pre class="file" id="file2" style="display: none">package file
+
+import (
+        "dripapp/configs"
+        "dripapp/internal/dripapp/models"
+        "dripapp/internal/pkg/hasher"
+        "errors"
+        "fmt"
+        "image"
+        "image/gif"
+        "image/jpeg"
+        "image/png"
+        "io"
+        "os"
+        "strings"
+
+        "github.com/chai2010/webp"
+
+        uuid "github.com/nu7hatch/gouuid"
+)
+
+type FileManager struct {
+        RootFolder  string
+        PhotoFolder string
+}
+
+type Image struct {
+        img     image.Image
+        gif     *gif.GIF
+        imgType string
+}
+
+func NewFileManager(config configs.FileStorageConfig) (fm *FileManager, err error) <span class="cov0" title="0">{
+        rootFolder := config.RootFolder
+        photoFolder := fmt.Sprintf("%s/%s", rootFolder, config.ProfilePhotoPath)
+
+        fm = &amp;FileManager{
+                RootFolder:  rootFolder,
+                PhotoFolder: photoFolder,
+        }
+
+        if ok, err := fm.isNotExists(fm.RootFolder); ok </span><span class="cov0" title="0">{
+                if err != nil </span><span class="cov0" title="0">{
+                        return nil, err
+                }</span>
+
+                <span class="cov0" title="0">err = fm.createFolder(fm.RootFolder)
+                if err != nil </span><span class="cov0" title="0">{
+                        return nil, err
+                }</span>
+        }
+
+        <span class="cov0" title="0">if ok, err := fm.isNotExists(fm.PhotoFolder); ok </span><span class="cov0" title="0">{
+                if err != nil </span><span class="cov0" title="0">{
+                        return nil, err
+                }</span>
+
+                <span class="cov0" title="0">err = fm.createFolder(fm.PhotoFolder)
+                if err != nil </span><span class="cov0" title="0">{
+                        return nil, err
+                }</span>
+        }
+
+        <span class="cov0" title="0">return fm, err</span>
+}
+
+func (fm FileManager) CreateFoldersForNewUser(user models.User) error <span class="cov0" title="0">{
+        return fm.createFolder(fm.getPathToUserPhoto(user))
+}</span>
+
+func (fm FileManager) SaveUserPhoto(user models.User, file io.Reader, fileName string) (path string, err error) <span class="cov0" title="0">{
+        img, err := decodeImg(file, fileName)
+        if err != nil </span><span class="cov0" title="0">{
+                return
+        }</span>
+
+        <span class="cov0" title="0">newPhoto, err := getNewFilename()
+        if err != nil </span><span class="cov0" title="0">{
+                return
+        }</span>
+
+        <span class="cov0" title="0">path = fmt.Sprintf("%s/%s.webp", fm.getPathToUserPhoto(user), newPhoto)
+
+        err = img.saveAsWebp(path)
+        return</span>
+}
+
+func (FileManager) Delete(filePath string) error <span class="cov0" title="0">{
+        return os.Remove(filePath)
+}</span>
+
+func (FileManager) createFolder(title string) error <span class="cov0" title="0">{
+        return os.Mkdir(title, os.ModePerm)
+}</span>
+
+func (FileManager) save(file io.Reader, path string) error <span class="cov0" title="0">{
+        fileOnDisk, err := os.Create(path)
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+        <span class="cov0" title="0">defer fileOnDisk.Close()
+
+        _, err = io.Copy(fileOnDisk, file)
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+
+        <span class="cov0" title="0">return nil</span>
+}
+
+func (fm FileManager) getPathToUserPhoto(user models.User) string <span class="cov0" title="0">{
+        return fmt.Sprintf("%s/%s", fm.PhotoFolder, hasher.GetSha1([]byte(user.Email)))
+}</span>
+
+func getFileType(fileName string) (string, error) <span class="cov0" title="0">{
+        separatedFilename := strings.Split(fileName, ".")
+        if len(separatedFilename) &lt;= 1 </span><span class="cov0" title="0">{
+                err := errors.New("bad filename")
+                return "", err
+        }</span>
+
+        <span class="cov0" title="0">fileType := separatedFilename[len(separatedFilename)-1]
+
+        return strings.ToLower(fileType), nil</span>
+}
+
+func getNewFilename() (string, error) <span class="cov0" title="0">{
+        u, err := uuid.NewV4()
+        if err != nil </span><span class="cov0" title="0">{
+                return "", err
+        }</span>
+
+        <span class="cov0" title="0">return u.String(), nil</span>
+}
+
+func (FileManager) isNotExists(path string) (bool, error) <span class="cov0" title="0">{
+        _, err := os.Stat(path)
+        if err == nil </span><span class="cov0" title="0">{
+                return false, nil
+        }</span>
+
+        <span class="cov0" title="0">if os.IsNotExist(err) </span><span class="cov0" title="0">{
+                return true, nil
+        }</span>
+
+        <span class="cov0" title="0">return false, err</span>
+}
+
+func decodeImg(file io.Reader, fileName string) (img Image, err error) <span class="cov0" title="0">{
+        fileType, err := getFileType(fileName)
+        if err != nil </span><span class="cov0" title="0">{
+                return
+        }</span>
+
+        <span class="cov0" title="0">switch fileType </span>{
+        case "jpeg":<span class="cov0" title="0">
+                img.img, err = jpeg.Decode(file)</span>
+        case "jpg":<span class="cov0" title="0">
+                img.img, err = jpeg.Decode(file)</span>
+        case "png":<span class="cov0" title="0">
+                img.img, err = png.Decode(file)</span>
+        case "gif":<span class="cov0" title="0">
+                img.gif, err = gif.DecodeAll(file)</span>
+        case "webp":<span class="cov0" title="0">
+                img.img, err = webp.Decode(file)</span>
+        default:<span class="cov0" title="0">
+                err = errors.New("Unsupported file type")</span>
+        }
+
+        <span class="cov0" title="0">img.imgType = fileType
+
+        return</span>
+}
+
+func (img Image) saveAsWebp(path string) error <span class="cov0" title="0">{
+        fileOnDisk, err := os.Create(path)
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+        <span class="cov0" title="0">defer fileOnDisk.Close()
+
+        if img.imgType == "gif" </span><span class="cov0" title="0">{
+                err = gif.EncodeAll(fileOnDisk, img.gif)
+        }</span> else<span class="cov0" title="0"> {
+                err = webp.Encode(fileOnDisk, img.img, nil)
+        }</span>
+        <span class="cov0" title="0">if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+
+        <span class="cov0" title="0">return nil</span>
+}
+
+func (img Image) getType() string <span class="cov0" title="0">{
+        return img.imgType
+}</span>
+</pre>
+		
+		<pre class="file" id="file3" style="display: none">package middleware
+
+import (
+        "dripapp/internal/dripapp/models"
+        "dripapp/internal/pkg/logger"
+        "dripapp/internal/pkg/responses"
+        "errors"
+        "fmt"
+        "net/http"
+        "strings"
+)
+
+var allowedOrigins = map[string]struct{}{
+        "http://127.0.0.1":         {},
+        "http://127.0.0.1:8000":    {},
+        "http://localhost":         {},
+        "http://localhost:8080":    {},
+        "http://ijia.me":           {},
+        "http://192.168.1.16:8080": {},
+
+        "https://localhost:8080":    {},
+        "https://127.0.0.1:8000":    {},
+        "https://192.168.1.16:8080": {},
+        "https://127.0.0.1":         {},
+        "https://localhost":         {},
+        "https://ijia.me":           {},
+}
+
+func CORS(logger logger.Logger) (mw func(http.Handler) http.Handler) <span class="cov0" title="0">{
+        return func(next http.Handler) http.Handler </span><span class="cov0" title="0">{
+                return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) </span><span class="cov0" title="0">{
+                        origin := r.Header.Get("Origin")
+                        _, isIn := allowedOrigins[origin]
+                        if isIn </span><span class="cov0" title="0">{
+                                w.Header().Set("Access-Control-Allow-Origin", origin)
+                        }</span> else<span class="cov0" title="0"> {
+                                mess := fmt.Sprintf("unknown origin %s", origin)
+                                responses.SendError(w, models.HTTPError{
+                                        Code:    http.StatusInternalServerError,
+                                        Message: errors.New(mess),
+                                }, logger.ErrorLogging)
+                                return
+                        }</span>
+                        <span class="cov0" title="0">w.Header().Set("Access-Control-Allow-Credentials", "true")
+                        w.Header().Set("Access-Control-Allow-Methods", "POST, GET, DELETE, PUT, OPTIONS")
+                        var sb strings.Builder
+                        sb.WriteString("Accept,")
+                        sb.WriteString("Content-Type,")
+                        sb.WriteString("Content-Length,")
+                        sb.WriteString("Accept-Encoding,")
+                        sb.WriteString("X-CSRF-Token,")
+                        sb.WriteString("Authorization,")
+                        sb.WriteString("Allow-Credentials,")
+                        sb.WriteString("Set-Cookie,")
+                        sb.WriteString("Access-Control-Allow-Credentials,")
+                        sb.WriteString("Access-Control-Allow-Origin")
+                        w.Header().Set("Access-Control-Allow-Headers", sb.String())
+                        if r.Method == "OPTIONS" </span><span class="cov0" title="0">{
+                                return
+                        }</span>
+
+                        <span class="cov0" title="0">next.ServeHTTP(w, r)</span>
+                })
+        }
+}
+</pre>
+		
+		<pre class="file" id="file4" style="display: none">package middleware
+
+import (
+        "dripapp/internal/pkg/logger"
+        "dripapp/internal/pkg/monitoring"
+        "io"
+        "log"
+        "net/http"
+        "os"
+        "strconv"
+        "time"
+)
+
+func Logger(logFile *os.File, l logger.Logger, metrics *monitoring.PromMetrics) (mw func(http.Handler) http.Handler) <span class="cov0" title="0">{
+        return func(next http.Handler) http.Handler </span><span class="cov0" title="0">{
+                return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) </span><span class="cov0" title="0">{
+                        start := time.Now()
+
+                        multiWriter := io.MultiWriter(os.Stdout, logFile)
+                        log.SetOutput(multiWriter)
+                        l.InfoLogging(r.Method, r.RemoteAddr, r.URL.Path, time.Since(start))
+                        reqTime := time.Now()
+                        next.ServeHTTP(w, r)
+                        respTime := time.Since(reqTime)
+                        if r.URL.Path != "/metrics" </span><span class="cov0" title="0">{
+                                metrics.Hits.WithLabelValues(strconv.Itoa(http.StatusOK), r.URL.String(), r.Method).Inc()
+                                metrics.Timings.WithLabelValues(
+                                        strconv.Itoa(http.StatusOK), r.URL.String(), r.Method).Observe(respTime.Seconds())
+                        }</span>
+                })
+        }
+}
+</pre>
+		
+		<pre class="file" id="file5" style="display: none">package middleware
+
+import (
+        _sessionModels "dripapp/internal/microservices/auth/models"
+        "dripapp/internal/pkg/logger"
+        "dripapp/internal/pkg/monitoring"
+        "os"
+
+        "github.com/gorilla/mux"
+)
+
+func NewMiddleware(r *mux.Router, sp _sessionModels.SessionRepository, logFile *os.File, l logger.Logger) <span class="cov0" title="0">{
+        // sm := sessionMiddleware{
+        //         sessionRepo: sp,
+        // }
+        metrics := monitoring.RegisterMetrics(r)
+
+        r.Use(Logger(logFile, l, metrics))
+        //r.Use(CORS(l))
+        r.Use(PanicRecovery(l, metrics))
+        // r.Use(sm.SessionMiddleware(l))
+}</span>
+</pre>
+		
+		<pre class="file" id="file6" style="display: none">package middleware
+
+import (
+        "dripapp/internal/dripapp/models"
+        "dripapp/internal/pkg/logger"
+        "dripapp/internal/pkg/monitoring"
+        "dripapp/internal/pkg/responses"
+        "fmt"
+        "net/http"
+        "strconv"
+        "time"
+)
+
+func PanicRecovery(l logger.Logger, metrics *monitoring.PromMetrics) (mw func(http.Handler) http.Handler) <span class="cov0" title="0">{
+        return func(next http.Handler) http.Handler </span><span class="cov0" title="0">{
+                return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) </span><span class="cov0" title="0">{
+                        reqTime := time.Now()
+                        defer func() </span><span class="cov0" title="0">{
+                                if err := recover(); err != nil </span><span class="cov0" title="0">{
+                                        respTime := time.Since(reqTime)
+                                        metrics.Hits.WithLabelValues(
+                                                strconv.Itoa(http.StatusInternalServerError), r.URL.Path, r.Method).Inc()
+                                        fmt.Printf("Recovered from panic with err: %s on Method: [%s] %s\n", err, r.Method, r.RequestURI)
+                                        metrics.Timings.WithLabelValues(
+                                                strconv.Itoa(http.StatusInternalServerError), r.URL.String(),
+                                                r.Method).Observe(respTime.Seconds())
+                                        responses.SendError(w, models.InternalServerError500, l.ErrorLogging)
+                                        return
+                                }</span>
+                        }()
+                        <span class="cov0" title="0">next.ServeHTTP(w, r)</span>
+                })
+        }
+}
+</pre>
+		
+		<pre class="file" id="file7" style="display: none">package models
+
+import (
+        "io"
+)
+
+type Photo struct {
+        Path string `json:"photo"`
+}
+
+func (user User) GetLastPhoto() string <span class="cov0" title="0">{
+        if len(user.Imgs) == 0 </span><span class="cov0" title="0">{
+                return ""
+        }</span>
+
+        <span class="cov0" title="0">return user.Imgs[len(user.Imgs)-1]</span>
+}
+
+func (user *User) AddNewPhoto(photoPath string) <span class="cov8" title="1">{
+        user.Imgs = append(user.Imgs, photoPath)
+}</span>
+
+func (user *User) DeletePhoto(photo Photo) (err error) <span class="cov8" title="1">{
+        var photos []string
+
+        err = ErrNoSuchPhoto
+        for _, currPhoto := range user.Imgs </span><span class="cov8" title="1">{
+                if currPhoto != photo.Path </span><span class="cov8" title="1">{
+                        photos = append(photos, currPhoto)
+                        err = nil
+                }</span>
+        }
+
+        <span class="cov8" title="1">user.Imgs = photos
+
+        return</span>
+}
+
+type FileRepository interface {
+        CreateFoldersForNewUser(user User) error
+        SaveUserPhoto(user User, file io.Reader, fileName string) (path string, err error)
+        Delete(filePath string) error
+}
+</pre>
+		
+		<pre class="file" id="file8" style="display: none">package delivery
+
+import (
+        "dripapp/internal/dripapp/models"
+        _sessionModels "dripapp/internal/microservices/auth/models"
+        "dripapp/internal/pkg/logger"
+        "dripapp/internal/pkg/responses"
+        "net/http"
+)
+
+const maxPhotoSize = 20 * 1024 * 1025
+
+type UserHandler struct {
+        SessionUcase _sessionModels.SessionUsecase
+        UserUCase    models.UserUsecase
+        Logger       logger.Logger
+}
+
+// func (h *UserHandler) CurrentUser(w http.ResponseWriter, r *http.Request) {
+//         user, err := h.UserUCase.CurrentUser(r.Context())
+//         if err != nil {
+//                 responses.SendError(w, models.HTTPError{
+//                         Code:    http.StatusNotFound,
+//                         Message: err,
+//                 }, h.Logger.ErrorLogging)
+//                 return
+//         }
+
+//         responses.SendData(w, user)
+// }
+
+func (h *UserHandler) EditProfileHandler(w http.ResponseWriter, r *http.Request) <span class="cov8" title="1">{
+        var newUserData models.User
+        err := responses.ReadJSON(r, &amp;newUserData)
+        if err != nil </span><span class="cov8" title="1">{
+                responses.SendError(w, models.HTTPError{
+                        Code:    http.StatusBadRequest,
+                        Message: err,
+                }, h.Logger.ErrorLogging)
+                return
+        }</span>
+
+        <span class="cov8" title="1">user, err := h.UserUCase.EditProfile(r.Context(), newUserData)
+        if err != nil </span><span class="cov8" title="1">{
+                responses.SendError(w, models.HTTPError{
+                        Code:    http.StatusNotFound,
+                        Message: err,
+                }, h.Logger.ErrorLogging)
+                return
+        }</span>
+
+        <span class="cov8" title="1">responses.SendData(w, user)</span>
+}
+
+func (h *UserHandler) UploadPhoto(w http.ResponseWriter, r *http.Request) <span class="cov8" title="1">{
+        err := r.ParseMultipartForm(maxPhotoSize)
+        if err != nil </span><span class="cov8" title="1">{
+                responses.SendError(w, models.HTTPError{
+                        Code:    http.StatusBadRequest,
+                        Message: err,
+                }, h.Logger.ErrorLogging)
+                return
+        }</span>
+
+        <span class="cov8" title="1">uploadedPhoto, fileHeader, err := r.FormFile("photo")
+        if err != nil </span><span class="cov8" title="1">{
+                responses.SendError(w, models.HTTPError{
+                        Code:    http.StatusBadRequest,
+                        Message: err,
+                }, h.Logger.ErrorLogging)
+                return
+        }</span>
+        <span class="cov8" title="1">defer uploadedPhoto.Close()
+
+        photo, err := h.UserUCase.AddPhoto(r.Context(), uploadedPhoto, fileHeader.Filename)
+        if err != nil </span><span class="cov8" title="1">{
+                responses.SendError(w, models.HTTPError{
+                        Code:    http.StatusInternalServerError,
+                        Message: err,
+                }, h.Logger.ErrorLogging)
+                return
+        }</span>
+
+        <span class="cov8" title="1">responses.SendData(w, photo)</span>
+}
+
+func (h *UserHandler) DeletePhoto(w http.ResponseWriter, r *http.Request) <span class="cov8" title="1">{
+        var photo models.Photo
+        err := responses.ReadJSON(r, &amp;photo)
+        if err != nil </span><span class="cov8" title="1">{
+                responses.SendError(w, models.HTTPError{
+                        Code:    http.StatusBadRequest,
+                        Message: err,
+                }, h.Logger.ErrorLogging)
+                return
+        }</span>
+
+        <span class="cov8" title="1">err = h.UserUCase.DeletePhoto(r.Context(), photo)
+        if err != nil </span><span class="cov8" title="1">{
+                responses.SendError(w, models.HTTPError{
+                        Code:    http.StatusNotFound,
+                        Message: err,
+                }, h.Logger.ErrorLogging)
+                return
+        }</span>
+
+        <span class="cov8" title="1">responses.SendOK(w)</span>
+}
+
+// func (h *UserHandler) SignupHandler(w http.ResponseWriter, r *http.Request) {
+//         var logUserData models.LoginUser
+//         err := responses.ReadJSON(r, &amp;logUserData)
+//         if err != nil {
+//                 responses.SendError(w, models.HTTPError{
+//                         Code:    http.StatusBadRequest,
+//                         Message: err,
+//                 }, h.Logger.ErrorLogging)
+//                 return
+//         }
+
+//         user, err := h.UserUCase.Signup(r.Context(), logUserData)
+//         if err != nil {
+//                 code := http.StatusNotFound
+//                 if err == models.ErrEmailAlreadyExists {
+//                         code = models.StatusEmailAlreadyExists
+//                 }
+//                 responses.SendError(w, models.HTTPError{
+//                         Code:    code,
+//                         Message: err,
+//                 }, h.Logger.ErrorLogging)
+//                 return
+//         }
+//         cookie := _sessionModels.CreateSessionCookie(logUserData)
+
+//         sess := _sessionModels.Session{
+//                 Cookie: cookie.Value,
+//                 UserID: user.ID,
+//         }
+//         err = h.SessionUcase.AddSession(r.Context(), sess)
+//         if err != nil {
+//                 responses.SendError(w, models.HTTPError{
+//                         Code:    http.StatusInternalServerError,
+//                         Message: err,
+//                 }, h.Logger.WarnLogging)
+//                 return
+//         }
+
+//         http.SetCookie(w, &amp;cookie)
+
+//         responses.SendData(w, user)
+// }
+
+func (h *UserHandler) NextUserHandler(w http.ResponseWriter, r *http.Request) <span class="cov8" title="1">{
+        nextUser, err := h.UserUCase.NextUser(r.Context())
+        if err != nil </span><span class="cov8" title="1">{
+                responses.SendError(w, models.HTTPError{
+                        Code:    http.StatusNotFound,
+                        Message: err,
+                }, h.Logger.ErrorLogging)
+                return
+        }</span>
+
+        <span class="cov8" title="1">responses.SendData(w, nextUser)</span>
+}
+
+func (h *UserHandler) GetAllTags(w http.ResponseWriter, r *http.Request) <span class="cov8" title="1">{
+        allTags, err := h.UserUCase.GetAllTags(r.Context())
+        if err != nil </span><span class="cov8" title="1">{
+                responses.SendError(w, models.HTTPError{
+                        Code:    http.StatusNotFound,
+                        Message: err,
+                }, h.Logger.ErrorLogging)
+                return
+        }</span>
+
+        <span class="cov8" title="1">responses.SendData(w, allTags)</span>
+}
+
+func (h *UserHandler) MatchesHandler(w http.ResponseWriter, r *http.Request) <span class="cov8" title="1">{
+        matches, err := h.UserUCase.UsersMatches(r.Context())
+        if err != nil </span><span class="cov8" title="1">{
+                responses.SendError(w, models.HTTPError{
+                        Code:    http.StatusNotFound,
+                        Message: err,
+                }, h.Logger.ErrorLogging)
+                return
+        }</span>
+
+        <span class="cov8" title="1">responses.SendData(w, matches)</span>
+}
+
+func (h *UserHandler) SearchMatchesHandler(w http.ResponseWriter, r *http.Request) <span class="cov8" title="1">{
+        var searchData models.Search
+        err := responses.ReadJSON(r, &amp;searchData)
+        if err != nil </span><span class="cov8" title="1">{
+                responses.SendError(w, models.HTTPError{
+                        Code:    http.StatusBadRequest,
+                        Message: err,
+                }, h.Logger.ErrorLogging)
+                return
+        }</span>
+
+        <span class="cov8" title="1">matches, err := h.UserUCase.UsersMatchesWithSearching(r.Context(), searchData)
+        if err != nil </span><span class="cov8" title="1">{
+                responses.SendError(w, models.HTTPError{
+                        Code:    http.StatusNotFound,
+                        Message: err,
+                }, h.Logger.ErrorLogging)
+                return
+        }</span>
+
+        <span class="cov8" title="1">responses.SendData(w, matches)</span>
+}
+
+func (h *UserHandler) ReactionHandler(w http.ResponseWriter, r *http.Request) <span class="cov8" title="1">{
+        var reactionData models.UserReaction
+        err := responses.ReadJSON(r, &amp;reactionData)
+        if err != nil </span><span class="cov8" title="1">{
+                responses.SendError(w, models.HTTPError{
+                        Code:    http.StatusBadRequest,
+                        Message: err,
+                }, h.Logger.ErrorLogging)
+                return
+        }</span>
+
+        <span class="cov8" title="1">match, err := h.UserUCase.Reaction(r.Context(), reactionData)
+        if err != nil </span><span class="cov8" title="1">{
+                responses.SendError(w, models.HTTPError{
+                        Code:    http.StatusNotFound,
+                        Message: err,
+                }, h.Logger.ErrorLogging)
+                return
+        }</span>
+
+        <span class="cov8" title="1">responses.SendData(w, match)</span>
+}
+
+func (h *UserHandler) LikesHandler(w http.ResponseWriter, r *http.Request) <span class="cov8" title="1">{
+        likes, err := h.UserUCase.UserLikes(r.Context())
+        if err != nil </span><span class="cov8" title="1">{
+                responses.SendError(w, models.HTTPError{
+                        Code:    http.StatusNotFound,
+                        Message: err,
+                }, h.Logger.ErrorLogging)
+                return
+        }</span>
+
+        <span class="cov8" title="1">responses.SendData(w, likes)</span>
+}
+
+func (h *UserHandler) GetAllReports(w http.ResponseWriter, r *http.Request) <span class="cov8" title="1">{
+        allReports, err := h.UserUCase.GetAllReports(r.Context())
+        if err != nil </span><span class="cov8" title="1">{
+                responses.SendError(w, models.HTTPError{
+                        Code:    http.StatusNotFound,
+                        Message: err,
+                }, h.Logger.ErrorLogging)
+                return
+        }</span>
+
+        <span class="cov8" title="1">responses.SendData(w, allReports)</span>
+}
+
+func (h *UserHandler) AddReport(w http.ResponseWriter, r *http.Request) <span class="cov8" title="1">{
+        var reportData models.NewReport
+        err := responses.ReadJSON(r, &amp;reportData)
+        if err != nil </span><span class="cov8" title="1">{
+                responses.SendError(w, models.HTTPError{
+                        Code:    http.StatusBadRequest,
+                        Message: err,
+                }, h.Logger.ErrorLogging)
+                return
+        }</span>
+
+        <span class="cov8" title="1">err = h.UserUCase.AddReport(r.Context(), reportData)
+        if err != nil </span><span class="cov8" title="1">{
+                responses.SendError(w, models.HTTPError{
+                        Code:    http.StatusNotFound,
+                        Message: err,
+                }, h.Logger.ErrorLogging)
+                return
+        }</span>
+
+        <span class="cov8" title="1">responses.SendOK(w)</span>
+}
+</pre>
+		
+		<pre class="file" id="file9" style="display: none">package delivery
+
+import (
+        "dripapp/internal/dripapp/models"
+        _authClient "dripapp/internal/microservices/auth/delivery/grpc/client"
+        _sessionModels "dripapp/internal/microservices/auth/models"
+        "dripapp/internal/pkg/logger"
+        _p "dripapp/internal/pkg/permissions"
+
+        "github.com/gorilla/mux"
+        httpSwagger "github.com/swaggo/http-swagger"
+)
+
+func SetUserRouting(loggger logger.Logger, router *mux.Router, us models.UserUsecase, su _sessionModels.SessionUsecase, sc _authClient.SessionClient) <span class="cov8" title="1">{
+        userHandler := &amp;UserHandler{
+                Logger:       loggger,
+                UserUCase:    us,
+                SessionUcase: su,
+        }
+
+        perm := _p.Permission{
+                AuthClient: sc,
+        }
+
+        // router.HandleFunc("/api/v1/profile", _p.SetCSRF(perm.CheckAuth(perm.GetCurrentUser(userHandler.CurrentUser)))).Methods("GET", "OPTIONS")
+        router.HandleFunc("/api/v1/profile", _p.CheckCSRF(perm.CheckAuth(perm.GetCurrentUser(userHandler.EditProfileHandler)))).Methods("PUT", "OPTIONS")
+        // router.HandleFunc("/api/v1/profile", _p.SetCSRF(userHandler.SignupHandler)).Methods("POST", "OPTIONS")
+
+        router.HandleFunc("/api/v1/profile/photo", _p.CheckCSRF(perm.CheckAuth(perm.GetCurrentUser(userHandler.UploadPhoto)))).Methods("POST", "OPTIONS")
+        router.HandleFunc("/api/v1/profile/photo", _p.CheckCSRF(perm.CheckAuth(perm.GetCurrentUser(userHandler.DeletePhoto)))).Methods("DELETE", "OPTIONS")
+
+        router.HandleFunc("/api/v1/user/cards", _p.SetCSRF(perm.CheckAuth(perm.GetCurrentUser(userHandler.NextUserHandler)))).Methods("GET", "OPTIONS")
+
+        router.HandleFunc("/api/v1/user/likes", _p.SetCSRF(perm.CheckAuth(perm.GetCurrentUser(userHandler.LikesHandler)))).Methods("GET", "OPTIONS")
+
+        router.HandleFunc("/api/v1/matches", _p.SetCSRF(perm.CheckAuth(perm.GetCurrentUser(userHandler.MatchesHandler)))).Methods("GET", "OPTIONS")
+        router.HandleFunc("/api/v1/matches", _p.SetCSRF((perm.CheckAuth(perm.GetCurrentUser(userHandler.SearchMatchesHandler))))).Methods("POST", "OPTIONS")
+
+        router.HandleFunc("/api/v1/likes", _p.CheckCSRF(perm.CheckAuth(perm.GetCurrentUser(userHandler.ReactionHandler)))).Methods("POST", "OPTIONS")
+
+        router.HandleFunc("/api/v1/tags", _p.SetCSRF(perm.CheckAuth(userHandler.GetAllTags))).Methods("GET", "OPTIONS")
+
+        router.HandleFunc("/api/v1/reports", _p.SetCSRF(perm.CheckAuth(userHandler.GetAllReports))).Methods("GET", "OPTIONS")
+        router.HandleFunc("/api/v1/reports", _p.SetCSRF(perm.CheckAuth(perm.GetCurrentUser(userHandler.AddReport)))).Methods("POST", "OPTIONS")
+
+        router.PathPrefix("/api/documentation/").Handler(httpSwagger.WrapHandler)
+}</span>
+</pre>
+		
+		<pre class="file" id="file10" style="display: none">package repository
+
+import (
+        "context"
+        "database/sql"
+        "dripapp/configs"
+        "dripapp/internal/dripapp/models"
+        "fmt"
+        "log"
+        "strings"
+
+        "github.com/jmoiron/sqlx"
+        "github.com/lib/pq"
+        _ "github.com/lib/pq"
+)
+
+const success = "Connection success (postgre) on: "
+
+type PostgreUserRepo struct {
+        Conn sqlx.DB
+}
+
+func NewPostgresUserRepository(config configs.PostgresConfig) (models.UserRepository, error) <span class="cov8" title="1">{
+        ConnStr := fmt.Sprintf("user=%s dbname=%s password=%s host=%s sslmode=disable",
+                config.User,
+                config.DBName,
+                config.Password,
+                config.Host)
+
+        Conn, err := sqlx.Open("postgres", ConnStr)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">log.Printf("%s%s", success, ConnStr)
+        return &amp;PostgreUserRepo{*Conn}, nil</span>
+}
+
+func (p PostgreUserRepo) GetUser(ctx context.Context, email string) (models.User, error) <span class="cov8" title="1">{
+        var RespUser models.User
+        err := p.Conn.QueryRow(GetUserQuery, email).
+                Scan(&amp;RespUser.ID, &amp;RespUser.Email, &amp;RespUser.Password, &amp;RespUser.Name, &amp;RespUser.Gender, &amp;RespUser.Prefer,
+                        &amp;RespUser.FromAge, &amp;RespUser.ToAge, &amp;RespUser.Date, &amp;RespUser.Age, &amp;RespUser.Description, pq.Array(&amp;RespUser.Imgs))
+        if err != nil </span><span class="cov8" title="1">{
+                return models.User{}, err
+        }</span>
+
+        <span class="cov8" title="1">RespUser.Tags, err = p.getTagsByID(ctx, RespUser.ID)
+        if err != nil </span><span class="cov8" title="1">{
+                if err != sql.ErrNoRows </span><span class="cov8" title="1">{
+                        return models.User{}, err
+                }</span>
+        }
+
+        <span class="cov8" title="1">return RespUser, nil</span>
+}
+
+func (p PostgreUserRepo) GetUserByID(ctx context.Context, userID uint64) (models.User, error) <span class="cov8" title="1">{
+        var RespUser models.User
+        err := p.Conn.QueryRow(GetUserByIdAQuery, userID).
+                Scan(&amp;RespUser.ID, &amp;RespUser.Email, &amp;RespUser.Password, &amp;RespUser.Name, &amp;RespUser.Gender, &amp;RespUser.Prefer,
+                        &amp;RespUser.FromAge, &amp;RespUser.ToAge, &amp;RespUser.Date, &amp;RespUser.Age, &amp;RespUser.Description, pq.Array(&amp;RespUser.Imgs))
+        if err != nil </span><span class="cov8" title="1">{
+                return models.User{}, err
+        }</span>
+
+        <span class="cov8" title="1">RespUser.Tags, err = p.getTagsByID(ctx, userID)
+        if err != nil </span><span class="cov8" title="1">{
+                if err != sql.ErrNoRows </span><span class="cov8" title="1">{
+                        return models.User{}, err
+                }</span>
+        }
+
+        <span class="cov8" title="1">return RespUser, nil</span>
+}
+
+func (p PostgreUserRepo) CreateUser(ctx context.Context, logUserData models.LoginUser) (models.User, error) <span class="cov8" title="1">{
+        var RespUser models.User
+        err := p.Conn.GetContext(ctx, &amp;RespUser, CreateUserQuery, logUserData.Email, logUserData.Password)
+        return RespUser, err
+}</span>
+
+func (p PostgreUserRepo) UpdateUser(ctx context.Context, newUserData models.User) (models.User, error) <span class="cov8" title="1">{
+
+        if newUserData.FromAge == 0 </span><span class="cov8" title="1">{
+                newUserData.FromAge = 18
+        }</span>
+        <span class="cov8" title="1">if newUserData.ToAge == 0 </span><span class="cov8" title="1">{
+                newUserData.ToAge = 100
+        }</span>
+
+        <span class="cov8" title="1">var RespUser models.User
+        err := p.Conn.QueryRow(UpdateUserQuery, newUserData.Email, newUserData.Name, newUserData.Gender, newUserData.Prefer,
+                newUserData.FromAge, newUserData.ToAge, newUserData.Date, newUserData.Description, pq.Array(&amp;newUserData.Imgs)).
+                Scan(&amp;RespUser.ID, &amp;RespUser.Email, &amp;RespUser.Password, &amp;RespUser.Name, &amp;RespUser.Gender, &amp;RespUser.Prefer,
+                        &amp;RespUser.FromAge, &amp;RespUser.ToAge, &amp;RespUser.Date, &amp;RespUser.Age, &amp;RespUser.Description, pq.Array(&amp;RespUser.Imgs))
+        if err != nil </span><span class="cov8" title="1">{
+                return models.User{}, err
+        }</span>
+
+        <span class="cov8" title="1">err = p.deleteTags(ctx, newUserData.ID)
+        if err != nil &amp;&amp; err != sql.ErrNoRows </span><span class="cov8" title="1">{
+                return models.User{}, err
+        }</span>
+
+        <span class="cov8" title="1">if len(newUserData.Tags) != 0 </span><span class="cov8" title="1">{
+                err = p.insertTags(ctx, newUserData.ID, newUserData.Tags)
+                if err != nil </span><span class="cov8" title="1">{
+                        return models.User{}, err
+                }</span>
+        }
+
+        <span class="cov8" title="1">RespUser.Tags, err = p.getTagsByID(ctx, RespUser.ID)
+        if err != nil &amp;&amp; err != sql.ErrNoRows </span><span class="cov8" title="1">{
+                return models.User{}, err
+        }</span>
+
+        <span class="cov8" title="1">return RespUser, nil</span>
+}
+
+func (p PostgreUserRepo) deleteTags(ctx context.Context, userId uint64) error <span class="cov8" title="1">{
+        var id uint64
+        err := p.Conn.QueryRow(DeleteTagsQuery, userId).Scan(&amp;id)
+        if err != nil </span><span class="cov8" title="1">{
+                return err
+        }</span>
+
+        <span class="cov8" title="1">return nil</span>
+}
+
+func (p PostgreUserRepo) GetTags(ctx context.Context) (map[uint64]string, error) <span class="cov8" title="1">{
+        var tags []models.Tag
+        err := p.Conn.Select(&amp;tags, GetTagsQuery)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">tagsMap := make(map[uint64]string)
+
+        var i uint64
+        for i = 0; i &lt; uint64(len(tags)); i++ </span><span class="cov8" title="1">{
+                tagsMap[i] = tags[i].TagName
+        }</span>
+
+        <span class="cov8" title="1">return tagsMap, nil</span>
+}
+
+func (p PostgreUserRepo) getTagsByID(ctx context.Context, id uint64) ([]string, error) <span class="cov8" title="1">{
+        var tags []string
+        err := p.Conn.Select(&amp;tags, GetTagsByIdQuery, id)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">return tags, nil</span>
+}
+
+func (p PostgreUserRepo) getImgsByID(ctx context.Context, id uint64) ([]string, error) <span class="cov8" title="1">{
+        var imgs []string
+        if err := p.Conn.QueryRow(GetImgsByIDQuery, id).Scan(pq.Array(&amp;imgs)); err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">return imgs, nil</span>
+}
+
+func (p PostgreUserRepo) insertTags(ctx context.Context, id uint64, tags []string) error <span class="cov8" title="1">{
+        if len(tags) == 0 </span><span class="cov8" title="1">{
+                return nil
+        }</span>
+
+        <span class="cov8" title="1">vals := []interface{}{}
+        vals = append(vals, id)
+        for _, val := range tags </span><span class="cov8" title="1">{
+                vals = append(vals, val)
+        }</span>
+
+        <span class="cov8" title="1">var sb strings.Builder
+        sb.WriteString(InsertTagsQueryFirstPart)
+        var inserts []string
+        for idx := range tags </span><span class="cov8" title="1">{
+                str := fmt.Sprintf(InsertTagsQueryParts, idx+2)
+                inserts = append(inserts, str)
+        }</span>
+        <span class="cov8" title="1">sb.WriteString(strings.Join(inserts, ",\n"))
+        sb.WriteString(" returning id;")
+        insertTagsQuery := sb.String()
+
+        var respId uint64
+        err := p.Conn.QueryRow(insertTagsQuery, vals...).Scan(&amp;respId)
+
+        if err != nil </span><span class="cov8" title="1">{
+                if err != sql.ErrNoRows </span><span class="cov8" title="1">{
+                        return err
+                }</span>
+        }
+
+        <span class="cov8" title="1">return nil</span>
+}
+
+func (p PostgreUserRepo) UpdateImgs(ctx context.Context, id uint64, imgs []string) error <span class="cov8" title="1">{
+        var user_id uint64
+        err := p.Conn.QueryRow(UpdateImgsQuery, id, pq.Array(&amp;imgs)).Scan(&amp;user_id)
+        if err != nil </span><span class="cov8" title="1">{
+                return err
+        }</span>
+
+        <span class="cov8" title="1">return nil</span>
+}
+
+func (p PostgreUserRepo) AddReaction(ctx context.Context, currentUserId uint64, swipedUserId uint64, reactionType uint64) error <span class="cov8" title="1">{
+        var id uint64
+        err := p.Conn.QueryRow(AddReactionQuery, currentUserId, swipedUserId, reactionType).Scan(&amp;id)
+        if err != nil </span><span class="cov8" title="1">{
+                return err
+        }</span>
+
+        <span class="cov8" title="1">return nil</span>
+}
+
+func (p PostgreUserRepo) GetNextUserForSwipe(ctx context.Context, currentUser models.User) (notSwipedUsers []models.User, err error) <span class="cov8" title="1">{
+        var sb strings.Builder
+        sb.WriteString(GetNextUserForSwipeQuery1)
+        if len(currentUser.Prefer) != 0 </span><span class="cov8" title="1">{
+                sb.WriteString(GetNextUserForSwipeQueryPrefer)
+        }</span>
+        <span class="cov8" title="1">sb.WriteString(Limit)
+        GetNextUserForSwipeQuery := sb.String()
+
+        if len(currentUser.Prefer) != 0 </span><span class="cov8" title="1">{
+                err = p.Conn.Select(&amp;notSwipedUsers, GetNextUserForSwipeQuery, currentUser.ID, currentUser.FromAge, currentUser.ToAge, currentUser.Prefer)
+        }</span> else<span class="cov0" title="0"> {
+                err = p.Conn.Select(&amp;notSwipedUsers, GetNextUserForSwipeQuery, currentUser.ID, currentUser.FromAge, currentUser.ToAge)
+        }</span>
+        <span class="cov8" title="1">if err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">for idx := range notSwipedUsers </span><span class="cov8" title="1">{
+                notSwipedUsers[idx].Imgs, err = p.getImgsByID(ctx, notSwipedUsers[idx].ID)
+                if err != nil </span><span class="cov8" title="1">{
+                        return nil, err
+                }</span>
+
+                <span class="cov8" title="1">notSwipedUsers[idx].Tags, err = p.getTagsByID(ctx, notSwipedUsers[idx].ID)
+                if err != nil </span><span class="cov8" title="1">{
+                        return nil, err
+                }</span>
+        }
+
+        <span class="cov8" title="1">return notSwipedUsers, nil</span>
+}
+
+func (p PostgreUserRepo) GetUsersMatches(ctx context.Context, currentUserId uint64) ([]models.User, error) <span class="cov8" title="1">{
+        var matchesUsers []models.User
+        err := p.Conn.Select(&amp;matchesUsers, GetUsersForMatchesQuery, currentUserId)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">for idx := range matchesUsers </span><span class="cov8" title="1">{
+                matchesUsers[idx].Imgs, err = p.getImgsByID(ctx, matchesUsers[idx].ID)
+                if err != nil </span><span class="cov8" title="1">{
+                        return nil, err
+                }</span>
+
+                <span class="cov8" title="1">matchesUsers[idx].Tags, err = p.getTagsByID(ctx, matchesUsers[idx].ID)
+                if err != nil </span><span class="cov8" title="1">{
+                        return nil, err
+                }</span>
+        }
+
+        <span class="cov8" title="1">return matchesUsers, nil</span>
+}
+
+func (p PostgreUserRepo) GetLikes(ctx context.Context, currentUserId uint64) ([]uint64, error) <span class="cov8" title="1">{
+        // type = 1 is like (dislike - 2)
+
+        var likes []uint64
+        err := p.Conn.Select(&amp;likes, GetLikesQuery, currentUserId)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">return likes, nil</span>
+}
+
+func (p PostgreUserRepo) DeleteReaction(ctx context.Context, firstUser uint64, secondUser uint64) error <span class="cov8" title="1">{
+        var id uint64
+        err := p.Conn.QueryRow(DeleteReactionQuery, firstUser, secondUser).Scan(&amp;id)
+        if err != nil &amp;&amp; err != sql.ErrNoRows </span><span class="cov8" title="1">{
+                return err
+        }</span>
+
+        <span class="cov8" title="1">return nil</span>
+}
+
+func (p PostgreUserRepo) DeleteMatches(ctx context.Context, firstUser uint64, secondUser uint64) error <span class="cov8" title="1">{
+        var id uint64
+        err := p.Conn.QueryRow(DeleteMatchQuery, firstUser, secondUser).Scan(&amp;id)
+        if err != nil &amp;&amp; err != sql.ErrNoRows </span><span class="cov8" title="1">{
+                return err
+        }</span>
+
+        <span class="cov8" title="1">return nil</span>
+}
+
+func (p PostgreUserRepo) AddMatch(ctx context.Context, firstUser uint64, secondUser uint64) error <span class="cov8" title="1">{
+        var id uint64
+        err := p.Conn.QueryRow(AddMatchQuery, firstUser, secondUser).Scan(&amp;id)
+        if err != nil </span><span class="cov8" title="1">{
+                return err
+        }</span>
+
+        <span class="cov8" title="1">return nil</span>
+}
+
+func (p PostgreUserRepo) GetUsersLikes(ctx context.Context, currentUserId uint64) ([]models.User, error) <span class="cov8" title="1">{
+        var likesUsers []models.User
+        err := p.Conn.Select(&amp;likesUsers, GetUserLikesQuery, currentUserId)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">for idx := range likesUsers </span><span class="cov8" title="1">{
+                likesUsers[idx].Imgs, err = p.getImgsByID(ctx, likesUsers[idx].ID)
+                if err != nil </span><span class="cov8" title="1">{
+                        return nil, err
+                }</span>
+
+                <span class="cov8" title="1">likesUsers[idx].Tags, err = p.getTagsByID(ctx, likesUsers[idx].ID)
+                if err != nil </span><span class="cov8" title="1">{
+                        return nil, err
+                }</span>
+        }
+
+        <span class="cov8" title="1">return likesUsers, nil</span>
+}
+
+func (p PostgreUserRepo) GetUsersMatchesWithSearching(ctx context.Context, currentUserId uint64, searchTmpl string) ([]models.User, error) <span class="cov8" title="1">{
+        var matchesUsers []models.User
+        err := p.Conn.Select(&amp;matchesUsers, GetUsersForMatchesWithSearchingQuery, currentUserId, searchTmpl)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">for idx := range matchesUsers </span><span class="cov8" title="1">{
+                matchesUsers[idx].Imgs, err = p.getImgsByID(ctx, matchesUsers[idx].ID)
+                if err != nil </span><span class="cov8" title="1">{
+                        return nil, err
+                }</span>
+
+                <span class="cov8" title="1">matchesUsers[idx].Tags, err = p.getTagsByID(ctx, matchesUsers[idx].ID)
+                if err != nil </span><span class="cov8" title="1">{
+                        return nil, err
+                }</span>
+        }
+
+        <span class="cov8" title="1">return matchesUsers, nil</span>
+}
+
+func (p PostgreUserRepo) GetReports(ctx context.Context) (map[uint64]string, error) <span class="cov8" title="1">{
+        var reports []models.Report
+        err := p.Conn.Select(&amp;reports, GetReportsQuery)
+        fmt.Println(352, err)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">reportsMap := make(map[uint64]string)
+
+        var i uint64
+        for i = 0; i &lt; uint64(len(reports)); i++ </span><span class="cov8" title="1">{
+                reportsMap[i] = reports[i].ReportDesc
+        }</span>
+
+        <span class="cov8" title="1">return reportsMap, nil</span>
+}
+
+func (p PostgreUserRepo) AddReport(ctx context.Context, report models.NewReport) error <span class="cov8" title="1">{
+        var reportId uint64
+        if err := p.Conn.QueryRow(GetReportIdFromDescQuery, report.ReportDesc).Scan(&amp;reportId); err != nil </span><span class="cov8" title="1">{
+                return err
+        }</span>
+
+        <span class="cov8" title="1">var respId uint64
+        err := p.Conn.QueryRow(AddReportToProfileQuery, report.ToId, reportId).Scan(&amp;respId)
+        if err != nil </span><span class="cov8" title="1">{
+                return err
+        }</span>
+
+        <span class="cov8" title="1">return nil</span>
+}
+
+func (p PostgreUserRepo) GetReportsCount(ctx context.Context, userId uint64) (uint64, error) <span class="cov8" title="1">{
+        var curCount uint64
+        if err := p.Conn.QueryRow(GetReportsCountQuery, userId).Scan(&amp;curCount); err != nil </span><span class="cov8" title="1">{
+                return 0, err
+        }</span>
+
+        <span class="cov8" title="1">return curCount, nil</span>
+}
+
+func (p PostgreUserRepo) GetReportsWithMaxCount(ctx context.Context, userId uint64) (uint64, error) <span class="cov8" title="1">{
+        var reportId uint64
+        if err := p.Conn.QueryRow(GetReportsIdWithMaxCountQuery, userId).Scan(&amp;reportId); err != nil </span><span class="cov8" title="1">{
+                return 0, err
+        }</span>
+
+        <span class="cov8" title="1">return reportId, nil</span>
+}
+
+func (p PostgreUserRepo) GetReportDesc(ctx context.Context, reportId uint64) (string, error) <span class="cov8" title="1">{
+        var reportDesc string
+        if err := p.Conn.QueryRow(GetReportDescFromIdQuery, reportId).Scan(&amp;reportDesc); err != nil </span><span class="cov8" title="1">{
+                return "", err
+        }</span>
+
+        <span class="cov8" title="1">return reportDesc, nil</span>
+}
+
+func (p PostgreUserRepo) UpdateReportStatus(ctx context.Context, userId uint64, reportStatus string) error <span class="cov8" title="1">{
+        var respId uint64
+        err := p.Conn.QueryRow(UpdateProfilesReportStatusQuery, userId, reportStatus).Scan(&amp;respId)
+        if err != nil </span><span class="cov8" title="1">{
+                return err
+        }</span>
+
+        <span class="cov8" title="1">return nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file11" style="display: none">package usecase
+
+import (
+        "context"
+        "dripapp/configs"
+        "dripapp/internal/dripapp/models"
+        _sessionModels "dripapp/internal/microservices/auth/models"
+        "dripapp/internal/pkg/hasher"
+        "fmt"
+        "io"
+        "strconv"
+        "time"
+)
+
+type userUsecase struct {
+        UserRepo       models.UserRepository
+        Session        _sessionModels.SessionRepository
+        File           models.FileRepository
+        contextTimeout time.Duration
+}
+
+func NewUserUsecase(
+        ur models.UserRepository,
+        fileManager models.FileRepository,
+        timeout time.Duration) models.UserUsecase <span class="cov8" title="1">{
+        return &amp;userUsecase{
+                UserRepo:       ur,
+                File:           fileManager,
+                contextTimeout: timeout,
+        }
+}</span>
+
+func (h *userUsecase) CurrentUser(c context.Context) (models.User, error) <span class="cov8" title="1">{
+        ctx, cancel := context.WithTimeout(c, h.contextTimeout)
+        defer cancel()
+
+        currentUser, ok := ctx.Value(configs.ContextUser).(models.User)
+        fmt.Println(currentUser, ok)
+        if !ok </span><span class="cov8" title="1">{
+                return models.User{}, models.ErrContextNilError
+        }</span>
+
+        <span class="cov8" title="1">return currentUser, nil</span>
+}
+
+func (h *userUsecase) EditProfile(c context.Context, newUserData models.User) (updatedUser models.User, err error) <span class="cov8" title="1">{
+        ctx, cancel := context.WithTimeout(c, h.contextTimeout)
+        defer cancel()
+
+        currentUser, ok := ctx.Value(configs.ContextUser).(models.User)
+        if !ok </span><span class="cov8" title="1">{
+                return models.User{}, models.ErrContextNilError
+        }</span>
+
+        <span class="cov8" title="1">newUserData.ID = currentUser.ID
+        newUserData.Email = currentUser.Email
+        // if err != nil {
+        //         return models.User{}, err
+        // }
+
+        updatedUser, err = h.UserRepo.UpdateUser(c, newUserData)
+        if err != nil </span><span class="cov8" title="1">{
+                return models.User{}, err
+        }</span>
+
+        <span class="cov8" title="1">return updatedUser, nil</span>
+}
+
+func (h *userUsecase) AddPhoto(c context.Context, photo io.Reader, fileName string) (models.Photo, error) <span class="cov8" title="1">{
+        ctx, cancel := context.WithTimeout(c, h.contextTimeout)
+        defer cancel()
+
+        currentUser, ok := ctx.Value(configs.ContextUser).(models.User)
+        if !ok </span><span class="cov8" title="1">{
+                return models.Photo{}, models.ErrContextNilError
+        }</span>
+
+        <span class="cov8" title="1">photoPath, err := h.File.SaveUserPhoto(currentUser, photo, fileName)
+        if err != nil </span><span class="cov8" title="1">{
+                return models.Photo{}, err
+        }</span>
+
+        <span class="cov8" title="1">currentUser.AddNewPhoto(photoPath)
+
+        err = h.UserRepo.UpdateImgs(c, currentUser.ID, currentUser.Imgs)
+        if err != nil </span><span class="cov8" title="1">{
+                return models.Photo{}, err
+        }</span>
+
+        <span class="cov8" title="1">return models.Photo{Path: photoPath}, nil</span>
+}
+
+func (h *userUsecase) DeletePhoto(c context.Context, photo models.Photo) error <span class="cov8" title="1">{
+        ctx, cancel := context.WithTimeout(c, h.contextTimeout)
+        defer cancel()
+
+        currentUser, ok := ctx.Value(configs.ContextUser).(models.User)
+        if !ok </span><span class="cov8" title="1">{
+                return models.ErrContextNilError
+        }</span>
+
+        <span class="cov8" title="1">err := currentUser.DeletePhoto(photo)
+        if err != nil </span><span class="cov8" title="1">{
+                return err
+        }</span>
+
+        <span class="cov8" title="1">err = h.UserRepo.UpdateImgs(c, currentUser.ID, currentUser.Imgs)
+        if err != nil </span><span class="cov8" title="1">{
+                return err
+        }</span>
+
+        <span class="cov8" title="1">err = h.File.Delete(photo.Path)
+        if err != nil </span><span class="cov8" title="1">{
+                return err
+        }</span>
+
+        <span class="cov8" title="1">return nil</span>
+}
+
+func (h *userUsecase) Login(c context.Context, logUserData models.LoginUser) (models.User, error) <span class="cov8" title="1">{
+        identifiableUser, err := h.UserRepo.GetUser(c, logUserData.Email)
+        if err != nil </span><span class="cov8" title="1">{
+                return models.User{}, err
+        }</span>
+
+        <span class="cov8" title="1">if !hasher.CheckWithHash(identifiableUser.Password, logUserData.Password) </span><span class="cov8" title="1">{
+                return models.User{}, models.ErrMismatch
+        }</span>
+
+        <span class="cov8" title="1">return identifiableUser, nil</span>
+}
+
+func (h *userUsecase) Signup(c context.Context, logUserData models.LoginUser) (models.User, error) <span class="cov8" title="1">{
+        ctx, cancel := context.WithTimeout(c, h.contextTimeout)
+        defer cancel()
+
+        identifiableUser, _ := h.UserRepo.GetUser(ctx, logUserData.Email)
+        if len(identifiableUser.Email) != 0 </span><span class="cov8" title="1">{
+                return models.User{}, models.ErrEmailAlreadyExists
+        }</span>
+
+        <span class="cov8" title="1">logUserData.Password = hasher.HashAndSalt(nil, logUserData.Password)
+
+        user, err := h.UserRepo.CreateUser(c, logUserData)
+        if err != nil </span><span class="cov8" title="1">{
+                return models.User{}, err
+        }</span>
+
+        <span class="cov8" title="1">err = h.File.CreateFoldersForNewUser(user)
+        if err != nil </span><span class="cov8" title="1">{
+                return models.User{}, err
+        }</span>
+
+        <span class="cov8" title="1">return user, nil</span>
+}
+
+func (h *userUsecase) NextUser(c context.Context) ([]models.User, error) <span class="cov8" title="1">{
+        ctx, cancel := context.WithTimeout(c, h.contextTimeout)
+        defer cancel()
+
+        currentUser, ok := ctx.Value(configs.ContextUser).(models.User)
+        if !ok </span><span class="cov8" title="1">{
+                return nil, models.ErrContextNilError
+        }</span>
+
+        <span class="cov8" title="1">nextUsers, err := h.UserRepo.GetNextUserForSwipe(ctx, currentUser)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">return nextUsers, nil</span>
+}
+
+func (h *userUsecase) GetAllTags(c context.Context) (models.Tags, error) <span class="cov8" title="1">{
+        ctx, cancel := context.WithTimeout(c, h.contextTimeout)
+        defer cancel()
+
+        allTags, err := h.UserRepo.GetTags(ctx)
+        if err != nil </span><span class="cov8" title="1">{
+                return models.Tags{}, err
+        }</span>
+        <span class="cov8" title="1">var respTag models.Tag
+        var currentAllTags = make(map[uint64]models.Tag)
+        var respAllTags models.Tags
+        counter := 0
+
+        for _, value := range allTags </span><span class="cov8" title="1">{
+                respTag.TagName = value
+                currentAllTags[uint64(counter)] = respTag
+                counter++
+        }</span>
+
+        <span class="cov8" title="1">respAllTags.AllTags = currentAllTags
+        respAllTags.Count = uint64(counter)
+
+        return respAllTags, nil</span>
+}
+
+func (h *userUsecase) UsersMatches(c context.Context) (models.Matches, error) <span class="cov8" title="1">{
+        ctx, cancel := context.WithTimeout(c, h.contextTimeout)
+        defer cancel()
+
+        currentUser, ok := ctx.Value(configs.ContextUser).(models.User)
+        if !ok </span><span class="cov8" title="1">{
+                return models.Matches{}, models.ErrContextNilError
+        }</span>
+
+        // find matches
+        <span class="cov8" title="1">mathes, err := h.UserRepo.GetUsersMatches(ctx, currentUser.ID)
+        if err != nil </span><span class="cov8" title="1">{
+                return models.Matches{}, err
+        }</span>
+
+        // count
+        <span class="cov8" title="1">counter := 0
+        var allMathesMap = make(map[uint64]models.User)
+        for _, value := range mathes </span><span class="cov8" title="1">{
+                allMathesMap[uint64(counter)] = value
+                counter++
+        }</span>
+
+        <span class="cov8" title="1">var allMatches models.Matches
+        allMatches.AllUsers = allMathesMap
+        allMatches.Count = strconv.Itoa(counter)
+
+        return allMatches, nil</span>
+}
+
+func (h *userUsecase) UsersMatchesWithSearching(c context.Context, searchData models.Search) (models.Matches, error) <span class="cov8" title="1">{
+        ctx, cancel := context.WithTimeout(c, h.contextTimeout)
+        defer cancel()
+
+        currentUser, ok := ctx.Value(configs.ContextUser).(models.User)
+        if !ok </span><span class="cov8" title="1">{
+                return models.Matches{}, models.ErrContextNilError
+        }</span>
+
+        // find matches
+        <span class="cov8" title="1">mathes, err := h.UserRepo.GetUsersMatchesWithSearching(ctx, currentUser.ID, searchData.SearchingTmpl)
+        if err != nil </span><span class="cov8" title="1">{
+                return models.Matches{}, err
+        }</span>
+
+        // count
+        <span class="cov8" title="1">counter := 0
+        var allMathesMap = make(map[uint64]models.User)
+        for _, value := range mathes </span><span class="cov8" title="1">{
+                allMathesMap[uint64(counter)] = value
+                counter++
+        }</span>
+
+        <span class="cov8" title="1">var allMatches models.Matches
+        allMatches.AllUsers = allMathesMap
+        allMatches.Count = strconv.Itoa(counter)
+
+        return allMatches, nil</span>
+}
+
+func (h *userUsecase) Reaction(c context.Context, reactionData models.UserReaction) (models.Match, error) <span class="cov8" title="1">{
+        ctx, cancel := context.WithTimeout(c, h.contextTimeout)
+        defer cancel()
+
+        currentUser, ok := ctx.Value(configs.ContextUser).(models.User)
+        if !ok </span><span class="cov8" title="1">{
+                return models.Match{}, models.ErrContextNilError
+        }</span>
+
+        // added reaction in db
+        <span class="cov8" title="1">err := h.UserRepo.AddReaction(ctx, currentUser.ID, reactionData.Id, reactionData.Reaction)
+        if err != nil </span><span class="cov8" title="1">{
+                return models.Match{}, err
+        }</span>
+
+        // no match if dislike
+        <span class="cov8" title="1">var currMath models.Match
+        currMath.Match = false
+        if reactionData.Reaction != 1 </span><span class="cov8" title="1">{
+                return currMath, nil
+        }</span>
+
+        // get users who liked current user
+        <span class="cov8" title="1">var likes []uint64
+        likes, err = h.UserRepo.GetLikes(ctx, currentUser.ID)
+        if err != nil </span><span class="cov8" title="1">{
+                return models.Match{}, err
+        }</span>
+
+        <span class="cov8" title="1">for _, value := range likes </span><span class="cov8" title="1">{
+                if value == reactionData.Id </span><span class="cov8" title="1">{
+                        currMath.Match = true
+                        err = h.UserRepo.DeleteReaction(ctx, currentUser.ID, reactionData.Id)
+                        if err != nil </span><span class="cov8" title="1">{
+                                return models.Match{}, err
+                        }</span>
+                        <span class="cov8" title="1">err = h.UserRepo.AddMatch(ctx, currentUser.ID, reactionData.Id)
+                        if err != nil </span><span class="cov8" title="1">{
+                                return models.Match{}, err
+                        }</span>
+                }
+        }
+
+        <span class="cov8" title="1">return currMath, nil</span>
+}
+
+func (h *userUsecase) UserLikes(c context.Context) (models.Likes, error) <span class="cov8" title="1">{
+        ctx, cancel := context.WithTimeout(c, h.contextTimeout)
+        defer cancel()
+
+        currentUser, ok := ctx.Value(configs.ContextUser).(models.User)
+        if !ok </span><span class="cov8" title="1">{
+                return models.Likes{}, models.ErrContextNilError
+        }</span>
+
+        // find likes
+        <span class="cov8" title="1">likes, err := h.UserRepo.GetUsersLikes(ctx, currentUser.ID)
+        if err != nil </span><span class="cov8" title="1">{
+                return models.Likes{}, err
+        }</span>
+
+        // count
+        <span class="cov8" title="1">counter := 0
+        var allMathesMap = make(map[uint64]models.User)
+        for _, value := range likes </span><span class="cov8" title="1">{
+                allMathesMap[uint64(counter)] = value
+                counter++
+        }</span>
+
+        <span class="cov8" title="1">var allLikes models.Likes
+        allLikes.AllUsers = allMathesMap
+        allLikes.Count = strconv.Itoa(counter)
+
+        return allLikes, nil</span>
+}
+
+func (h *userUsecase) GetAllReports(c context.Context) (models.Reports, error) <span class="cov8" title="1">{
+        ctx, cancel := context.WithTimeout(c, h.contextTimeout)
+        defer cancel()
+
+        allReports, err := h.UserRepo.GetReports(ctx)
+        if err != nil </span><span class="cov8" title="1">{
+                return models.Reports{}, err
+        }</span>
+        <span class="cov8" title="1">var respReport models.Report
+        var currentAllReports = make(map[uint64]models.Report)
+        var respAllReports models.Reports
+        counter := 0
+
+        for _, value := range allReports </span><span class="cov8" title="1">{
+                respReport.ReportDesc = value
+                currentAllReports[uint64(counter)] = respReport
+                counter++
+        }</span>
+
+        <span class="cov8" title="1">respAllReports.AllReports = currentAllReports
+        respAllReports.Count = uint64(counter)
+
+        return respAllReports, nil</span>
+}
+
+func (h *userUsecase) AddReport(c context.Context, report models.NewReport) error <span class="cov8" title="1">{
+        ctx, cancel := context.WithTimeout(c, h.contextTimeout)
+        defer cancel()
+
+        currentUser, ok := ctx.Value(configs.ContextUser).(models.User)
+        if !ok </span><span class="cov8" title="1">{
+                return models.ErrContextNilError
+        }</span>
+
+        // add new report
+        <span class="cov8" title="1">err := h.UserRepo.AddReport(ctx, report)
+        if err != nil </span><span class="cov8" title="1">{
+                return err
+        }</span>
+
+        // delete likes with this user
+        <span class="cov8" title="1">err = h.UserRepo.DeleteReaction(ctx, currentUser.ID, report.ToId)
+        if err != nil </span><span class="cov8" title="1">{
+                return err
+        }</span>
+        // delete matches with this user
+        <span class="cov8" title="1">err = h.UserRepo.DeleteMatches(ctx, currentUser.ID, report.ToId)
+        if err != nil </span><span class="cov8" title="1">{
+                return err
+        }</span>
+
+        // added dislike(2) reaction in db
+        <span class="cov8" title="1">err = h.UserRepo.AddReaction(ctx, currentUser.ID, report.ToId, models.DislikeReaction)
+        if err != nil </span><span class="cov8" title="1">{
+                return err
+        }</span>
+
+        // report's count ToId user
+        <span class="cov8" title="1">curCount, err := h.UserRepo.GetReportsCount(ctx, report.ToId)
+        if err != nil </span><span class="cov8" title="1">{
+                return err
+        }</span>
+
+        // if report's count &gt; limit -&gt; ban
+        <span class="cov8" title="1">if curCount &gt; models.ReportLimit </span><span class="cov8" title="1">{
+                banId, err := h.UserRepo.GetReportsWithMaxCount(ctx, report.ToId)
+                if err != nil </span><span class="cov8" title="1">{
+                        return err
+                }</span>
+                <span class="cov8" title="1">banDesc, err := h.UserRepo.GetReportDesc(ctx, banId)
+                if err != nil </span><span class="cov8" title="1">{
+                        return err
+                }</span>
+
+                <span class="cov8" title="1">var reportStatus string
+                switch banDesc </span>{
+                case models.FakeReport:<span class="cov8" title="1">
+                        reportStatus = "FAKE"</span>
+                case models.AggressionReport:<span class="cov8" title="1">
+                        reportStatus = "AGGRESSION"</span>
+                case models.SkamReport:<span class="cov8" title="1">
+                        reportStatus = "SKAM"</span>
+                case models.UnderageReport:<span class="cov8" title="1">
+                        reportStatus = "UNDERAGE"</span>
+                }
+
+                <span class="cov8" title="1">err = h.UserRepo.UpdateReportStatus(ctx, report.ToId, reportStatus)
+                if err != nil </span><span class="cov8" title="1">{
+                        return err
+                }</span>
+        }
+
+        <span class="cov8" title="1">return nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file12" style="display: none">package client
+
+import (
+        "context"
+        _userModels "dripapp/internal/dripapp/models"
+        proto "dripapp/internal/microservices/auth/delivery/grpc/protobuff"
+        _sessionModels "dripapp/internal/microservices/auth/models"
+        "fmt"
+
+        "google.golang.org/grpc"
+)
+
+type SessionClient struct {
+        client proto.AuthGrpcHandlerClient
+}
+
+func NewAuthClient(conn *grpc.ClientConn) *SessionClient <span class="cov8" title="1">{
+        c := proto.NewAuthGrpcHandlerClient(conn)
+        return &amp;SessionClient{
+                client: c,
+        }
+}</span>
+
+func (s *SessionClient) GetFromSession(ctx context.Context, cookie string) (_sessionModels.Session, error) <span class="cov8" title="1">{
+        cook := proto.Cookie{
+                Cookie: cookie,
+        }
+        userSession, err := s.client.GetFromSession(context.Background(), &amp;cook)
+        if err != nil </span><span class="cov8" title="1">{
+                fmt.Println("Unexpected Error", err)
+                return _sessionModels.Session{}, err
+        }</span>
+        <span class="cov8" title="1">return transformSessionFromRPC(userSession), nil</span>
+}
+
+func (s *SessionClient) GetById(ctx context.Context, session _sessionModels.Session) (_userModels.User, error) <span class="cov8" title="1">{
+        sess := proto.Session{
+                Cookie: session.Cookie,
+                UserID: session.UserID,
+        }
+        user, err := s.client.GetById(ctx, &amp;sess)
+        return transformUserFromRPC(user), err
+}</span>
+
+func transformSessionFromRPC(session *proto.Session) _sessionModels.Session <span class="cov8" title="1">{
+        if session == nil </span><span class="cov0" title="0">{
+                return _sessionModels.Session{}
+        }</span>
+        <span class="cov8" title="1">res := _sessionModels.Session{
+                Cookie: session.Cookie,
+                UserID: session.UserID,
+        }
+        return res</span>
+}
+
+func transformUserFromRPC(user *proto.User) _userModels.User <span class="cov8" title="1">{
+        if user == nil </span><span class="cov0" title="0">{
+                return _userModels.User{}
+        }</span>
+        <span class="cov8" title="1">res := _userModels.User{
+                ID:           user.ID,
+                Email:        user.Email,
+                Password:     user.Password,
+                Name:         user.Name,
+                Gender:       user.Gender,
+                Prefer:       user.Prefer,
+                FromAge:      user.FromAge,
+                ToAge:        user.ToAge,
+                Date:         user.Date,
+                Age:          user.Age,
+                Description:  user.Description,
+                Imgs:         user.Imgs,
+                Tags:         user.Tags,
+                ReportStatus: user.ReportStatus,
+        }
+        return res</span>
+}
+</pre>
+		
+		<pre class="file" id="file13" style="display: none">package grpcserver
+
+import (
+        "context"
+        _userModels "dripapp/internal/dripapp/models"
+        proto "dripapp/internal/microservices/auth/delivery/grpc/protobuff"
+        _sessionModels "dripapp/internal/microservices/auth/models"
+        "net"
+        "time"
+
+        "github.com/rs/zerolog/log"
+        "google.golang.org/grpc"
+        "google.golang.org/grpc/keepalive"
+        "google.golang.org/grpc/reflection"
+)
+
+type server struct {
+        sessionManager _sessionModels.SessionRepository
+        userRepo       _userModels.UserRepository
+}
+
+func NewAuthServerGRPC(gserver *grpc.Server, su _sessionModels.SessionRepository, uu _userModels.UserRepository) <span class="cov8" title="1">{
+        authServer := &amp;server{
+                sessionManager: su,
+                userRepo:       uu,
+        }
+        proto.RegisterAuthGrpcHandlerServer(gserver, authServer)
+        reflection.Register(gserver)
+}</span>
+
+func StartAuthGrpcServer(su _sessionModels.SessionRepository, uu _userModels.UserRepository, url string) <span class="cov8" title="1">{
+        list, err := net.Listen("tcp", url)
+        if err != nil </span><span class="cov0" title="0">{
+                log.Err(err)
+        }</span>
+        <span class="cov8" title="1">server := grpc.NewServer(
+                grpc.KeepaliveParams(keepalive.ServerParameters{
+                        MaxConnectionIdle: 5 * time.Minute,
+                }),
+        )
+        NewAuthServerGRPC(server, su, uu)
+        _ = server.Serve(list)</span>
+}
+
+func (s *server) GetFromSession(ctx context.Context, cookie *proto.Cookie) (*proto.Session, error) <span class="cov8" title="1">{
+        userSession, err := s.sessionManager.GetSessionByCookie(cookie.Cookie)
+        if err != nil </span><span class="cov0" title="0">{
+                userSession = _sessionModels.Session{
+                        UserID: 0,
+                        Cookie: "",
+                }
+        }</span>
+        <span class="cov8" title="1">return transSessionIntoRPC(&amp;userSession), err</span>
+}
+
+func (s *server) GetById(ctx context.Context, session *proto.Session) (*proto.User, error) <span class="cov8" title="1">{
+        user, err := s.userRepo.GetUserByID(context.Background(), session.UserID)
+        return transUserIntoRPC(&amp;user), err
+}</span>
+
+func transSessionIntoRPC(session *_sessionModels.Session) *proto.Session <span class="cov8" title="1">{
+        if session == nil </span><span class="cov0" title="0">{
+                return nil
+        }</span>
+        <span class="cov8" title="1">res := &amp;proto.Session{
+                Cookie: session.Cookie,
+                UserID: session.UserID,
+        }
+        return res</span>
+}
+
+func transUserIntoRPC(user *_userModels.User) *proto.User <span class="cov8" title="1">{
+        if user == nil </span><span class="cov0" title="0">{
+                return nil
+        }</span>
+        <span class="cov8" title="1">res := &amp;proto.User{
+                ID:           user.ID,
+                Email:        user.Email,
+                Password:     user.Password,
+                Name:         user.Name,
+                Gender:       user.Gender,
+                Prefer:       user.Prefer,
+                FromAge:      user.FromAge,
+                ToAge:        user.ToAge,
+                Date:         user.Date,
+                Age:          user.Age,
+                Description:  user.Description,
+                Imgs:         user.Imgs,
+                Tags:         user.Tags,
+                ReportStatus: user.ReportStatus,
+        }
+        return res</span>
+}
+</pre>
+		
+		<pre class="file" id="file14" style="display: none">//protoc --go_out=plugins=grpc:. *.proto
+
+// Code generated by protoc-gen-go. DO NOT EDIT.
+// versions:
+//         protoc-gen-go v1.27.1
+//         protoc        v3.6.1
+// source: auth.proto
+
+package auth
+
+import (
+        context "context"
+        _ "github.com/golang/protobuf/ptypes/timestamp"
+        grpc "google.golang.org/grpc"
+        codes "google.golang.org/grpc/codes"
+        status "google.golang.org/grpc/status"
+        protoreflect "google.golang.org/protobuf/reflect/protoreflect"
+        protoimpl "google.golang.org/protobuf/runtime/protoimpl"
+        reflect "reflect"
+        sync "sync"
+)
+
+const (
+        // Verify that this generated code is sufficiently up-to-date.
+        _ = protoimpl.EnforceVersion(20 - protoimpl.MinVersion)
+        // Verify that runtime/protoimpl is sufficiently up-to-date.
+        _ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
+)
+
+type Cookie struct {
+        state         protoimpl.MessageState
+        sizeCache     protoimpl.SizeCache
+        unknownFields protoimpl.UnknownFields
+
+        Cookie string `protobuf:"bytes,1,opt,name=Cookie,proto3" json:"Cookie,omitempty"`
+}
+
+func (x *Cookie) Reset() <span class="cov8" title="1">{
+        *x = Cookie{}
+        if protoimpl.UnsafeEnabled </span><span class="cov8" title="1">{
+                mi := &amp;file_auth_proto_msgTypes[0]
+                ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+                ms.StoreMessageInfo(mi)
+        }</span>
+}
+
+func (x *Cookie) String() string <span class="cov0" title="0">{
+        return protoimpl.X.MessageStringOf(x)
+}</span>
+
+func (*Cookie) ProtoMessage() {<span class="cov0" title="0">}</span>
+
+func (x *Cookie) ProtoReflect() protoreflect.Message <span class="cov8" title="1">{
+        mi := &amp;file_auth_proto_msgTypes[0]
+        if protoimpl.UnsafeEnabled &amp;&amp; x != nil </span><span class="cov8" title="1">{
+                ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+                if ms.LoadMessageInfo() == nil </span><span class="cov8" title="1">{
+                        ms.StoreMessageInfo(mi)
+                }</span>
+                <span class="cov8" title="1">return ms</span>
+        }
+        <span class="cov0" title="0">return mi.MessageOf(x)</span>
+}
+
+// Deprecated: Use Cookie.ProtoReflect.Descriptor instead.
+func (*Cookie) Descriptor() ([]byte, []int) <span class="cov0" title="0">{
+        return file_auth_proto_rawDescGZIP(), []int{0}
+}</span>
+
+func (x *Cookie) GetCookie() string <span class="cov0" title="0">{
+        if x != nil </span><span class="cov0" title="0">{
+                return x.Cookie
+        }</span>
+        <span class="cov0" title="0">return ""</span>
+}
+
+type Session struct {
+        state         protoimpl.MessageState
+        sizeCache     protoimpl.SizeCache
+        unknownFields protoimpl.UnknownFields
+
+        UserID uint64 `protobuf:"varint,1,opt,name=UserID,proto3" json:"UserID,omitempty"`
+        Cookie string `protobuf:"bytes,2,opt,name=Cookie,proto3" json:"Cookie,omitempty"`
+}
+
+func (x *Session) Reset() <span class="cov8" title="1">{
+        *x = Session{}
+        if protoimpl.UnsafeEnabled </span><span class="cov8" title="1">{
+                mi := &amp;file_auth_proto_msgTypes[1]
+                ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+                ms.StoreMessageInfo(mi)
+        }</span>
+}
+
+func (x *Session) String() string <span class="cov0" title="0">{
+        return protoimpl.X.MessageStringOf(x)
+}</span>
+
+func (*Session) ProtoMessage() {<span class="cov0" title="0">}</span>
+
+func (x *Session) ProtoReflect() protoreflect.Message <span class="cov8" title="1">{
+        mi := &amp;file_auth_proto_msgTypes[1]
+        if protoimpl.UnsafeEnabled &amp;&amp; x != nil </span><span class="cov8" title="1">{
+                ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+                if ms.LoadMessageInfo() == nil </span><span class="cov8" title="1">{
+                        ms.StoreMessageInfo(mi)
+                }</span>
+                <span class="cov8" title="1">return ms</span>
+        }
+        <span class="cov0" title="0">return mi.MessageOf(x)</span>
+}
+
+// Deprecated: Use Session.ProtoReflect.Descriptor instead.
+func (*Session) Descriptor() ([]byte, []int) <span class="cov0" title="0">{
+        return file_auth_proto_rawDescGZIP(), []int{1}
+}</span>
+
+func (x *Session) GetUserID() uint64 <span class="cov0" title="0">{
+        if x != nil </span><span class="cov0" title="0">{
+                return x.UserID
+        }</span>
+        <span class="cov0" title="0">return 0</span>
+}
+
+func (x *Session) GetCookie() string <span class="cov0" title="0">{
+        if x != nil </span><span class="cov0" title="0">{
+                return x.Cookie
+        }</span>
+        <span class="cov0" title="0">return ""</span>
+}
+
+type User struct {
+        state         protoimpl.MessageState
+        sizeCache     protoimpl.SizeCache
+        unknownFields protoimpl.UnknownFields
+
+        ID           uint64   `protobuf:"varint,1,opt,name=ID,proto3" json:"ID,omitempty"`
+        Email        string   `protobuf:"bytes,2,opt,name=Email,proto3" json:"Email,omitempty"`
+        Password     string   `protobuf:"bytes,3,opt,name=Password,proto3" json:"Password,omitempty"`
+        Name         string   `protobuf:"bytes,4,opt,name=Name,proto3" json:"Name,omitempty"`
+        Gender       string   `protobuf:"bytes,5,opt,name=Gender,proto3" json:"Gender,omitempty"`
+        Prefer       string   `protobuf:"bytes,6,opt,name=Prefer,proto3" json:"Prefer,omitempty"`
+        FromAge      uint32   `protobuf:"varint,7,opt,name=FromAge,proto3" json:"FromAge,omitempty"`
+        ToAge        uint32   `protobuf:"varint,8,opt,name=ToAge,proto3" json:"ToAge,omitempty"`
+        Date         string   `protobuf:"bytes,9,opt,name=Date,proto3" json:"Date,omitempty"`
+        Age          uint32   `protobuf:"varint,10,opt,name=Age,proto3" json:"Age,omitempty"`
+        Description  string   `protobuf:"bytes,11,opt,name=Description,proto3" json:"Description,omitempty"`
+        Imgs         []string `protobuf:"bytes,12,rep,name=Imgs,proto3" json:"Imgs,omitempty"`
+        Tags         []string `protobuf:"bytes,13,rep,name=Tags,proto3" json:"Tags,omitempty"`
+        ReportStatus string   `protobuf:"bytes,14,opt,name=ReportStatus,proto3" json:"ReportStatus,omitempty"`
+}
+
+func (x *User) Reset() <span class="cov8" title="1">{
+        *x = User{}
+        if protoimpl.UnsafeEnabled </span><span class="cov8" title="1">{
+                mi := &amp;file_auth_proto_msgTypes[2]
+                ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+                ms.StoreMessageInfo(mi)
+        }</span>
+}
+
+func (x *User) String() string <span class="cov0" title="0">{
+        return protoimpl.X.MessageStringOf(x)
+}</span>
+
+func (*User) ProtoMessage() {<span class="cov0" title="0">}</span>
+
+func (x *User) ProtoReflect() protoreflect.Message <span class="cov8" title="1">{
+        mi := &amp;file_auth_proto_msgTypes[2]
+        if protoimpl.UnsafeEnabled &amp;&amp; x != nil </span><span class="cov8" title="1">{
+                ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+                if ms.LoadMessageInfo() == nil </span><span class="cov8" title="1">{
+                        ms.StoreMessageInfo(mi)
+                }</span>
+                <span class="cov8" title="1">return ms</span>
+        }
+        <span class="cov0" title="0">return mi.MessageOf(x)</span>
+}
+
+// Deprecated: Use User.ProtoReflect.Descriptor instead.
+func (*User) Descriptor() ([]byte, []int) <span class="cov0" title="0">{
+        return file_auth_proto_rawDescGZIP(), []int{2}
+}</span>
+
+func (x *User) GetID() uint64 <span class="cov0" title="0">{
+        if x != nil </span><span class="cov0" title="0">{
+                return x.ID
+        }</span>
+        <span class="cov0" title="0">return 0</span>
+}
+
+func (x *User) GetEmail() string <span class="cov0" title="0">{
+        if x != nil </span><span class="cov0" title="0">{
+                return x.Email
+        }</span>
+        <span class="cov0" title="0">return ""</span>
+}
+
+func (x *User) GetPassword() string <span class="cov0" title="0">{
+        if x != nil </span><span class="cov0" title="0">{
+                return x.Password
+        }</span>
+        <span class="cov0" title="0">return ""</span>
+}
+
+func (x *User) GetName() string <span class="cov0" title="0">{
+        if x != nil </span><span class="cov0" title="0">{
+                return x.Name
+        }</span>
+        <span class="cov0" title="0">return ""</span>
+}
+
+func (x *User) GetGender() string <span class="cov0" title="0">{
+        if x != nil </span><span class="cov0" title="0">{
+                return x.Gender
+        }</span>
+        <span class="cov0" title="0">return ""</span>
+}
+
+func (x *User) GetPrefer() string <span class="cov0" title="0">{
+        if x != nil </span><span class="cov0" title="0">{
+                return x.Prefer
+        }</span>
+        <span class="cov0" title="0">return ""</span>
+}
+
+func (x *User) GetFromAge() uint32 <span class="cov0" title="0">{
+        if x != nil </span><span class="cov0" title="0">{
+                return x.FromAge
+        }</span>
+        <span class="cov0" title="0">return 0</span>
+}
+
+func (x *User) GetToAge() uint32 <span class="cov0" title="0">{
+        if x != nil </span><span class="cov0" title="0">{
+                return x.ToAge
+        }</span>
+        <span class="cov0" title="0">return 0</span>
+}
+
+func (x *User) GetDate() string <span class="cov0" title="0">{
+        if x != nil </span><span class="cov0" title="0">{
+                return x.Date
+        }</span>
+        <span class="cov0" title="0">return ""</span>
+}
+
+func (x *User) GetAge() uint32 <span class="cov0" title="0">{
+        if x != nil </span><span class="cov0" title="0">{
+                return x.Age
+        }</span>
+        <span class="cov0" title="0">return 0</span>
+}
+
+func (x *User) GetDescription() string <span class="cov0" title="0">{
+        if x != nil </span><span class="cov0" title="0">{
+                return x.Description
+        }</span>
+        <span class="cov0" title="0">return ""</span>
+}
+
+func (x *User) GetImgs() []string <span class="cov0" title="0">{
+        if x != nil </span><span class="cov0" title="0">{
+                return x.Imgs
+        }</span>
+        <span class="cov0" title="0">return nil</span>
+}
+
+func (x *User) GetTags() []string <span class="cov0" title="0">{
+        if x != nil </span><span class="cov0" title="0">{
+                return x.Tags
+        }</span>
+        <span class="cov0" title="0">return nil</span>
+}
+
+func (x *User) GetReportStatus() string <span class="cov0" title="0">{
+        if x != nil </span><span class="cov0" title="0">{
+                return x.ReportStatus
+        }</span>
+        <span class="cov0" title="0">return ""</span>
+}
+
+var File_auth_proto protoreflect.FileDescriptor
+
+var file_auth_proto_rawDesc = []byte{
+        0x0a, 0x0a, 0x61, 0x75, 0x74, 0x68, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x12, 0x04, 0x61, 0x75,
+        0x74, 0x68, 0x1a, 0x1f, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2f, 0x70, 0x72, 0x6f, 0x74, 0x6f,
+        0x62, 0x75, 0x66, 0x2f, 0x74, 0x69, 0x6d, 0x65, 0x73, 0x74, 0x61, 0x6d, 0x70, 0x2e, 0x70, 0x72,
+        0x6f, 0x74, 0x6f, 0x22, 0x20, 0x0a, 0x06, 0x43, 0x6f, 0x6f, 0x6b, 0x69, 0x65, 0x12, 0x16, 0x0a,
+        0x06, 0x43, 0x6f, 0x6f, 0x6b, 0x69, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x06, 0x43,
+        0x6f, 0x6f, 0x6b, 0x69, 0x65, 0x22, 0x39, 0x0a, 0x07, 0x53, 0x65, 0x73, 0x73, 0x69, 0x6f, 0x6e,
+        0x12, 0x16, 0x0a, 0x06, 0x55, 0x73, 0x65, 0x72, 0x49, 0x44, 0x18, 0x01, 0x20, 0x01, 0x28, 0x04,
+        0x52, 0x06, 0x55, 0x73, 0x65, 0x72, 0x49, 0x44, 0x12, 0x16, 0x0a, 0x06, 0x43, 0x6f, 0x6f, 0x6b,
+        0x69, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x06, 0x43, 0x6f, 0x6f, 0x6b, 0x69, 0x65,
+        0x22, 0xd0, 0x02, 0x0a, 0x04, 0x55, 0x73, 0x65, 0x72, 0x12, 0x0e, 0x0a, 0x02, 0x49, 0x44, 0x18,
+        0x01, 0x20, 0x01, 0x28, 0x04, 0x52, 0x02, 0x49, 0x44, 0x12, 0x14, 0x0a, 0x05, 0x45, 0x6d, 0x61,
+        0x69, 0x6c, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x05, 0x45, 0x6d, 0x61, 0x69, 0x6c, 0x12,
+        0x1a, 0x0a, 0x08, 0x50, 0x61, 0x73, 0x73, 0x77, 0x6f, 0x72, 0x64, 0x18, 0x03, 0x20, 0x01, 0x28,
+        0x09, 0x52, 0x08, 0x50, 0x61, 0x73, 0x73, 0x77, 0x6f, 0x72, 0x64, 0x12, 0x12, 0x0a, 0x04, 0x4e,
+        0x61, 0x6d, 0x65, 0x18, 0x04, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x4e, 0x61, 0x6d, 0x65, 0x12,
+        0x16, 0x0a, 0x06, 0x47, 0x65, 0x6e, 0x64, 0x65, 0x72, 0x18, 0x05, 0x20, 0x01, 0x28, 0x09, 0x52,
+        0x06, 0x47, 0x65, 0x6e, 0x64, 0x65, 0x72, 0x12, 0x16, 0x0a, 0x06, 0x50, 0x72, 0x65, 0x66, 0x65,
+        0x72, 0x18, 0x06, 0x20, 0x01, 0x28, 0x09, 0x52, 0x06, 0x50, 0x72, 0x65, 0x66, 0x65, 0x72, 0x12,
+        0x18, 0x0a, 0x07, 0x46, 0x72, 0x6f, 0x6d, 0x41, 0x67, 0x65, 0x18, 0x07, 0x20, 0x01, 0x28, 0x0d,
+        0x52, 0x07, 0x46, 0x72, 0x6f, 0x6d, 0x41, 0x67, 0x65, 0x12, 0x14, 0x0a, 0x05, 0x54, 0x6f, 0x41,
+        0x67, 0x65, 0x18, 0x08, 0x20, 0x01, 0x28, 0x0d, 0x52, 0x05, 0x54, 0x6f, 0x41, 0x67, 0x65, 0x12,
+        0x12, 0x0a, 0x04, 0x44, 0x61, 0x74, 0x65, 0x18, 0x09, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x44,
+        0x61, 0x74, 0x65, 0x12, 0x10, 0x0a, 0x03, 0x41, 0x67, 0x65, 0x18, 0x0a, 0x20, 0x01, 0x28, 0x0d,
+        0x52, 0x03, 0x41, 0x67, 0x65, 0x12, 0x20, 0x0a, 0x0b, 0x44, 0x65, 0x73, 0x63, 0x72, 0x69, 0x70,
+        0x74, 0x69, 0x6f, 0x6e, 0x18, 0x0b, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0b, 0x44, 0x65, 0x73, 0x63,
+        0x72, 0x69, 0x70, 0x74, 0x69, 0x6f, 0x6e, 0x12, 0x12, 0x0a, 0x04, 0x49, 0x6d, 0x67, 0x73, 0x18,
+        0x0c, 0x20, 0x03, 0x28, 0x09, 0x52, 0x04, 0x49, 0x6d, 0x67, 0x73, 0x12, 0x12, 0x0a, 0x04, 0x54,
+        0x61, 0x67, 0x73, 0x18, 0x0d, 0x20, 0x03, 0x28, 0x09, 0x52, 0x04, 0x54, 0x61, 0x67, 0x73, 0x12,
+        0x22, 0x0a, 0x0c, 0x52, 0x65, 0x70, 0x6f, 0x72, 0x74, 0x53, 0x74, 0x61, 0x74, 0x75, 0x73, 0x18,
+        0x0e, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0c, 0x52, 0x65, 0x70, 0x6f, 0x72, 0x74, 0x53, 0x74, 0x61,
+        0x74, 0x75, 0x73, 0x32, 0x66, 0x0a, 0x0f, 0x41, 0x75, 0x74, 0x68, 0x47, 0x72, 0x70, 0x63, 0x48,
+        0x61, 0x6e, 0x64, 0x6c, 0x65, 0x72, 0x12, 0x24, 0x0a, 0x07, 0x47, 0x65, 0x74, 0x42, 0x79, 0x49,
+        0x64, 0x12, 0x0d, 0x2e, 0x61, 0x75, 0x74, 0x68, 0x2e, 0x53, 0x65, 0x73, 0x73, 0x69, 0x6f, 0x6e,
+        0x1a, 0x0a, 0x2e, 0x61, 0x75, 0x74, 0x68, 0x2e, 0x55, 0x73, 0x65, 0x72, 0x12, 0x2d, 0x0a, 0x0e,
+        0x47, 0x65, 0x74, 0x46, 0x72, 0x6f, 0x6d, 0x53, 0x65, 0x73, 0x73, 0x69, 0x6f, 0x6e, 0x12, 0x0c,
+        0x2e, 0x61, 0x75, 0x74, 0x68, 0x2e, 0x43, 0x6f, 0x6f, 0x6b, 0x69, 0x65, 0x1a, 0x0d, 0x2e, 0x61,
+        0x75, 0x74, 0x68, 0x2e, 0x53, 0x65, 0x73, 0x73, 0x69, 0x6f, 0x6e, 0x42, 0x08, 0x5a, 0x06, 0x2e,
+        0x3b, 0x61, 0x75, 0x74, 0x68, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+}
+
+var (
+        file_auth_proto_rawDescOnce sync.Once
+        file_auth_proto_rawDescData = file_auth_proto_rawDesc
+)
+
+func file_auth_proto_rawDescGZIP() []byte <span class="cov0" title="0">{
+        file_auth_proto_rawDescOnce.Do(func() </span><span class="cov0" title="0">{
+                file_auth_proto_rawDescData = protoimpl.X.CompressGZIP(file_auth_proto_rawDescData)
+        }</span>)
+        <span class="cov0" title="0">return file_auth_proto_rawDescData</span>
+}
+
+var file_auth_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
+var file_auth_proto_goTypes = []interface{}{
+        (*Cookie)(nil),  // 0: auth.Cookie
+        (*Session)(nil), // 1: auth.Session
+        (*User)(nil),    // 2: auth.User
+}
+var file_auth_proto_depIdxs = []int32{
+        1, // 0: auth.AuthGrpcHandler.GetById:input_type -&gt; auth.Session
+        0, // 1: auth.AuthGrpcHandler.GetFromSession:input_type -&gt; auth.Cookie
+        2, // 2: auth.AuthGrpcHandler.GetById:output_type -&gt; auth.User
+        1, // 3: auth.AuthGrpcHandler.GetFromSession:output_type -&gt; auth.Session
+        2, // [2:4] is the sub-list for method output_type
+        0, // [0:2] is the sub-list for method input_type
+        0, // [0:0] is the sub-list for extension type_name
+        0, // [0:0] is the sub-list for extension extendee
+        0, // [0:0] is the sub-list for field type_name
+}
+
+func init() <span class="cov8" title="1">{ file_auth_proto_init() }</span>
+func file_auth_proto_init() <span class="cov8" title="1">{
+        if File_auth_proto != nil </span><span class="cov0" title="0">{
+                return
+        }</span>
+        <span class="cov8" title="1">if !protoimpl.UnsafeEnabled </span><span class="cov0" title="0">{
+                file_auth_proto_msgTypes[0].Exporter = func(v interface{}, i int) interface{} </span><span class="cov0" title="0">{
+                        switch v := v.(*Cookie); i </span>{
+                        case 0:<span class="cov0" title="0">
+                                return &amp;v.state</span>
+                        case 1:<span class="cov0" title="0">
+                                return &amp;v.sizeCache</span>
+                        case 2:<span class="cov0" title="0">
+                                return &amp;v.unknownFields</span>
+                        default:<span class="cov0" title="0">
+                                return nil</span>
+                        }
+                }
+                <span class="cov0" title="0">file_auth_proto_msgTypes[1].Exporter = func(v interface{}, i int) interface{} </span><span class="cov0" title="0">{
+                        switch v := v.(*Session); i </span>{
+                        case 0:<span class="cov0" title="0">
+                                return &amp;v.state</span>
+                        case 1:<span class="cov0" title="0">
+                                return &amp;v.sizeCache</span>
+                        case 2:<span class="cov0" title="0">
+                                return &amp;v.unknownFields</span>
+                        default:<span class="cov0" title="0">
+                                return nil</span>
+                        }
+                }
+                <span class="cov0" title="0">file_auth_proto_msgTypes[2].Exporter = func(v interface{}, i int) interface{} </span><span class="cov0" title="0">{
+                        switch v := v.(*User); i </span>{
+                        case 0:<span class="cov0" title="0">
+                                return &amp;v.state</span>
+                        case 1:<span class="cov0" title="0">
+                                return &amp;v.sizeCache</span>
+                        case 2:<span class="cov0" title="0">
+                                return &amp;v.unknownFields</span>
+                        default:<span class="cov0" title="0">
+                                return nil</span>
+                        }
+                }
+        }
+        <span class="cov8" title="1">type x struct{}
+        out := protoimpl.TypeBuilder{
+                File: protoimpl.DescBuilder{
+                        GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
+                        RawDescriptor: file_auth_proto_rawDesc,
+                        NumEnums:      0,
+                        NumMessages:   3,
+                        NumExtensions: 0,
+                        NumServices:   1,
+                },
+                GoTypes:           file_auth_proto_goTypes,
+                DependencyIndexes: file_auth_proto_depIdxs,
+                MessageInfos:      file_auth_proto_msgTypes,
+        }.Build()
+        File_auth_proto = out.File
+        file_auth_proto_rawDesc = nil
+        file_auth_proto_goTypes = nil
+        file_auth_proto_depIdxs = nil</span>
+}
+
+// Reference imports to suppress errors if they are not otherwise used.
+var _ context.Context
+var _ grpc.ClientConnInterface
+
+// This is a compile-time assertion to ensure that this generated file
+// is compatible with the grpc package it is being compiled against.
+const _ = grpc.SupportPackageIsVersion6
+
+// AuthGrpcHandlerClient is the client API for AuthGrpcHandler service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
+type AuthGrpcHandlerClient interface {
+        GetById(ctx context.Context, in *Session, opts ...grpc.CallOption) (*User, error)
+        GetFromSession(ctx context.Context, in *Cookie, opts ...grpc.CallOption) (*Session, error)
+}
+
+type authGrpcHandlerClient struct {
+        cc grpc.ClientConnInterface
+}
+
+func NewAuthGrpcHandlerClient(cc grpc.ClientConnInterface) AuthGrpcHandlerClient <span class="cov8" title="1">{
+        return &amp;authGrpcHandlerClient{cc}
+}</span>
+
+func (c *authGrpcHandlerClient) GetById(ctx context.Context, in *Session, opts ...grpc.CallOption) (*User, error) <span class="cov8" title="1">{
+        out := new(User)
+        err := c.cc.Invoke(ctx, "/auth.AuthGrpcHandler/GetById", in, out, opts...)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return out, nil</span>
+}
+
+func (c *authGrpcHandlerClient) GetFromSession(ctx context.Context, in *Cookie, opts ...grpc.CallOption) (*Session, error) <span class="cov8" title="1">{
+        out := new(Session)
+        err := c.cc.Invoke(ctx, "/auth.AuthGrpcHandler/GetFromSession", in, out, opts...)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return out, nil</span>
+}
+
+// AuthGrpcHandlerServer is the server API for AuthGrpcHandler service.
+type AuthGrpcHandlerServer interface {
+        GetById(context.Context, *Session) (*User, error)
+        GetFromSession(context.Context, *Cookie) (*Session, error)
+}
+
+// UnimplementedAuthGrpcHandlerServer can be embedded to have forward compatible implementations.
+type UnimplementedAuthGrpcHandlerServer struct {
+}
+
+func (*UnimplementedAuthGrpcHandlerServer) GetById(context.Context, *Session) (*User, error) <span class="cov0" title="0">{
+        return nil, status.Errorf(codes.Unimplemented, "method GetById not implemented")
+}</span>
+func (*UnimplementedAuthGrpcHandlerServer) GetFromSession(context.Context, *Cookie) (*Session, error) <span class="cov0" title="0">{
+        return nil, status.Errorf(codes.Unimplemented, "method GetFromSession not implemented")
+}</span>
+
+func RegisterAuthGrpcHandlerServer(s *grpc.Server, srv AuthGrpcHandlerServer) <span class="cov8" title="1">{
+        s.RegisterService(&amp;_AuthGrpcHandler_serviceDesc, srv)
+}</span>
+
+func _AuthGrpcHandler_GetById_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) <span class="cov8" title="1">{
+        in := new(Session)
+        if err := dec(in); err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">if interceptor == nil </span><span class="cov8" title="1">{
+                return srv.(AuthGrpcHandlerServer).GetById(ctx, in)
+        }</span>
+        <span class="cov0" title="0">info := &amp;grpc.UnaryServerInfo{
+                Server:     srv,
+                FullMethod: "/auth.AuthGrpcHandler/GetById",
+        }
+        handler := func(ctx context.Context, req interface{}) (interface{}, error) </span><span class="cov0" title="0">{
+                return srv.(AuthGrpcHandlerServer).GetById(ctx, req.(*Session))
+        }</span>
+        <span class="cov0" title="0">return interceptor(ctx, in, info, handler)</span>
+}
+
+func _AuthGrpcHandler_GetFromSession_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) <span class="cov8" title="1">{
+        in := new(Cookie)
+        if err := dec(in); err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">if interceptor == nil </span><span class="cov8" title="1">{
+                return srv.(AuthGrpcHandlerServer).GetFromSession(ctx, in)
+        }</span>
+        <span class="cov0" title="0">info := &amp;grpc.UnaryServerInfo{
+                Server:     srv,
+                FullMethod: "/auth.AuthGrpcHandler/GetFromSession",
+        }
+        handler := func(ctx context.Context, req interface{}) (interface{}, error) </span><span class="cov0" title="0">{
+                return srv.(AuthGrpcHandlerServer).GetFromSession(ctx, req.(*Cookie))
+        }</span>
+        <span class="cov0" title="0">return interceptor(ctx, in, info, handler)</span>
+}
+
+var _AuthGrpcHandler_serviceDesc = grpc.ServiceDesc{
+        ServiceName: "auth.AuthGrpcHandler",
+        HandlerType: (*AuthGrpcHandlerServer)(nil),
+        Methods: []grpc.MethodDesc{
+                {
+                        MethodName: "GetById",
+                        Handler:    _AuthGrpcHandler_GetById_Handler,
+                },
+                {
+                        MethodName: "GetFromSession",
+                        Handler:    _AuthGrpcHandler_GetFromSession_Handler,
+                },
+        },
+        Streams:  []grpc.StreamDesc{},
+        Metadata: "auth.proto",
+}
+</pre>
+		
+		<pre class="file" id="file15" style="display: none">package http
+
+import (
+        _userModels "dripapp/internal/dripapp/models"
+        _sessionModels "dripapp/internal/microservices/auth/models"
+        "dripapp/internal/pkg/logger"
+        "dripapp/internal/pkg/responses"
+        "fmt"
+        "net/http"
+        "time"
+)
+
+type SessionHandler struct {
+        Logger       logger.Logger
+        UserUCase    _userModels.UserUsecase
+        SessionUcase _sessionModels.SessionUsecase
+}
+
+func (h *SessionHandler) LoginHandler(w http.ResponseWriter, r *http.Request) <span class="cov8" title="1">{
+        var logUserData _userModels.LoginUser
+        err := responses.ReadJSON(r, &amp;logUserData)
+        if err != nil </span><span class="cov8" title="1">{
+                responses.SendError(w, _userModels.HTTPError{
+                        Code:    http.StatusBadRequest,
+                        Message: err,
+                }, h.Logger.ErrorLogging)
+                return
+        }</span>
+
+        <span class="cov8" title="1">user, err := h.UserUCase.Login(r.Context(), logUserData)
+        if err != nil </span><span class="cov8" title="1">{
+                responses.SendError(w, _userModels.HTTPError{
+                        Code:    http.StatusNotFound,
+                        Message: err,
+                }, h.Logger.WarnLogging)
+                return
+        }</span>
+
+        <span class="cov8" title="1">sessionCookie := _sessionModels.CreateSessionCookie(logUserData)
+
+        sess := _sessionModels.Session{
+                Cookie: sessionCookie.Value,
+                UserID: user.ID,
+        }
+        err = h.SessionUcase.AddSession(r.Context(), sess)
+        if err != nil </span><span class="cov8" title="1">{
+                responses.SendError(w, _userModels.HTTPError{
+                        Code:    http.StatusInternalServerError,
+                        Message: err,
+                }, h.Logger.WarnLogging)
+                return
+        }</span>
+
+        <span class="cov8" title="1">http.SetCookie(w, &amp;sessionCookie)
+
+        responses.SendData(w, user)</span>
+}
+
+func (h *SessionHandler) LogoutHandler(w http.ResponseWriter, r *http.Request) <span class="cov8" title="1">{
+        err := h.SessionUcase.DeleteSession(r.Context())
+        if err != nil </span><span class="cov8" title="1">{
+                responses.SendError(w, _userModels.HTTPError{
+                        Code:    http.StatusNotFound,
+                        Message: err,
+                }, h.Logger.WarnLogging)
+                return
+        }</span>
+
+        <span class="cov8" title="1">authCookie := &amp;http.Cookie{
+                Name:     "sessionId",
+                Value:    "",
+                Path:     "/",
+                Expires:  time.Unix(0, 0),
+                HttpOnly: true,
+        }
+        http.SetCookie(w, authCookie)
+
+        csrfCookie := &amp;http.Cookie{
+                Name:     "csrf",
+                Value:    "",
+                Path:     "/",
+                Expires:  time.Unix(0, 0),
+                HttpOnly: true,
+        }
+        http.SetCookie(w, csrfCookie)
+
+        responses.SendOK(w)</span>
+}
+
+func (h *SessionHandler) CurrentUser(w http.ResponseWriter, r *http.Request) <span class="cov0" title="0">{
+        user, err := h.UserUCase.CurrentUser(r.Context())
+        if err != nil </span><span class="cov0" title="0">{
+                responses.SendError(w, _userModels.HTTPError{
+                        Code:    http.StatusNotFound,
+                        Message: err,
+                }, h.Logger.ErrorLogging)
+                return
+        }</span>
+
+        <span class="cov0" title="0">responses.SendData(w, user)</span>
+}
+
+func (h *SessionHandler) SignupHandler(w http.ResponseWriter, r *http.Request) <span class="cov8" title="1">{
+        var logUserData _userModels.LoginUser
+        err := responses.ReadJSON(r, &amp;logUserData)
+        if err != nil </span><span class="cov8" title="1">{
+                responses.SendError(w, _userModels.HTTPError{
+                        Code:    http.StatusBadRequest,
+                        Message: err,
+                }, h.Logger.ErrorLogging)
+                return
+        }</span>
+
+        <span class="cov8" title="1">user, err := h.UserUCase.Signup(r.Context(), logUserData)
+        if err != nil </span><span class="cov8" title="1">{
+                code := http.StatusNotFound
+                if err == _userModels.ErrEmailAlreadyExists </span><span class="cov8" title="1">{
+                        code = _userModels.StatusEmailAlreadyExists
+                }</span>
+                <span class="cov8" title="1">responses.SendError(w, _userModels.HTTPError{
+                        Code:    code,
+                        Message: err,
+                }, h.Logger.ErrorLogging)
+                return</span>
+        }
+        <span class="cov8" title="1">cookie := _sessionModels.CreateSessionCookie(logUserData)
+        fmt.Println(cookie.Domain)
+        fmt.Println(cookie.Path)
+
+        sess := _sessionModels.Session{
+                Cookie: cookie.Value,
+                UserID: user.ID,
+        }
+
+        err = h.SessionUcase.AddSession(r.Context(), sess)
+        if err != nil </span><span class="cov8" title="1">{
+                responses.SendError(w, _userModels.HTTPError{
+                        Code:    http.StatusInternalServerError,
+                        Message: err,
+                }, h.Logger.WarnLogging)
+                return
+        }</span>
+
+        <span class="cov8" title="1">http.SetCookie(w, &amp;cookie)
+
+        responses.SendData(w, user)</span>
+}
+</pre>
+		
+		<pre class="file" id="file16" style="display: none">package http
+
+import (
+        _userModels "dripapp/internal/dripapp/models"
+        _authClient "dripapp/internal/microservices/auth/delivery/grpc/client"
+        _sessionModels "dripapp/internal/microservices/auth/models"
+        "dripapp/internal/pkg/logger"
+        _p "dripapp/internal/pkg/permissions"
+
+        "github.com/gorilla/mux"
+)
+
+func SetSessionRouting(loggger logger.Logger, router *mux.Router, us _userModels.UserUsecase, su _sessionModels.SessionUsecase, sc _authClient.SessionClient) <span class="cov8" title="1">{
+        sessionHandler := &amp;SessionHandler{
+                Logger:       loggger,
+                UserUCase:    us,
+                SessionUcase: su,
+        }
+
+        perm := _p.Permission{
+                AuthClient: sc,
+        }
+
+        router.HandleFunc("/api/v1/auth/session", _p.SetCSRF(sessionHandler.LoginHandler)).Methods("POST", "OPTIONS")
+        router.HandleFunc("/api/v1/auth/session", perm.CheckAuth(sessionHandler.LogoutHandler)).Methods("DELETE", "OPTIONS")
+
+        router.HandleFunc("/api/v1/auth/profile", _p.SetCSRF(perm.CheckAuth(perm.GetCurrentUser(sessionHandler.CurrentUser)))).Methods("GET", "OPTIONS")
+        router.HandleFunc("/api/v1/auth/profile", _p.SetCSRF(sessionHandler.SignupHandler)).Methods("POST", "OPTIONS")
+}</span>
+</pre>
+		
+		<pre class="file" id="file17" style="display: none">package models
+
+import (
+        "context"
+        "crypto/md5"
+        "dripapp/internal/dripapp/models"
+        "fmt"
+        "net/http"
+        "time"
+)
+
+type Session struct {
+        Cookie string
+        UserID uint64
+}
+
+func CreateSessionCookie(user models.LoginUser) http.Cookie <span class="cov8" title="1">{
+        expiration := time.Now().Add(10 * time.Hour)
+
+        data := user.Password + time.Now().String()
+        md5CookieValue := fmt.Sprintf("%x", md5.Sum([]byte(data)))
+
+        cookie := http.Cookie{
+                Name:     "sessionId",
+                Value:    md5CookieValue,
+                Expires:  expiration,
+                Secure:   true,
+                HttpOnly: true,
+                SameSite: http.SameSiteNoneMode,
+                Path:     "/api/v1",
+        }
+
+        return cookie
+}</span>
+
+func NewSession(id uint64, email, cookie string) *Session <span class="cov0" title="0">{
+        return &amp;Session{UserID: id, Cookie: cookie}
+}</span>
+
+type SessionRepository interface {
+        GetSessionByCookie(sessionCookie string) (Session, error)
+        NewSessionCookie(sessionCookie string, userId uint64) error
+        DeleteSessionCookie(sessionCookie string) error
+}
+
+type SessionUsecase interface {
+        AddSession(c context.Context, session Session) error
+        DeleteSession(c context.Context) error
+}
+</pre>
+		
+		<pre class="file" id="file18" style="display: none">package repository
+
+import (
+        "dripapp/configs"
+        _sessionModels "dripapp/internal/microservices/auth/models"
+        "errors"
+        "fmt"
+        "log"
+
+        "github.com/tarantool/go-tarantool"
+)
+
+const success = "Connection success (drip_tarantool) on: "
+
+type SessionManager struct {
+        TarantoolConn *tarantool.Connection
+}
+
+func NewTarantoolConnection(tntConfig configs.TarantoolConfig) (_sessionModels.SessionRepository, error) <span class="cov0" title="0">{
+        addrPort := fmt.Sprintf("%s%s", tntConfig.Host, tntConfig.Port)
+
+        conn, err := tarantool.Connect(addrPort, tarantool.Opts{
+                User: "guest",
+        })
+
+        seesManager := SessionManager{conn}
+
+        if err != nil </span><span class="cov0" title="0">{
+                return &amp;SessionManager{}, err
+        }</span> else<span class="cov0" title="0"> {
+                log.Printf("%s%s", success, addrPort)
+        }</span>
+
+        <span class="cov0" title="0">resp, err := conn.Eval("return init()", []interface{}{})
+        if err != nil </span><span class="cov0" title="0">{
+                fmt.Println("Error", err)
+                fmt.Println("Code", resp.Code)
+                return &amp;SessionManager{}, err
+        }</span>
+
+        <span class="cov0" title="0">return &amp;seesManager, nil</span>
+}
+
+func (conn *SessionManager) GetSessionByCookie(sessionCookie string) (session _sessionModels.Session, err error) <span class="cov0" title="0">{
+        resp, err := conn.TarantoolConn.Call("check_session", []interface{}{sessionCookie})
+        if err != nil </span><span class="cov0" title="0">{
+                return _sessionModels.Session{}, err
+        }</span>
+
+        <span class="cov0" title="0">if len(resp.Data) == 0 </span><span class="cov0" title="0">{
+                return _sessionModels.Session{}, errors.New("not exixsts this cookie")
+        }</span>
+
+        <span class="cov0" title="0">data := resp.Data[0]
+        if data == nil </span><span class="cov0" title="0">{
+                return _sessionModels.Session{}, nil
+        }</span>
+
+        <span class="cov0" title="0">sessionDataSlice, ok := data.([]interface{})
+        if !ok </span><span class="cov0" title="0">{
+                return _sessionModels.Session{}, fmt.Errorf("cannot cast data: %v", sessionDataSlice)
+        }</span>
+
+        <span class="cov0" title="0">if len(sessionDataSlice) == 0 </span><span class="cov0" title="0">{
+                return _sessionModels.Session{}, nil
+        }</span>
+
+        <span class="cov0" title="0">cookie, ok := sessionDataSlice[0].(string)
+        if !ok </span><span class="cov0" title="0">{
+                return _sessionModels.Session{}, fmt.Errorf("cannot cast data: %v", sessionDataSlice)
+        }</span>
+        <span class="cov0" title="0">userId, ok := sessionDataSlice[1].(uint64)
+        if !ok </span><span class="cov0" title="0">{
+                return _sessionModels.Session{}, fmt.Errorf("cannot cast data: %v", sessionDataSlice)
+        }</span>
+
+        <span class="cov0" title="0">return _sessionModels.Session{Cookie: cookie, UserID: userId}, nil</span>
+}
+
+func (conn *SessionManager) NewSessionCookie(sessionCookie string, id uint64) error <span class="cov0" title="0">{
+        resp, err := conn.TarantoolConn.Call("new_session", []interface{}{sessionCookie, id})
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+
+        <span class="cov0" title="0">if len(resp.Data) == 0 </span><span class="cov0" title="0">{
+                return errors.New("this cookie already exists")
+        }</span>
+        <span class="cov0" title="0">return nil</span>
+}
+
+func (conn *SessionManager) DeleteSessionCookie(sessionCookie string) error <span class="cov0" title="0">{
+        resp, err := conn.TarantoolConn.Call("delete_session", []interface{}{sessionCookie})
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+
+        <span class="cov0" title="0">if len(resp.Data) == 0 </span><span class="cov0" title="0">{
+                return errors.New("this cookie is not exists")
+        }</span>
+
+        <span class="cov0" title="0">return nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file19" style="display: none">package usecase
+
+import (
+        "context"
+        "dripapp/configs"
+        _sessionModels "dripapp/internal/microservices/auth/models"
+        "errors"
+        "time"
+)
+
+type sessionUsecase struct {
+        Session        _sessionModels.SessionRepository
+        contextTimeout time.Duration
+}
+
+func NewSessionUsecase(sess _sessionModels.SessionRepository, timeout time.Duration) _sessionModels.SessionUsecase <span class="cov8" title="1">{
+        return &amp;sessionUsecase{
+                Session:        sess,
+                contextTimeout: timeout,
+        }
+}</span>
+
+func (s *sessionUsecase) AddSession(c context.Context, session _sessionModels.Session) error <span class="cov8" title="1">{
+        err := s.Session.NewSessionCookie(session.Cookie, session.UserID)
+        if err != nil </span><span class="cov8" title="1">{
+                return err
+        }</span>
+        <span class="cov8" title="1">return nil</span>
+}
+
+func (s *sessionUsecase) DeleteSession(c context.Context) error <span class="cov8" title="1">{
+        ctx, cancel := context.WithTimeout(c, s.contextTimeout)
+        defer cancel()
+
+        ctxSession := ctx.Value(configs.ContextUserID)
+        if ctxSession == nil </span><span class="cov8" title="1">{
+                return errors.New("context nil error")
+        }</span>
+        <span class="cov8" title="1">currentSession, ok := ctxSession.(_sessionModels.Session)
+        if !ok </span><span class="cov0" title="0">{
+                return errors.New("convert to model session error")
+        }</span>
+        <span class="cov8" title="1">err := s.Session.DeleteSessionCookie(currentSession.Cookie)
+        if err != nil </span><span class="cov8" title="1">{
+                return err
+        }</span>
+        <span class="cov8" title="1">return nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file20" style="display: none">package delivery
+
+import (
+        _userModels "dripapp/internal/dripapp/models"
+        "dripapp/internal/microservices/chat/models"
+        "dripapp/internal/pkg/logger"
+        "dripapp/internal/pkg/responses"
+        "net/http"
+        "strconv"
+
+        "github.com/gorilla/mux"
+)
+
+type ChatHandler struct {
+        Chat   models.ChatUseCase
+        Logger logger.Logger
+}
+
+func (h *ChatHandler) GetChat(w http.ResponseWriter, r *http.Request) <span class="cov8" title="1">{
+        fromId, err := strconv.Atoi(mux.Vars(r)["id"])
+        if err != nil </span><span class="cov0" title="0">{
+                responses.SendError(w, _userModels.HTTPError{
+                        Code:    http.StatusNotFound,
+                        Message: err,
+                }, h.Logger.ErrorLogging)
+                return
+        }</span>
+        <span class="cov8" title="1">lastId, err := strconv.Atoi(mux.Vars(r)["lastId"])
+        if err != nil </span><span class="cov0" title="0">{
+                responses.SendError(w, _userModels.HTTPError{
+                        Code:    http.StatusNotFound,
+                        Message: err,
+                }, h.Logger.ErrorLogging)
+                return
+        }</span>
+
+        <span class="cov8" title="1">mses, err := h.Chat.GetChat(r.Context(), uint64(fromId), uint64(lastId))
+        if err != nil </span><span class="cov8" title="1">{
+                responses.SendError(w, _userModels.HTTPError{
+                        Code:    http.StatusNotFound,
+                        Message: err,
+                }, h.Logger.ErrorLogging)
+                return
+        }</span>
+
+        <span class="cov8" title="1">responses.SendData(w, mses)</span>
+}
+
+func (h *ChatHandler) GetChats(w http.ResponseWriter, r *http.Request) <span class="cov8" title="1">{
+        chats, err := h.Chat.GetChats(r.Context())
+        if err != nil </span><span class="cov8" title="1">{
+                responses.SendError(w, _userModels.HTTPError{
+                        Code:    http.StatusNotFound,
+                        Message: err,
+                }, h.Logger.ErrorLogging)
+                return
+        }</span>
+
+        <span class="cov8" title="1">responses.SendData(w, chats)</span>
+}
+</pre>
+		
+		<pre class="file" id="file21" style="display: none">package delivery
+
+import (
+        _authClient "dripapp/internal/microservices/auth/delivery/grpc/client"
+        "dripapp/internal/microservices/chat/models"
+        "dripapp/internal/pkg/logger"
+        _p "dripapp/internal/pkg/permissions"
+
+        "github.com/gorilla/mux"
+)
+
+func SetChatRouting(logger logger.Logger, router *mux.Router, chatUCase models.ChatUseCase, sc _authClient.SessionClient) <span class="cov8" title="1">{
+        chatHandler := &amp;ChatHandler{
+                Chat:   chatUCase,
+                Logger: logger,
+        }
+
+        perm := _p.Permission{
+                AuthClient: sc,
+        }
+
+        router.HandleFunc("/api/v1/apiws",
+                _p.SetCSRF(perm.CheckAuth(perm.GetCurrentUser(chatHandler.UpgradeWS))))
+
+        router.HandleFunc("/api/v1/chat/{id:[0-9]+}&amp;{lastId:[0-9]+}",
+                _p.SetCSRF(perm.CheckAuth(perm.GetCurrentUser(chatHandler.GetChat)))).
+                Methods("GET", "OPTIONS")
+
+        router.HandleFunc("/api/v1/chats",
+                _p.SetCSRF(perm.CheckAuth(perm.GetCurrentUser(chatHandler.GetChats)))).
+                Methods("GET", "OPTIONS")
+}</span>
+</pre>
+		
+		<pre class="file" id="file22" style="display: none">package delivery
+
+import (
+        _userModels "dripapp/internal/dripapp/models"
+        "dripapp/internal/microservices/chat/models"
+        "dripapp/internal/pkg/logger"
+        "dripapp/internal/pkg/responses"
+        "net/http"
+
+        "github.com/gorilla/websocket"
+)
+
+type WS interface {
+        ReadJSON(interface{}) error
+        WriteJSON(interface{}) error
+}
+
+type MessagesWS struct {
+        conn   WS
+        logger logger.Logger
+}
+
+var upgrader = websocket.Upgrader{
+        ReadBufferSize:  1024,
+        WriteBufferSize: 1024,
+}
+
+func (h *ChatHandler) UpgradeWS(w http.ResponseWriter, r *http.Request) <span class="cov0" title="0">{
+        conn, err := upgrader.Upgrade(w, r, nil)
+        if err != nil </span><span class="cov0" title="0">{
+                status := _userModels.HTTPError{
+                        Code:    http.StatusInternalServerError,
+                        Message: err,
+                }
+                responses.SendError(w, status, h.Logger.ErrorLogging)
+                return
+        }</span>
+
+        <span class="cov0" title="0">io := &amp;MessagesWS{
+                conn:   conn,
+                logger: h.Logger,
+        }
+
+        err = h.Chat.ClientHandler(r.Context(), io)
+        if err != nil </span><span class="cov0" title="0">{
+                status := _userModels.HTTPError{
+                        Code:    http.StatusNotFound,
+                        Message: err,
+                }
+                responses.SendError(w, status, h.Logger.ErrorLogging)
+                return
+        }</span>
+}
+
+func (m *MessagesWS) ReadMessage(message *models.Message) error <span class="cov8" title="1">{
+        err := m.conn.ReadJSON(message)
+        if err != nil </span><span class="cov8" title="1">{
+                m.logger.ErrorLogging(http.StatusInternalServerError, "ReadJSON: "+err.Error())
+        }</span>
+
+        <span class="cov8" title="1">return err</span>
+}
+
+func (m *MessagesWS) WriteMessage(message models.Message) error <span class="cov8" title="1">{
+        err := m.conn.WriteJSON(message)
+        if err != nil </span><span class="cov8" title="1">{
+                m.logger.ErrorLogging(http.StatusInternalServerError, "WriteJSON: "+err.Error())
+        }</span>
+
+        <span class="cov8" title="1">return err</span>
+}
+</pre>
+		
+		<pre class="file" id="file23" style="display: none">package models
+
+import "dripapp/internal/dripapp/models"
+
+type ChatClient struct {
+        user models.User
+        hub  *Hub
+        repo ClientRepository
+        io   IOMessage
+        send chan Message
+}
+
+func NewChatClient(user models.User, hub *Hub, repo ClientRepository, io IOMessage) (client *ChatClient) <span class="cov0" title="0">{
+        client = &amp;ChatClient{
+                user: user,
+                hub:  hub,
+                repo: repo,
+                io:   io,
+                send: make(chan Message),
+        }
+
+        hub.register &lt;- client
+        return
+}</span>
+
+func (c *ChatClient) ReadPump() <span class="cov0" title="0">{
+        defer func() </span><span class="cov0" title="0">{
+                c.hub.unregister &lt;- c
+        }</span>()
+
+        <span class="cov0" title="0">for </span><span class="cov0" title="0">{
+                var message Message
+                err := c.io.ReadMessage(&amp;message)
+                if err != nil </span><span class="cov0" title="0">{
+                        break</span>
+                }
+
+                <span class="cov0" title="0">message, err = c.repo.SaveMessage(c.user.ID, message.ToID, message.Text)
+                if err != nil </span><span class="cov0" title="0">{
+                        break</span>
+                }
+
+                <span class="cov0" title="0">c.hub.broadcast &lt;- message</span>
+        }
+}
+
+func (c *ChatClient) WritePump() <span class="cov0" title="0">{
+        for </span><span class="cov0" title="0">{
+                message := &lt;-c.send
+                err := c.io.WriteMessage(message)
+                if err != nil </span><span class="cov0" title="0">{
+                        break</span>
+                }
+        }
+}
+
+type IOMessage interface {
+        ReadMessage(message *Message) error
+        WriteMessage(message Message) error
+}
+
+type ClientRepository interface {
+        SaveMessage(userId uint64, toId uint64, text string) (Message, error)
+}
+</pre>
+		
+		<pre class="file" id="file24" style="display: none">package models
+
+type Hub struct {
+        clients    map[*ChatClient]bool
+        broadcast  chan Message
+        register   chan *ChatClient
+        unregister chan *ChatClient
+}
+
+func NewHub() *Hub <span class="cov8" title="1">{
+        return &amp;Hub{
+                broadcast:  make(chan Message),
+                register:   make(chan *ChatClient),
+                unregister: make(chan *ChatClient),
+                clients:    make(map[*ChatClient]bool),
+        }
+}</span>
+
+func (h *Hub) Run() <span class="cov0" title="0">{
+        for </span><span class="cov0" title="0">{
+                select </span>{
+                case client := &lt;-h.register:<span class="cov0" title="0">
+                        h.clients[client] = true</span>
+                case client := &lt;-h.unregister:<span class="cov0" title="0">
+                        if _, ok := h.clients[client]; ok </span><span class="cov0" title="0">{
+                                delete(h.clients, client)
+                                close(client.send)
+                        }</span>
+                case message := &lt;-h.broadcast:<span class="cov0" title="0">
+                        for client := range h.clients </span><span class="cov0" title="0">{
+                                if client.user.ID == message.FromID ||
+                                        client.user.ID == message.ToID </span><span class="cov0" title="0">{
+                                        select </span>{
+                                        case client.send &lt;- message:<span class="cov0" title="0"></span>
+                                        default:<span class="cov0" title="0">
+                                                close(client.send)
+                                                delete(h.clients, client)</span>
+                                        }
+                                }
+                        }
+                }
+        }
+}
+
+func (h *Hub) Register(client *ChatClient) <span class="cov0" title="0">{
+        h.register &lt;- client
+}</span>
+
+func (h *Hub) Unregister(client *ChatClient) <span class="cov0" title="0">{
+        h.unregister &lt;- client
+}</span>
+
+func (h *Hub) Broadcast(message Message) <span class="cov0" title="0">{
+        h.broadcast &lt;- message
+}</span>
+</pre>
+		
+		<pre class="file" id="file25" style="display: none">package repository
+
+import (
+        "context"
+        "dripapp/configs"
+        "dripapp/internal/microservices/chat/models"
+        "fmt"
+        "log"
+
+        "github.com/jmoiron/sqlx"
+        _ "github.com/lib/pq"
+)
+
+type PostgreChatRepo struct {
+        Conn sqlx.DB
+}
+
+const success = "Connection success (postgre) on: "
+
+func NewPostgresChatRepository(config configs.PostgresConfig) (models.ChatRepository, error) <span class="cov8" title="1">{
+        ConnStr := fmt.Sprintf("user=%s dbname=%s password=%s host=%s sslmode=disable",
+                config.User,
+                config.DBName,
+                config.Password,
+                config.Host)
+
+        fmt.Println(ConnStr)
+
+        Conn, err := sqlx.Open("postgres", ConnStr)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">log.Printf("%s%s", success, ConnStr)
+        return &amp;PostgreChatRepo{*Conn}, nil</span>
+}
+
+func (p PostgreChatRepo) GetChats(ctx context.Context, userId uint64) ([]models.Chat, error) <span class="cov8" title="1">{
+        var chats []models.Chat
+        err := p.Conn.Select(&amp;chats, GetChatsQuery, userId)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">for idx := range chats </span><span class="cov8" title="1">{
+                var ms models.Message
+                err := p.Conn.GetContext(ctx, &amp;ms, GetLastMessageQuery, userId, chats[idx].FromUserID)
+                if err != nil </span><span class="cov8" title="1">{
+                        return nil, err
+                }</span>
+                <span class="cov8" title="1">chats[idx].Messages = append(chats[idx].Messages, ms)</span>
+        }
+
+        <span class="cov8" title="1">return chats, nil</span>
+}
+
+func (p PostgreChatRepo) GetChat(ctx context.Context, userId uint64, fromId uint64, lastId uint64) ([]models.Message, error) <span class="cov8" title="1">{
+        var mses []models.Message
+        err := p.Conn.Select(&amp;mses, GetMessagesQuery, userId, fromId, lastId)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">return mses, nil</span>
+}
+
+func (p PostgreChatRepo) SaveMessage(userId uint64, toId uint64, text string) (models.Message, error) <span class="cov8" title="1">{
+        var msg models.Message
+        err := p.Conn.Get(&amp;msg, SaveMessageQuery, userId, toId, text)
+        if err != nil </span><span class="cov8" title="1">{
+                return models.Message{}, err
+        }</span>
+
+        <span class="cov8" title="1">return msg, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file26" style="display: none">package usecase
+
+import (
+        "context"
+        "dripapp/configs"
+        _userModels "dripapp/internal/dripapp/models"
+        "dripapp/internal/microservices/chat/models"
+        "time"
+)
+
+type ChatUseCase struct {
+        ChatRepo       models.ChatRepository
+        hub            *models.Hub
+        contextTimeout time.Duration
+}
+
+func NewChatUseCase(
+        chatRepo models.ChatRepository,
+        hub *models.Hub,
+        timeout time.Duration) models.ChatUseCase <span class="cov8" title="1">{
+        return &amp;ChatUseCase{
+                ChatRepo:       chatRepo,
+                hub:            hub,
+                contextTimeout: timeout,
+        }
+}</span>
+
+func (h *ChatUseCase) ClientHandler(c context.Context, io models.IOMessage) error <span class="cov0" title="0">{
+        ctx, cancel := context.WithTimeout(c, h.contextTimeout)
+        defer cancel()
+
+        currentUser, ok := ctx.Value(configs.ContextUser).(_userModels.User)
+        if !ok </span><span class="cov0" title="0">{
+                return _userModels.ErrContextNilError
+        }</span>
+
+        <span class="cov0" title="0">client := models.NewChatClient(currentUser, h.hub, h.ChatRepo, io)
+
+        go client.WritePump()
+        go client.ReadPump()
+
+        return nil</span>
+}
+
+func (h *ChatUseCase) GetChats(c context.Context) ([]models.Chat, error) <span class="cov8" title="1">{
+        ctx, cancel := context.WithTimeout(c, h.contextTimeout)
+        defer cancel()
+
+        currentUser, ok := ctx.Value(configs.ContextUser).(_userModels.User)
+        if !ok </span><span class="cov8" title="1">{
+                return nil, _userModels.ErrContextNilError
+        }</span>
+
+        <span class="cov8" title="1">chats, err := h.ChatRepo.GetChats(ctx, currentUser.ID)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">return chats, nil</span>
+}
+
+func (h *ChatUseCase) GetChat(c context.Context, fromId uint64, lastId uint64) ([]models.Message, error) <span class="cov8" title="1">{
+        ctx, cancel := context.WithTimeout(c, h.contextTimeout)
+        defer cancel()
+
+        currentUser, ok := ctx.Value(configs.ContextUser).(_userModels.User)
+        if !ok </span><span class="cov8" title="1">{
+                return nil, _userModels.ErrContextNilError
+        }</span>
+
+        <span class="cov8" title="1">mses, err := h.ChatRepo.GetChat(ctx, currentUser.ID, fromId, lastId)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">return mses, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file27" style="display: none">package hasher
+
+import (
+        "crypto/sha1"
+        "encoding/hex"
+        "math/rand"
+)
+
+const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+
+func HashAndSalt(salt []byte, password string) string <span class="cov8" title="1">{
+        if salt == nil </span><span class="cov8" title="1">{
+                salt = make([]byte, 8)
+                for i := range salt </span><span class="cov8" title="1">{
+                        salt[i] = letterBytes[rand.Int63()%int64(len(letterBytes))]
+                }</span>
+        }
+        <span class="cov8" title="1">hashedPass := []byte(GetSha1([]byte(password)))
+        saltAndHash := append(salt, hashedPass...)
+        return string(saltAndHash[:])</span>
+}
+
+func CheckWithHash(hashedStr string, plainStr string) bool <span class="cov8" title="1">{
+        salt := []byte(hashedStr[0:8])
+        plainStrWithHash := HashAndSalt(salt, plainStr)
+        return plainStrWithHash == hashedStr
+}</span>
+
+func GetSha1(value []byte) string <span class="cov8" title="1">{
+        sum := sha1.Sum(value)
+        return hex.EncodeToString(sum[:])
+}</span>
+</pre>
+		
+		<pre class="file" id="file28" style="display: none">package logger
+
+import (
+        "dripapp/configs"
+        "log"
+        "os"
+        "time"
+)
+
+type Logger struct {
+        Debug *log.Logger
+        Info  *log.Logger
+        Warn  *log.Logger
+        Err   *log.Logger
+}
+
+var (
+        DripLogger = Logger{
+                Debug: log.New(os.Stderr, "DEBUG\t", log.Ldate|log.Ltime),
+                Info:  log.New(os.Stderr, "INFO\t", log.Ldate|log.Ltime),
+                Warn:  log.New(os.Stderr, "WARNING\t", log.Ldate|log.Ltime),
+                Err:   log.New(os.Stdout, "ERROR\t", log.Ldate|log.Ltime),
+        }
+)
+
+func (l *Logger) DebugLogging(message string) <span class="cov0" title="0">{
+        if configs.LogLevel == configs.DEBUG </span><span class="cov0" title="0">{
+                l.Debug.Printf("MESSAGE %s", message)
+        }</span>
+}
+
+func (l *Logger) InfoLogging(method string, remoteAddr string, url string, time time.Duration) <span class="cov0" title="0">{
+        if configs.LogLevel &lt;= configs.INFO </span><span class="cov0" title="0">{
+                l.Info.Printf("[%s] %s, %s %s", method, remoteAddr, url, time)
+        }</span>
+}
+
+func (l *Logger) WarnLogging(code int, message string) <span class="cov8" title="1">{
+        if configs.LogLevel &lt;= configs.WARNING </span><span class="cov8" title="1">{
+                l.Warn.Printf("CODE %d MESSAGE %s", code, message)
+        }</span>
+}
+
+func (l *Logger) ErrorLogging(code int, message string) <span class="cov8" title="1">{
+        l.Err.Printf("CODE %d MESSAGE %s", code, message)
+}</span>
+</pre>
+		
+		<pre class="file" id="file29" style="display: none">package monitoring
+
+import (
+        "github.com/gorilla/mux"
+        "github.com/prometheus/client_golang/prometheus"
+        "github.com/prometheus/client_golang/prometheus/promhttp"
+)
+
+type PromMetrics struct {
+        Hits    *prometheus.CounterVec
+        Timings *prometheus.HistogramVec
+}
+
+func RegisterMetrics(r *mux.Router) *PromMetrics <span class="cov0" title="0">{
+        var metrics PromMetrics
+
+        metrics.Hits = prometheus.NewCounterVec(prometheus.CounterOpts{
+                Name: "hits",
+        }, []string{"status", "path", "method"})
+
+        metrics.Timings = prometheus.NewHistogramVec(
+                prometheus.HistogramOpts{
+                        Name: "timings",
+                },
+                []string{"status", "path", "method"},
+        )
+
+        prometheus.MustRegister(metrics.Hits, metrics.Timings)
+
+        r.Handle("/metrics", promhttp.Handler())
+
+        return &amp;metrics
+}</span>
+</pre>
+		
+		<pre class="file" id="file30" style="display: none">package permissions
+
+import (
+        "context"
+        "dripapp/configs"
+        _userModels "dripapp/internal/dripapp/models"
+        _authClient "dripapp/internal/microservices/auth/delivery/grpc/client"
+        _sessionModels "dripapp/internal/microservices/auth/models"
+        "dripapp/internal/pkg/logger"
+        "dripapp/internal/pkg/responses"
+
+        "net/http"
+        "time"
+
+        uuid "github.com/nu7hatch/gouuid"
+)
+
+type Permission struct {
+        AuthClient _authClient.SessionClient
+}
+
+func (perm *Permission) CheckAuth(next http.HandlerFunc) http.HandlerFunc <span class="cov8" title="1">{
+        return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) </span><span class="cov8" title="1">{
+                var userSession _sessionModels.Session
+                session, err := r.Cookie("sessionId")
+                if err != nil </span><span class="cov0" title="0">{
+                        responses.SendError(w, _userModels.HTTPError{
+                                Code:    http.StatusForbidden,
+                                Message: _userModels.ErrAuth,
+                        }, logger.DripLogger.WarnLogging)
+                        return
+                }</span> else<span class="cov8" title="1"> {
+                        userSession, err = perm.AuthClient.GetFromSession(r.Context(), session.Value)
+                        if err != nil </span><span class="cov8" title="1">{
+                                responses.SendError(w, _userModels.HTTPError{
+                                        Code:    http.StatusForbidden,
+                                        Message: _userModels.ErrAuth,
+                                }, logger.DripLogger.WarnLogging)
+                                return
+                        }</span>
+                }
+                <span class="cov0" title="0">r = r.WithContext(context.WithValue(r.Context(), configs.ContextUserID, userSession))
+                next.ServeHTTP(w, r)</span>
+        })
+}
+
+func (perm *Permission) GetCurrentUser(next http.HandlerFunc) http.HandlerFunc <span class="cov8" title="1">{
+        return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) </span><span class="cov0" title="0">{
+
+                logger.DripLogger.DebugLogging("get current")
+                ctxSession := r.Context().Value(configs.ContextUserID)
+                if ctxSession == nil </span><span class="cov0" title="0">{
+                        responses.SendError(w, _userModels.HTTPError{
+                                Code:    http.StatusForbidden,
+                                Message: _userModels.ErrExtractContext,
+                        }, logger.DripLogger.ErrorLogging)
+                        return
+                }</span>
+                <span class="cov0" title="0">currentSession, ok := ctxSession.(_sessionModels.Session)
+                if !ok </span><span class="cov0" title="0">{
+                        responses.SendError(w, _userModels.HTTPError{
+                                Code:    http.StatusForbidden,
+                                Message: _userModels.ErrExtractContext,
+                        }, logger.DripLogger.ErrorLogging)
+                        return
+                }</span>
+
+                <span class="cov0" title="0">currentUser, err := perm.AuthClient.GetById(r.Context(), currentSession)
+                if err != nil </span><span class="cov0" title="0">{
+                        responses.SendError(w, _userModels.HTTPError{
+                                Code:    http.StatusNotFound,
+                                Message: err,
+                        }, logger.DripLogger.ErrorLogging)
+                        return
+                }</span>
+
+                <span class="cov0" title="0">r = r.WithContext(context.WithValue(r.Context(), configs.ContextUser, currentUser))
+                next.ServeHTTP(w, r)</span>
+        })
+}
+
+func generateCsrfLogic(w http.ResponseWriter) <span class="cov8" title="1">{
+        csrf, err := uuid.NewV4()
+        if err != nil </span><span class="cov0" title="0">{
+                responses.SendError(w, _userModels.HTTPError{
+                        Code:    http.StatusForbidden,
+                        Message: _userModels.ErrNoPermission,
+                }, logger.DripLogger.ErrorLogging)
+                return
+        }</span>
+        <span class="cov8" title="1">timeDelta := time.Now().Add(time.Hour * 24 * 30)
+        csrfCookie := &amp;http.Cookie{Name: "csrf", Value: csrf.String(), Path: "/", HttpOnly: true, Expires: timeDelta}
+
+        http.SetCookie(w, csrfCookie)
+        w.Header().Set("csrf", csrf.String())</span>
+}
+
+func SetCSRF(next http.HandlerFunc) http.HandlerFunc <span class="cov8" title="1">{
+        return http.HandlerFunc(
+                func(w http.ResponseWriter, r *http.Request) </span><span class="cov8" title="1">{
+                        generateCsrfLogic(w)
+                        next.ServeHTTP(w, r)
+                }</span>)
+}
+
+func CheckCSRF(next http.HandlerFunc) http.HandlerFunc <span class="cov8" title="1">{
+        return http.HandlerFunc(
+                func(w http.ResponseWriter, r *http.Request) </span><span class="cov8" title="1">{
+                        // csrf := r.Header.Get("x-csrf-Token")
+                        // csrfCookie, err := r.Cookie("csrf")
+
+                        // if err != nil || csrf == "" || csrfCookie.Value == "" || csrfCookie.Value != csrf {
+                        //         responses.SendError(w, models.HTTPError{
+                        //                 Code:    models.StatusCsrfProtection,
+                        //                 Message: models.ErrCSRF,
+                        //         }, logger.DripLogger.ErrorLogging)
+                        //         return
+                        // }
+                        // generateCsrfLogic(w)
+                        next.ServeHTTP(w, r)
+                }</span>)
+
+}
+</pre>
+		
+		<pre class="file" id="file31" style="display: none">package responses
+
+import (
+        "dripapp/internal/dripapp/models"
+        "dripapp/internal/pkg/logger"
+        "encoding/json"
+        "io/ioutil"
+        "net/http"
+)
+
+type JSON struct {
+        Status int         `json:"status"`
+        Body   interface{} `json:"body"`
+}
+
+func SendOK(w http.ResponseWriter) <span class="cov8" title="1">{
+        resp := JSON{
+                Status: http.StatusOK,
+        }
+
+        err := WriteJSON(w, resp)
+        if err != nil </span><span class="cov0" title="0">{
+                SendError(w, models.HTTPError{
+                        Code:    http.StatusInternalServerError,
+                        Message: models.ErrWriteByte,
+                },
+                        logger.DripLogger.ErrorLogging,
+                )
+                return
+        }</span>
+
+        <span class="cov8" title="1">logger.DripLogger.Info.Printf("CODE %d", resp.Status)</span>
+}
+
+func SendData(w http.ResponseWriter, v interface{}) <span class="cov8" title="1">{
+        resp := JSON{
+                Status: http.StatusOK,
+                Body:   v,
+        }
+
+        err := WriteJSON(w, resp)
+        if err != nil </span><span class="cov0" title="0">{
+                SendError(w, models.HTTPError{
+                        Code:    http.StatusInternalServerError,
+                        Message: models.ErrWriteByte,
+                },
+                        logger.DripLogger.ErrorLogging,
+                )
+                return
+        }</span>
+
+        <span class="cov8" title="1">logger.DripLogger.Info.Printf("CODE %d", resp.Status)</span>
+}
+
+func SendError(w http.ResponseWriter, httpErr models.HTTPError, logging func(int, string)) <span class="cov8" title="1">{
+        resp := JSON{
+                Status: httpErr.Code,
+        }
+
+        err := WriteJSON(w, resp)
+        if err != nil </span><span class="cov0" title="0">{
+                w.WriteHeader(http.StatusInternalServerError)
+                return
+        }</span>
+
+        <span class="cov8" title="1">logging(httpErr.Code, httpErr.Message.Error())</span>
+}
+
+func ReadJSON(r *http.Request, v interface{}) error <span class="cov8" title="1">{
+        byteReq, err := ioutil.ReadAll(r.Body)
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+
+        <span class="cov8" title="1">err = json.Unmarshal(byteReq, v)
+        if err != nil </span><span class="cov8" title="1">{
+                return err
+        }</span>
+
+        <span class="cov8" title="1">return nil</span>
+}
+
+func WriteJSON(w http.ResponseWriter, v interface{}) error <span class="cov8" title="1">{
+        byteResp, err := json.Marshal(v)
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+
+        <span class="cov8" title="1">_, err = w.Write(byteResp)
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+
+        <span class="cov8" title="1">return nil</span>
+}
+</pre>
+		
+		</div>
+	</body>
+	<script>
+	(function() {
+		var files = document.getElementById('files');
+		var visible;
+		files.addEventListener('change', onChange, false);
+		function select(part) {
+			if (visible)
+				visible.style.display = 'none';
+			visible = document.getElementById(part);
+			if (!visible)
+				return;
+			files.value = part;
+			visible.style.display = 'block';
+			location.hash = part;
+		}
+		function onChange() {
+			select(files.value);
+			window.scrollTo(0, 0);
+		}
+		if (location.hash != "") {
+			select(location.hash.substr(1));
+		}
+		if (!visible) {
+			select("file0");
+		}
+	})();
+	</script>
+</html>

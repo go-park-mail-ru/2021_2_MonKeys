@@ -66,7 +66,7 @@ func (p PostgreChatRepo) GetChat(ctx context.Context, userId uint64, fromId uint
 
 func (p PostgreChatRepo) SaveMessage(userId uint64, toId uint64, text string) (models.Message, error) {
 	var msg models.Message
-	err := p.Conn.Get(&msg, SendMessageQuery, userId, toId, text)
+	err := p.Conn.Get(&msg, SaveMessageQuery, userId, toId, text)
 	if err != nil {
 		return models.Message{}, err
 	}

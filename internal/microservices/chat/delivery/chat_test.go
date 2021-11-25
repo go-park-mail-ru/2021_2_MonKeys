@@ -9,14 +9,15 @@ import (
 	"dripapp/internal/pkg/logger"
 	"encoding/json"
 	"errors"
-	"github.com/gorilla/mux"
-	"github.com/stretchr/testify/mock"
-	"google.golang.org/grpc"
 	"io"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 	"time"
+
+	"github.com/gorilla/mux"
+	"github.com/stretchr/testify/mock"
+	"google.golang.org/grpc"
 )
 
 type TestCase struct {
@@ -88,7 +89,7 @@ func TestSetRouting(t *testing.T) {
 	mockChat := &mocks.ChatUseCase{}
 
 	grpcConn, _ := grpc.Dial(configs.AuthServer.GrpcUrl, grpc.WithInsecure())
-	grpcAuthClient := _authClient.NewStaffClient(grpcConn)
+	grpcAuthClient := _authClient.NewAuthClient(grpcConn)
 
 	SetChatRouting(logger.DripLogger, mux.NewRouter(), mockChat, *grpcAuthClient)
 }

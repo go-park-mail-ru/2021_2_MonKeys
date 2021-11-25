@@ -14,7 +14,7 @@ type SessionClient struct {
 	client proto.AuthGrpcHandlerClient
 }
 
-func NewStaffClient(conn *grpc.ClientConn) *SessionClient {
+func NewAuthClient(conn *grpc.ClientConn) *SessionClient {
 	c := proto.NewAuthGrpcHandlerClient(conn)
 	return &SessionClient{
 		client: c,
@@ -25,7 +25,7 @@ func (s *SessionClient) GetFromSession(ctx context.Context, cookie string) (_ses
 	cook := proto.Cookie{
 		Cookie: cookie,
 	}
-	userSession, err := s.client.GetFromSession(ctx, &cook)
+	userSession, err := s.client.GetFromSession(context.Background(), &cook)
 	if err != nil {
 		fmt.Println("Unexpected Error", err)
 		return _sessionModels.Session{}, err

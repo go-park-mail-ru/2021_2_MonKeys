@@ -104,8 +104,8 @@ case when date <> '' then date_part('year', age(date::date)) else 0 end as age, 
 	AddMatchQuery = "insert into matches(id1, id2) values ($1,$2),($2,$1) returning id;"
 
 	GetUserLikesQuery = `select p.id,
-						   p.name,
 						   p.email,
+						   p.name,
 						   p.date,
 						   case when p.date <> '' then date_part('year', age(p.date::timestamp)) else 0 end as age,
 						   p.description,
@@ -121,7 +121,7 @@ case when date <> '' then date_part('year', age(date::date)) else 0 end as age, 
 
 	GetReportIdFromDescQuery      = "select r.id from reports r where r.reportdesc = $1;"
 	GetReportDescFromIdQuery      = "select reportdesc from reports r where r.id = $1;"
-	AddReportToProfileQuery       = "insert into profile_report(profile_id, report_id) values($1, $2);"
+	AddReportToProfileQuery       = "insert into profile_report(profile_id, report_id) values($1, $2) returning id;"
 	GetReportsCountQuery          = "select count(*) from profile_report where profile_id = $1;"
 	GetReportsIdWithMaxCountQuery = `select report_id
 									from profile_report
@@ -133,5 +133,5 @@ case when date <> '' then date_part('year', age(date::date)) else 0 end as age, 
 																				where profile_id = $1
 																				group by report_id
 													) as counts);`
-	UpdateProfilesReportStatusQuery = "update profile set reportstatus = $2 where id = $1;"
+	UpdateProfilesReportStatusQuery = "update profile set reportstatus = $2 where id = $1 returning id;"
 )
