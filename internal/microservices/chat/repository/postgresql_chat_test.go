@@ -48,7 +48,7 @@ func TestChats(t *testing.T) {
 	}
 
 	t.Run("good get chats", func(t *testing.T) {
-		rows := sqlmock.NewRows([]string{"FromUserID", "name", "img"}).AddRow("1", "Ilyagu", "lol")
+		rows := sqlmock.NewRows([]string{"id", "name", "img"}).AddRow("1", "Ilyagu", "lol")
 		mock.ExpectQuery("select").WithArgs(1).WillReturnRows(rows)
 
 		messageRows := sqlmock.NewRows([]string{"message_id", "from_id", "to_id", "text", "date"}).
@@ -85,7 +85,7 @@ func TestChats(t *testing.T) {
 		}
 	})
 	t.Run("error get last message", func(t *testing.T) {
-		rows := sqlmock.NewRows([]string{"FromUserID", "name", "img"}).AddRow("1", "Ilyagu", "lol")
+		rows := sqlmock.NewRows([]string{"id", "name", "img"}).AddRow("1", "Ilyagu", "lol")
 		mock.ExpectQuery("select").WithArgs(1).WillReturnRows(rows)
 
 		mock.ExpectQuery("select").WithArgs(1, 1).WillReturnError(sql.ErrNoRows)
