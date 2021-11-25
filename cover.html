@@ -61,13 +61,13 @@
 				
 				<option value="file2">dripapp/internal/dripapp/file/manager.go (0.0%)</option>
 				
-				<option value="file3">dripapp/internal/dripapp/middleware/cors.go (0.0%)</option>
+				<option value="file3">dripapp/internal/dripapp/middleware/cors.go (3.8%)</option>
 				
-				<option value="file4">dripapp/internal/dripapp/middleware/logger.go (0.0%)</option>
+				<option value="file4">dripapp/internal/dripapp/middleware/logger.go (8.3%)</option>
 				
 				<option value="file5">dripapp/internal/dripapp/middleware/middleware.go (0.0%)</option>
 				
-				<option value="file6">dripapp/internal/dripapp/middleware/panic.go (0.0%)</option>
+				<option value="file6">dripapp/internal/dripapp/middleware/panic.go (8.3%)</option>
 				
 				<option value="file7">dripapp/internal/dripapp/models/file.go (75.0%)</option>
 				
@@ -113,9 +113,9 @@
 				
 				<option value="file28">dripapp/internal/pkg/logger/logger.go (42.9%)</option>
 				
-				<option value="file29">dripapp/internal/pkg/monitoring/monitoring.go (0.0%)</option>
+				<option value="file29">dripapp/internal/pkg/monitoring/monitoring.go (100.0%)</option>
 				
-				<option value="file30">dripapp/internal/pkg/permissions/permissions.go (48.8%)</option>
+				<option value="file30">dripapp/internal/pkg/permissions/permissions.go (53.7%)</option>
 				
 				<option value="file31">dripapp/internal/pkg/responses/responses.go (71.9%)</option>
 				
@@ -532,7 +532,7 @@ var allowedOrigins = map[string]struct{}{
         "https://ijia.me":           {},
 }
 
-func CORS(logger logger.Logger) (mw func(http.Handler) http.Handler) <span class="cov0" title="0">{
+func CORS(logger logger.Logger) (mw func(http.Handler) http.Handler) <span class="cov8" title="1">{
         return func(next http.Handler) http.Handler </span><span class="cov0" title="0">{
                 return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) </span><span class="cov0" title="0">{
                         origin := r.Header.Get("Origin")
@@ -584,7 +584,7 @@ import (
         "time"
 )
 
-func Logger(logFile *os.File, l logger.Logger, metrics *monitoring.PromMetrics) (mw func(http.Handler) http.Handler) <span class="cov0" title="0">{
+func Logger(logFile *os.File, l logger.Logger, metrics *monitoring.PromMetrics) (mw func(http.Handler) http.Handler) <span class="cov8" title="1">{
         return func(next http.Handler) http.Handler </span><span class="cov0" title="0">{
                 return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) </span><span class="cov0" title="0">{
                         start := time.Now()
@@ -617,15 +617,12 @@ import (
 )
 
 func NewMiddleware(r *mux.Router, sp _sessionModels.SessionRepository, logFile *os.File, l logger.Logger) <span class="cov0" title="0">{
-        // sm := sessionMiddleware{
-        //         sessionRepo: sp,
-        // }
+
         metrics := monitoring.RegisterMetrics(r)
 
         r.Use(Logger(logFile, l, metrics))
         //r.Use(CORS(l))
         r.Use(PanicRecovery(l, metrics))
-        // r.Use(sm.SessionMiddleware(l))
 }</span>
 </pre>
 		
@@ -642,7 +639,7 @@ import (
         "time"
 )
 
-func PanicRecovery(l logger.Logger, metrics *monitoring.PromMetrics) (mw func(http.Handler) http.Handler) <span class="cov0" title="0">{
+func PanicRecovery(l logger.Logger, metrics *monitoring.PromMetrics) (mw func(http.Handler) http.Handler) <span class="cov8" title="1">{
         return func(next http.Handler) http.Handler </span><span class="cov0" title="0">{
                 return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) </span><span class="cov0" title="0">{
                         reqTime := time.Now()
@@ -3546,7 +3543,7 @@ type PromMetrics struct {
         Timings *prometheus.HistogramVec
 }
 
-func RegisterMetrics(r *mux.Router) *PromMetrics <span class="cov0" title="0">{
+func RegisterMetrics(r *mux.Router) *PromMetrics <span class="cov8" title="1">{
         var metrics PromMetrics
 
         metrics.Hits = prometheus.NewCounterVec(prometheus.CounterOpts{
@@ -3593,7 +3590,7 @@ func (perm *Permission) CheckAuth(next http.HandlerFunc) http.HandlerFunc <span 
         return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) </span><span class="cov8" title="1">{
                 var userSession _sessionModels.Session
                 session, err := r.Cookie("sessionId")
-                if err != nil </span><span class="cov0" title="0">{
+                if err != nil </span><span class="cov8" title="1">{
                         responses.SendError(w, _userModels.HTTPError{
                                 Code:    http.StatusForbidden,
                                 Message: _userModels.ErrAuth,

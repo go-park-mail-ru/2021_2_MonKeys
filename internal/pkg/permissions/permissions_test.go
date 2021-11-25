@@ -102,7 +102,7 @@ func TestGetCurrentUser(t *testing.T) {
 		req = req.WithContext(context.WithValue(req.Context(), configs.ContextUserID, 1))
 
 		m := new(_authMock.AuthGrpcHandlerClient)
-		m.On("GetFromSession", req.Context(), sess).Return(_userModels.User{}, nil)
+		m.On("GetById", req.Context(), sess).Return(_userModels.User{}, nil)
 
 		recorder := httptest.NewRecorder()
 		handlerToTest.ServeHTTP(recorder, req)
