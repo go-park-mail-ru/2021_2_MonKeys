@@ -22,8 +22,8 @@ build-go:
 ## test-coverage: get final code coverage
 test-coverage:
 	go test -coverprofile=coverage.out.tmp -coverpkg=./...  ./...
-	cat coverage.out.tmp | grep -v mock > coverage2.out.tmp
-	cat coverage2.out.tmp | grep -v cmd > coverage.out.tmp
+# cat coverage.out.tmp | grep -v mock > coverage2.out.tmp
+# cat coverage2.out.tmp | grep -v cmd > coverage.out.tmp
 	go tool cover -func=coverage.out.tmp
 	go tool cover -html=coverage.out.tmp -o cover.html
 
