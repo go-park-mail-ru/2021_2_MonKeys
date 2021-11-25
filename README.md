@@ -16,5 +16,5 @@
 <br><a href="https://github.com/4Marvin2">😭Михаил Попов</a>
 <br><a href="https://github.com/VladimirLunkin">🕵️Владимир Лункин🧙</a>
 </h2>
-<img alt="Website" src="https://img.shields.io/website?url=https%3A%2F%2Fapi.ijia.me">
+<img alt="Website" src="https://img.shields.io/website?url=https%3A%2F%2Fapi.monkeys.team">
 <h1> <a href="https://drip.monkeys.team"> deployment (https://drip.monkeys.team) </a> </h1>
