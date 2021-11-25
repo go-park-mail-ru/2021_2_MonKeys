@@ -61,11 +61,11 @@ func main() {
 	userUCase := _userUCase.NewUserUsecase(userRepo, fileManager, timeoutContext)
 
 	// new auth server
-	go grpcServer.StartStaffGrpcServer(sm, userRepo, configs.AuthServer.GrpcUrl)
+	go grpcServer.StartAuthGrpcServer(sm, userRepo, configs.AuthServer.GrpcUrl)
 
 	// auth client
 	grpcConn, _ := grpc.Dial(configs.AuthServer.GrpcUrl, grpc.WithInsecure())
-	grpcAuthClient := _authClient.NewStaffClient(grpcConn)
+	grpcAuthClient := _authClient.NewAuthClient(grpcConn)
 
 	// delivery
 	_sessionDelivery.SetSessionRouting(logger.DripLogger, router, userUCase, sessionUCase, *grpcAuthClient)

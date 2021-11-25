@@ -16,7 +16,7 @@ const (
     order by date desc
     limit 1;`
 
-	SendMessageQuery = `
+	SaveMessageQuery = `
 	insert into message(from_id, to_id, text) values ($1,$2,$3) returning message_id, from_id, to_id, text, date;
 	`
 

@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"dripapp/configs"
 	"dripapp/internal/dripapp/models"
-	"dripapp/internal/pkg/logger"
 	"fmt"
 	"log"
 	"strings"
@@ -96,27 +95,23 @@ func (p PostgreUserRepo) UpdateUser(ctx context.Context, newUserData models.User
 		Scan(&RespUser.ID, &RespUser.Email, &RespUser.Password, &RespUser.Name, &RespUser.Gender, &RespUser.Prefer,
 			&RespUser.FromAge, &RespUser.ToAge, &RespUser.Date, &RespUser.Age, &RespUser.Description, pq.Array(&RespUser.Imgs))
 	if err != nil {
-		logger.DripLogger.DebugLogging("update error")
 		return models.User{}, err
 	}
 
 	err = p.deleteTags(ctx, newUserData.ID)
 	if err != nil && err != sql.ErrNoRows {
-		logger.DripLogger.DebugLogging("delete error")
 		return models.User{}, err
 	}
 
 	if len(newUserData.Tags) != 0 {
 		err = p.insertTags(ctx, newUserData.ID, newUserData.Tags)
 		if err != nil {
-			logger.DripLogger.DebugLogging("insert error")
 			return models.User{}, err
 		}
 	}
 
 	RespUser.Tags, err = p.getTagsByID(ctx, RespUser.ID)
 	if err != nil && err != sql.ErrNoRows {
-		logger.DripLogger.DebugLogging("get tags by id")
 		return models.User{}, err
 	}
 
@@ -390,11 +385,8 @@ func (p PostgreUserRepo) AddReport(ctx context.Context, report models.NewReport)
 
 	var respId uint64
 	err := p.Conn.QueryRow(AddReportToProfileQuery, report.ToId, reportId).Scan(&respId)
-
 	if err != nil {
-		if err != sql.ErrNoRows {
-			return err
-		}
+		return err
 	}
 
 	return nil
@@ -403,7 +395,7 @@ func (p PostgreUserRepo) AddReport(ctx context.Context, report models.NewReport)
 func (p PostgreUserRepo) GetReportsCount(ctx context.Context, userId uint64) (uint64, error) {
 	var curCount uint64
 	if err := p.Conn.QueryRow(GetReportsCountQuery, userId).Scan(&curCount); err != nil {
-		return curCount, err
+		return 0, err
 	}
 
 	return curCount, nil
@@ -412,7 +404,7 @@ func (p PostgreUserRepo) GetReportsCount(ctx context.Context, userId uint64) (ui
 func (p PostgreUserRepo) GetReportsWithMaxCount(ctx context.Context, userId uint64) (uint64, error) {
 	var reportId uint64
 	if err := p.Conn.QueryRow(GetReportsIdWithMaxCountQuery, userId).Scan(&reportId); err != nil {
-		return reportId, err
+		return 0, err
 	}
 
 	return reportId, nil
@@ -421,7 +413,7 @@ func (p PostgreUserRepo) GetReportsWithMaxCount(ctx context.Context, userId uint
 func (p PostgreUserRepo) GetReportDesc(ctx context.Context, reportId uint64) (string, error) {
 	var reportDesc string
 	if err := p.Conn.QueryRow(GetReportDescFromIdQuery, reportId).Scan(&reportDesc); err != nil {
-		return reportDesc, err
+		return "", err
 	}
 
 	return reportDesc, nil
@@ -430,11 +422,8 @@ func (p PostgreUserRepo) GetReportDesc(ctx context.Context, reportId uint64) (st
 func (p PostgreUserRepo) UpdateReportStatus(ctx context.Context, userId uint64, reportStatus string) error {
 	var respId uint64
 	err := p.Conn.QueryRow(UpdateProfilesReportStatusQuery, userId, reportStatus).Scan(&respId)
-
 	if err != nil {
-		if err != sql.ErrNoRows {
-			return err
-		}
+		return err
 	}
 
 	return nil

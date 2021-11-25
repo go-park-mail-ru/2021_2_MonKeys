@@ -3,19 +3,21 @@ package delivery
 import (
 	"context"
 	"dripapp/configs"
-	"dripapp/internal/dripapp/user/repository"
+	_authClient "dripapp/internal/microservices/auth/delivery/grpc/client"
 	"dripapp/internal/microservices/chat/mocks"
 	"dripapp/internal/microservices/chat/models"
 	"dripapp/internal/pkg/logger"
 	"encoding/json"
 	"errors"
-	"github.com/gorilla/mux"
-	"github.com/stretchr/testify/mock"
 	"io"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 	"time"
+
+	"github.com/gorilla/mux"
+	"github.com/stretchr/testify/mock"
+	"google.golang.org/grpc"
 )
 
 type TestCase struct {
@@ -85,9 +87,11 @@ func CheckResponse(t *testing.T, w *httptest.ResponseRecorder, caseNum int, test
 
 func TestSetRouting(t *testing.T) {
 	mockChat := &mocks.ChatUseCase{}
-	userRepo, _ := repository.NewPostgresUserRepository(configs.PostgresConfig{})
 
-	SetChatRouting(logger.DripLogger, mux.NewRouter(), mockChat, userRepo)
+	grpcConn, _ := grpc.Dial(configs.AuthServer.GrpcUrl, grpc.WithInsecure())
+	grpcAuthClient := _authClient.NewAuthClient(grpcConn)
+
+	SetChatRouting(logger.DripLogger, mux.NewRouter(), mockChat, *grpcAuthClient)
 }
 
 func TestGetChat(t *testing.T) {

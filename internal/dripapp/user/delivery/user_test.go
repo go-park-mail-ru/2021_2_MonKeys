@@ -158,88 +158,6 @@ func CreateRequest(method, target string, body io.Reader) (r *http.Request) {
 // 	}
 // }
 
-// func TestSignup(t *testing.T) {
-// 	t.Parallel()
-
-// 	mockUserUseCase := &mocks.UserUsecase{}
-// 	mockSessionUseCase := &_s.SessionUsecase{}
-
-// 	userHandler := &UserHandler{
-// 		Logger:       logger.DripLogger,
-// 		UserUCase:    mockUserUseCase,
-// 		SessionUcase: mockSessionUseCase,
-// 	}
-
-// 	cases := []TestCase{
-// 		{
-// 			BodyReq: bytes.NewReader([]byte(`{"email":"` + email + `","password":"` + password + `"}`)),
-// 			mockUserUseCase: []interface{}{
-// 				user,
-// 				nil,
-// 			},
-// 			mockSessUseCase: []interface{}{
-// 				nil,
-// 			},
-// 			StatusCode: http.StatusOK,
-// 			BodyResp:   `{"status":200,"body":{"id":` + idStr + `,"email":"` + email + `"}}`,
-// 		},
-// 		{
-// 			BodyReq: bytes.NewReader([]byte(`wrong input data`)),
-// 			mockUserUseCase: []interface{}{
-// 				user,
-// 				nil,
-// 			},
-// 			mockSessUseCase: []interface{}{
-// 				nil,
-// 			},
-// 			StatusCode: http.StatusOK,
-// 			BodyResp:   `{"status":400,"body":null}`,
-// 		},
-// 		{
-// 			BodyReq: bytes.NewReader([]byte(`{"email":"wrongEmail","password":"wrongPassword"}`)),
-// 			mockUserUseCase: []interface{}{
-// 				models.User{},
-// 				models.ErrEmailAlreadyExists,
-// 			},
-// 			mockSessUseCase: []interface{}{
-// 				nil,
-// 			},
-// 			StatusCode: http.StatusOK,
-// 			BodyResp:   `{"status":1001,"body":null}`,
-// 		},
-// 		{
-// 			BodyReq: bytes.NewReader([]byte(`{"email":"` + email + `","password":"` + password + `"}`)),
-// 			mockUserUseCase: []interface{}{
-// 				user,
-// 				nil,
-// 			},
-// 			mockSessUseCase: []interface{}{
-// 				models.ErrSessionAlreadyExists,
-// 			},
-// 			StatusCode: http.StatusOK,
-// 			BodyResp:   `{"status":500,"body":null}`,
-// 		},
-// 	}
-
-// 	for caseNum, item := range cases {
-// 		r := CreateRequest("POST", "/api/v1/signup", item.BodyReq)
-// 		w := httptest.NewRecorder()
-
-// 		mockUserUseCase.ExpectedCalls = nil
-// 		mockUserUseCase.On("Signup",
-// 			r.Context(),
-// 			mock.AnythingOfType("models.LoginUser")).Return(item.mockUserUseCase...)
-// 		mockSessionUseCase.ExpectedCalls = nil
-// 		mockSessionUseCase.On("AddSession",
-// 			r.Context(),
-// 			mock.AnythingOfType("models.Session")).Return(item.mockSessUseCase...)
-
-// 		userHandler.SignupHandler(w, r)
-
-// 		CheckResponse(t, w, caseNum, item)
-// 	}
-// }
-
 func TestNextUser(t *testing.T) {
 	t.Parallel()
 
@@ -810,7 +728,7 @@ func TestSetRouting(t *testing.T) {
 	mockUserUseCase := &mocks.UserUsecase{}
 	mockSessionUseCase := &_s.SessionUsecase{}
 	grpcConn, _ := grpc.Dial(configs.AuthServer.GrpcUrl, grpc.WithInsecure())
-	grpcAuthClient := _authClient.NewStaffClient(grpcConn)
+	grpcAuthClient := _authClient.NewAuthClient(grpcConn)
 
 	SetUserRouting(logger.DripLogger, mux.NewRouter(), mockUserUseCase, mockSessionUseCase, *grpcAuthClient)
 }

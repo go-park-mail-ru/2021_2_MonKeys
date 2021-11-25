@@ -70,7 +70,7 @@ func main() {
 
 	// auth client
 	grpcConn, _ := grpc.Dial(configs.AuthServer.GrpcUrl, grpc.WithInsecure())
-	grpcAuthClient := _authClient.NewStaffClient(grpcConn)
+	grpcAuthClient := _authClient.NewAuthClient(grpcConn)
 
 	// delivery
 	_userDelivery.SetUserRouting(logger.DripLogger, router, userUCase, sessionUcase, *grpcAuthClient)

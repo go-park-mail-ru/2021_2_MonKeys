@@ -5,8 +5,9 @@ import (
 	"dripapp/internal/microservices/chat/models"
 	"dripapp/internal/pkg/logger"
 	"errors"
-	"github.com/stretchr/testify/mock"
 	"testing"
+
+	"github.com/stretchr/testify/mock"
 )
 
 type TestCaseWS struct {

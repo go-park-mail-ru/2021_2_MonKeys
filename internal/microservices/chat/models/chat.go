@@ -14,7 +14,7 @@ type Message struct {
 }
 
 type Chat struct {
-	FromUserID uint64    `json:"fromUserID"`
+	FromUserID uint64    `json:"fromUserID" db:"FromUserID"`
 	Name       string    `json:"name"`
 	Img        string    `json:"img"`
 	Messages   []Message `json:"messages"`

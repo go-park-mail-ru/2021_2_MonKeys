@@ -14,7 +14,6 @@ install-dependencies:
 
 ## build-go: Build compiles project
 build-go:
-# go mod tidy
 	go build -o ${MAIN_SERVICE_BINARY} cmd/dripapp/main.go
 	go build -o ${CHAT_SERVICE_BINARY} cmd/chat/main.go
 	go build -o ${AUTH_SERVICE_BINARY} cmd/auth/main.go
@@ -22,10 +21,12 @@ build-go:
 ## test-coverage: get final code coverage
 test-coverage:
 	go test -coverprofile=coverage.out.tmp -coverpkg=./...  ./...
-	cat coverage.out.tmp | grep -v mock > coverage2.out.tmp
-	go tool cover -func=coverage2.out.tmp
-	go tool cover -html=coverage2.out.tmp
+    cat coverage.out.tmp | grep -v mock > coverage2.out.tmp
+	cat coverage2.out.tmp | grep -v cmd > coverage.out.tmp
+	go tool cover -func=coverage.out.tmp
+	go tool cover -html=coverage.out.tmp -o cover.html
 
+## test: test code
 test:
 	go test ./...
 
@@ -44,6 +45,7 @@ clean:
 	docker volume prune
 
 clean-deploy:
+	docker-compose rm postgres
 	docker rm -vf $$(docker ps -a -q) || true
 	sudo rm -rf media
 	sudo rm -rf logs.log
