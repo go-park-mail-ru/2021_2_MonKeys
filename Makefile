@@ -44,6 +44,7 @@ clean:
 	docker volume prune
 
 clean-deploy:
+	docker-compose rm postgres
 	docker rm -vf $$(docker ps -a -q) || true
 	sudo rm -rf media
 	sudo rm -rf logs.log
