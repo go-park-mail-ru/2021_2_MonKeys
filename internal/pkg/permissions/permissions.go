@@ -3,6 +3,7 @@ package permissions
 import (
 	"context"
 	"dripapp/configs"
+	"dripapp/internal/dripapp/models"
 	_userModels "dripapp/internal/dripapp/models"
 	_authClient "dripapp/internal/microservices/auth/delivery/grpc/client"
 	_sessionModels "dripapp/internal/microservices/auth/models"
@@ -106,17 +107,17 @@ func SetCSRF(next http.HandlerFunc) http.HandlerFunc {
 func CheckCSRF(next http.HandlerFunc) http.HandlerFunc {
 	return http.HandlerFunc(
 		func(w http.ResponseWriter, r *http.Request) {
-			// csrf := r.Header.Get("x-csrf-Token")
-			// csrfCookie, err := r.Cookie("csrf")
+			csrf := r.Header.Get("x-csrf-Token")
+			csrfCookie, err := r.Cookie("csrf")
 
-			// if err != nil || csrf == "" || csrfCookie.Value == "" || csrfCookie.Value != csrf {
-			// 	responses.SendError(w, models.HTTPError{
-			// 		Code:    models.StatusCsrfProtection,
-			// 		Message: models.ErrCSRF,
-			// 	}, logger.DripLogger.ErrorLogging)
-			// 	return
-			// }
-			// generateCsrfLogic(w)
+			if err != nil || csrf == "" || csrfCookie.Value == "" || csrfCookie.Value != csrf {
+				responses.SendError(w, models.HTTPError{
+					Code:    models.StatusCsrfProtection,
+					Message: models.ErrCSRF,
+				}, logger.DripLogger.ErrorLogging)
+				return
+			}
+			generateCsrfLogic(w)
 			next.ServeHTTP(w, r)
 		})
 

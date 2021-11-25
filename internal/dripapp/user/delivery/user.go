@@ -16,19 +16,6 @@ type UserHandler struct {
 	Logger       logger.Logger
 }
 
-// func (h *UserHandler) CurrentUser(w http.ResponseWriter, r *http.Request) {
-// 	user, err := h.UserUCase.CurrentUser(r.Context())
-// 	if err != nil {
-// 		responses.SendError(w, models.HTTPError{
-// 			Code:    http.StatusNotFound,
-// 			Message: err,
-// 		}, h.Logger.ErrorLogging)
-// 		return
-// 	}
-
-// 	responses.SendData(w, user)
-// }
-
 func (h *UserHandler) EditProfileHandler(w http.ResponseWriter, r *http.Request) {
 	var newUserData models.User
 	err := responses.ReadJSON(r, &newUserData)
@@ -106,49 +93,6 @@ func (h *UserHandler) DeletePhoto(w http.ResponseWriter, r *http.Request) {
 
 	responses.SendOK(w)
 }
-
-// func (h *UserHandler) SignupHandler(w http.ResponseWriter, r *http.Request) {
-// 	var logUserData models.LoginUser
-// 	err := responses.ReadJSON(r, &logUserData)
-// 	if err != nil {
-// 		responses.SendError(w, models.HTTPError{
-// 			Code:    http.StatusBadRequest,
-// 			Message: err,
-// 		}, h.Logger.ErrorLogging)
-// 		return
-// 	}
-
-// 	user, err := h.UserUCase.Signup(r.Context(), logUserData)
-// 	if err != nil {
-// 		code := http.StatusNotFound
-// 		if err == models.ErrEmailAlreadyExists {
-// 			code = models.StatusEmailAlreadyExists
-// 		}
-// 		responses.SendError(w, models.HTTPError{
-// 			Code:    code,
-// 			Message: err,
-// 		}, h.Logger.ErrorLogging)
-// 		return
-// 	}
-// 	cookie := _sessionModels.CreateSessionCookie(logUserData)
-
-// 	sess := _sessionModels.Session{
-// 		Cookie: cookie.Value,
-// 		UserID: user.ID,
-// 	}
-// 	err = h.SessionUcase.AddSession(r.Context(), sess)
-// 	if err != nil {
-// 		responses.SendError(w, models.HTTPError{
-// 			Code:    http.StatusInternalServerError,
-// 			Message: err,
-// 		}, h.Logger.WarnLogging)
-// 		return
-// 	}
-
-// 	http.SetCookie(w, &cookie)
-
-// 	responses.SendData(w, user)
-// }
 
 func (h *UserHandler) NextUserHandler(w http.ResponseWriter, r *http.Request) {
 	nextUser, err := h.UserUCase.NextUser(r.Context())

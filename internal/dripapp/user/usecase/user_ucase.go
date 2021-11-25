@@ -54,9 +54,6 @@ func (h *userUsecase) EditProfile(c context.Context, newUserData models.User) (u
 
 	newUserData.ID = currentUser.ID
 	newUserData.Email = currentUser.Email
-	// if err != nil {
-	// 	return models.User{}, err
-	// }
 
 	updatedUser, err = h.UserRepo.UpdateUser(c, newUserData)
 	if err != nil {
