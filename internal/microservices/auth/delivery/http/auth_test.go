@@ -31,8 +31,8 @@ type TestCase struct {
 }
 
 var (
-	idStr    = "1"
-	user     = models.User{
+	idStr = "1"
+	user  = models.User{
 		ID:       uint64(1),
 		Email:    "test@mail.ru",
 		Password: "qweQWE12",
@@ -319,7 +319,7 @@ func TestSetRouting(t *testing.T) {
 	mockUserUseCase := &mocks.UserUsecase{}
 	mockSessionUseCase := &_s.SessionUsecase{}
 	grpcConn, _ := grpc.Dial(configs.AuthServer.GrpcUrl, grpc.WithInsecure())
-	grpcAuthClient := _authClient.NewStaffClient(grpcConn)
+	grpcAuthClient := _authClient.NewAuthClient(grpcConn)
 
 	SetSessionRouting(logger.DripLogger, mux.NewRouter(), mockUserUseCase, mockSessionUseCase, *grpcAuthClient)
 }

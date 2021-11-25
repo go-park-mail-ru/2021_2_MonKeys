@@ -28,7 +28,7 @@ func NewAuthServerGRPC(gserver *grpc.Server, su _sessionModels.SessionRepository
 	reflection.Register(gserver)
 }
 
-func StartStaffGrpcServer(su _sessionModels.SessionRepository, uu _userModels.UserRepository, url string) {
+func StartAuthGrpcServer(su _sessionModels.SessionRepository, uu _userModels.UserRepository, url string) {
 	list, err := net.Listen("tcp", url)
 	if err != nil {
 		log.Err(err)
@@ -54,7 +54,7 @@ func (s *server) GetFromSession(ctx context.Context, cookie *proto.Cookie) (*pro
 }
 
 func (s *server) GetById(ctx context.Context, session *proto.Session) (*proto.User, error) {
-	user, err := s.userRepo.GetUserByID(ctx, session.UserID)
+	user, err := s.userRepo.GetUserByID(context.Background(), session.UserID)
 	return transUserIntoRPC(&user), err
 }
 

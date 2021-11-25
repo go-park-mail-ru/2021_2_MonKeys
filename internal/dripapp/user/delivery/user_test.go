@@ -158,8 +158,6 @@ func CreateRequest(method, target string, body io.Reader) (r *http.Request) {
 // 	}
 // }
 
-
-
 func TestNextUser(t *testing.T) {
 	t.Parallel()
 
@@ -730,7 +728,7 @@ func TestSetRouting(t *testing.T) {
 	mockUserUseCase := &mocks.UserUsecase{}
 	mockSessionUseCase := &_s.SessionUsecase{}
 	grpcConn, _ := grpc.Dial(configs.AuthServer.GrpcUrl, grpc.WithInsecure())
-	grpcAuthClient := _authClient.NewStaffClient(grpcConn)
+	grpcAuthClient := _authClient.NewAuthClient(grpcConn)
 
 	SetUserRouting(logger.DripLogger, mux.NewRouter(), mockUserUseCase, mockSessionUseCase, *grpcAuthClient)
 }
