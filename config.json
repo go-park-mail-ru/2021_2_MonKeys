@@ -1,5 +1,5 @@
 {
-    "log_level": "INFO",
+    "log_level": "DEBUG",
     "server": {
       "host": "127.0.0.1",
       "httpPort": ":8000",
@@ -8,26 +8,26 @@
     },
     "chat_server": {
       "host": "127.0.0.1",
-      "httpPort": ":8000",
+      "httpPort": ":8001",
       "certFile": "api.ijia.me.crt",
       "keyFile": "api.ijia.me.key"
     },
     "auth_server": {
       "host": "127.0.0.1",
       "httpPort": ":8002",
-      "grpcUrl": "auth_service:8003",
+      "grpcUrl": ":8003",
       "certFile": "api.ijia.me.crt",
       "keyFile": "api.ijia.me.key"
     },
     "database": {
-        "host": "postgres",
+        "host": "127.0.0.1",
         "port": ":5432",
         "user": "admin",
         "pass": "lolkek",
         "name": "drip"
     },
     "session": {
-        "host": "tarantool",
+        "host": "127.0.0.1",
         "port": ":3301",
         "user": "admin",
         "pass": "pass",

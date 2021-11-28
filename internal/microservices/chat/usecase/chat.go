@@ -5,6 +5,7 @@ import (
 	"dripapp/configs"
 	_userModels "dripapp/internal/dripapp/models"
 	"dripapp/internal/microservices/chat/models"
+	"fmt"
 	"time"
 )
 
@@ -74,4 +75,22 @@ func (h *ChatUseCase) GetChat(c context.Context, fromId uint64, lastId uint64) (
 	}
 
 	return mses, nil
+}
+
+func (h *ChatUseCase) DeleteChat(c context.Context, fromId uint64) error {
+	ctx, cancel := context.WithTimeout(c, h.contextTimeout)
+	defer cancel()
+
+	currentUser, ok := ctx.Value(configs.ContextUser).(_userModels.User)
+	if !ok {
+		return nil
+	}
+	fmt.Println(currentUser.ID)
+
+	err := h.ChatRepo.DeleteChat(ctx, currentUser.ID, fromId)
+	if err != nil {
+		return nil
+	}
+
+	return nil
 }

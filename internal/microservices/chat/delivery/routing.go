@@ -29,4 +29,8 @@ func SetChatRouting(logger logger.Logger, router *mux.Router, chatUCase models.C
 	router.HandleFunc("/api/v1/chats",
 		_p.SetCSRF(perm.CheckAuth(perm.GetCurrentUser(chatHandler.GetChats)))).
 		Methods("GET", "OPTIONS")
+
+	router.HandleFunc("/api/v1/chat/{id:[0-9]+}",
+		_p.SetCSRF(perm.CheckAuth(perm.GetCurrentUser(chatHandler.DeleteChat)))).
+		Methods("DELETE", "OPTIONS")
 }
