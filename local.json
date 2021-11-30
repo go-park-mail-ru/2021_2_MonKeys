@@ -7,7 +7,7 @@
       "keyFile": "api.ijia.me.key"
     },
     "chat_server": {
-      "host": "127.0.0.1",
+      "host": "localhost",
       "httpPort": ":8001",
       "certFile": "api.ijia.me.crt",
       "keyFile": "api.ijia.me.key"

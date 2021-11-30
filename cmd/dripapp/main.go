@@ -11,10 +11,13 @@ import (
 	_authClient "dripapp/internal/microservices/auth/delivery/grpc/client"
 	_sessionRepo "dripapp/internal/microservices/auth/repository"
 	_sessionUcase "dripapp/internal/microservices/auth/usecase"
+	"fmt"
 	"log"
 
 	"dripapp/internal/pkg/logger"
 	"net/http"
+	"net/http/httputil"
+	"net/url"
 	"os"
 
 	_ "dripapp/docs"
@@ -77,6 +80,21 @@ func main() {
 
 	// middleware
 	middleware.NewMiddleware(router, sm, logFile, logger.DripLogger)
+
+	fmt.Println("http://" + configs.ChatServer.Host + configs.ChatServer.HttpPort)
+	target, err := url.Parse("http://" + configs.ChatServer.Host + configs.ChatServer.HttpPort)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	http.Handle("/api/v1/chat/{id:[0-9]+}&{lastId:[0-9]+}",
+		http.StripPrefix("/api/v1/chat/{id:[0-9]+}&{lastId:[0-9]+}", httputil.NewSingleHostReverseProxy(target)))
+	http.Handle("/api/v1/chat/{id:[0-9]+}",
+		http.StripPrefix("/api/v1/chat/{id:[0-9]+}", httputil.NewSingleHostReverseProxy(target)))
+	http.Handle("/api/v1/apiws",
+		http.StripPrefix("/api/v1/apiws", httputil.NewSingleHostReverseProxy(target)))
+	http.Handle("/api/v1/chats",
+		http.StripPrefix("/api/v1/chats", httputil.NewSingleHostReverseProxy(target)))
 
 	srv := &http.Server{
 		Handler:      router,
