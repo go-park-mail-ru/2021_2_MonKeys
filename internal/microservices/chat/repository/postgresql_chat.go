@@ -73,3 +73,13 @@ func (p PostgreChatRepo) SaveMessage(userId uint64, toId uint64, text string) (m
 
 	return msg, nil
 }
+
+func (p PostgreChatRepo) DeleteChat(ctx context.Context, userId uint64, fromId uint64) error {
+	var id uint64
+	err := p.Conn.QueryRow(DeleteMessagesQuery, userId, fromId).Scan(&id)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

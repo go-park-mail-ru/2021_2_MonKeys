@@ -22,9 +22,7 @@ func SetUserRouting(loggger logger.Logger, router *mux.Router, us models.UserUse
 		AuthClient: sc,
 	}
 
-	// router.HandleFunc("/api/v1/profile", _p.SetCSRF(perm.CheckAuth(perm.GetCurrentUser(userHandler.CurrentUser)))).Methods("GET", "OPTIONS")
 	router.HandleFunc("/api/v1/profile", _p.CheckCSRF(perm.CheckAuth(perm.GetCurrentUser(userHandler.EditProfileHandler)))).Methods("PUT", "OPTIONS")
-	// router.HandleFunc("/api/v1/profile", _p.SetCSRF(userHandler.SignupHandler)).Methods("POST", "OPTIONS")
 
 	router.HandleFunc("/api/v1/profile/photo", _p.CheckCSRF(perm.CheckAuth(perm.GetCurrentUser(userHandler.UploadPhoto)))).Methods("POST", "OPTIONS")
 	router.HandleFunc("/api/v1/profile/photo", _p.CheckCSRF(perm.CheckAuth(perm.GetCurrentUser(userHandler.DeletePhoto)))).Methods("DELETE", "OPTIONS")

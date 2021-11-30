@@ -33,7 +33,7 @@ test:
 ## linter: linterint all files
 linter:
 	go get github.com/golangci/golangci-lint/cmd/golangci-lint@v1.42.1
-	go run github.com/golangci/golangci-lint/cmd/golangci-lint run ./... --disable unused --disable deadcode
+	go run github.com/golangci/golangci-lint/cmd/golangci-lint run ./... --disable unused
 	go mod tidy
 
 ## clean: Clean all volumes, containers, media folders  and log files

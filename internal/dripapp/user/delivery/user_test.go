@@ -113,51 +113,6 @@ func CreateRequest(method, target string, body io.Reader) (r *http.Request) {
 	return
 }
 
-// func TestCurrentUser(t *testing.T) {
-// 	t.Parallel()
-
-// 	mockUserUseCase := &mocks.UserUsecase{}
-// 	mockSessionUseCase := &_s.SessionUsecase{}
-
-// 	call := mockUserUseCase.On("CurrentUser", context.Background())
-
-// 	userHandler := &UserHandler{
-// 		Logger:       logger.DripLogger,
-// 		UserUCase:    mockUserUseCase,
-// 		SessionUcase: mockSessionUseCase,
-// 	}
-
-// 	cases := []TestCase{
-// 		{
-// 			mockUserUseCase: []interface{}{
-// 				user,
-// 				nil,
-// 			},
-// 			StatusCode: http.StatusOK,
-// 			BodyResp:   `{"status":200,"body":{"id":` + idStr + `,"email":"` + email + `"}}`,
-// 		},
-// 		{
-// 			mockUserUseCase: []interface{}{
-// 				models.User{},
-// 				models.ErrContextNilError,
-// 			},
-// 			StatusCode: http.StatusOK,
-// 			BodyResp:   `{"status":404,"body":null}`,
-// 		},
-// 	}
-
-// 	for caseNum, item := range cases {
-// 		call.Return(item.mockUserUseCase...)
-
-// 		r := httptest.NewRequest("GET", "/api/v1/currentuser", nil)
-// 		w := httptest.NewRecorder()
-
-// 		userHandler.CurrentUser(w, r)
-
-// 		CheckResponse(t, w, caseNum, item)
-// 	}
-// }
-
 func TestNextUser(t *testing.T) {
 	t.Parallel()
 

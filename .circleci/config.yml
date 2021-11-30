@@ -1,0 +1,131 @@
+version: 2.1
+jobs:
+  build:
+    working_directory: ~/repo
+    docker:
+      - image: circleci/golang:1.16
+    steps:
+      - checkout
+      - run:
+          name: Install Dependencies
+          command: go get ./...
+      - run:
+          name: go mod tidy
+          command: go mod tidy
+      - run:
+          name: "Create a temp directory for artifacts"
+          command: |
+            mkdir -p /tmp/artifacts
+      - run: cd cmd/dripapp && go build
+      
+      - store_artifacts:
+          path: /tmp/artifacts
+  unit-tests:
+      working_directory: ~/repo
+      docker:
+        - image: circleci/golang:1.16
+      steps:
+      - checkout
+      - run:
+          name: Install Dependencies
+          command: go get ./...
+      - run:
+          name: go mod tidy
+          command: go mod tidy
+      - run:
+          name: "Create a temp directory for artifacts"
+          command: |
+            mkdir -p /tmp/artifacts
+      - run: cd cmd/dripapp && go build
+      - run:
+          name: "making test-results folder"
+          command: |
+                mkdir test-results && cd test-results && mkdir go && pwd
+                ls
+                pwd
+      - run:
+            name: "Running tests and storing under test-results folder"
+            command: |
+                ls 
+                go get gotest.tools/gotestsum
+                go run gotest.tools/gotestsum --junitfile test-results/go/unit-tests.xml
+      - store_test_results:
+                path: test-results
+  test-coverage:
+      working_directory: ~/repo
+      docker:
+        - image: circleci/golang:1.16
+      steps:
+        
+      - checkout
+      - run:
+          name: Install Dependencies
+          command: go get ./...
+      - run:
+          name: go mod tidy
+          command: go mod tidy
+     
+      - run:
+          name: "Create a temp directory for artifacts"
+          command: |
+            mkdir -p /tmp/artifacts
+      - run: 
+            name: "go cov dependecies"
+            command: go get github.com/axw/gocov/gocov
+      - run: 
+            name: "go xml dependecies"
+            command: go get github.com/AlekSi/gocov-xml
+      - run:
+          name: "run tests"
+          command: |
+                go test -coverprofile=coverage.out.tmp -coverpkg=./...  ./...
+                cat coverage.out.tmp | grep -v mock > coverage2.out.tmp
+                cat coverage2.out.tmp | grep -v cmd > coverage.out.tmp
+                go tool cover -func=coverage.out.tmp
+                go tool cover -html=coverage.out.tmp -o cover.html
+                mv cover.html /tmp/artifacts
+      - run:
+          name: "making test-results folder"
+          command: |
+                mkdir test-results && cd test-results && mkdir go && pwd
+                ls
+                pwd
+      - run:
+            name: "convert to xml for circleCI"
+            command: |
+                ls
+                gocov convert coverage.out.tmp | gocov-xml > test-results/go/results.xml
+      - run:
+            name: upload codecov
+            command: bash <(curl -s https://codecov.io/bash) -t 7cfc4bf5-8684-4ae1-b55b-f6cc88432910
+  linter:
+    working_directory: ~/repo
+    docker:
+      - image: circleci/golang:1.16
+    steps:
+      - checkout
+      - run:
+          name: Install Dependencies
+          command: go get ./...
+      - run:
+          name: go mod tidy
+          command: go mod tidy
+      - run:
+          name: Install GolangCI-LINT
+          command: go get github.com/golangci/golangci-lint/cmd/golangci-lint@v1.42.1
+      - run:
+          name: Running GolangCI-LINT
+          command: go run github.com/golangci/golangci-lint/cmd/golangci-lint run ./... --disable unused --disable deadcode
+      
+workflows:
+  version: 2
+  build-test:
+    jobs:
+      - linter
+      - build
+      - unit-tests:
+          requires:
+            - build
+      - test-coverage:
+          requires:
+            - build
