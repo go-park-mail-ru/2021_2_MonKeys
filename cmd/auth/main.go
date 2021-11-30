@@ -83,7 +83,7 @@ func main() {
 	log.Printf("STD starting server at %s\n", srv.Addr)
 
 	// for local
-	log.Fatal(srv.ListenAndServe())
+	// log.Fatal(srv.ListenAndServe())
 	// for deploy
-	// log.Fatal(srv.ListenAndServeTLS(certFile, keyFile))
+	log.Fatal(srv.ListenAndServeTLS(configs.AuthServer.CertFile, configs.AuthServer.KeyFile))
 }

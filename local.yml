@@ -16,15 +16,15 @@ services:
       - tarantool
       - postgres
 
-  chat_service:
-    image: chat_service
-    ports:
-      - "8001:8001"
-    volumes:
-      - $PWD/media:/dripapp/media
-    depends_on:
-      - tarantool
-      - postgres
+  # chat_service:
+  #   image: chat_service
+  #   ports:
+  #     - "8001:8001"
+  #   volumes:
+  #     - $PWD/media:/dripapp/media
+  #   depends_on:
+  #     - tarantool
+  #     - postgres
 
   auth_service:
     image: auth_service

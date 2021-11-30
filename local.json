@@ -3,21 +3,21 @@
     "server": {
       "host": "127.0.0.1",
       "httpPort": ":8000",
-      "certFile": "api.ijia.me.crt",
-      "keyFile": "api.ijia.me.key"
+      "certFile": "star.monkeys.team.crt",
+      "keyFile": "star.monkeys.team.key"
     },
     "chat_server": {
       "host": "127.0.0.1",
       "httpPort": ":8001",
-      "certFile": "api.ijia.me.crt",
-      "keyFile": "api.ijia.me.key"
+      "certFile": "star.monkeys.team.crt",
+      "keyFile": "star.monkeys.team.key"
     },
     "auth_server": {
       "host": "127.0.0.1",
       "httpPort": ":8002",
       "grpcUrl": "auth_service:8003",
-      "certFile": "api.ijia.me.crt",
-      "keyFile": "api.ijia.me.key"
+      "certFile": "star.monkeys.team.crt",
+      "keyFile": "star.monkeys.team.key"
     },
     "database": {
         "host": "postgres",
