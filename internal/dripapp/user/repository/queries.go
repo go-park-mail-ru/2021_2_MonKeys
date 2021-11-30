@@ -37,29 +37,28 @@ case when date <> '' then date_part('year', age(date::date)) else 0 end as age, 
 
 	AddReactionQuery = "insert into reactions(id1, id2, type) values ($1,$2,$3) returning id;"
 
-	GetNextUserForSwipeQuery1 = `select 
-									op.id,
-									op.email,
-									op.password,
-									op.name,
-									op.date,
-									case when date <> '' then date_part('year', age(date::timestamp)) else 0 end as age,
-									op.description,
-                  					op.reportstatus
-								from profile op
-								where op.id not in (
+	GetNextUserForSwipeQuery1 = `select op.id, op.email, op.password, op.name, op.gender, op.date,
+									date_part('year', age(date::timestamp)) as age,
+									op.description, op.reportstatus
+									from profile op
+									where op.id not in (
 									select r.id2
 									from reactions r
 									where r.id1 = $1
-								) and op.id not in (
+									) and op.id not in (
 									select m.id2
 									from matches m
 									where m.id1 = $1
-								) and op.id <> $1
+									) and op.id not in (
+									select r.id1
+									from reactions r
+									where r.id2 = $1 and type=0
+									)
+									and op.id <> $1
 									and op.name <> ''
 									and op.date <> ''
-									and (case when date <> '' then date_part('year', age(date::timestamp)) else 0 end)>=$2
-    								and (case when date <> '' then date_part('year', age(date::timestamp)) else 0 end)<=$3
+									and date_part('year', age(date::timestamp)) >= $2
+									and date_part('year', age(date::timestamp)) <= $3;
 									`
 
 	GetNextUserForSwipeQueryPrefer = "and op.gender=$4\n"
@@ -104,18 +103,24 @@ case when date <> '' then date_part('year', age(date::date)) else 0 end as age, 
 	AddMatchQuery = "insert into matches(id1, id2) values ($1,$2),($2,$1) returning id;"
 
 	GetUserLikesQuery = `select p.id,
-						   p.email,
-						   p.name,
-						   p.date,
-						   case when p.date <> '' then date_part('year', age(p.date::timestamp)) else 0 end as age,
-						   p.description,
-               			   p.reportstatus
-					from profile p
-					join reactions r on (r.id1 = p.id
-										 and r.id2 = $1
-										 and r.type = 1
-										 and p.name <> ''
-										 and p.date <> '');`
+							p.email,
+							p.name,
+							p.date,
+							case when p.date <> '' then date_part('year', age(p.date::timestamp)) else 0 end as age,
+							p.description,
+							p.reportstatus
+						from profile p
+						join reactions r on
+						(r.id1 = p.id
+						and r.id2 = $1
+						and r.type = 1
+						and p.name <> ''
+						and p.date <> '')
+						where p.id not in (
+						select r.id2
+						from reactions r
+						where r.id1 = $1 and type=0);
+						`
 
 	GetReportsQuery = "select reportdesc from reports;"
 
