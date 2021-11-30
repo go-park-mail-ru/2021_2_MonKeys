@@ -64,7 +64,7 @@ build:
 
 ## deploy-run: Deploy run app on background
 deploy-run:
-	docker-compose -f prod.yml up --build --no-deps -d
+	docker-compose -f prod.yml up --build --no-deps
 
 ## deploy: Deploy build and run app
 deploy: build deploy-run

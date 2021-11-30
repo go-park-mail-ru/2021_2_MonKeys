@@ -16,19 +16,21 @@ services:
       - tarantool
       - postgres
 
-  chat_service:
-    image: chat_service
-    ports:
-      - "8001:443"
-    depends_on:
-      - tarantool
-      - postgres
+  # chat_service:
+  #   image: chat_service
+  #   ports:
+  #     - "8001:443"
+  #   depends_on:
+  #     - tarantool
+  #     - postgres
 
   auth_service:
     image: auth_service
     ports:
       - "8002:443"
       - "8003:8003"
+    volumes:
+      - $PWD/media:/dripapp/media
     depends_on:
       - tarantool
       - postgres
@@ -73,3 +75,10 @@ services:
       - prometheus
     ports:
       - 3000:3000
+  node-exporter:
+      image: prom/node-exporter
+      restart: always
+      ports:
+        - "9100:9100"
+      volumes:
+        - ./monitoring:/etc/config

@@ -61,7 +61,15 @@ services:
     restart: on-failure
     healthcheck:
       test: "exit 0"
-  
+      
+  node-exporter:
+      image: prom/node-exporter
+      restart: always
+      ports:
+        - "9100:9100"
+      volumes:
+        - ./monitoring:/etc/config
+
   prometheus:
     image: prom/prometheus
     ports:
