@@ -12,6 +12,13 @@ import (
 	"time"
 )
 
+const (
+	FAKE       = "ФЭЙК"
+	AGGRESSION = "АГРЕССИЯ"
+	SCAM       = "СКАМ"
+	UNDERAGE   = "НЕСОВЕРШЕННОЛЕТНИЙ"
+)
+
 type userUsecase struct {
 	UserRepo       models.UserRepository
 	Session        _sessionModels.SessionRepository
@@ -406,13 +413,13 @@ func (h *userUsecase) AddReport(c context.Context, report models.NewReport) erro
 		var reportStatus string
 		switch banDesc {
 		case models.FakeReport:
-			reportStatus = "FAKE"
+			reportStatus = FAKE
 		case models.AggressionReport:
-			reportStatus = "AGGRESSION"
+			reportStatus = AGGRESSION
 		case models.SkamReport:
-			reportStatus = "SKAM"
+			reportStatus = SCAM
 		case models.UnderageReport:
-			reportStatus = "UNDERAGE"
+			reportStatus = UNDERAGE
 		}
 
 		err = h.UserRepo.UpdateReportStatus(ctx, report.ToId, reportStatus)

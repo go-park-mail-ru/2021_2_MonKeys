@@ -69,7 +69,7 @@ create table if not exists profile_report(
 );
 insert into
   tag(tagname)
-values('anime'),('music'),('gaming'),('sport'),('science');
+values('аниме'),('рок'),('игры'),('спорт'),('наука'),('рэп'),('джаз'),('западная музыка'),('комедии'),('футбол');
 insert into
   reports(reportdesc)
 values('Фалишивый профиль/спам'),('Непристойное общение'),('Скам'),('Несовершеннолетний пользователь');
