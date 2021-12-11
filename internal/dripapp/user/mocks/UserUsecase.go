@@ -51,6 +51,48 @@ func (_m *UserUsecase) AddReport(c context.Context, report models.NewReport) err
 	return r0
 }
 
+// CheckPayment provides a mock function with given fields: c
+func (_m *UserUsecase) CheckPayment(c context.Context) (models.Payment, error) {
+	ret := _m.Called(c)
+
+	var r0 models.Payment
+	if rf, ok := ret.Get(0).(func(context.Context) models.Payment); ok {
+		r0 = rf(c)
+	} else {
+		r0 = ret.Get(0).(models.Payment)
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context) error); ok {
+		r1 = rf(c)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// CreatePayment provides a mock function with given fields: c, period
+func (_m *UserUsecase) CreatePayment(c context.Context, period string) (models.Payment, error) {
+	ret := _m.Called(c, period)
+
+	var r0 models.Payment
+	if rf, ok := ret.Get(0).(func(context.Context, string) models.Payment); ok {
+		r0 = rf(c, period)
+	} else {
+		r0 = ret.Get(0).(models.Payment)
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(c, period)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // CurrentUser provides a mock function with given fields: c
 func (_m *UserUsecase) CurrentUser(c context.Context) (models.User, error) {
 	ret := _m.Called(c)
@@ -233,6 +275,20 @@ func (_m *UserUsecase) Signup(c context.Context, logUserData models.LoginUser) (
 	}
 
 	return r0, r1
+}
+
+// UpdatePayment provides a mock function with given fields: c, paymentId
+func (_m *UserUsecase) UpdatePayment(c context.Context, paymentId uint64) error {
+	ret := _m.Called(c, paymentId)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, uint64) error); ok {
+		r0 = rf(c, paymentId)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
 }
 
 // UserLikes provides a mock function with given fields: c

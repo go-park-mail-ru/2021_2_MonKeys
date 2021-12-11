@@ -3,11 +3,13 @@ package repository
 const (
 	GetUserQuery = `select id, email, password, name, gender, prefer, fromage, toage, date, 
 	case when date <> '' then date_part('year', age(date::date)) else 0 end as age,
-	description, imgs from profile where email = $1;`
+	description, imgs
+	from profile where email = $1;`
 
 	GetUserByIdAQuery = `select id, email, password, name, gender, prefer, fromage, toage, date, 
 	case when date <> '' then date_part('year', age(date::date)) else 0 end as age,
-	description, imgs from profile where id = $1;`
+	description, imgs
+	from profile where id = $1;`
 
 	CreateUserQuery = "INSERT into profile(email,password) VALUES($1,$2) RETURNING id, email, password;"
 
@@ -139,4 +141,9 @@ case when date <> '' then date_part('year', age(date::date)) else 0 end as age, 
 																				group by report_id
 													) as counts);`
 	UpdateProfilesReportStatusQuery = "update profile set reportstatus = $2 where id = $1 returning id;"
+
+	UpdatePaymentQuery = "update payment set status=1 where id=$1 returning id;"
+	CreatePaymentQuery = "insert into payment(period, profile_id) values(now()+interval $1, $2) returning id;"
+	CheckPaymentQuery  = `select id, period, status,
+case when now() < (select period from payment where profile_id=$1 and status=1 order by period limit 1) then 1 else 0 end as sub from payment where profile_id=$1;`
 )

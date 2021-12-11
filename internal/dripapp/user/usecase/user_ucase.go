@@ -430,3 +430,49 @@ func (h *userUsecase) AddReport(c context.Context, report models.NewReport) erro
 
 	return nil
 }
+
+func (h *userUsecase) UpdatePayment(c context.Context, paymentId uint64) error {
+	ctx, cancel := context.WithTimeout(c, h.contextTimeout)
+	defer cancel()
+
+	err := h.UserRepo.UpdatePayment(ctx, paymentId)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (h *userUsecase) CreatePayment(c context.Context, period string) (models.Payment, error) {
+	ctx, cancel := context.WithTimeout(c, h.contextTimeout)
+	defer cancel()
+
+	currentUser, ok := ctx.Value(configs.ContextUser).(models.User)
+	if !ok {
+		return models.Payment{}, models.ErrContextNilError
+	}
+
+	payment_id, err := h.UserRepo.CreatePayment(ctx, currentUser.ID, period)
+	if err != nil {
+		return models.Payment{}, err
+	}
+
+	return models.Payment{Id: payment_id}, nil
+}
+
+func (h *userUsecase) CheckPayment(c context.Context) (models.Payment, error) {
+	ctx, cancel := context.WithTimeout(c, h.contextTimeout)
+	defer cancel()
+
+	currentUser, ok := ctx.Value(configs.ContextUser).(models.User)
+	if !ok {
+		return models.Payment{}, models.ErrContextNilError
+	}
+
+	payment, err := h.UserRepo.CheckPayment(ctx, currentUser.ID)
+	if err != nil {
+		return models.Payment{}, err
+	}
+
+	return payment, nil
+}

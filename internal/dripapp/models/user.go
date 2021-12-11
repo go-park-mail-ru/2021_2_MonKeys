@@ -20,6 +20,7 @@ type User struct {
 	Imgs         []string `json:"imgs,omitempty"`
 	Tags         []string `json:"tags,omitempty"`
 	ReportStatus string   `json:"reportStatus,omitempty"`
+	Payment      bool     `json:"payment,omitempty"`
 }
 
 const (
@@ -91,6 +92,13 @@ type UserReportsCount struct {
 	Count uint64 `json:"userReportsCount"`
 }
 
+type Payment struct {
+	Id     uint64 `json:"id"`
+	Period string `json:"period"`
+	Status int    `json:"status"`
+	Sub    int    `json:"sub"`
+}
+
 // ArticleUsecase represent the article's usecases
 type UserUsecase interface {
 	CurrentUser(c context.Context) (User, error)
@@ -107,6 +115,9 @@ type UserUsecase interface {
 	UsersMatchesWithSearching(c context.Context, searchData Search) (Matches, error)
 	GetAllReports(c context.Context) (Reports, error)
 	AddReport(c context.Context, report NewReport) error
+	UpdatePayment(c context.Context, paymentId uint64) error
+	CreatePayment(c context.Context, period string) (Payment, error)
+	CheckPayment(c context.Context) (Payment, error)
 }
 
 // ArticleRepository represent the article's repository contract
@@ -132,4 +143,7 @@ type UserRepository interface {
 	GetReportsWithMaxCount(ctx context.Context, userId uint64) (uint64, error)
 	GetReportDesc(ctx context.Context, reportId uint64) (string, error)
 	UpdateReportStatus(ctx context.Context, userId uint64, reportStatus string) error
+	UpdatePayment(ctx context.Context, userId uint64) error
+	CreatePayment(ctx context.Context, userId uint64, period string) (uint64, error)
+	CheckPayment(ctx context.Context, userId uint64) (Payment, error)
 }

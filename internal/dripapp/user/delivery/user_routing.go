@@ -41,5 +41,9 @@ func SetUserRouting(loggger logger.Logger, router *mux.Router, us models.UserUse
 	router.HandleFunc("/api/v1/reports", _p.SetCSRF(perm.CheckAuth(userHandler.GetAllReports))).Methods("GET", "OPTIONS")
 	router.HandleFunc("/api/v1/reports", _p.SetCSRF(perm.CheckAuth(perm.GetCurrentUser(userHandler.AddReport)))).Methods("POST", "OPTIONS")
 
+	router.HandleFunc("/api/v1/payment/{id:[0-9]+}", _p.SetCSRF(perm.CheckAuth(perm.GetCurrentUser(userHandler.UpdatePayment)))).Methods("PUT", "OPTIONS")
+	router.HandleFunc("/api/v1/payment", _p.SetCSRF(perm.CheckAuth(perm.GetCurrentUser(userHandler.CreatePayment)))).Methods("POST", "OPTIONS")
+	router.HandleFunc("/api/v1/payment", _p.SetCSRF(perm.CheckAuth(perm.GetCurrentUser(userHandler.CheckPayment)))).Methods("GET", "OPTIONS")
+
 	router.PathPrefix("/api/documentation/").Handler(httpSwagger.WrapHandler)
 }

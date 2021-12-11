@@ -6,6 +6,9 @@ import (
 	"dripapp/internal/pkg/logger"
 	"dripapp/internal/pkg/responses"
 	"net/http"
+	"strconv"
+
+	"github.com/gorilla/mux"
 )
 
 const maxPhotoSize = 20 * 1024 * 1025
@@ -226,4 +229,62 @@ func (h *UserHandler) AddReport(w http.ResponseWriter, r *http.Request) {
 	}
 
 	responses.SendOK(w)
+}
+
+func (h *UserHandler) UpdatePayment(w http.ResponseWriter, r *http.Request) {
+	paymentId, err := strconv.Atoi(mux.Vars(r)["id"])
+	if err != nil {
+		responses.SendError(w, models.HTTPError{
+			Code:    http.StatusNotFound,
+			Message: err,
+		}, h.Logger.ErrorLogging)
+		return
+	}
+
+	err = h.UserUCase.UpdatePayment(r.Context(), uint64(paymentId))
+	if err != nil {
+		responses.SendError(w, models.HTTPError{
+			Code:    http.StatusNotFound,
+			Message: err,
+		}, h.Logger.ErrorLogging)
+		return
+	}
+
+	responses.SendOK(w)
+}
+
+func (h *UserHandler) CreatePayment(w http.ResponseWriter, r *http.Request) {
+	var paymentData models.Payment
+	err := responses.ReadJSON(r, &paymentData)
+	if err != nil {
+		responses.SendError(w, models.HTTPError{
+			Code:    http.StatusBadRequest,
+			Message: err,
+		}, h.Logger.ErrorLogging)
+		return
+	}
+
+	payment, err := h.UserUCase.CreatePayment(r.Context(), paymentData.Period)
+	if err != nil {
+		responses.SendError(w, models.HTTPError{
+			Code:    http.StatusNotFound,
+			Message: err,
+		}, h.Logger.ErrorLogging)
+		return
+	}
+
+	responses.SendData(w, payment)
+}
+
+func (h *UserHandler) CheckPayment(w http.ResponseWriter, r *http.Request) {
+	payment, err := h.UserUCase.CheckPayment(r.Context())
+	if err != nil {
+		responses.SendError(w, models.HTTPError{
+			Code:    http.StatusNotFound,
+			Message: err,
+		}, h.Logger.ErrorLogging)
+		return
+	}
+
+	responses.SendData(w, payment)
 }

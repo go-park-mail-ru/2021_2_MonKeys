@@ -56,6 +56,48 @@ func (_m *UserRepository) AddReport(ctx context.Context, report models.NewReport
 	return r0
 }
 
+// CheckPayment provides a mock function with given fields: ctx, userId
+func (_m *UserRepository) CheckPayment(ctx context.Context, userId uint64) (models.Payment, error) {
+	ret := _m.Called(ctx, userId)
+
+	var r0 models.Payment
+	if rf, ok := ret.Get(0).(func(context.Context, uint64) models.Payment); ok {
+		r0 = rf(ctx, userId)
+	} else {
+		r0 = ret.Get(0).(models.Payment)
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, uint64) error); ok {
+		r1 = rf(ctx, userId)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// CreatePayment provides a mock function with given fields: ctx, userId, period
+func (_m *UserRepository) CreatePayment(ctx context.Context, userId uint64, period string) (uint64, error) {
+	ret := _m.Called(ctx, userId, period)
+
+	var r0 uint64
+	if rf, ok := ret.Get(0).(func(context.Context, uint64, string) uint64); ok {
+		r0 = rf(ctx, userId, period)
+	} else {
+		r0 = ret.Get(0).(uint64)
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, uint64, string) error); ok {
+		r1 = rf(ctx, userId, period)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // CreateUser provides a mock function with given fields: ctx, logUserData
 func (_m *UserRepository) CreateUser(ctx context.Context, logUserData models.LoginUser) (models.User, error) {
 	ret := _m.Called(ctx, logUserData)
@@ -378,6 +420,20 @@ func (_m *UserRepository) UpdateImgs(ctx context.Context, id uint64, imgs []stri
 	var r0 error
 	if rf, ok := ret.Get(0).(func(context.Context, uint64, []string) error); ok {
 		r0 = rf(ctx, id, imgs)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// UpdatePayment provides a mock function with given fields: ctx, userId
+func (_m *UserRepository) UpdatePayment(ctx context.Context, userId uint64) error {
+	ret := _m.Called(ctx, userId)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, uint64) error); ok {
+		r0 = rf(ctx, userId)
 	} else {
 		r0 = ret.Error(0)
 	}

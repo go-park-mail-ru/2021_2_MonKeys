@@ -428,3 +428,32 @@ func (p PostgreUserRepo) UpdateReportStatus(ctx context.Context, userId uint64, 
 
 	return nil
 }
+
+func (p PostgreUserRepo) UpdatePayment(ctx context.Context, userId uint64) error {
+	var payment_id int
+	err := p.Conn.QueryRow(UpdatePaymentQuery, userId).Scan(&payment_id)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (p PostgreUserRepo) CreatePayment(ctx context.Context, userId uint64, period string) (uint64, error) {
+	var payment_id uint64
+	err := p.Conn.QueryRow(CreatePaymentQuery, period, userId).Scan(&payment_id)
+	if err != nil {
+		return 0, err
+	}
+	return payment_id, nil
+}
+
+func (p PostgreUserRepo) CheckPayment(ctx context.Context, userId uint64) (models.Payment, error) {
+	var payment models.Payment
+	err := p.Conn.QueryRow(CheckPaymentQuery, userId).Scan(&payment)
+	if err != nil {
+		return models.Payment{}, err
+	}
+
+	return payment, nil
+}

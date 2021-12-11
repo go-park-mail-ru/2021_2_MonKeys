@@ -52,7 +52,6 @@ create table message(
   constraint fk_ms_profile1 foreign key (from_id) REFERENCES profile (id),
   constraint fk_ms_profile2 foreign key (to_id) REFERENCES profile (id)
 );
-
 -- message date index
   create index idx_ms_date on message(date) include (from_id, to_id, text);
 
@@ -67,6 +66,15 @@ create table if not exists profile_report(
   constraint fk_pr_profile foreign key (profile_id) REFERENCES profile (id),
   constraint fk_pr_report foreign key (report_id) REFERENCES reports (id)
 );
+create table if not exists payment(
+  id serial not null primary key,
+  period timestamptz default now(),
+  status smallint,
+  profile_id integer,
+  constraint fk_pm_profile foreign key (profile_id) REFERENCES profile (id)
+);
+
+
 insert into
   tag(tagname)
 values('аниме'),('рок'),('игры'),('спорт'),('наука'),('рэп'),('джаз'),('западная музыка'),('комедии'),('футбол');
@@ -89,7 +97,7 @@ create index idx_pt_tag_id on profile_tag(tag_id);
   create index idx_profile_imgs_gin on profile using gin (imgs);
 create or replace function moddatetime()
 returns trigger
-as $$ 
+as $$
   begin
     NEW.update_time = NOW();
 return NEW;
