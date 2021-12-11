@@ -1,15 +1,21 @@
 package usecase
 
 import (
+	"bytes"
 	"context"
 	"dripapp/configs"
 	"dripapp/internal/dripapp/models"
 	_sessionModels "dripapp/internal/microservices/auth/models"
 	"dripapp/internal/pkg/hasher"
+	"encoding/json"
 	"fmt"
 	"io"
+	"io/ioutil"
+	"net/http"
 	"strconv"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 const (
@@ -443,21 +449,69 @@ func (h *userUsecase) UpdatePayment(c context.Context, paymentId uint64) error {
 	return nil
 }
 
-func (h *userUsecase) CreatePayment(c context.Context, period string) (models.Payment, error) {
-	ctx, cancel := context.WithTimeout(c, h.contextTimeout)
-	defer cancel()
+func (h *userUsecase) CreatePayment(c context.Context, newPayment models.Payment) (models.RedirectUrl, error) {
+	// ctx, cancel := context.WithTimeout(c, h.contextTimeout)
+	// defer cancel()
 
-	currentUser, ok := ctx.Value(configs.ContextUser).(models.User)
-	if !ok {
-		return models.Payment{}, models.ErrContextNilError
-	}
+	// currentUser, ok := ctx.Value(configs.ContextUser).(models.User)
+	// if !ok {
+	// 	return models.ErrContextNilError
+	// 	// return models.Payment{}, models.ErrContextNilError
+	// }
 
-	payment_id, err := h.UserRepo.CreatePayment(ctx, currentUser.ID, period)
+	var amount = make(map[string]string)
+	amount["value"] = newPayment.Amount
+	amount["currency"] = "RUB"
+	var confirmation = make(map[string]string)
+	confirmation["type"] = "redirect"
+	confirmation["return_url"] = "http://localhost/"
+	var paymentInfo models.PaymentInfo
+	paymentInfo.Amount = amount
+	paymentInfo.Capture = true
+	paymentInfo.Confirmation = confirmation
+
+	paymentInfoJSON, err := json.Marshal(paymentInfo)
 	if err != nil {
-		return models.Payment{}, err
+		return models.RedirectUrl{}, err
 	}
 
-	return models.Payment{Id: payment_id}, nil
+	paymentRequest, err := http.NewRequest("POST", "https://api.yookassa.ru/v3/payments", bytes.NewBuffer(paymentInfoJSON))
+	if err != nil {
+		return models.RedirectUrl{}, err
+	}
+	paymentRequest.Header.Set("Authorization", "Basic ODYyNTgxOnRlc3RfRk51empyZFBMdVo0MzhpMmd3WndkaVBTWkJJTTdJSTd5eXZWOHBKY2ZwWQ==")
+	paymentRequest.Header.Set("Idempotence-Key", uuid.NewString())
+	paymentRequest.Header.Set("Content-Type", "application/json")
+
+	client := http.DefaultClient
+
+	resp, err := client.Do(paymentRequest)
+	if err != nil {
+		return models.RedirectUrl{}, err
+	}
+	buf, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return models.RedirectUrl{}, err
+	}
+	var yooKassaResponse models.YooKassaResponse
+	err = json.Unmarshal(buf, &yooKassaResponse)
+	if err != nil {
+		return models.RedirectUrl{}, err
+	}
+
+	var curRedirect models.RedirectUrl
+	curRedirect.URL = yooKassaResponse.Confirmation.ConfirmationUrl
+	fmt.Println(yooKassaResponse)
+
+	// payment_id, err := h.UserRepo.CreatePayment(ctx, currentUser.ID, newPayment.Period)
+	// if err != nil {
+	// 	return err
+	// 	// return models.Payment{}, err
+	// }
+	// fmt.Println(payment_id)
+
+	return curRedirect, nil
+	// return models.Payment{Id: payment_id}, nil
 }
 
 func (h *userUsecase) CheckPayment(c context.Context) (models.Payment, error) {

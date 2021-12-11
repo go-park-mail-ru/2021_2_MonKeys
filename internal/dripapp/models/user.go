@@ -92,11 +92,53 @@ type UserReportsCount struct {
 	Count uint64 `json:"userReportsCount"`
 }
 
+// type Payment struct {
+// 	Id     uint64 `json:"id"`
+// 	Period string `json:"period"`
+// 	Status int    `json:"status"`
+// 	Sub    int    `json:"sub"`
+// }
 type Payment struct {
-	Id     uint64 `json:"id"`
 	Period string `json:"period"`
-	Status int    `json:"status"`
-	Sub    int    `json:"sub"`
+	Amount string `json:"amount"`
+}
+
+type RedirectUrl struct {
+	URL string `json:"redirectUrl"`
+}
+
+type PaymentInfo struct {
+	Amount       map[string]string `json:"amount"`
+	Capture      bool              `json:"capture"`
+	Confirmation map[string]string `json:"confirmation"`
+	// Description  string            `json:"description"`
+}
+
+type YooKassaResponse struct {
+	Id           string           `json:"id"`
+	Status       string           `json:"status"`
+	Amount       AmountType       `json:"amount"`
+	Recipient    RecipientType    `json:"recipient"`
+	CreatedAt    string           `json:"created_at"`
+	Confirmation ConfirmationType `json:"confirmation"`
+	Test         bool             `json:"test"`
+	Paid         bool             `json:"paid"`
+	Refundable   bool             `json:"refundable"`
+}
+
+type AmountType struct {
+	Value    string `json:"value"`
+	Currency string `json:"currency"`
+}
+
+type RecipientType struct {
+	AccountId string `json:"account_id"`
+	GatewayId string `json:"gateway_id"`
+}
+
+type ConfirmationType struct {
+	Type            string `json:"type"`
+	ConfirmationUrl string `json:"confirmation_url"`
 }
 
 // ArticleUsecase represent the article's usecases
@@ -116,7 +158,7 @@ type UserUsecase interface {
 	GetAllReports(c context.Context) (Reports, error)
 	AddReport(c context.Context, report NewReport) error
 	UpdatePayment(c context.Context, paymentId uint64) error
-	CreatePayment(c context.Context, period string) (Payment, error)
+	CreatePayment(c context.Context, newPayment Payment) (RedirectUrl, error)
 	CheckPayment(c context.Context) (Payment, error)
 }
 

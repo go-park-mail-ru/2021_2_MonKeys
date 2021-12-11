@@ -19,6 +19,7 @@ require (
 	github.com/chai2010/webp v1.1.0
 	github.com/go-openapi/spec v0.20.4 // indirect
 	github.com/golang/protobuf v1.5.2
+	github.com/google/uuid v1.3.0
 	github.com/gorilla/websocket v1.4.2
 	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/prometheus/client_golang v1.11.0

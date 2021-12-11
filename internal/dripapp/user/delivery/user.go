@@ -264,7 +264,7 @@ func (h *UserHandler) CreatePayment(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	payment, err := h.UserUCase.CreatePayment(r.Context(), paymentData.Period)
+	redirectUrl, err := h.UserUCase.CreatePayment(r.Context(), paymentData)
 	if err != nil {
 		responses.SendError(w, models.HTTPError{
 			Code:    http.StatusNotFound,
@@ -273,7 +273,9 @@ func (h *UserHandler) CreatePayment(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	responses.SendData(w, payment)
+	// responses.SendOK(w)
+	// responses.SendData(w, payment)
+	responses.SendData(w, redirectUrl)
 }
 
 func (h *UserHandler) CheckPayment(w http.ResponseWriter, r *http.Request) {
