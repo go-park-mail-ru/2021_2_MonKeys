@@ -49,6 +49,13 @@ type TimeoutsConfig struct {
 	ContextTimeout time.Duration
 }
 
+type PaymentConfig struct {
+	Currency    string
+	ReturnUrl   string
+	YooKassaUrl string
+	AuthToken   string
+}
+
 type logLevel int
 
 type contextUserID string
@@ -75,6 +82,8 @@ var (
 	ContextUserID contextUserID
 
 	ContextUser contextUser
+
+	Payment PaymentConfig
 )
 
 func SetConfig() {
@@ -140,6 +149,13 @@ func SetConfig() {
 	FileStorage = FileStorageConfig{
 		RootFolder:       viper.GetString(`file_storage.root_folder`),
 		ProfilePhotoPath: viper.GetString(`file_storage.profile_photo_path`),
+	}
+
+	Payment = PaymentConfig{
+		Currency:    viper.GetString(`payment.currency`),
+		ReturnUrl:   viper.GetString(`payment.return_url`),
+		YooKassaUrl: viper.GetString(`payment.yoo_kassa_url`),
+		AuthToken:   viper.GetString(`payment.auth_token`),
 	}
 
 	Timeouts = TimeoutsConfig{

@@ -273,8 +273,6 @@ func (h *UserHandler) CreatePayment(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// responses.SendOK(w)
-	// responses.SendData(w, payment)
 	responses.SendData(w, redirectUrl)
 }
 

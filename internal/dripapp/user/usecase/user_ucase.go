@@ -461,10 +461,10 @@ func (h *userUsecase) CreatePayment(c context.Context, newPayment models.Payment
 
 	var amount = make(map[string]string)
 	amount["value"] = newPayment.Amount
-	amount["currency"] = "RUB"
+	amount["currency"] = configs.Payment.Currency
 	var confirmation = make(map[string]string)
 	confirmation["type"] = "redirect"
-	confirmation["return_url"] = "http://localhost/"
+	confirmation["return_url"] = configs.Payment.ReturnUrl
 	var paymentInfo models.PaymentInfo
 	paymentInfo.Amount = amount
 	paymentInfo.Capture = true
@@ -475,11 +475,11 @@ func (h *userUsecase) CreatePayment(c context.Context, newPayment models.Payment
 		return models.RedirectUrl{}, err
 	}
 
-	paymentRequest, err := http.NewRequest("POST", "https://api.yookassa.ru/v3/payments", bytes.NewBuffer(paymentInfoJSON))
+	paymentRequest, err := http.NewRequest("POST", configs.Payment.YooKassaUrl, bytes.NewBuffer(paymentInfoJSON))
 	if err != nil {
 		return models.RedirectUrl{}, err
 	}
-	paymentRequest.Header.Set("Authorization", "Basic ODYyNTgxOnRlc3RfRk51empyZFBMdVo0MzhpMmd3WndkaVBTWkJJTTdJSTd5eXZWOHBKY2ZwWQ==")
+	paymentRequest.Header.Set("Authorization", "Basic "+configs.Payment.AuthToken)
 	paymentRequest.Header.Set("Idempotence-Key", uuid.NewString())
 	paymentRequest.Header.Set("Content-Type", "application/json")
 
