@@ -21,18 +21,19 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Install Dependecies
-      - run: go get ./...
+        run: go get ./...
 
       - name: Go mod tidy
-      - run: go mod tidy
+        run: go mod tidy
 
       - name: Build
-      - run: cd cmd/dripapp && go build
+        run: cd cmd/dripapp && go build
   
   test:
   
     needs: build
     runs-on: ubuntu-latest
+    
     steps:
     
       - name: Set up Go
@@ -44,16 +45,16 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Install Dependecies
-      - run: go get ./...
+        run: go get ./...
 
       - name: Go mod tidy
-      - run: go mod tidy
+        run: go mod tidy
 
       - name: Build
-      - run: cd cmd/dripapp && go build
+        run: cd cmd/dripapp && go build
 
       - name: Test
-      - run: make test
+        run: make test
 
   linter:
     runs-on: ubuntu-latest
@@ -69,19 +70,19 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Install Dependecies
-      - run: go get ./...
+        run: go get ./...
 
       - name: Go mod tidy
-      - run: go mod tidy
+        run: go mod tidy
 
       - name: Build
-      - run: cd cmd/dripapp && go build
+        run: cd cmd/dripapp && go build
 
       - name: Install GolangCI-Lint
-      - run: go get github.com/golangci/golangci-lint/cmd/golangci-lint@v1.42.1
+        run: go get github.com/golangci/golangci-lint/cmd/golangci-lint@v1.42.1
 
       - name: Run GolangCI-Lint
-      - run: go run github.com/golangci/golangci-lint/cmd/golangci-lint run ./... --disable unused --disable deadcode
+        run: go run github.com/golangci/golangci-lint/cmd/golangci-lint run ./... --disable unused --disable deadcode
   
   test-coverage:
     needs: build
@@ -97,19 +98,19 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Install Dependecies
-      - run: go get ./...
+        run: go get ./...
 
       - name: Go mod tidy
-      - run: go mod tidy
+        run: go mod tidy
 
       - name: Build
-      - run: cd cmd/dripapp && go build
+        run: cd cmd/dripapp && go build
 
       - name: Test
-      - run: make test
+        run: make test
 
       - name: Go cov dependencies
-      - run: go get github.com/AlekSi/gocov-xml
+        run: go get github.com/AlekSi/gocov-xml
 
       - name: Run tests w/ coverage
-      - run: make test-coverage
+        run: make test-coverage
