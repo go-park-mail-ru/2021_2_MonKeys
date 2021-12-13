@@ -80,14 +80,13 @@ jobs:
           host: drip.monkeys.team
           username: clown
           key: ${{ secrets.DEPLOYMENT_KEY }}
-          script: |
-            cd ~/../back
-            git pull
+          script: cd ~/../back &&
+            git pull &&
             docker pull ${{ secrets.DOCKERHUB_USERNAME }}/drip_tarantool:${{github.sha}} &&
             docker pull ${{ secrets.DOCKERHUB_USERNAME }}/main_service:${{github.sha}} &&
             docker pull ${{ secrets.DOCKERHUB_USERNAME }}/chat_service:${{github.sha}} &&
-            docker pull ${{ secrets.DOCKERHUB_USERNAME }}/auth_service:${{github.sha}}
-            sudo docker rm -vf $(docker ps -a -q) || true
+            docker pull ${{ secrets.DOCKERHUB_USERNAME }}/auth_service:${{github.sha}} &&
+            sudo docker rm -vf $(docker ps -a -q) || true &&
             sudo make deploy-run
 
             
