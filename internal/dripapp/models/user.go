@@ -3,6 +3,7 @@ package models
 import (
 	"context"
 	"io"
+	"time"
 )
 
 type User struct {
@@ -92,55 +93,6 @@ type UserReportsCount struct {
 	Count uint64 `json:"userReportsCount"`
 }
 
-// type Payment struct {
-// 	Id     uint64 `json:"id"`
-// 	Period string `json:"period"`
-// 	Status int    `json:"status"`
-// 	Sub    int    `json:"sub"`
-// }
-type Payment struct {
-	Period string `json:"period"`
-	Amount string `json:"amount"`
-}
-
-type RedirectUrl struct {
-	URL string `json:"redirectUrl"`
-}
-
-type PaymentInfo struct {
-	Amount       map[string]string `json:"amount"`
-	Capture      bool              `json:"capture"`
-	Confirmation map[string]string `json:"confirmation"`
-	// Description  string            `json:"description"`
-}
-
-type YooKassaResponse struct {
-	Id           string           `json:"id"`
-	Status       string           `json:"status"`
-	Amount       AmountType       `json:"amount"`
-	Recipient    RecipientType    `json:"recipient"`
-	CreatedAt    string           `json:"created_at"`
-	Confirmation ConfirmationType `json:"confirmation"`
-	Test         bool             `json:"test"`
-	Paid         bool             `json:"paid"`
-	Refundable   bool             `json:"refundable"`
-}
-
-type AmountType struct {
-	Value    string `json:"value"`
-	Currency string `json:"currency"`
-}
-
-type RecipientType struct {
-	AccountId string `json:"account_id"`
-	GatewayId string `json:"gateway_id"`
-}
-
-type ConfirmationType struct {
-	Type            string `json:"type"`
-	ConfirmationUrl string `json:"confirmation_url"`
-}
-
 // ArticleUsecase represent the article's usecases
 type UserUsecase interface {
 	CurrentUser(c context.Context) (User, error)
@@ -157,9 +109,9 @@ type UserUsecase interface {
 	UsersMatchesWithSearching(c context.Context, searchData Search) (Matches, error)
 	GetAllReports(c context.Context) (Reports, error)
 	AddReport(c context.Context, report NewReport) error
-	UpdatePayment(c context.Context, paymentId uint64) error
+	UpdatePayment(c context.Context, PaymentNotificationData PaymentNotification) error
 	CreatePayment(c context.Context, newPayment Payment) (RedirectUrl, error)
-	CheckPayment(c context.Context) (Payment, error)
+	// CheckPayment(c context.Context) (Payment, error)
 }
 
 // ArticleRepository represent the article's repository contract
@@ -185,7 +137,9 @@ type UserRepository interface {
 	GetReportsWithMaxCount(ctx context.Context, userId uint64) (uint64, error)
 	GetReportDesc(ctx context.Context, reportId uint64) (string, error)
 	UpdateReportStatus(ctx context.Context, userId uint64, reportStatus string) error
-	UpdatePayment(ctx context.Context, userId uint64) error
-	CreatePayment(ctx context.Context, userId uint64, period string) (uint64, error)
-	CheckPayment(ctx context.Context, userId uint64) (Payment, error)
+	CreatePayment(ctx context.Context, paymentId string, status string, amount string, userId uint64) error
+	CreateSubscription(ctx context.Context, periodStart time.Time, periodEnd time.Time, userId uint64, paymentId string) error
+	UpdatePayment(ctx context.Context, paymentId string, status string) error
+	UpdateSubscription(ctx context.Context, paymentId string, activeState bool) error
+	// CheckPayment(ctx context.Context, userId uint64) (Payment, error)
 }
