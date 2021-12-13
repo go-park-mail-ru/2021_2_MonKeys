@@ -74,9 +74,6 @@ jobs:
               chmod 600 "$HOME/.ssh/key"
 
       - name: Executing remote ssh commands
-        uses: appleboy/ssh-action@master
-        with:
-          host: drip.monkeys.team
-          username: clown
-          key: ${{ secrets.DEPLOYMENT_KEY }}
-          script: whoami
+        run: ssh -i "$HOME/.ssh/key" "clown@drip.monkeys.team" "
+            whoami
+          "
