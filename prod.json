@@ -36,6 +36,12 @@
     "file_storage": {
       "root_folder": "media",
       "profile_photo_path": "profile_photos"
+    },
+    "payment": {
+      "currency": "RUB",
+      "return_url": "https://drip.monkeys.team/",
+      "yoo_kassa_url": "https://api.yookassa.ru/v3/payments",
+      "auth_token": "ODYyNTgxOnRlc3RfRk51empyZFBMdVo0MzhpMmd3WndkaVBTWkJJTTdJSTd5eXZWOHBKY2ZwWQ=="
     }
   }
   

@@ -7,7 +7,9 @@ import (
 	"dripapp/internal/dripapp/models"
 	"fmt"
 	"log"
+	"reflect"
 	"strings"
+	"time"
 
 	"github.com/jmoiron/sqlx"
 	"github.com/lib/pq"
@@ -429,9 +431,28 @@ func (p PostgreUserRepo) UpdateReportStatus(ctx context.Context, userId uint64, 
 	return nil
 }
 
-func (p PostgreUserRepo) UpdatePayment(ctx context.Context, userId uint64) error {
-	var payment_id int
-	err := p.Conn.QueryRow(UpdatePaymentQuery, userId).Scan(&payment_id)
+func (p PostgreUserRepo) CreatePayment(ctx context.Context, paymentId string, status string, amount string, userId uint64) error {
+	var payment_id string
+	fmt.Println(reflect.TypeOf(paymentId))
+	err := p.Conn.QueryRow(CreatePaymentQuery, paymentId, status, amount, userId).Scan(&payment_id)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (p PostgreUserRepo) CreateSubscription(ctx context.Context, periodStart time.Time, periodEnd time.Time, userId uint64, paymentId string) error {
+	var subscription_id uint64
+	err := p.Conn.QueryRow(CreateSubscriptionQuery, periodStart, periodEnd, userId, paymentId).Scan(&subscription_id)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (p PostgreUserRepo) UpdatePayment(ctx context.Context, paymentId string, status string) error {
+	var payment_id string
+	err := p.Conn.QueryRow(UpdatePaymentQuery, paymentId, status).Scan(&payment_id)
 	if err != nil {
 		return err
 	}
@@ -439,21 +460,22 @@ func (p PostgreUserRepo) UpdatePayment(ctx context.Context, userId uint64) error
 	return nil
 }
 
-func (p PostgreUserRepo) CreatePayment(ctx context.Context, userId uint64, period string) (uint64, error) {
-	var payment_id uint64
-	err := p.Conn.QueryRow(CreatePaymentQuery, period, userId).Scan(&payment_id)
+func (p PostgreUserRepo) UpdateSubscription(ctx context.Context, paymentId string, activeState bool) error {
+	var subscription_id uint64
+	err := p.Conn.QueryRow(UpdateSubscriptionQuery, paymentId, activeState).Scan(&subscription_id)
 	if err != nil {
-		return 0, err
-	}
-	return payment_id, nil
-}
-
-func (p PostgreUserRepo) CheckPayment(ctx context.Context, userId uint64) (models.Payment, error) {
-	var payment models.Payment
-	err := p.Conn.QueryRow(CheckPaymentQuery, userId).Scan(&payment)
-	if err != nil {
-		return models.Payment{}, err
+		return err
 	}
 
-	return payment, nil
+	return nil
 }
+
+// func (p PostgreUserRepo) CheckPayment(ctx context.Context, userId uint64) (models.Payment, error) {
+// 	var payment models.Payment
+// 	err := p.Conn.QueryRow(CheckPaymentQuery, userId).Scan(&payment)
+// 	if err != nil {
+// 		return models.Payment{}, err
+// 	}
+
+// 	return payment, nil
+// }

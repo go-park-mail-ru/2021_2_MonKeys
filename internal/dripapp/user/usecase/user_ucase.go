@@ -437,27 +437,14 @@ func (h *userUsecase) AddReport(c context.Context, report models.NewReport) erro
 	return nil
 }
 
-func (h *userUsecase) UpdatePayment(c context.Context, paymentId uint64) error {
+func (h *userUsecase) CreatePayment(c context.Context, newPayment models.Payment) (models.RedirectUrl, error) {
 	ctx, cancel := context.WithTimeout(c, h.contextTimeout)
 	defer cancel()
 
-	err := h.UserRepo.UpdatePayment(ctx, paymentId)
-	if err != nil {
-		return err
+	currentUser, ok := ctx.Value(configs.ContextUser).(models.User)
+	if !ok {
+		return models.RedirectUrl{}, models.ErrContextNilError
 	}
-
-	return nil
-}
-
-func (h *userUsecase) CreatePayment(c context.Context, newPayment models.Payment) (models.RedirectUrl, error) {
-	// ctx, cancel := context.WithTimeout(c, h.contextTimeout)
-	// defer cancel()
-
-	// currentUser, ok := ctx.Value(configs.ContextUser).(models.User)
-	// if !ok {
-	// 	return models.ErrContextNilError
-	// 	// return models.Payment{}, models.ErrContextNilError
-	// }
 
 	var amount = make(map[string]string)
 	amount["value"] = newPayment.Amount
@@ -503,30 +490,57 @@ func (h *userUsecase) CreatePayment(c context.Context, newPayment models.Payment
 	curRedirect.URL = yooKassaResponse.Confirmation.ConfirmationUrl
 	fmt.Println(yooKassaResponse)
 
-	// payment_id, err := h.UserRepo.CreatePayment(ctx, currentUser.ID, newPayment.Period)
-	// if err != nil {
-	// 	return err
-	// 	// return models.Payment{}, err
-	// }
-	// fmt.Println(payment_id)
+	err = h.UserRepo.CreatePayment(ctx, yooKassaResponse.Id, yooKassaResponse.Status, yooKassaResponse.Amount.Value+yooKassaResponse.Amount.Currency, currentUser.ID)
+	if err != nil {
+		return models.RedirectUrl{}, err
+	}
+
+	periodStart, err := time.Parse(models.DateLayout, yooKassaResponse.CreatedAt)
+	if err != nil {
+		return models.RedirectUrl{}, err
+	}
+	periodEnd := periodStart.AddDate(0, int(newPayment.Period), 0)
+
+	err = h.UserRepo.CreateSubscription(ctx, periodStart, periodEnd, currentUser.ID, yooKassaResponse.Id)
+	if err != nil {
+		return models.RedirectUrl{}, err
+	}
 
 	return curRedirect, nil
-	// return models.Payment{Id: payment_id}, nil
 }
 
-func (h *userUsecase) CheckPayment(c context.Context) (models.Payment, error) {
+func (h *userUsecase) UpdatePayment(c context.Context, paymentNotificationData models.PaymentNotification) error {
 	ctx, cancel := context.WithTimeout(c, h.contextTimeout)
 	defer cancel()
 
-	currentUser, ok := ctx.Value(configs.ContextUser).(models.User)
-	if !ok {
-		return models.Payment{}, models.ErrContextNilError
-	}
-
-	payment, err := h.UserRepo.CheckPayment(ctx, currentUser.ID)
+	err := h.UserRepo.UpdatePayment(ctx, paymentNotificationData.Object.Id, paymentNotificationData.Object.Status)
 	if err != nil {
-		return models.Payment{}, err
+		return err
 	}
 
-	return payment, nil
+	if paymentNotificationData.Object.Status == models.PaymentStatusSuccessString {
+		err = h.UserRepo.UpdateSubscription(ctx, paymentNotificationData.Object.Id, models.PaymentStatusSuccess)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
+
+// func (h *userUsecase) CheckPayment(c context.Context) (models.Payment, error) {
+// 	ctx, cancel := context.WithTimeout(c, h.contextTimeout)
+// 	defer cancel()
+
+// 	currentUser, ok := ctx.Value(configs.ContextUser).(models.User)
+// 	if !ok {
+// 		return models.Payment{}, models.ErrContextNilError
+// 	}
+
+// 	payment, err := h.UserRepo.CheckPayment(ctx, currentUser.ID)
+// 	if err != nil {
+// 		return models.Payment{}, err
+// 	}
+
+// 	return payment, nil
+// }

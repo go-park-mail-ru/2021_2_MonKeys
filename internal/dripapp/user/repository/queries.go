@@ -142,8 +142,13 @@ case when date <> '' then date_part('year', age(date::date)) else 0 end as age, 
 													) as counts);`
 	UpdateProfilesReportStatusQuery = "update profile set reportstatus = $2 where id = $1 returning id;"
 
-	UpdatePaymentQuery = "update payment set status=1 where id=$1 returning id;"
-	CreatePaymentQuery = "insert into payment(period, profile_id) values(now()+interval $1, $2) returning id;"
-	CheckPaymentQuery  = `select id, period, status,
+	CreatePaymentQuery = "insert into payment(id, status, amount, profile_id) values($1, $2, $3, $4) returning id;"
+	UpdatePaymentQuery = "update payment set status=$2 where id=$1 returning id;"
+
+	CreateSubscriptionQuery = "insert into subscription(period_start, period_end, profile_id, payment_id) values($1, $2, $3, $4) returning id;"
+	UpdateSubscriptionQuery = "update subscription set active=$2 where payment_id=$1 returning id;"
+
+	// CreatePaymentQuery = "insert into payment(period, profile_id) values(now()+interval $1, $2) returning id;"
+	CheckPaymentQuery = `select id, period, status,
 case when now() < (select period from payment where profile_id=$1 and status=1 order by period limit 1) then 1 else 0 end as sub from payment where profile_id=$1;`
 )
