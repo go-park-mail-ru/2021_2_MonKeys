@@ -30,7 +30,7 @@ jobs:
         run: echo ${{ secrets.DOCKERHUB_PASSWORD }} | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
       
       - name: Build
-        run:  docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/dependencies:${GITHUB_SHA::8} -f ./docker/builder.Dockerfile .  && 
+        run:  docker build -t dependencies -f ./docker/builder.Dockerfile .  && 
               docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/drip_tarantool:${GITHUB_SHA::8} -f ./docker/drip_tarantool.Dockerfile . && 
               docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/main_service:${GITHUB_SHA::8} -f ./docker/main_service.Dockerfile . && 
               docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/chat_service:${GITHUB_SHA::8} -f ./docker/chat_service.Dockerfile . && 
