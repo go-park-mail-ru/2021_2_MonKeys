@@ -51,41 +51,20 @@ func (_m *UserUsecase) AddReport(c context.Context, report models.NewReport) err
 	return r0
 }
 
-// CheckPayment provides a mock function with given fields: c
-func (_m *UserUsecase) CheckPayment(c context.Context) (models.Payment, error) {
-	ret := _m.Called(c)
+// CreatePayment provides a mock function with given fields: c, newPayment
+func (_m *UserUsecase) CreatePayment(c context.Context, newPayment models.Payment) (models.RedirectUrl, error) {
+	ret := _m.Called(c, newPayment)
 
-	var r0 models.Payment
-	if rf, ok := ret.Get(0).(func(context.Context) models.Payment); ok {
-		r0 = rf(c)
+	var r0 models.RedirectUrl
+	if rf, ok := ret.Get(0).(func(context.Context, models.Payment) models.RedirectUrl); ok {
+		r0 = rf(c, newPayment)
 	} else {
-		r0 = ret.Get(0).(models.Payment)
+		r0 = ret.Get(0).(models.RedirectUrl)
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(context.Context) error); ok {
-		r1 = rf(c)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
-// CreatePayment provides a mock function with given fields: c, period
-func (_m *UserUsecase) CreatePayment(c context.Context, period string) (models.Payment, error) {
-	ret := _m.Called(c, period)
-
-	var r0 models.Payment
-	if rf, ok := ret.Get(0).(func(context.Context, string) models.Payment); ok {
-		r0 = rf(c, period)
-	} else {
-		r0 = ret.Get(0).(models.Payment)
-	}
-
-	var r1 error
-	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
-		r1 = rf(c, period)
+	if rf, ok := ret.Get(1).(func(context.Context, models.Payment) error); ok {
+		r1 = rf(c, newPayment)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -277,13 +256,13 @@ func (_m *UserUsecase) Signup(c context.Context, logUserData models.LoginUser) (
 	return r0, r1
 }
 
-// UpdatePayment provides a mock function with given fields: c, paymentId
-func (_m *UserUsecase) UpdatePayment(c context.Context, paymentId uint64) error {
-	ret := _m.Called(c, paymentId)
+// UpdatePayment provides a mock function with given fields: c, PaymentNotificationData
+func (_m *UserUsecase) UpdatePayment(c context.Context, PaymentNotificationData models.PaymentNotification) error {
+	ret := _m.Called(c, PaymentNotificationData)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, uint64) error); ok {
-		r0 = rf(c, paymentId)
+	if rf, ok := ret.Get(0).(func(context.Context, models.PaymentNotification) error); ok {
+		r0 = rf(c, PaymentNotificationData)
 	} else {
 		r0 = ret.Error(0)
 	}

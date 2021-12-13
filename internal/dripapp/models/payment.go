@@ -9,6 +9,7 @@ const (
 	PaymentStatusSuccessString  = "succeeded"
 )
 
+//easyjson:json
 type Payment struct {
 	Period uint64 `json:"period"`
 	Amount string `json:"amount"`
