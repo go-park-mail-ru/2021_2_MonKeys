@@ -9,7 +9,11 @@
 <img alt="GitHub go.mod Go version (branch & subdirectory of monorepo)" src="https://img.shields.io/github/go-mod/go-version/go-park-mail-ru/2021_2_MonKeys/dev">
   <img alt="GitHub language count" src="https://img.shields.io/github/languages/count/go-park-mail-ru/2021_2_MonKeys">
 <img alt="GitHub watchers" src="https://img.shields.io/github/watchers/go-park-mail-ru/2021_2_MonKeys?style=social">
+<img alt="GitHub watchers" src="https://github.com/go-park-mail-ru/2021_2_MonKeys/actions/workflows/test.yml/badge.svg">
+<img alt="GitHub watchers" src="https://github.com/go-park-mail-ru/2021_2_MonKeys/actions/workflows/deployment.yml/badge.svg">
 </div>
+
+
 <h2>
 <br><a href="https://github.com/perlinleo" style="color: #FFC0CB">🥵Леонид Перлин</a>
 <br><a href="https://github.com/Ilyagu">🐒Ильягу Нагдимаев🙈🙉🙊</a>
