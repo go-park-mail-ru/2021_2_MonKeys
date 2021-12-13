@@ -528,19 +528,19 @@ func (h *userUsecase) UpdatePayment(c context.Context, paymentNotificationData m
 	return nil
 }
 
-// func (h *userUsecase) CheckPayment(c context.Context) (models.Payment, error) {
-// 	ctx, cancel := context.WithTimeout(c, h.contextTimeout)
-// 	defer cancel()
+func (h *userUsecase) CheckSubscription(c context.Context) (models.Subscription, error) {
+	ctx, cancel := context.WithTimeout(c, h.contextTimeout)
+	defer cancel()
 
-// 	currentUser, ok := ctx.Value(configs.ContextUser).(models.User)
-// 	if !ok {
-// 		return models.Payment{}, models.ErrContextNilError
-// 	}
+	currentUser, ok := ctx.Value(configs.ContextUser).(models.User)
+	if !ok {
+		return models.Subscription{}, models.ErrContextNilError
+	}
 
-// 	payment, err := h.UserRepo.CheckPayment(ctx, currentUser.ID)
-// 	if err != nil {
-// 		return models.Payment{}, err
-// 	}
+	isActive, err := h.UserRepo.CheckSubscription(ctx, currentUser.ID)
+	if err != nil {
+		return models.Subscription{}, err
+	}
 
-// 	return payment, nil
-// }
+	return models.Subscription{SubscriptionActive: isActive}, nil
+}

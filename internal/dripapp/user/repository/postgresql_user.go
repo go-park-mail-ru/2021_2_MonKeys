@@ -470,12 +470,12 @@ func (p PostgreUserRepo) UpdateSubscription(ctx context.Context, paymentId strin
 	return nil
 }
 
-// func (p PostgreUserRepo) CheckPayment(ctx context.Context, userId uint64) (models.Payment, error) {
-// 	var payment models.Payment
-// 	err := p.Conn.QueryRow(CheckPaymentQuery, userId).Scan(&payment)
-// 	if err != nil {
-// 		return models.Payment{}, err
-// 	}
+func (p PostgreUserRepo) CheckSubscription(ctx context.Context, userId uint64) (bool, error) {
+	var isActive bool
+	err := p.Conn.QueryRow(CheckSubscriptionQuery, userId).Scan(&isActive)
+	if err != nil {
+		return isActive, err
+	}
 
-// 	return payment, nil
-// }
+	return isActive, nil
+}

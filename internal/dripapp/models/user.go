@@ -93,6 +93,10 @@ type UserReportsCount struct {
 	Count uint64 `json:"userReportsCount"`
 }
 
+type Subscription struct {
+	SubscriptionActive bool `json:"subscriptionActive"`
+}
+
 // ArticleUsecase represent the article's usecases
 type UserUsecase interface {
 	CurrentUser(c context.Context) (User, error)
@@ -111,7 +115,7 @@ type UserUsecase interface {
 	AddReport(c context.Context, report NewReport) error
 	UpdatePayment(c context.Context, PaymentNotificationData PaymentNotification) error
 	CreatePayment(c context.Context, newPayment Payment) (RedirectUrl, error)
-	// CheckPayment(c context.Context) (Payment, error)
+	CheckSubscription(c context.Context) (Subscription, error)
 }
 
 // ArticleRepository represent the article's repository contract
@@ -141,5 +145,5 @@ type UserRepository interface {
 	CreateSubscription(ctx context.Context, periodStart time.Time, periodEnd time.Time, userId uint64, paymentId string) error
 	UpdatePayment(ctx context.Context, paymentId string, status string) error
 	UpdateSubscription(ctx context.Context, paymentId string, activeState bool) error
-	// CheckPayment(ctx context.Context, userId uint64) (Payment, error)
+	CheckSubscription(ctx context.Context, userId uint64) (bool, error)
 }

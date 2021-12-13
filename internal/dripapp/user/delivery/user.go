@@ -296,15 +296,15 @@ func (h *UserHandler) HandlePaymentNotification(w http.ResponseWriter, r *http.R
 	responses.SendOK(w)
 }
 
-// func (h *UserHandler) CheckPayment(w http.ResponseWriter, r *http.Request) {
-// 	payment, err := h.UserUCase.CheckPayment(r.Context())
-// 	if err != nil {
-// 		responses.SendError(w, models.HTTPError{
-// 			Code:    http.StatusNotFound,
-// 			Message: err,
-// 		}, h.Logger.ErrorLogging)
-// 		return
-// 	}
+func (h *UserHandler) CheckSubscription(w http.ResponseWriter, r *http.Request) {
+	payment, err := h.UserUCase.CheckSubscription(r.Context())
+	if err != nil {
+		responses.SendError(w, models.HTTPError{
+			Code:    http.StatusNotFound,
+			Message: err,
+		}, h.Logger.ErrorLogging)
+		return
+	}
 
-// 	responses.SendData(w, payment)
-// }
+	responses.SendData(w, payment)
+}

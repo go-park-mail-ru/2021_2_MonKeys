@@ -78,7 +78,7 @@ create table if not exists subscription(
   id serial not null primary key,
   period_start timestamptz default now(),
   period_end timestamptz default now(),
-  active boolean default false,
+  paid boolean default false,
   profile_id integer,
   payment_id varchar(40),
   constraint fk_sub_profile foreign key (profile_id) REFERENCES profile (id),
