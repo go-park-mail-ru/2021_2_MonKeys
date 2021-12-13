@@ -31,16 +31,16 @@ jobs:
       
       - name: Build
         run:  docker build -t dependencies -f ./docker/builder.Dockerfile .  && 
-              docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/drip_tarantool:${GITHUB_SHA::8} -f ./docker/drip_tarantool.Dockerfile . && 
-              docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/main_service:${GITHUB_SHA::8} -f ./docker/main_service.Dockerfile . && 
-              docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/chat_service:${GITHUB_SHA::8} -f ./docker/chat_service.Dockerfile . && 
-              docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/auth_service:${GITHUB_SHA::8} -f ./docker/auth_service.Dockerfile .
+              docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/drip_tarantool:${{github.sha}} -f ./docker/drip_tarantool.Dockerfile . && 
+              docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/main_service:${{github.sha}} -f ./docker/main_service.Dockerfile . && 
+              docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/chat_service:${{github.sha}} -f ./docker/chat_service.Dockerfile . && 
+              docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/auth_service:${{github.sha}} -f ./docker/auth_service.Dockerfile .
       
       - name: Publish docker image
-        run:  docker push ${{ secrets.DOCKERHUB_USERNAME }}/drip_tarantool:${GITHUB_SHA::8} &&
-              docker push ${{ secrets.DOCKERHUB_USERNAME }}/main_service:${GITHUB_SHA::8} &&
-              docker push ${{ secrets.DOCKERHUB_USERNAME }}/chat_service:${GITHUB_SHA::8} &&
-              docker push ${{ secrets.DOCKERHUB_USERNAME }}/auth_service:${GITHUB_SHA::8}
+        run:  docker push ${{ secrets.DOCKERHUB_USERNAME }}/drip_tarantool:${{github.sha}} &&
+              docker push ${{ secrets.DOCKERHUB_USERNAME }}/main_service:${{github.sha}} &&
+              docker push ${{ secrets.DOCKERHUB_USERNAME }}/chat_service:${{github.sha}} &&
+              docker push ${{ secrets.DOCKERHUB_USERNAME }}/auth_service:${{github.sha}}
 
 
   test:
@@ -91,9 +91,6 @@ jobs:
       - name: Go mod tidy
         run: go mod tidy
 
-      - name: Build
-        run: cd cmd/dripapp && go build
-
       - name: Test
         run: make test
 
@@ -102,9 +99,13 @@ jobs:
       - run: echo "${{ secrets.DEPLOYMENT_KEY }}" > "$HOME/.ssh/key"
       - run: chmod 600 "$HOME/.ssh/key"
 
-    
-      - run: cd static && sudo rsync -e "ssh -i $HOME/.ssh/key -o StrictHostKeyChecking=no" --archive --compress --omit-dir-times --no-perms --delete . clown@drip.monkeys.team:~/../back
-
+      - name: Executing remote ssh commands
+        uses: appleboy/ssh-action@master
+        with: 
+          host: drip.monkeys.team
+          username: clown
+          key_path: $HOME/.ssh/key
+          script: whoami
   
 
 
