@@ -9,7 +9,7 @@ services:
   main_service:
     image: main_service
     ports:
-      - "8000:8000"
+      - "8000:443"
     volumes:
       - $PWD/media:/dripapp/media
     depends_on:
@@ -19,7 +19,16 @@ services:
   chat_service:
     image: chat_service
     ports:
-      - "8001:8001"
+      - "8001:443"
+    depends_on:
+      - tarantool
+      - postgres
+
+  auth_service:
+    image: auth_service
+    ports:
+      - "8002:443"
+      - "8003:8003"
     depends_on:
       - tarantool
       - postgres
@@ -48,27 +57,15 @@ services:
     restart: on-failure
     healthcheck:
       test: "exit 0"
-
-  node-exporter:
-      image: prom/node-exporter
-      restart: always
-      ports:
-        - "9100:9100"
-      volumes:
-        - ./monitoring:/etc/config
-     
-
-
+  
   prometheus:
     image: prom/prometheus
-    restart: always
     ports:
       - "9090:9090"
     volumes:
       - "./prometheus:/etc/prometheus"
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
-  
   grafana:
     image: grafana/grafana
     user: "grafana"
