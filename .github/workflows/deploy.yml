@@ -1,0 +1,109 @@
+name: Deployment
+
+on:
+  push:
+    branches: [ dev ]
+
+  workflow_dispatch:
+
+jobs:
+
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.17
+    
+      - name: Checkout code 
+        uses: actions/checkout@v2
+
+      - name: Install Dependecies
+      - run: go get ./...
+
+      - name: Go mod tidy
+      - run: go mod tidy
+
+      - name: Build
+      - run: cd cmd/dripapp && go build
+  
+  test:
+    needs: build
+     - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.17
+    
+      - name: Checkout code 
+        uses: actions/checkout@v2
+
+      - name: Install Dependecies
+      - run: go get ./...
+
+      - name: Go mod tidy
+      - run: go mod tidy
+
+      - name: Build
+      - run: cd cmd/dripapp && go build
+
+      - name: Test
+      - run: make test
+
+  linter:
+    runs-on: ubuntu-latest
+
+    steps:
+    
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.17
+    
+      - name: Checkout code 
+        uses: actions/checkout@v2
+
+      - name: Install Dependecies
+      - run: go get ./...
+
+      - name: Go mod tidy
+      - run: go mod tidy
+
+      - name: Build
+      - run: cd cmd/dripapp && go build
+
+      - name: Install GolangCI-Lint
+      - run: go get github.com/golangci/golangci-lint/cmd/golangci-lint@v1.42.1
+
+      - name: Run GolangCI-Lint
+      - run: go run github.com/golangci/golangci-lint/cmd/golangci-lint run ./... --disable unused --disable deadcode
+  
+  test-coverage:
+    needs: build
+     - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.17
+    
+      - name: Checkout code 
+        uses: actions/checkout@v2
+
+      - name: Install Dependecies
+      - run: go get ./...
+
+      - name: Go mod tidy
+      - run: go mod tidy
+
+      - name: Build
+      - run: cd cmd/dripapp && go build
+
+      - name: Test
+      - run: make test
+
+      - name: Go cov dependencies
+      - run: go get github.com/AlekSi/gocov-xml
+
+      - name: Run tests w/ coverage
+      - run: make test-coverage
