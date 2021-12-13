@@ -78,5 +78,5 @@ jobs:
         with:
           host: drip.monkeys.team
           username: clown
-          key_path: ~/.ssh/key
+          key: ${{ secrets.DEPLOYMENT_KEY }}
           script: whoami
