@@ -2,19 +2,19 @@
     "log_level": "ERROR",
     "server": {
       "host": "api.monkeys.team",
-      "httpPort": ":443",
+      "httpPort": ":8000",
       "certFile": "star.monkeys.team.crt",
       "keyFile": "star.monkeys.team.key"
     },
     "chat_server": {
       "host": "api.monkeys.team",
-      "httpPort": ":443",
+      "httpPort": ":8001",
       "certFile": "star.monkeys.team.crt",
       "keyFile": "star.monkeys.team.key"
     },
     "auth_server": {
       "host": "api.monkeys.team",
-      "httpPort": ":443",
+      "httpPort": ":8002",
       "grpcUrl": "auth_service:8003",
       "certFile": "star.monkeys.team.crt",
       "keyFile": "star.monkeys.team.key"

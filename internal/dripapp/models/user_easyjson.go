@@ -706,7 +706,73 @@ func (v *Tag) UnmarshalJSON(data []byte) error {
 func (v *Tag) UnmarshalEasyJSON(l *jlexer.Lexer) {
 	easyjson9e1087fdDecodeDripappInternalDripappModels5(l, v)
 }
-func easyjson9e1087fdDecodeDripappInternalDripappModels6(in *jlexer.Lexer, out *Search) {
+func easyjson9e1087fdDecodeDripappInternalDripappModels6(in *jlexer.Lexer, out *Subscription) {
+	isTopLevel := in.IsStart()
+	if in.IsNull() {
+		if isTopLevel {
+			in.Consumed()
+		}
+		in.Skip()
+		return
+	}
+	in.Delim('{')
+	for !in.IsDelim('}') {
+		key := in.UnsafeFieldName(false)
+		in.WantColon()
+		if in.IsNull() {
+			in.Skip()
+			in.WantComma()
+			continue
+		}
+		switch key {
+		case "subscriptionActive":
+			out.SubscriptionActive = bool(in.Bool())
+		default:
+			in.SkipRecursive()
+		}
+		in.WantComma()
+	}
+	in.Delim('}')
+	if isTopLevel {
+		in.Consumed()
+	}
+}
+func easyjson9e1087fdEncodeDripappInternalDripappModels6(out *jwriter.Writer, in Subscription) {
+	out.RawByte('{')
+	first := true
+	_ = first
+	{
+		const prefix string = ",\"subscriptionActive\":"
+		out.RawString(prefix[1:])
+		out.Bool(bool(in.SubscriptionActive))
+	}
+	out.RawByte('}')
+}
+
+// MarshalJSON supports json.Marshaler interface
+func (v Subscription) MarshalJSON() ([]byte, error) {
+	w := jwriter.Writer{}
+	easyjson9e1087fdEncodeDripappInternalDripappModels6(&w, v)
+	return w.Buffer.BuildBytes(), w.Error
+}
+
+// MarshalEasyJSON supports easyjson.Marshaler interface
+func (v Subscription) MarshalEasyJSON(w *jwriter.Writer) {
+	easyjson9e1087fdEncodeDripappInternalDripappModels6(w, v)
+}
+
+// UnmarshalJSON supports json.Unmarshaler interface
+func (v *Subscription) UnmarshalJSON(data []byte) error {
+	r := jlexer.Lexer{Data: data}
+	easyjson9e1087fdDecodeDripappInternalDripappModels6(&r, v)
+	return r.Error()
+}
+
+// UnmarshalEasyJSON supports easyjson.Unmarshaler interface
+func (v *Subscription) UnmarshalEasyJSON(l *jlexer.Lexer) {
+	easyjson9e1087fdDecodeDripappInternalDripappModels6(l, v)
+}
+func easyjson9e1087fdDecodeDripappInternalDripappModels7(in *jlexer.Lexer, out *Search) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -737,7 +803,7 @@ func easyjson9e1087fdDecodeDripappInternalDripappModels6(in *jlexer.Lexer, out *
 		in.Consumed()
 	}
 }
-func easyjson9e1087fdEncodeDripappInternalDripappModels6(out *jwriter.Writer, in Search) {
+func easyjson9e1087fdEncodeDripappInternalDripappModels7(out *jwriter.Writer, in Search) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -752,27 +818,27 @@ func easyjson9e1087fdEncodeDripappInternalDripappModels6(out *jwriter.Writer, in
 // MarshalJSON supports json.Marshaler interface
 func (v Search) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjson9e1087fdEncodeDripappInternalDripappModels6(&w, v)
+	easyjson9e1087fdEncodeDripappInternalDripappModels7(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v Search) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjson9e1087fdEncodeDripappInternalDripappModels6(w, v)
+	easyjson9e1087fdEncodeDripappInternalDripappModels7(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *Search) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjson9e1087fdDecodeDripappInternalDripappModels6(&r, v)
+	easyjson9e1087fdDecodeDripappInternalDripappModels7(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *Search) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjson9e1087fdDecodeDripappInternalDripappModels6(l, v)
+	easyjson9e1087fdDecodeDripappInternalDripappModels7(l, v)
 }
-func easyjson9e1087fdDecodeDripappInternalDripappModels7(in *jlexer.Lexer, out *Reports) {
+func easyjson9e1087fdDecodeDripappInternalDripappModels8(in *jlexer.Lexer, out *Reports) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -819,7 +885,7 @@ func easyjson9e1087fdDecodeDripappInternalDripappModels7(in *jlexer.Lexer, out *
 		in.Consumed()
 	}
 }
-func easyjson9e1087fdEncodeDripappInternalDripappModels7(out *jwriter.Writer, in Reports) {
+func easyjson9e1087fdEncodeDripappInternalDripappModels8(out *jwriter.Writer, in Reports) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -855,27 +921,27 @@ func easyjson9e1087fdEncodeDripappInternalDripappModels7(out *jwriter.Writer, in
 // MarshalJSON supports json.Marshaler interface
 func (v Reports) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjson9e1087fdEncodeDripappInternalDripappModels7(&w, v)
+	easyjson9e1087fdEncodeDripappInternalDripappModels8(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v Reports) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjson9e1087fdEncodeDripappInternalDripappModels7(w, v)
+	easyjson9e1087fdEncodeDripappInternalDripappModels8(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *Reports) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjson9e1087fdDecodeDripappInternalDripappModels7(&r, v)
+	easyjson9e1087fdDecodeDripappInternalDripappModels8(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *Reports) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjson9e1087fdDecodeDripappInternalDripappModels7(l, v)
+	easyjson9e1087fdDecodeDripappInternalDripappModels8(l, v)
 }
-func easyjson9e1087fdDecodeDripappInternalDripappModels8(in *jlexer.Lexer, out *Report) {
+func easyjson9e1087fdDecodeDripappInternalDripappModels9(in *jlexer.Lexer, out *Report) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -906,7 +972,7 @@ func easyjson9e1087fdDecodeDripappInternalDripappModels8(in *jlexer.Lexer, out *
 		in.Consumed()
 	}
 }
-func easyjson9e1087fdEncodeDripappInternalDripappModels8(out *jwriter.Writer, in Report) {
+func easyjson9e1087fdEncodeDripappInternalDripappModels9(out *jwriter.Writer, in Report) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -921,27 +987,27 @@ func easyjson9e1087fdEncodeDripappInternalDripappModels8(out *jwriter.Writer, in
 // MarshalJSON supports json.Marshaler interface
 func (v Report) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjson9e1087fdEncodeDripappInternalDripappModels8(&w, v)
+	easyjson9e1087fdEncodeDripappInternalDripappModels9(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v Report) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjson9e1087fdEncodeDripappInternalDripappModels8(w, v)
+	easyjson9e1087fdEncodeDripappInternalDripappModels9(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *Report) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjson9e1087fdDecodeDripappInternalDripappModels8(&r, v)
+	easyjson9e1087fdDecodeDripappInternalDripappModels9(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *Report) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjson9e1087fdDecodeDripappInternalDripappModels8(l, v)
+	easyjson9e1087fdDecodeDripappInternalDripappModels9(l, v)
 }
-func easyjson9e1087fdDecodeDripappInternalDripappModels9(in *jlexer.Lexer, out *NewReport) {
+func easyjson9e1087fdDecodeDripappInternalDripappModels10(in *jlexer.Lexer, out *NewReport) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -974,7 +1040,7 @@ func easyjson9e1087fdDecodeDripappInternalDripappModels9(in *jlexer.Lexer, out *
 		in.Consumed()
 	}
 }
-func easyjson9e1087fdEncodeDripappInternalDripappModels9(out *jwriter.Writer, in NewReport) {
+func easyjson9e1087fdEncodeDripappInternalDripappModels10(out *jwriter.Writer, in NewReport) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -994,27 +1060,27 @@ func easyjson9e1087fdEncodeDripappInternalDripappModels9(out *jwriter.Writer, in
 // MarshalJSON supports json.Marshaler interface
 func (v NewReport) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjson9e1087fdEncodeDripappInternalDripappModels9(&w, v)
+	easyjson9e1087fdEncodeDripappInternalDripappModels10(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v NewReport) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjson9e1087fdEncodeDripappInternalDripappModels9(w, v)
+	easyjson9e1087fdEncodeDripappInternalDripappModels10(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *NewReport) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjson9e1087fdDecodeDripappInternalDripappModels9(&r, v)
+	easyjson9e1087fdDecodeDripappInternalDripappModels10(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *NewReport) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjson9e1087fdDecodeDripappInternalDripappModels9(l, v)
+	easyjson9e1087fdDecodeDripappInternalDripappModels10(l, v)
 }
-func easyjson9e1087fdDecodeDripappInternalDripappModels10(in *jlexer.Lexer, out *Matches) {
+func easyjson9e1087fdDecodeDripappInternalDripappModels11(in *jlexer.Lexer, out *Matches) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -1061,7 +1127,7 @@ func easyjson9e1087fdDecodeDripappInternalDripappModels10(in *jlexer.Lexer, out 
 		in.Consumed()
 	}
 }
-func easyjson9e1087fdEncodeDripappInternalDripappModels10(out *jwriter.Writer, in Matches) {
+func easyjson9e1087fdEncodeDripappInternalDripappModels11(out *jwriter.Writer, in Matches) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -1097,27 +1163,27 @@ func easyjson9e1087fdEncodeDripappInternalDripappModels10(out *jwriter.Writer, i
 // MarshalJSON supports json.Marshaler interface
 func (v Matches) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjson9e1087fdEncodeDripappInternalDripappModels10(&w, v)
+	easyjson9e1087fdEncodeDripappInternalDripappModels11(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v Matches) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjson9e1087fdEncodeDripappInternalDripappModels10(w, v)
+	easyjson9e1087fdEncodeDripappInternalDripappModels11(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *Matches) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjson9e1087fdDecodeDripappInternalDripappModels10(&r, v)
+	easyjson9e1087fdDecodeDripappInternalDripappModels11(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *Matches) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjson9e1087fdDecodeDripappInternalDripappModels10(l, v)
+	easyjson9e1087fdDecodeDripappInternalDripappModels11(l, v)
 }
-func easyjson9e1087fdDecodeDripappInternalDripappModels11(in *jlexer.Lexer, out *Match) {
+func easyjson9e1087fdDecodeDripappInternalDripappModels12(in *jlexer.Lexer, out *Match) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -1148,7 +1214,7 @@ func easyjson9e1087fdDecodeDripappInternalDripappModels11(in *jlexer.Lexer, out 
 		in.Consumed()
 	}
 }
-func easyjson9e1087fdEncodeDripappInternalDripappModels11(out *jwriter.Writer, in Match) {
+func easyjson9e1087fdEncodeDripappInternalDripappModels12(out *jwriter.Writer, in Match) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -1163,27 +1229,27 @@ func easyjson9e1087fdEncodeDripappInternalDripappModels11(out *jwriter.Writer, i
 // MarshalJSON supports json.Marshaler interface
 func (v Match) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjson9e1087fdEncodeDripappInternalDripappModels11(&w, v)
+	easyjson9e1087fdEncodeDripappInternalDripappModels12(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v Match) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjson9e1087fdEncodeDripappInternalDripappModels11(w, v)
+	easyjson9e1087fdEncodeDripappInternalDripappModels12(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *Match) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjson9e1087fdDecodeDripappInternalDripappModels11(&r, v)
+	easyjson9e1087fdDecodeDripappInternalDripappModels12(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *Match) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjson9e1087fdDecodeDripappInternalDripappModels11(l, v)
+	easyjson9e1087fdDecodeDripappInternalDripappModels12(l, v)
 }
-func easyjson9e1087fdDecodeDripappInternalDripappModels12(in *jlexer.Lexer, out *LoginUser) {
+func easyjson9e1087fdDecodeDripappInternalDripappModels13(in *jlexer.Lexer, out *LoginUser) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -1218,7 +1284,7 @@ func easyjson9e1087fdDecodeDripappInternalDripappModels12(in *jlexer.Lexer, out 
 		in.Consumed()
 	}
 }
-func easyjson9e1087fdEncodeDripappInternalDripappModels12(out *jwriter.Writer, in LoginUser) {
+func easyjson9e1087fdEncodeDripappInternalDripappModels13(out *jwriter.Writer, in LoginUser) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -1249,27 +1315,27 @@ func easyjson9e1087fdEncodeDripappInternalDripappModels12(out *jwriter.Writer, i
 // MarshalJSON supports json.Marshaler interface
 func (v LoginUser) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjson9e1087fdEncodeDripappInternalDripappModels12(&w, v)
+	easyjson9e1087fdEncodeDripappInternalDripappModels13(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v LoginUser) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjson9e1087fdEncodeDripappInternalDripappModels12(w, v)
+	easyjson9e1087fdEncodeDripappInternalDripappModels13(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *LoginUser) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjson9e1087fdDecodeDripappInternalDripappModels12(&r, v)
+	easyjson9e1087fdDecodeDripappInternalDripappModels13(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *LoginUser) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjson9e1087fdDecodeDripappInternalDripappModels12(l, v)
+	easyjson9e1087fdDecodeDripappInternalDripappModels13(l, v)
 }
-func easyjson9e1087fdDecodeDripappInternalDripappModels13(in *jlexer.Lexer, out *Likes) {
+func easyjson9e1087fdDecodeDripappInternalDripappModels14(in *jlexer.Lexer, out *Likes) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -1316,7 +1382,7 @@ func easyjson9e1087fdDecodeDripappInternalDripappModels13(in *jlexer.Lexer, out 
 		in.Consumed()
 	}
 }
-func easyjson9e1087fdEncodeDripappInternalDripappModels13(out *jwriter.Writer, in Likes) {
+func easyjson9e1087fdEncodeDripappInternalDripappModels14(out *jwriter.Writer, in Likes) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -1352,23 +1418,23 @@ func easyjson9e1087fdEncodeDripappInternalDripappModels13(out *jwriter.Writer, i
 // MarshalJSON supports json.Marshaler interface
 func (v Likes) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjson9e1087fdEncodeDripappInternalDripappModels13(&w, v)
+	easyjson9e1087fdEncodeDripappInternalDripappModels14(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v Likes) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjson9e1087fdEncodeDripappInternalDripappModels13(w, v)
+	easyjson9e1087fdEncodeDripappInternalDripappModels14(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *Likes) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjson9e1087fdDecodeDripappInternalDripappModels13(&r, v)
+	easyjson9e1087fdDecodeDripappInternalDripappModels14(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *Likes) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjson9e1087fdDecodeDripappInternalDripappModels13(l, v)
+	easyjson9e1087fdDecodeDripappInternalDripappModels14(l, v)
 }

@@ -9,29 +9,39 @@ services:
   main_service:
     image: main_service
     ports:
-      - "8000:443"
+      - "8000:8000"
     volumes:
       - $PWD/media:/dripapp/media
     depends_on:
       - tarantool
       - postgres
+    environment:
+        DRIPAPP: "DEPLOY"
 
   chat_service:
     image: chat_service
     ports:
-      - "8001:443"
+      - "8001:8001"
+    volumes:
+      - $PWD/media:/dripapp/media
     depends_on:
       - tarantool
       - postgres
+    environment:
+        DRIPAPP: "DEPLOY"
 
   auth_service:
     image: auth_service
     ports:
-      - "8002:443"
+      - "8002:8002"
       - "8003:8003"
+    volumes:
+      - $PWD/media:/dripapp/media
     depends_on:
       - tarantool
       - postgres
+    environment:
+        DRIPAPP: "DEPLOY"
 
   tarantool:
     image: "drip_tarantool"
