@@ -85,15 +85,15 @@ func main() {
 		ReadTimeout:  http.DefaultClient.Timeout,
 	}
 
-	mode:= os.Getenv("DRIPAPP")
+	mode := os.Getenv("DRIPAPP")
 
-	if mode=="LOCAL" {
+	if mode == "LOCAL" {
 		log.Fatal(srv.ListenAndServe())
-	} else if mode=="DEPLOY" {
+	} else if mode == "DEPLOY" {
 		log.Fatal(srv.ListenAndServeTLS("star.monkeys.team.crt", "star.monkeys.team.key"))
 	} else {
 		log.Printf("NO MODE SPECIFIED.SET ENV VAR DRIPAPP TO \"LOCAL\" or \"DEPLOY\"")
 	}
-	
-	log.Printf("STD starting server(%s) at %s\n",mode, srv.Addr)
+
+	log.Printf("STD starting server(%s) at %s\n", mode, srv.Addr)
 }
