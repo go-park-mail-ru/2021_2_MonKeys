@@ -72,6 +72,20 @@ func (_m *UserUsecase) CheckSubscription(c context.Context) (models.Subscription
 	return r0, r1
 }
 
+// ClientHandler provides a mock function with given fields: c, notifications
+func (_m *UserUsecase) ClientHandler(c context.Context, notifications models.Notifications) error {
+	ret := _m.Called(c, notifications)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, models.Notifications) error); ok {
+		r0 = rf(c, notifications)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // CreatePayment provides a mock function with given fields: c, newPayment
 func (_m *UserUsecase) CreatePayment(c context.Context, newPayment models.Payment) (models.RedirectUrl, error) {
 	ret := _m.Called(c, newPayment)

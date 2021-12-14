@@ -311,7 +311,7 @@ func (h *userUsecase) Reaction(c context.Context, reactionData models.UserReacti
 	}
 
 	// notifications
-	if currMath.Match == true {
+	if currMath.Match {
 		client, err := h.hub.GetClient(reactionData.Id)
 		if err != nil {
 			return currMath, nil
