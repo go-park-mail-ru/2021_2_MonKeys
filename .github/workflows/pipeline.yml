@@ -1,4 +1,4 @@
-name: Github CI/CD Pipeline
+name: CI/CD
 
 on:
   push:
@@ -146,7 +146,7 @@ jobs:
         run: make test-coverage
 
   deploy:
-    needs: [test]
+    needs: [test, build-docker]
 
     runs-on: ubuntu-latest
     if:
