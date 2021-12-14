@@ -5,6 +5,7 @@ import (
 	"dripapp/internal/dripapp/file"
 	_fileDelivery "dripapp/internal/dripapp/file/delivery"
 	"dripapp/internal/dripapp/middleware"
+	"dripapp/internal/dripapp/models"
 	_userDelivery "dripapp/internal/dripapp/user/delivery"
 	_userRepo "dripapp/internal/dripapp/user/repository"
 	_userUsecase "dripapp/internal/dripapp/user/usecase"
@@ -41,6 +42,8 @@ func main() {
 	// router
 	router := mux.NewRouter()
 
+	hub := models.NewHub()
+	go hub.Run()
 	// repository
 	userRepo, err := _userRepo.NewPostgresUserRepository(configs.Postgres)
 	if err != nil {

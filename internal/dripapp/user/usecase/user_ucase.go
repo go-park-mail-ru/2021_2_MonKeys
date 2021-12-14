@@ -30,6 +30,7 @@ type userUsecase struct {
 	Session        _sessionModels.SessionRepository
 	File           models.FileRepository
 	contextTimeout time.Duration
+	hub            *models.Hub
 }
 
 func NewUserUsecase(
@@ -309,7 +310,31 @@ func (h *userUsecase) Reaction(c context.Context, reactionData models.UserReacti
 		}
 	}
 
+	// notifications
+	if currMath.Match == true {
+		client, err := h.hub.GetClient(reactionData.Id)
+		if err != nil {
+			return currMath, nil
+		}
+
+		client.NotifyAboutMatchWith(currentUser)
+	}
+
 	return currMath, nil
+}
+
+func (h *userUsecase) ClientHandler(c context.Context, notifications models.Notifications) error {
+	ctx, cancel := context.WithTimeout(c, h.contextTimeout)
+	defer cancel()
+
+	currentUser, ok := ctx.Value(configs.ContextUser).(models.User)
+	if !ok {
+		return models.ErrContextNilError
+	}
+
+	models.NewClient(currentUser, h.hub, notifications)
+
+	return nil
 }
 
 func (h *userUsecase) UserLikes(c context.Context) (models.Likes, error) {
