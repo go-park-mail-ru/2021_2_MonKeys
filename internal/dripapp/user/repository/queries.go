@@ -60,7 +60,7 @@ case when date <> '' then date_part('year', age(date::date)) else 0 end as age, 
 									and op.name <> ''
 									and op.date <> ''
 									and date_part('year', age(date::timestamp)) >= $2
-									and date_part('year', age(date::timestamp)) <= $3;
+									and date_part('year', age(date::timestamp)) <= $3
 									`
 
 	GetNextUserForSwipeQueryPrefer = "and op.gender=$4\n"
