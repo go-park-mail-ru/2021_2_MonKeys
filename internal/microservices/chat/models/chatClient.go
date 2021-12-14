@@ -2,6 +2,7 @@ package models
 
 import "dripapp/internal/dripapp/models"
 
+//easyjson:json
 type ChatClient struct {
 	user models.User
 	hub  *Hub

@@ -2,19 +2,19 @@
     "log_level": "ERROR",
     "server": {
       "host": "api.monkeys.team",
-      "httpPort": ":443",
+      "httpPort": ":8000",
       "certFile": "star.monkeys.team.crt",
       "keyFile": "star.monkeys.team.key"
     },
     "chat_server": {
       "host": "api.monkeys.team",
-      "httpPort": ":443",
+      "httpPort": ":8001",
       "certFile": "star.monkeys.team.crt",
       "keyFile": "star.monkeys.team.key"
     },
     "auth_server": {
       "host": "api.monkeys.team",
-      "httpPort": ":443",
+      "httpPort": ":8002",
       "grpcUrl": "auth_service:8003",
       "certFile": "star.monkeys.team.crt",
       "keyFile": "star.monkeys.team.key"
@@ -36,6 +36,12 @@
     "file_storage": {
       "root_folder": "media",
       "profile_photo_path": "profile_photos"
+    },
+    "payment": {
+      "currency": "RUB",
+      "return_url": "https://drip.monkeys.team/",
+      "yoo_kassa_url": "https://api.yookassa.ru/v3/payments",
+      "auth_token": "ODYyNTgxOnRlc3RfRk51empyZFBMdVo0MzhpMmd3WndkaVBTWkJJTTdJSTd5eXZWOHBKY2ZwWQ=="
     }
   }
   

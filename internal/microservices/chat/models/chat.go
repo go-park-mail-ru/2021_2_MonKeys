@@ -5,6 +5,7 @@ import (
 	"time"
 )
 
+//easyjson:json
 type Message struct {
 	MessageID uint64    `json:"messageID" db:"message_id"`
 	FromID    uint64    `json:"fromID" db:"from_id"`
@@ -13,11 +14,19 @@ type Message struct {
 	Date      time.Time `json:"date"`
 }
 
+type Messages struct {
+	Messages []Message
+}
+
 type Chat struct {
 	FromUserID uint64    `json:"fromUserID" db:"id"`
 	Name       string    `json:"name"`
 	Img        string    `json:"img"`
 	Messages   []Message `json:"messages"`
+}
+
+type Chats struct {
+	Chats []Chat
 }
 
 type ChatUseCase interface {

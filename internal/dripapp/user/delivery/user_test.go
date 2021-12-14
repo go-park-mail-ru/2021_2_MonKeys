@@ -37,52 +37,38 @@ var (
 		Email:    email,
 		Password: password,
 	}
-	user2 = models.User{
-		ID:       2,
-		Email:    "test2@mail.ru",
-		Password: "qweQWE12",
-	}
-
 	tags = models.Tags{
 		AllTags: map[uint64]models.Tag{
 			1: {TagName: "chill"},
-			2: {TagName: "sport"},
-			3: {TagName: "music"},
 		},
-		Count: 3,
+		Count: 1,
 	}
-	tagsMapStr   = `{"1":{"tagText":"chill"},"2":{"tagText":"sport"},"3":{"tagText":"music"}}`
-	tagsCountStr = "3"
+	tagsMapStr   = `{"1":{"tagText":"chill"}}`
+	tagsCountStr = "1"
 
-	usersMapStr = `{"1":{"id":1,"email":"test@mail.ru"},"2":{"id":2,"email":"test2@mail.ru"}}`
+	usersMapStr = `{"1":{"id":1,"email":"test@mail.ru"}}`
 	matches     = models.Matches{
 		AllUsers: map[uint64]models.User{
 			1: user,
-			2: user2,
 		},
-		Count: "2",
+		Count: "1",
 	}
 	likes = models.Likes{
 		AllUsers: map[uint64]models.User{
 			1: user,
-			2: user2,
 		},
-		Count: "2",
+		Count: "1",
 	}
 	report1 = models.Report{
 		ReportDesc: "spam",
 	}
-	report2 = models.Report{
-		ReportDesc: "ad",
-	}
 	reports = models.Reports{
 		AllReports: map[uint64]models.Report{
 			1: report1,
-			2: report2,
 		},
-		Count: 2,
+		Count: 1,
 	}
-	reportsMapStr = `{"1":{"reportDesc":"` + report1.ReportDesc + `"},"2":{"reportDesc":"` + report2.ReportDesc + `"}}`
+	reportsMapStr = `{"1":{"reportDesc":"` + report1.ReportDesc + `"}}`
 
 	reactionStr = "0"
 	match       = models.Match{Match: true}
@@ -132,7 +118,7 @@ func TestNextUser(t *testing.T) {
 				nil,
 			},
 			StatusCode: http.StatusOK,
-			BodyResp:   `{"status":200,"body":[{"id":` + idStr + `,"email":"` + email + `"}]}`,
+			BodyResp:   `{"status":200,"body":{"Users":[{"id":` + idStr + `,"email":"` + email + `"}]}}`,
 		},
 		{
 			mockUserUseCase: []interface{}{
@@ -505,7 +491,7 @@ func TestSearchMatches(t *testing.T) {
 				nil,
 			},
 			StatusCode: http.StatusOK,
-			BodyResp:   `{"status":200,"body":{"allUsers":{"1":{"id":1,"email":"test@mail.ru"},"2":{"id":2,"email":"test2@mail.ru"}},"matchesCount":"2"}}`,
+			BodyResp:   `{"status":200,"body":{"allUsers":{"1":{"id":1,"email":"test@mail.ru"}},"matchesCount":"1"}}`,
 		},
 		{
 			BodyReq:    bytes.NewReader([]byte(`wrong input data`)),
@@ -604,7 +590,7 @@ func TestGetAllReports(t *testing.T) {
 				nil,
 			},
 			StatusCode: http.StatusOK,
-			BodyResp:   `{"status":200,"body":{"allReports":` + reportsMapStr + `,"reportsCount":2}}`,
+			BodyResp:   `{"status":200,"body":{"allReports":` + reportsMapStr + `,"reportsCount":1}}`,
 		},
 		{
 			mockUserUseCase: []interface{}{

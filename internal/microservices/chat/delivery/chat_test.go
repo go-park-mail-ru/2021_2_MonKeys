@@ -47,7 +47,10 @@ var (
 		message1,
 		message2,
 	}
-	messagesStr = objToJsonStr(messages)
+	messagesEasy = models.Messages{
+		Messages: messages,
+	}
+	messagesStr = objToJsonStr(messagesEasy)
 
 	chat1 = models.Chat{
 		FromUserID: 1,
@@ -65,7 +68,10 @@ var (
 		chat1,
 		chat2,
 	}
-	chatsStr = objToJsonStr(chats)
+	chatsEasy = models.Chats{
+		Chats: chats,
+	}
+	chatsStr = objToJsonStr(chatsEasy)
 )
 
 func objToJsonStr(v interface{}) string {

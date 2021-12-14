@@ -4,6 +4,7 @@ import (
 	"io"
 )
 
+//easyjson:json
 type Photo struct {
 	Path string `json:"photo"`
 }

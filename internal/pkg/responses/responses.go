@@ -3,11 +3,19 @@ package responses
 import (
 	"dripapp/internal/dripapp/models"
 	"dripapp/internal/pkg/logger"
-	"encoding/json"
 	"io/ioutil"
 	"net/http"
 )
 
+type ReadModel interface {
+	UnmarshalJSON(data []byte) error
+}
+
+type WriteModel interface {
+	MarshalJSON() ([]byte, error)
+}
+
+//easyjson:json
 type JSON struct {
 	Status int         `json:"status"`
 	Body   interface{} `json:"body"`
@@ -32,7 +40,7 @@ func SendOK(w http.ResponseWriter) {
 	logger.DripLogger.Info.Printf("CODE %d", resp.Status)
 }
 
-func SendData(w http.ResponseWriter, v interface{}) {
+func SendData(w http.ResponseWriter, v WriteModel) {
 	resp := JSON{
 		Status: http.StatusOK,
 		Body:   v,
@@ -66,13 +74,13 @@ func SendError(w http.ResponseWriter, httpErr models.HTTPError, logging func(int
 	logging(httpErr.Code, httpErr.Message.Error())
 }
 
-func ReadJSON(r *http.Request, v interface{}) error {
+func ReadJSON(r *http.Request, v ReadModel) error {
 	byteReq, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		return err
 	}
 
-	err = json.Unmarshal(byteReq, v)
+	err = v.UnmarshalJSON(byteReq)
 	if err != nil {
 		return err
 	}
@@ -80,8 +88,8 @@ func ReadJSON(r *http.Request, v interface{}) error {
 	return nil
 }
 
-func WriteJSON(w http.ResponseWriter, v interface{}) error {
-	byteResp, err := json.Marshal(v)
+func WriteJSON(w http.ResponseWriter, v WriteModel) error {
+	byteResp, err := v.MarshalJSON()
 	if err != nil {
 		return err
 	}
