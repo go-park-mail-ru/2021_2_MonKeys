@@ -102,6 +102,10 @@ type Subscription struct {
 	SubscriptionActive bool `json:"subscriptionActive"`
 }
 
+type Notifications interface {
+	Send(user User) error
+}
+
 // ArticleUsecase represent the article's usecases
 type UserUsecase interface {
 	CurrentUser(c context.Context) (User, error)
@@ -114,6 +118,7 @@ type UserUsecase interface {
 	GetAllTags(c context.Context) (Tags, error)
 	UsersMatches(c context.Context) (Matches, error)
 	Reaction(c context.Context, reactionData UserReaction) (Match, error)
+	ClientHandler(c context.Context, notifications Notifications) error
 	UserLikes(c context.Context) (Likes, error)
 	UsersMatchesWithSearching(c context.Context, searchData Search) (Matches, error)
 	GetAllReports(c context.Context) (Reports, error)

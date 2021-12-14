@@ -1152,242 +1152,242 @@ func TestUserUsecase_UsersMatches(t *testing.T) {
 	}
 }
 
-func TestUserUsecase_Reaction(t *testing.T) {
-	type TestCase struct {
-		user         models.User
-		reactionData models.UserReaction
-		match        models.Match
-		err          error
-	}
-	testCases := []TestCase{
-		// Test OK and Match
-		{
-			user: models.User{
-				ID: 0,
-			},
-			reactionData: models.UserReaction{
-				Id:       2,
-				Reaction: 1,
-			},
-			match: models.Match{
-				Match: true,
-			},
-			err: nil,
-		},
-		// Test OK and no Match
-		{
-			user: models.User{
-				ID: 0,
-			},
-			reactionData: models.UserReaction{
-				Id:       5,
-				Reaction: 1,
-			},
-			match: models.Match{
-				Match: false,
-			},
-			err: nil,
-		},
-		// Test OK and no Match
-		{
-			user: models.User{
-				ID: 0,
-			},
-			reactionData: models.UserReaction{
-				Id:       2,
-				Reaction: 2,
-			},
-			match: models.Match{
-				Match: false,
-			},
-			err: nil,
-		},
-		// Test ErrorNotFound
-		{
-			user: models.User{
-				ID: 1,
-			},
-			reactionData: models.UserReaction{},
-			match:        models.Match{},
-			err:          nil,
-		},
-		// Test ErrContextNilError
-		{
-			user: models.User{
-				ID: 2,
-			},
-			reactionData: models.UserReaction{},
-			match:        models.Match{},
-			err:          models.ErrContextNilError,
-		},
-		// Test ErrAddReaction
-		{
-			user: models.User{
-				ID: 0,
-			},
-			reactionData: models.UserReaction{
-				Id:       2,
-				Reaction: 1,
-			},
-			match: models.Match{},
-			err:   errors.New(""),
-		},
-		// Test ErrGetLikes
-		{
-			user: models.User{
-				ID: 0,
-			},
-			reactionData: models.UserReaction{
-				Id:       2,
-				Reaction: 1,
-			},
-			match: models.Match{},
-			err:   errors.New(""),
-		},
-		// Test ErrDeleteLike
-		{
-			user: models.User{
-				ID: 0,
-			},
-			reactionData: models.UserReaction{
-				Id:       2,
-				Reaction: 1,
-			},
-			match: models.Match{},
-			err:   errors.New(""),
-		},
-		// Test ErrAddMatch
-		{
-			user: models.User{
-				ID: 0,
-			},
-			reactionData: models.UserReaction{
-				Id:       2,
-				Reaction: 1,
-			},
-			match: models.Match{},
-			err:   errors.New(""),
-		},
-	}
+// func TestUserUsecase_Reaction(t *testing.T) {
+// 	type TestCase struct {
+// 		user         models.User
+// 		reactionData models.UserReaction
+// 		match        models.Match
+// 		err          error
+// 	}
+// 	testCases := []TestCase{
+// 		// Test OK and Match
+// 		{
+// 			user: models.User{
+// 				ID: 0,
+// 			},
+// 			reactionData: models.UserReaction{
+// 				Id:       2,
+// 				Reaction: 1,
+// 			},
+// 			match: models.Match{
+// 				Match: true,
+// 			},
+// 			err: nil,
+// 		},
+// 		// Test OK and no Match
+// 		{
+// 			user: models.User{
+// 				ID: 0,
+// 			},
+// 			reactionData: models.UserReaction{
+// 				Id:       5,
+// 				Reaction: 1,
+// 			},
+// 			match: models.Match{
+// 				Match: false,
+// 			},
+// 			err: nil,
+// 		},
+// 		// Test OK and no Match
+// 		{
+// 			user: models.User{
+// 				ID: 0,
+// 			},
+// 			reactionData: models.UserReaction{
+// 				Id:       2,
+// 				Reaction: 2,
+// 			},
+// 			match: models.Match{
+// 				Match: false,
+// 			},
+// 			err: nil,
+// 		},
+// 		// Test ErrorNotFound
+// 		{
+// 			user: models.User{
+// 				ID: 1,
+// 			},
+// 			reactionData: models.UserReaction{},
+// 			match:        models.Match{},
+// 			err:          nil,
+// 		},
+// 		// Test ErrContextNilError
+// 		{
+// 			user: models.User{
+// 				ID: 2,
+// 			},
+// 			reactionData: models.UserReaction{},
+// 			match:        models.Match{},
+// 			err:          models.ErrContextNilError,
+// 		},
+// 		// Test ErrAddReaction
+// 		{
+// 			user: models.User{
+// 				ID: 0,
+// 			},
+// 			reactionData: models.UserReaction{
+// 				Id:       2,
+// 				Reaction: 1,
+// 			},
+// 			match: models.Match{},
+// 			err:   errors.New(""),
+// 		},
+// 		// Test ErrGetLikes
+// 		{
+// 			user: models.User{
+// 				ID: 0,
+// 			},
+// 			reactionData: models.UserReaction{
+// 				Id:       2,
+// 				Reaction: 1,
+// 			},
+// 			match: models.Match{},
+// 			err:   errors.New(""),
+// 		},
+// 		// Test ErrDeleteLike
+// 		{
+// 			user: models.User{
+// 				ID: 0,
+// 			},
+// 			reactionData: models.UserReaction{
+// 				Id:       2,
+// 				Reaction: 1,
+// 			},
+// 			match: models.Match{},
+// 			err:   errors.New(""),
+// 		},
+// 		// Test ErrAddMatch
+// 		{
+// 			user: models.User{
+// 				ID: 0,
+// 			},
+// 			reactionData: models.UserReaction{
+// 				Id:       2,
+// 				Reaction: 1,
+// 			},
+// 			match: models.Match{},
+// 			err:   errors.New(""),
+// 		},
+// 	}
 
-	type MockResultCase struct {
-		likes             []uint64
-		errAddReaction    error
-		errGetLikes       error
-		errDeleteReaction error
-		errAddMatch       error
-	}
-	MockResultCases := []MockResultCase{
-		// Test OK and Match
-		{
-			likes:             []uint64{1, 2, 3},
-			errAddReaction:    nil,
-			errGetLikes:       nil,
-			errDeleteReaction: nil,
-			errAddMatch:       nil,
-		},
-		// Test OK and no Match
-		{
-			likes:             []uint64{1, 2, 3},
-			errAddReaction:    nil,
-			errGetLikes:       nil,
-			errDeleteReaction: nil,
-			errAddMatch:       nil,
-		},
-		// Test OK and no Match
-		{
-			likes:             []uint64{1, 2, 3},
-			errAddReaction:    nil,
-			errGetLikes:       nil,
-			errDeleteReaction: nil,
-			errAddMatch:       nil,
-		},
-		// Test ErrorNotFound
-		{
-			likes:             []uint64{},
-			errAddReaction:    nil,
-			errGetLikes:       nil,
-			errDeleteReaction: nil,
-			errAddMatch:       nil,
-		},
-		// Test ErrContextNilError
-		{
-			likes:             []uint64{},
-			errAddReaction:    nil,
-			errGetLikes:       nil,
-			errDeleteReaction: nil,
-			errAddMatch:       nil,
-		},
-		// Test ErrAddReaction
-		{
-			likes:             []uint64{},
-			errAddReaction:    errors.New(""),
-			errGetLikes:       nil,
-			errDeleteReaction: nil,
-			errAddMatch:       nil,
-		},
-		// Test ErrGetLikes
-		{
-			likes:             []uint64{},
-			errAddReaction:    nil,
-			errGetLikes:       errors.New(""),
-			errDeleteReaction: nil,
-			errAddMatch:       nil,
-		},
-		// Test ErrDeleteLike
-		{
-			likes:             []uint64{1, 2, 3},
-			errAddReaction:    nil,
-			errGetLikes:       nil,
-			errDeleteReaction: errors.New(""),
-			errAddMatch:       nil,
-		},
-		// Test ErrAddMatch
-		{
-			likes:             []uint64{1, 2, 3},
-			errAddReaction:    nil,
-			errGetLikes:       nil,
-			errDeleteReaction: nil,
-			errAddMatch:       errors.New(""),
-		},
-	}
+// 	type MockResultCase struct {
+// 		likes             []uint64
+// 		errAddReaction    error
+// 		errGetLikes       error
+// 		errDeleteReaction error
+// 		errAddMatch       error
+// 	}
+// 	MockResultCases := []MockResultCase{
+// 		// Test OK and Match
+// 		{
+// 			likes:             []uint64{1, 2, 3},
+// 			errAddReaction:    nil,
+// 			errGetLikes:       nil,
+// 			errDeleteReaction: nil,
+// 			errAddMatch:       nil,
+// 		},
+// 		// Test OK and no Match
+// 		{
+// 			likes:             []uint64{1, 2, 3},
+// 			errAddReaction:    nil,
+// 			errGetLikes:       nil,
+// 			errDeleteReaction: nil,
+// 			errAddMatch:       nil,
+// 		},
+// 		// Test OK and no Match
+// 		{
+// 			likes:             []uint64{1, 2, 3},
+// 			errAddReaction:    nil,
+// 			errGetLikes:       nil,
+// 			errDeleteReaction: nil,
+// 			errAddMatch:       nil,
+// 		},
+// 		// Test ErrorNotFound
+// 		{
+// 			likes:             []uint64{},
+// 			errAddReaction:    nil,
+// 			errGetLikes:       nil,
+// 			errDeleteReaction: nil,
+// 			errAddMatch:       nil,
+// 		},
+// 		// Test ErrContextNilError
+// 		{
+// 			likes:             []uint64{},
+// 			errAddReaction:    nil,
+// 			errGetLikes:       nil,
+// 			errDeleteReaction: nil,
+// 			errAddMatch:       nil,
+// 		},
+// 		// Test ErrAddReaction
+// 		{
+// 			likes:             []uint64{},
+// 			errAddReaction:    errors.New(""),
+// 			errGetLikes:       nil,
+// 			errDeleteReaction: nil,
+// 			errAddMatch:       nil,
+// 		},
+// 		// Test ErrGetLikes
+// 		{
+// 			likes:             []uint64{},
+// 			errAddReaction:    nil,
+// 			errGetLikes:       errors.New(""),
+// 			errDeleteReaction: nil,
+// 			errAddMatch:       nil,
+// 		},
+// 		// Test ErrDeleteLike
+// 		{
+// 			likes:             []uint64{1, 2, 3},
+// 			errAddReaction:    nil,
+// 			errGetLikes:       nil,
+// 			errDeleteReaction: errors.New(""),
+// 			errAddMatch:       nil,
+// 		},
+// 		// Test ErrAddMatch
+// 		{
+// 			likes:             []uint64{1, 2, 3},
+// 			errAddReaction:    nil,
+// 			errGetLikes:       nil,
+// 			errDeleteReaction: nil,
+// 			errAddMatch:       errors.New(""),
+// 		},
+// 	}
 
-	for i, testCase := range testCases {
-		message := fmt.Sprintf("test case number: %d", i)
+// 	for i, testCase := range testCases {
+// 		message := fmt.Sprintf("test case number: %d", i)
 
-		r, err := http.NewRequest(http.MethodGet, "test", nil)
-		assert.NoError(t, err)
-		if testCase.user.ID != 2 {
-			r = r.WithContext(context.WithValue(r.Context(), configs.ContextUser, testCase.user))
-		}
+// 		r, err := http.NewRequest(http.MethodGet, "test", nil)
+// 		assert.NoError(t, err)
+// 		if testCase.user.ID != 2 {
+// 			r = r.WithContext(context.WithValue(r.Context(), configs.ContextUser, testCase.user))
+// 		}
 
-		mockUserRepository := new(userMocks.UserRepository)
-		mockUserRepository.On("AddReaction",
-			mock.AnythingOfType("*context.timerCtx"),
-			mock.AnythingOfType("uint64"),
-			mock.AnythingOfType("uint64"),
-			mock.AnythingOfType("uint64")).Return(MockResultCases[i].errAddReaction)
-		mockUserRepository.On("GetLikes",
-			mock.AnythingOfType("*context.timerCtx"),
-			mock.AnythingOfType("uint64")).Return(MockResultCases[i].likes, MockResultCases[i].errGetLikes)
-		mockUserRepository.On("DeleteReaction",
-			mock.AnythingOfType("*context.timerCtx"),
-			mock.AnythingOfType("uint64"),
-			mock.AnythingOfType("uint64")).Return(MockResultCases[i].errDeleteReaction)
-		mockUserRepository.On("AddMatch",
-			mock.AnythingOfType("*context.timerCtx"),
-			mock.AnythingOfType("uint64"),
-			mock.AnythingOfType("uint64")).Return(MockResultCases[i].errAddMatch)
-		mockFileRepository := new(fileMocks.FileRepository)
+// 		mockUserRepository := new(userMocks.UserRepository)
+// 		mockUserRepository.On("AddReaction",
+// 			mock.AnythingOfType("*context.timerCtx"),
+// 			mock.AnythingOfType("uint64"),
+// 			mock.AnythingOfType("uint64"),
+// 			mock.AnythingOfType("uint64")).Return(MockResultCases[i].errAddReaction)
+// 		mockUserRepository.On("GetLikes",
+// 			mock.AnythingOfType("*context.timerCtx"),
+// 			mock.AnythingOfType("uint64")).Return(MockResultCases[i].likes, MockResultCases[i].errGetLikes)
+// 		mockUserRepository.On("DeleteReaction",
+// 			mock.AnythingOfType("*context.timerCtx"),
+// 			mock.AnythingOfType("uint64"),
+// 			mock.AnythingOfType("uint64")).Return(MockResultCases[i].errDeleteReaction)
+// 		mockUserRepository.On("AddMatch",
+// 			mock.AnythingOfType("*context.timerCtx"),
+// 			mock.AnythingOfType("uint64"),
+// 			mock.AnythingOfType("uint64")).Return(MockResultCases[i].errAddMatch)
+// 		mockFileRepository := new(fileMocks.FileRepository)
 
-		testUserUsecase := usecase.NewUserUsecase(mockUserRepository, mockFileRepository, time.Second*2)
-		match, status := testUserUsecase.Reaction(r.Context(), testCase.reactionData)
+// 		testUserUsecase := usecase.NewUserUsecase(mockUserRepository, mockFileRepository, time.Second*2)
+// 		match, status := testUserUsecase.Reaction(r.Context(), testCase.reactionData)
 
-		assert.Equal(t, testCase.err, status, message)
-		reflect.DeepEqual(testCase.match, match)
+// 		assert.Equal(t, testCase.err, status, message)
+// 		reflect.DeepEqual(testCase.match, match)
 
-	}
-}
+// 	}
+// }
 
 func TestUserUsecase_UsersMatchesWithSearching(t *testing.T) {
 	type TestCase struct {
