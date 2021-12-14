@@ -61,7 +61,7 @@ jobs:
      
 
   test:
-    needs: build-go
+    needs: build-docker
     runs-on: ubuntu-latest
     
     steps:
@@ -171,6 +171,8 @@ jobs:
           key: ${{ secrets.DEPLOYMENT_KEY }}
           script: cd ~/../back &&
             git pull origin dev &&
+            echo ${{ secrets.SSL_KEY }} > star.monkeys.team.key &&
+            echo ${{ secrets.SSL_CRT }} > star.monkeys.team.crt &&
             sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/drip_tarantool:${{github.sha}} &&
             sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/main_service:${{github.sha}} &&
             sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/chat_service:${{github.sha}} &&
