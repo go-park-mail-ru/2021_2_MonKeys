@@ -22,6 +22,8 @@ services:
     image: chat_service
     ports:
       - "8001:8001"
+    volumes:
+      - $PWD/media:/dripapp/media
     depends_on:
       - tarantool
       - postgres
@@ -33,6 +35,8 @@ services:
     ports:
       - "8002:8002"
       - "8003:8003"
+    volumes:
+      - $PWD/media:/dripapp/media
     depends_on:
       - tarantool
       - postgres
