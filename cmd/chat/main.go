@@ -76,7 +76,6 @@ func main() {
 
 
 	mode:= os.Getenv("DRIPAPP")
-	log.Printf(mode);
 	if mode=="LOCAL" {
 		log.Fatal(srv.ListenAndServe())
 	} else if mode=="DEPLOY" {
