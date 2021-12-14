@@ -6,6 +6,7 @@ import (
 	"time"
 )
 
+//easyjson:json
 type User struct {
 	ID           uint64   `json:"id,omitempty"`
 	Email        string   `json:"email,omitempty"`
@@ -22,6 +23,10 @@ type User struct {
 	Tags         []string `json:"tags,omitempty"`
 	ReportStatus string   `json:"reportStatus,omitempty"`
 	Payment      bool     `json:"payment,omitempty"`
+}
+
+type Users struct {
+	Users []User
 }
 
 const (

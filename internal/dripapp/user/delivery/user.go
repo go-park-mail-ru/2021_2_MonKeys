@@ -104,7 +104,10 @@ func (h *UserHandler) NextUserHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	responses.SendData(w, nextUser)
+	nextUserJSON := models.Users{
+		Users: nextUser,
+	}
+	responses.SendData(w, nextUserJSON)
 }
 
 func (h *UserHandler) GetAllTags(w http.ResponseWriter, r *http.Request) {

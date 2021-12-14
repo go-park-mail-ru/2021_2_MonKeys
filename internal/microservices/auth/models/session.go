@@ -9,6 +9,7 @@ import (
 	"time"
 )
 
+//easyjson:json
 type Session struct {
 	Cookie string
 	UserID uint64

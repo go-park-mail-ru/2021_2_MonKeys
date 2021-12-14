@@ -44,7 +44,11 @@ func (h *ChatHandler) GetChat(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	responses.SendData(w, mses)
+	msesJSON := models.Messages{
+		Messages: mses,
+	}
+
+	responses.SendData(w, msesJSON)
 }
 
 func (h *ChatHandler) GetChats(w http.ResponseWriter, r *http.Request) {
@@ -57,7 +61,11 @@ func (h *ChatHandler) GetChats(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	responses.SendData(w, chats)
+	chatsJSON := models.Chats{
+		Chats: chats,
+	}
+
+	responses.SendData(w, chatsJSON)
 }
 
 func (h *ChatHandler) DeleteChat(w http.ResponseWriter, r *http.Request) {
