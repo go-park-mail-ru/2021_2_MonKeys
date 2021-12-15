@@ -164,7 +164,7 @@ jobs:
           # Required recipients' addresses:
           to: obiwan@example.com,yoda@example.com
           # Required sender full name (address can be skipped):
-          from: MonKeys Actions # <user@example.com>
+          from: <monkeysorg@mail.ru>
       
 
   deploy:
