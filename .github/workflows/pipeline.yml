@@ -29,6 +29,7 @@ jobs:
 
       - name: Build
         run: cd cmd/dripapp && go build
+      
   
   build-docker:
     
@@ -198,3 +199,12 @@ jobs:
             sudo docker rm -vf $(sudo docker ps -a -q) || true &&
             sudo docker system prune -f -a --volumes &&
             sudo make redeploy 
+      
+      - name: send telegram message on push
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_TO }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          message: |
+            Backend redeployed on https://drip.monkeys.team
+            Deploy job: https://github.com/go-park-mail-ru/2021_2_MonKeys/runs/${{github.run_id}}
