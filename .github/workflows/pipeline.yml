@@ -83,8 +83,8 @@ jobs:
       - name: Go mod tidy
         run: go mod tidy
 
-      - name: Build
-        run: cd cmd/dripapp && go build
+      # - name: Build
+      #   run: cd cmd/dripapp && go build
 
       - name: Test
         run: make test
@@ -108,8 +108,8 @@ jobs:
       - name: Go mod tidy
         run: go mod tidy
 
-      - name: Build
-        run: cd cmd/dripapp && go build
+      # - name: Build
+      #   run: cd cmd/dripapp && go build
 
       - name: Install GolangCI-Lint
         run: go get github.com/golangci/golangci-lint/cmd/golangci-lint@v1.42.1
@@ -136,8 +136,8 @@ jobs:
       - name: Go mod tidy
         run: go mod tidy
 
-      - name: Build
-        run: cd cmd/dripapp && go build
+      # - name: Build
+      #   run: cd cmd/dripapp && go build
 
       - name: Test
         run: make test
@@ -148,29 +148,29 @@ jobs:
       - name: Run tests w/ coverage
         run: make test-coverage
         
-  alert: 
-    runs-on: ubuntu-latest
-    if:
-      contains('
-        refs/heads/dev
-      ', github.ref)
-    steps:
-      - name: send telegram message on push
-        uses: appleboy/telegram-action@master
-        with:
-          to: ${{ secrets.TELEGRAM_TO }}
-          token: ${{ secrets.TELEGRAM_TOKEN }}
-          message: |
-            ${{ github.actor }} created commit:
-            Commit message: ${{ github.event.commits[0].message }}
+  # alert: 
+  #   runs-on: ubuntu-latest
+  #   if:
+  #     contains('
+  #       refs/heads/dev
+  #     ', github.ref)
+  #   steps:
+  #     - name: send telegram message on push
+  #       uses: appleboy/telegram-action@master
+  #       with:
+  #         to: ${{ secrets.TELEGRAM_TO }}
+  #         token: ${{ secrets.TELEGRAM_TOKEN }}
+  #         message: |
+  #           ${{ github.actor }} created commit:
+  #           Commit message: ${{ github.event.commits[0].message }}
             
-            Repository: ${{ github.repository }}
+  #           Repository: ${{ github.repository }}
             
-            GitHub checks: https://github.com/go-park-mail-ru/2021_2_MonKeys/commit/${{github.sha}}/checks
+  #           GitHub checks: https://github.com/go-park-mail-ru/2021_2_MonKeys/commit/${{github.sha}}/checks
       
 
   deploy:
-    needs: [test, build-docker]
+    # needs: [test, build-docker]
 
     runs-on: ubuntu-latest
     if:
@@ -197,26 +197,22 @@ jobs:
             git pull origin dev &&
             echo "${{ secrets.SSL_KEY }}" > star.monkeys.team.key &&
             echo "${{ secrets.SSL_CRT }}" > star.monkeys.team.crt &&
-            sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/drip_tarantool:${{github.sha}} &&
-            sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/main_service:${{github.sha}} &&
-            sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/chat_service:${{github.sha}} &&
-            sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/auth_service:${{github.sha}} &&
             sudo su &&
             sudo docker rm -vf $(sudo docker ps -a -q) || true &&
             sudo docker system prune -f -a --volumes &&
             sudo make redeploy 
       
-      - name: send telegram message on push
-        uses: appleboy/telegram-action@master
-        with:
-          to: ${{ secrets.TELEGRAM_TO }}
-          token: ${{ secrets.TELEGRAM_TOKEN }}
-          message: |
-            Commit message: ${{ github.event.commits[0].message }}
+      # - name: send telegram message on push
+      #   uses: appleboy/telegram-action@master
+      #   with:
+      #     to: ${{ secrets.TELEGRAM_TO }}
+      #     token: ${{ secrets.TELEGRAM_TOKEN }}
+      #     message: |
+      #       Commit message: ${{ github.event.commits[0].message }}
             
-            Repository: ${{ github.repository }}
-            Continious deployment of ${{ github.event.commits[0].message }} ended
-            GitHub checks: https://github.com/go-park-mail-ru/2021_2_MonKeys/commit/${{github.sha}}/checks
-            Deploy link: https://drip.monkeys.team
-          disable_web_page_preview: true
+      #       Repository: ${{ github.repository }}
+      #       Continious deployment of ${{ github.event.commits[0].message }} ended
+      #       GitHub checks: https://github.com/go-park-mail-ru/2021_2_MonKeys/commit/${{github.sha}}/checks
+      #       Deploy link: https://drip.monkeys.team
+      #     disable_web_page_preview: true
 
