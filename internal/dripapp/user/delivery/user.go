@@ -231,28 +231,6 @@ func (h *UserHandler) AddReport(w http.ResponseWriter, r *http.Request) {
 	responses.SendOK(w)
 }
 
-// func (h *UserHandler) UpdatePayment(w http.ResponseWriter, r *http.Request) {
-// 	paymentId, err := strconv.Atoi(mux.Vars(r)["id"])
-// 	if err != nil {
-// 		responses.SendError(w, models.HTTPError{
-// 			Code:    http.StatusNotFound,
-// 			Message: err,
-// 		}, h.Logger.ErrorLogging)
-// 		return
-// 	}
-
-// 	err = h.UserUCase.UpdatePayment(r.Context(), uint64(paymentId))
-// 	if err != nil {
-// 		responses.SendError(w, models.HTTPError{
-// 			Code:    http.StatusNotFound,
-// 			Message: err,
-// 		}, h.Logger.ErrorLogging)
-// 		return
-// 	}
-
-// 	responses.SendOK(w)
-// }
-
 func (h *UserHandler) CreatePayment(w http.ResponseWriter, r *http.Request) {
 	var paymentData models.Payment
 	err := responses.ReadJSON(r, &paymentData)
