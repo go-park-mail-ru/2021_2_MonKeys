@@ -177,7 +177,7 @@ jobs:
             sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/main_service:${{github.sha}} &&
             sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/chat_service:${{github.sha}} &&
             sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/auth_service:${{github.sha}} &&
-            sudo su
+            sudo su &&
             sudo docker rm -vf $(sudo docker ps -a -q) || true &&
-            sudo docker system prune -f -a --volumes
-            sudo make redeploy
+            sudo docker system prune -f -a --volumes &&
+            sudo make redeploy 
