@@ -42,7 +42,7 @@ func NewUserUsecase(
 		UserRepo:       ur,
 		File:           fileManager,
 		contextTimeout: timeout,
-		hub: hub,
+		hub:            hub,
 	}
 }
 
@@ -510,7 +510,6 @@ func (h *userUsecase) CreatePayment(c context.Context, newPayment models.Payment
 
 	var curRedirect models.RedirectUrl
 	curRedirect.URL = yooKassaResponse.Confirmation.ConfirmationUrl
-	fmt.Println(yooKassaResponse)
 
 	err = h.UserRepo.CreatePayment(ctx, yooKassaResponse.Id, yooKassaResponse.Status, yooKassaResponse.Amount.Value+yooKassaResponse.Amount.Currency, currentUser.ID)
 	if err != nil {
