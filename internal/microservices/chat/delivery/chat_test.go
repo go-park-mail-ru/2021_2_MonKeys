@@ -3,6 +3,7 @@ package delivery
 import (
 	"context"
 	"dripapp/configs"
+	_models "dripapp/internal/dripapp/models"
 	_authClient "dripapp/internal/microservices/auth/delivery/grpc/client"
 	"dripapp/internal/microservices/chat/mocks"
 	"dripapp/internal/microservices/chat/models"
@@ -89,6 +90,13 @@ func CheckResponse(t *testing.T, w *httptest.ResponseRecorder, caseNum int, test
 		t.Errorf("TestCase [%d]:\nwrongCase Response: \ngot %s\nexpected %s",
 			caseNum, w.Body.String(), testCase.BodyResp)
 	}
+}
+
+func CreateRequest(method, target string, body io.Reader) (r *http.Request) {
+	r = httptest.NewRequest(method, target, body)
+	r = r.WithContext(context.WithValue(r.Context(), configs.ContextUser, _models.User{}))
+
+	return
 }
 
 func TestSetRouting(t *testing.T) {
@@ -188,6 +196,62 @@ func TestGetChats(t *testing.T) {
 		w := httptest.NewRecorder()
 
 		chatHandler.GetChats(w, r)
+
+		CheckResponse(t, w, caseNum, item)
+	}
+}
+
+func TestDeleteChat(t *testing.T) {
+	t.Parallel()
+
+	mockChat := &mocks.ChatUseCase{}
+
+	chatHandler := &ChatHandler{
+		Chat:   mockChat,
+		Logger: logger.DripLogger,
+	}
+
+	cases := []TestCase{
+		{
+			URL: "1",
+			MockChat: []interface{}{
+				nil,
+			},
+			StatusCode: http.StatusOK,
+			BodyResp:   `{"status":200,"body":null}`,
+		},
+		{
+			URL: "wrongURL",
+			MockChat: []interface{}{
+				nil,
+			},
+			StatusCode: http.StatusOK,
+			BodyResp:   `{"status":404,"body":null}`,
+		},
+		{
+			URL: "1",
+			MockChat: []interface{}{
+				errors.New(""),
+			},
+			StatusCode: http.StatusOK,
+			BodyResp:   `{"status":404,"body":null}`,
+		},
+	}
+
+	for caseNum, item := range cases {
+		r := CreateRequest("DELETE", "/api/v1/chat/"+item.URL, nil)
+		vars := map[string]string{
+			"id": item.URL,
+		}
+		r = mux.SetURLVars(r, vars)
+		w := httptest.NewRecorder()
+
+		mockChat.ExpectedCalls = nil
+		mockChat.On("DeleteChat",
+			r.Context(),
+			mock.AnythingOfType("uint64")).Return(item.MockChat...)
+
+		chatHandler.DeleteChat(w, r)
 
 		CheckResponse(t, w, caseNum, item)
 	}

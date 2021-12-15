@@ -61,7 +61,7 @@ build:
 	docker build -t chat_service -f ${DOCKER_DIR}/chat_service.Dockerfile .
 	docker build -t auth_service -f ${DOCKER_DIR}/auth_service.Dockerfile .
 
-	
+
 ## deploy-run: Deploy run app on background
 deploy-run:
 	sudo docker-compose -f prod.yml up --build --no-deps -d
