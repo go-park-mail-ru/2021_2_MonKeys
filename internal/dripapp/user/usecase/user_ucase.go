@@ -36,11 +36,13 @@ type userUsecase struct {
 func NewUserUsecase(
 	ur models.UserRepository,
 	fileManager models.FileRepository,
-	timeout time.Duration) models.UserUsecase {
+	timeout time.Duration,
+	hub *models.Hub) models.UserUsecase {
 	return &userUsecase{
 		UserRepo:       ur,
 		File:           fileManager,
 		contextTimeout: timeout,
+		hub: hub,
 	}
 }
 
@@ -311,8 +313,11 @@ func (h *userUsecase) Reaction(c context.Context, reactionData models.UserReacti
 	}
 
 	// notifications
+	fmt.Println(h.hub.GetClient(reactionData.Id))
 	if currMath.Match {
 		client, err := h.hub.GetClient(reactionData.Id)
+// класс, оповестили только одного клиента/
+// как закрывать ws соединение
 		if err != nil {
 			return currMath, nil
 		}

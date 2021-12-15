@@ -59,7 +59,7 @@ func main() {
 
 	// usecase
 	sessionUCase := _sessionUCase.NewSessionUsecase(sm, timeoutContext)
-	userUCase := _userUCase.NewUserUsecase(userRepo, fileManager, timeoutContext)
+	userUCase := _userUCase.NewUserUsecase(userRepo, fileManager, timeoutContext, nil)
 
 	// new auth server
 	go grpcServer.StartAuthGrpcServer(sm, userRepo, configs.AuthServer.GrpcUrl)
@@ -74,8 +74,8 @@ func main() {
 	// middleware
 	middleware.NewMiddleware(router, sm, logFile, logger.DripLogger)
 
-	
-	
+
+
 
 
 	srv := &http.Server{
@@ -85,7 +85,7 @@ func main() {
 		ReadTimeout:  http.DefaultClient.Timeout,
 	}
 
-	
+
 	mode:= os.Getenv("DRIPAPP")
 
 	if mode=="LOCAL" {
@@ -95,7 +95,7 @@ func main() {
 	} else {
 		log.Printf("NO MODE SPECIFIED.SET ENV VAR DRIPAPP TO \"LOCAL\" or \"DEPLOY\"")
 	}
-	
+
 	fmt.Printf("STD starting server(%s) at %s\n",mode, srv.Addr)
 
 	// for local

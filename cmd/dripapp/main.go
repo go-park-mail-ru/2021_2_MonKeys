@@ -68,6 +68,7 @@ func main() {
 		userRepo,
 		fileManager,
 		timeoutContext,
+		hub,
 	)
 
 	// auth client
