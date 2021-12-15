@@ -44,11 +44,11 @@ clean:
 	docker volume prune
 
 clean-deploy:
-	docker-compose rm postgres
-	docker rm -vf $$(docker ps -a -q) || true
+	sudo docker-compose rm postgres
+	sudo docker rm -vf $$(docker ps -a -q) || true
 	sudo rm -rf media
 	sudo rm -rf logs.log
-	docker volume prune
+	sudo docker volume prune -f
 
 ##################################### deploy
 
@@ -64,7 +64,7 @@ build:
 	
 ## deploy-run: Deploy run app on background
 deploy-run:
-	docker-compose -f prod.yml up --build --no-deps -d
+	sudo docker-compose -f prod.yml up --build --no-deps -d
 
 ## deploy: Deploy build and run app
 deploy: build deploy-run
