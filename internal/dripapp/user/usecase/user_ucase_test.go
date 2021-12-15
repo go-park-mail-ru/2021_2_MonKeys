@@ -5,6 +5,7 @@ import (
 	"context"
 	"dripapp/configs"
 	"dripapp/internal/dripapp/models"
+	"dripapp/internal/pkg/logger"
 	"errors"
 	"fmt"
 	"log"
@@ -1154,245 +1155,337 @@ func TestUserUsecase_UsersMatches(t *testing.T) {
 	}
 }
 
-// func TestUserUsecase_Reaction(t *testing.T) {
-// 	type TestCase struct {
-// 		user         models.User
-// 		reactionData models.UserReaction
-// 		match        models.Match
-// 		err          error
-// 	}
-// 	testCases := []TestCase{
-// 		// Test OK and Match
-// 		{
-// 			user: models.User{
-// 				ID: 0,
-// 			},
-// 			reactionData: models.UserReaction{
-// 				Id:       2,
-// 				Reaction: 1,
-// 			},
-// 			match: models.Match{
-// 				Match: true,
-// 			},
-// 			err: nil,
-// 		},
-// 		// Test OK and no Match
-// 		{
-// 			user: models.User{
-// 				ID: 0,
-// 			},
-// 			reactionData: models.UserReaction{
-// 				Id:       5,
-// 				Reaction: 1,
-// 			},
-// 			match: models.Match{
-// 				Match: false,
-// 			},
-// 			err: nil,
-// 		},
-// 		// Test OK and no Match
-// 		{
-// 			user: models.User{
-// 				ID: 0,
-// 			},
-// 			reactionData: models.UserReaction{
-// 				Id:       2,
-// 				Reaction: 2,
-// 			},
-// 			match: models.Match{
-// 				Match: false,
-// 			},
-// 			err: nil,
-// 		},
-// 		// Test ErrorNotFound
-// 		{
-// 			user: models.User{
-// 				ID: 1,
-// 			},
-// 			reactionData: models.UserReaction{},
-// 			match:        models.Match{},
-// 			err:          nil,
-// 		},
-// 		// Test ErrContextNilError
-// 		{
-// 			user: models.User{
-// 				ID: 2,
-// 			},
-// 			reactionData: models.UserReaction{},
-// 			match:        models.Match{},
-// 			err:          models.ErrContextNilError,
-// 		},
-// 		// Test ErrAddReaction
-// 		{
-// 			user: models.User{
-// 				ID: 0,
-// 			},
-// 			reactionData: models.UserReaction{
-// 				Id:       2,
-// 				Reaction: 1,
-// 			},
-// 			match: models.Match{},
-// 			err:   errors.New(""),
-// 		},
-// 		// Test ErrGetLikes
-// 		{
-// 			user: models.User{
-// 				ID: 0,
-// 			},
-// 			reactionData: models.UserReaction{
-// 				Id:       2,
-// 				Reaction: 1,
-// 			},
-// 			match: models.Match{},
-// 			err:   errors.New(""),
-// 		},
-// 		// Test ErrDeleteLike
-// 		{
-// 			user: models.User{
-// 				ID: 0,
-// 			},
-// 			reactionData: models.UserReaction{
-// 				Id:       2,
-// 				Reaction: 1,
-// 			},
-// 			match: models.Match{},
-// 			err:   errors.New(""),
-// 		},
-// 		// Test ErrAddMatch
-// 		{
-// 			user: models.User{
-// 				ID: 0,
-// 			},
-// 			reactionData: models.UserReaction{
-// 				Id:       2,
-// 				Reaction: 1,
-// 			},
-// 			match: models.Match{},
-// 			err:   errors.New(""),
-// 		},
-// 	}
-//
-// 	type MockResultCase struct {
-// 		likes             []uint64
-// 		errAddReaction    error
-// 		errGetLikes       error
-// 		errDeleteReaction error
-// 		errAddMatch       error
-// 	}
-// 	MockResultCases := []MockResultCase{
-// 		// Test OK and Match
-// 		{
-// 			likes:             []uint64{1, 2, 3},
-// 			errAddReaction:    nil,
-// 			errGetLikes:       nil,
-// 			errDeleteReaction: nil,
-// 			errAddMatch:       nil,
-// 		},
-// 		// Test OK and no Match
-// 		{
-// 			likes:             []uint64{1, 2, 3},
-// 			errAddReaction:    nil,
-// 			errGetLikes:       nil,
-// 			errDeleteReaction: nil,
-// 			errAddMatch:       nil,
-// 		},
-// 		// Test OK and no Match
-// 		{
-// 			likes:             []uint64{1, 2, 3},
-// 			errAddReaction:    nil,
-// 			errGetLikes:       nil,
-// 			errDeleteReaction: nil,
-// 			errAddMatch:       nil,
-// 		},
-// 		// Test ErrorNotFound
-// 		{
-// 			likes:             []uint64{},
-// 			errAddReaction:    nil,
-// 			errGetLikes:       nil,
-// 			errDeleteReaction: nil,
-// 			errAddMatch:       nil,
-// 		},
-// 		// Test ErrContextNilError
-// 		{
-// 			likes:             []uint64{},
-// 			errAddReaction:    nil,
-// 			errGetLikes:       nil,
-// 			errDeleteReaction: nil,
-// 			errAddMatch:       nil,
-// 		},
-// 		// Test ErrAddReaction
-// 		{
-// 			likes:             []uint64{},
-// 			errAddReaction:    errors.New(""),
-// 			errGetLikes:       nil,
-// 			errDeleteReaction: nil,
-// 			errAddMatch:       nil,
-// 		},
-// 		// Test ErrGetLikes
-// 		{
-// 			likes:             []uint64{},
-// 			errAddReaction:    nil,
-// 			errGetLikes:       errors.New(""),
-// 			errDeleteReaction: nil,
-// 			errAddMatch:       nil,
-// 		},
-// 		// Test ErrDeleteLike
-// 		{
-// 			likes:             []uint64{1, 2, 3},
-// 			errAddReaction:    nil,
-// 			errGetLikes:       nil,
-// 			errDeleteReaction: errors.New(""),
-// 			errAddMatch:       nil,
-// 		},
-// 		// Test ErrAddMatch
-// 		{
-// 			likes:             []uint64{1, 2, 3},
-// 			errAddReaction:    nil,
-// 			errGetLikes:       nil,
-// 			errDeleteReaction: nil,
-// 			errAddMatch:       errors.New(""),
-// 		},
-// 	}
-//
-// 	for i, testCase := range testCases {
-// 		message := fmt.Sprintf("test case number: %d", i)
-// 		fmt.Println(1)
-//
-// 		r, err := http.NewRequest(http.MethodGet, "test", nil)
-// 		assert.NoError(t, err)
-// 		if testCase.user.ID != 2 {
-// 			r = r.WithContext(context.WithValue(r.Context(), configs.ContextUser, testCase.user))
-// 		}
-//
-// 		mockUserRepository := new(userMocks.UserRepository)
-// 		mockUserRepository.On("AddReaction",
-// 			mock.AnythingOfType("*context.timerCtx"),
-// 			mock.AnythingOfType("uint64"),
-// 			mock.AnythingOfType("uint64"),
-// 			mock.AnythingOfType("uint64")).Return(MockResultCases[i].errAddReaction)
-// 		mockUserRepository.On("GetLikes",
-// 			mock.AnythingOfType("*context.timerCtx"),
-// 			mock.AnythingOfType("uint64")).Return(MockResultCases[i].likes, MockResultCases[i].errGetLikes)
-// 		mockUserRepository.On("DeleteReaction",
-// 			mock.AnythingOfType("*context.timerCtx"),
-// 			mock.AnythingOfType("uint64"),
-// 			mock.AnythingOfType("uint64")).Return(MockResultCases[i].errDeleteReaction)
-// 		mockUserRepository.On("AddMatch",
-// 			mock.AnythingOfType("*context.timerCtx"),
-// 			mock.AnythingOfType("uint64"),
-// 			mock.AnythingOfType("uint64")).Return(MockResultCases[i].errAddMatch)
-// 		mockFileRepository := new(fileMocks.FileRepository)
-//
-// 		fmt.Println(2)
-// 		testUserUsecase := usecase.NewUserUsecase(mockUserRepository, mockFileRepository, time.Second*2)
-// 		fmt.Println(3)
-// 		match, status := testUserUsecase.Reaction(r.Context(), testCase.reactionData)
-// 		fmt.Println(4)
-//
-// 		assert.Equal(t, testCase.err, status, message)
-// 		reflect.DeepEqual(testCase.match, match)
-// 	}
-// }
+func TestUserUsecase_Reaction(t *testing.T) {
+	type TestCase struct {
+		user         models.User
+		reactionData models.UserReaction
+		match        models.Match
+		err          error
+	}
+	testCases := []TestCase{
+		// Test OK and Match
+		{
+			user: models.User{
+				ID: 0,
+			},
+			reactionData: models.UserReaction{
+				Id:       2,
+				Reaction: 1,
+			},
+			match: models.Match{
+				Match: true,
+			},
+			err: nil,
+		},
+		// Test OK and no Match
+		{
+			user: models.User{
+				ID: 0,
+			},
+			reactionData: models.UserReaction{
+				Id:       5,
+				Reaction: 1,
+			},
+			match: models.Match{
+				Match: false,
+			},
+			err: nil,
+		},
+		// Test OK and no Match
+		{
+			user: models.User{
+				ID: 0,
+			},
+			reactionData: models.UserReaction{
+				Id:       2,
+				Reaction: 2,
+			},
+			match: models.Match{
+				Match: false,
+			},
+			err: nil,
+		},
+		// Test ErrorNotFound
+		{
+			user: models.User{
+				ID: 1,
+			},
+			reactionData: models.UserReaction{},
+			match:        models.Match{},
+			err:          nil,
+		},
+		// Test ErrContextNilError
+		{
+			user: models.User{
+				ID: 2,
+			},
+			reactionData: models.UserReaction{},
+			match:        models.Match{},
+			err:          models.ErrContextNilError,
+		},
+		// Test ErrAddReaction
+		{
+			user: models.User{
+				ID: 0,
+			},
+			reactionData: models.UserReaction{
+				Id:       2,
+				Reaction: 1,
+			},
+			match: models.Match{},
+			err:   errors.New(""),
+		},
+		// Test ErrGetLikes
+		{
+			user: models.User{
+				ID: 0,
+			},
+			reactionData: models.UserReaction{
+				Id:       2,
+				Reaction: 1,
+			},
+			match: models.Match{},
+			err:   errors.New(""),
+		},
+		// Test ErrDeleteLike
+		{
+			user: models.User{
+				ID: 0,
+			},
+			reactionData: models.UserReaction{
+				Id:       2,
+				Reaction: 1,
+			},
+			match: models.Match{},
+			err:   errors.New(""),
+		},
+		// Test ErrAddMatch
+		{
+			user: models.User{
+				ID: 0,
+			},
+			reactionData: models.UserReaction{
+				Id:       2,
+				Reaction: 1,
+			},
+			match: models.Match{},
+			err:   errors.New(""),
+		},
+	}
+
+	type MockResultCase struct {
+		likes             []uint64
+		errAddReaction    error
+		errGetLikes       error
+		errDeleteReaction error
+		errAddMatch       error
+	}
+	MockResultCases := []MockResultCase{
+		// Test OK and Match
+		{
+			likes:             []uint64{1, 2, 3},
+			errAddReaction:    nil,
+			errGetLikes:       nil,
+			errDeleteReaction: nil,
+			errAddMatch:       nil,
+		},
+		// Test OK and no Match
+		{
+			likes:             []uint64{1, 2, 3},
+			errAddReaction:    nil,
+			errGetLikes:       nil,
+			errDeleteReaction: nil,
+			errAddMatch:       nil,
+		},
+		// Test OK and no Match
+		{
+			likes:             []uint64{1, 2, 3},
+			errAddReaction:    nil,
+			errGetLikes:       nil,
+			errDeleteReaction: nil,
+			errAddMatch:       nil,
+		},
+		// Test ErrorNotFound
+		{
+			likes:             []uint64{},
+			errAddReaction:    nil,
+			errGetLikes:       nil,
+			errDeleteReaction: nil,
+			errAddMatch:       nil,
+		},
+		// Test ErrContextNilError
+		{
+			likes:             []uint64{},
+			errAddReaction:    nil,
+			errGetLikes:       nil,
+			errDeleteReaction: nil,
+			errAddMatch:       nil,
+		},
+		// Test ErrAddReaction
+		{
+			likes:             []uint64{},
+			errAddReaction:    errors.New(""),
+			errGetLikes:       nil,
+			errDeleteReaction: nil,
+			errAddMatch:       nil,
+		},
+		// Test ErrGetLikes
+		{
+			likes:             []uint64{},
+			errAddReaction:    nil,
+			errGetLikes:       errors.New(""),
+			errDeleteReaction: nil,
+			errAddMatch:       nil,
+		},
+		// Test ErrDeleteLike
+		{
+			likes:             []uint64{1, 2, 3},
+			errAddReaction:    nil,
+			errGetLikes:       nil,
+			errDeleteReaction: errors.New(""),
+			errAddMatch:       nil,
+		},
+		// Test ErrAddMatch
+		{
+			likes:             []uint64{1, 2, 3},
+			errAddReaction:    nil,
+			errGetLikes:       nil,
+			errDeleteReaction: nil,
+			errAddMatch:       errors.New(""),
+		},
+	}
+
+	for i, testCase := range testCases {
+		message := fmt.Sprintf("test case number: %d", i)
+		fmt.Println(1)
+
+		r, err := http.NewRequest(http.MethodGet, "test", nil)
+		assert.NoError(t, err)
+		if testCase.user.ID != 2 {
+			r = r.WithContext(context.WithValue(r.Context(), configs.ContextUser, testCase.user))
+		}
+
+		mockUserRepository := new(userMocks.UserRepository)
+		mockUserRepository.On("AddReaction",
+			mock.AnythingOfType("*context.timerCtx"),
+			mock.AnythingOfType("uint64"),
+			mock.AnythingOfType("uint64"),
+			mock.AnythingOfType("uint64")).Return(MockResultCases[i].errAddReaction)
+		mockUserRepository.On("GetLikes",
+			mock.AnythingOfType("*context.timerCtx"),
+			mock.AnythingOfType("uint64")).Return(MockResultCases[i].likes, MockResultCases[i].errGetLikes)
+		mockUserRepository.On("DeleteReaction",
+			mock.AnythingOfType("*context.timerCtx"),
+			mock.AnythingOfType("uint64"),
+			mock.AnythingOfType("uint64")).Return(MockResultCases[i].errDeleteReaction)
+		mockUserRepository.On("AddMatch",
+			mock.AnythingOfType("*context.timerCtx"),
+			mock.AnythingOfType("uint64"),
+			mock.AnythingOfType("uint64")).Return(MockResultCases[i].errAddMatch)
+		mockFileRepository := new(fileMocks.FileRepository)
+
+		fmt.Println(2)
+		hub := models.NewHub()
+		go hub.Run()
+		testUserUsecase := usecase.NewUserUsecase(mockUserRepository, mockFileRepository, time.Second*2, hub)
+		fmt.Println(3)
+		match, status := testUserUsecase.Reaction(r.Context(), testCase.reactionData)
+		fmt.Println(4)
+
+		assert.Equal(t, testCase.err, status, message)
+		reflect.DeepEqual(testCase.match, match)
+	}
+}
+
+type WS interface {
+	ReadJSON(interface{}) error
+	WriteJSON(interface{}) error
+}
+
+type NotificationsWS struct {
+	conn   WS
+	logger logger.Logger
+}
+
+func (m *NotificationsWS) Send(user models.User) error {
+	err := m.conn.WriteJSON(user)
+	if err != nil {
+		m.logger.ErrorLogging(http.StatusInternalServerError, "WriteJSON: "+err.Error())
+	}
+
+	return err
+}
+func TestUserUsecase_ClientHandler(t *testing.T) {
+	type TestCase struct {
+		user         models.User
+		notification models.Notifications
+		err          error
+	}
+	testCases := []TestCase{
+		// Test OK
+		{
+			user: models.User{
+				ID: 1,
+			},
+			notification: &NotificationsWS{
+				// conn:   conn,
+				// logger: h.Logger,
+			},
+			err: nil,
+		},
+		// Test ErrContextNilError
+		{
+			user: models.User{
+				ID: 2,
+			},
+			notification: &NotificationsWS{
+				// conn:   conn,
+				// logger: h.Logger,
+			},
+			err: models.ErrContextNilError,
+		},
+	}
+
+	type MockResultCase struct {
+		isActive             bool
+		errCheckSubscription error
+	}
+	// MockResultCases := []MockResultCase{
+	// 	// Test OK
+	// 	{
+	// 		isActive:             true,
+	// 	},
+	// 	// Test ContextNilError
+	// 	{
+	// 		isActive:             false,
+	// 	},
+	// }
+
+	for i, testCase := range testCases {
+		message := fmt.Sprintf("test case number: %d", i)
+
+		r, err := http.NewRequest(http.MethodGet, "test", nil)
+		assert.NoError(t, err)
+		if testCase.user.ID != 2 {
+			r = r.WithContext(context.WithValue(r.Context(), configs.ContextUser, testCase.user))
+		}
+
+		mockUserRepository := new(userMocks.UserRepository)
+		// mockUserRepository.On("CheckSubscription",
+		// 	mock.AnythingOfType("*context.timerCtx"),
+		// 	mock.AnythingOfType("uint64")).Return(MockResultCases[i].isActive, MockResultCases[i].errCheckSubscription)
+
+		mockFileRepository := new(fileMocks.FileRepository)
+
+		hub := models.NewHub()
+		go hub.Run()
+		testUserUsecase := usecase.NewUserUsecase(mockUserRepository, mockFileRepository, time.Second*2, hub)
+
+		err = testUserUsecase.ClientHandler(r.Context(), testCase.notification)
+
+		assert.Equal(t, testCase.err, err, message)
+	}
+}
 
 func TestUserUsecase_UsersMatchesWithSearching(t *testing.T) {
 	type TestCase struct {
@@ -1998,16 +2091,16 @@ func TestUserUsecase_AddReport(t *testing.T) {
 	}
 }
 
-type PaymentConfig struct {
-	Currency    string
-	ReturnUrl   string
-	YooKassaUrl string
-	AuthToken   string
-}
-
-var Payment PaymentConfig
-
 func TestUserUsecase_CreatePayment(t *testing.T) {
+	type PaymentConfig struct {
+		Currency    string
+		ReturnUrl   string
+		YooKassaUrl string
+		AuthToken   string
+	}
+
+	var Payment PaymentConfig
+
 	type TestCase struct {
 		user     models.User
 		payment  models.Payment
@@ -2055,6 +2148,21 @@ func TestUserUsecase_CreatePayment(t *testing.T) {
 			redirect: models.RedirectUrl{},
 			err:      errors.New(""),
 		},
+		// Test Time Parse Error
+		{
+			user: models.User{},
+			payment: models.Payment{
+				Period: 3,
+				Amount: `"350","}"`,
+			},
+			redirect: models.RedirectUrl{},
+			err: &time.ParseError{
+				Layout:     "2006-01-02T15:04:05.000Z",
+				Value:      "",
+				LayoutElem: "2006",
+				ValueElem:  "",
+				Message:    ""},
+		},
 	}
 
 	type MockResultCase struct {
@@ -2081,6 +2189,11 @@ func TestUserUsecase_CreatePayment(t *testing.T) {
 		{
 			errCreatePayment:      nil,
 			errCreateSubscription: errors.New(""),
+		},
+		// Test Time Parse Error
+		{
+			errCreatePayment:      nil,
+			errCreateSubscription: nil,
 		},
 	}
 
@@ -2109,7 +2222,7 @@ func TestUserUsecase_CreatePayment(t *testing.T) {
 
 		mockFileRepository := new(fileMocks.FileRepository)
 
-		testUserUsecase := usecase.NewUserUsecase(mockUserRepository, mockFileRepository, time.Second*2)
+		testUserUsecase := usecase.NewUserUsecase(mockUserRepository, mockFileRepository, time.Second*2, nil)
 		viper.SetConfigFile("../../../../config.json")
 		err = viper.ReadInConfig()
 		if err != nil {
@@ -2209,7 +2322,7 @@ func TestUserUsecase_UpdatePayment(t *testing.T) {
 
 		mockFileRepository := new(fileMocks.FileRepository)
 
-		testUserUsecase := usecase.NewUserUsecase(mockUserRepository, mockFileRepository, time.Second*2)
+		testUserUsecase := usecase.NewUserUsecase(mockUserRepository, mockFileRepository, time.Second*2, nil)
 
 		err = testUserUsecase.UpdatePayment(r.Context(), testCase.paymentNotification)
 
@@ -2290,7 +2403,7 @@ func TestUserUsecase_CheckSubscription(t *testing.T) {
 
 		mockFileRepository := new(fileMocks.FileRepository)
 
-		testUserUsecase := usecase.NewUserUsecase(mockUserRepository, mockFileRepository, time.Second*2)
+		testUserUsecase := usecase.NewUserUsecase(mockUserRepository, mockFileRepository, time.Second*2, nil)
 
 		isActive, err := testUserUsecase.CheckSubscription(r.Context())
 
