@@ -471,9 +471,9 @@ func (p PostgreUserRepo) UpdateSubscription(ctx context.Context, paymentId strin
 }
 
 func (p PostgreUserRepo) CheckSubscription(ctx context.Context, userId uint64) (bool, error) {
-	var isActive bool
+	isActive := false
 	err := p.Conn.QueryRow(CheckSubscriptionQuery, userId).Scan(&isActive)
-	if err != nil {
+	if err != nil && err != sql.ErrNoRows {
 		return isActive, err
 	}
 
