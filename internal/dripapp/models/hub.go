@@ -1,7 +1,5 @@
 package models
 
-import "errors"
-
 type Hub struct {
 	clients    map[*Client]bool
 	register   chan *Client
@@ -30,12 +28,13 @@ func (h *Hub) Run() {
 	}
 }
 
-func (h Hub) GetClient(userId uint64) (*Client, error) {
+func (h *Hub) NotifyAboutMatchWith(recipientId uint64, user User) {
 	for client := range h.clients {
-		if client.user.ID == userId {
-			return client, nil
+		if client.user.ID == recipientId {
+			err := client.notifications.Send(user)
+			if err != nil {
+				h.unregister <- client
+			}
 		}
 	}
-
-	return &Client{}, errors.New("client not found")
 }

@@ -29,6 +29,7 @@ jobs:
 
       - name: Build
         run: cd cmd/dripapp && go build
+      
   
   build-docker:
     
@@ -144,6 +145,27 @@ jobs:
 
       - name: Run tests w/ coverage
         run: make test-coverage
+        
+  alert: 
+    runs-on: ubuntu-latest
+    if:
+      contains('
+        refs/heads/dev
+      ', github.ref)
+    steps:
+      - name: send telegram message on push
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_TO }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          message: |
+            ${{ github.actor }} created commit:
+            Commit message: ${{ github.event.commits[0].message }}
+            
+            Repository: ${{ github.repository }}
+            
+            GitHub checks: https://github.com/go-park-mail-ru/2021_2_MonKeys/commit/${{github.sha}}/checks
+      
 
   deploy:
     needs: [test, build-docker]
@@ -177,6 +199,22 @@ jobs:
             sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/main_service:${{github.sha}} &&
             sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/chat_service:${{github.sha}} &&
             sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/auth_service:${{github.sha}} &&
-            sudo su
+            sudo su &&
             sudo docker rm -vf $(sudo docker ps -a -q) || true &&
-            sudo make redeploy
+            sudo docker system prune -f -a --volumes &&
+            sudo make redeploy 
+      
+      - name: send telegram message on push
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_TO }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          message: |
+            Commit message: ${{ github.event.commits[0].message }}
+            
+            Repository: ${{ github.repository }}
+            Continious deployment of ${{ github.event.commits[0].message }} ended
+            GitHub checks: https://github.com/go-park-mail-ru/2021_2_MonKeys/commit/${{github.sha}}/checks
+            Deploy link: https://drip.monkeys.team
+          disable_web_page_preview: true
+
