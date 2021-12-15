@@ -1446,21 +1446,6 @@ func TestUserUsecase_ClientHandler(t *testing.T) {
 		},
 	}
 
-	type MockResultCase struct {
-		isActive             bool
-		errCheckSubscription error
-	}
-	// MockResultCases := []MockResultCase{
-	// 	// Test OK
-	// 	{
-	// 		isActive:             true,
-	// 	},
-	// 	// Test ContextNilError
-	// 	{
-	// 		isActive:             false,
-	// 	},
-	// }
-
 	for i, testCase := range testCases {
 		message := fmt.Sprintf("test case number: %d", i)
 
@@ -1471,9 +1456,6 @@ func TestUserUsecase_ClientHandler(t *testing.T) {
 		}
 
 		mockUserRepository := new(userMocks.UserRepository)
-		// mockUserRepository.On("CheckSubscription",
-		// 	mock.AnythingOfType("*context.timerCtx"),
-		// 	mock.AnythingOfType("uint64")).Return(MockResultCases[i].isActive, MockResultCases[i].errCheckSubscription)
 
 		mockFileRepository := new(fileMocks.FileRepository)
 
