@@ -7,6 +7,7 @@ import (
 	"dripapp/internal/dripapp/models"
 	"errors"
 	"fmt"
+	"log"
 	"net/http"
 	"reflect"
 	"testing"
@@ -16,6 +17,7 @@ import (
 	userMocks "dripapp/internal/dripapp/user/mocks"
 	"dripapp/internal/dripapp/user/usecase"
 
+	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
@@ -1269,7 +1271,7 @@ func TestUserUsecase_UsersMatches(t *testing.T) {
 // 			err:   errors.New(""),
 // 		},
 // 	}
-
+//
 // 	type MockResultCase struct {
 // 		likes             []uint64
 // 		errAddReaction    error
@@ -1351,16 +1353,17 @@ func TestUserUsecase_UsersMatches(t *testing.T) {
 // 			errAddMatch:       errors.New(""),
 // 		},
 // 	}
-
+//
 // 	for i, testCase := range testCases {
 // 		message := fmt.Sprintf("test case number: %d", i)
-
+// 		fmt.Println(1)
+//
 // 		r, err := http.NewRequest(http.MethodGet, "test", nil)
 // 		assert.NoError(t, err)
 // 		if testCase.user.ID != 2 {
 // 			r = r.WithContext(context.WithValue(r.Context(), configs.ContextUser, testCase.user))
 // 		}
-
+//
 // 		mockUserRepository := new(userMocks.UserRepository)
 // 		mockUserRepository.On("AddReaction",
 // 			mock.AnythingOfType("*context.timerCtx"),
@@ -1379,13 +1382,15 @@ func TestUserUsecase_UsersMatches(t *testing.T) {
 // 			mock.AnythingOfType("uint64"),
 // 			mock.AnythingOfType("uint64")).Return(MockResultCases[i].errAddMatch)
 // 		mockFileRepository := new(fileMocks.FileRepository)
-
+//
+// 		fmt.Println(2)
 // 		testUserUsecase := usecase.NewUserUsecase(mockUserRepository, mockFileRepository, time.Second*2)
+// 		fmt.Println(3)
 // 		match, status := testUserUsecase.Reaction(r.Context(), testCase.reactionData)
-
+// 		fmt.Println(4)
+//
 // 		assert.Equal(t, testCase.err, status, message)
 // 		reflect.DeepEqual(testCase.match, match)
-
 // 	}
 // }
 
@@ -1990,5 +1995,306 @@ func TestUserUsecase_AddReport(t *testing.T) {
 
 		assert.Equal(t, testCase.err, err, message)
 
+	}
+}
+
+type PaymentConfig struct {
+	Currency    string
+	ReturnUrl   string
+	YooKassaUrl string
+	AuthToken   string
+}
+
+var Payment PaymentConfig
+
+func TestUserUsecase_CreatePayment(t *testing.T) {
+	type TestCase struct {
+		user     models.User
+		payment  models.Payment
+		redirect models.RedirectUrl
+		err      error
+	}
+	testCases := []TestCase{
+		// Test OK
+		{
+			user: models.User{},
+			payment: models.Payment{
+				Period: 3,
+				Amount: "350",
+			},
+			redirect: models.RedirectUrl{
+				URL: "https://drip.monkey.team/",
+			},
+			err: nil,
+		},
+		// Test ErrContextNilError
+		{
+			user: models.User{
+				ID: 2,
+			},
+			payment: models.Payment{},
+			err:     models.ErrContextNilError,
+		},
+		// Test CreatePaymentErr
+		{
+			user: models.User{},
+			payment: models.Payment{
+				Period: 3,
+				Amount: "350",
+			},
+			redirect: models.RedirectUrl{},
+			err:      errors.New(""),
+		},
+		// Test CreateSubscriptionErr
+		{
+			user: models.User{},
+			payment: models.Payment{
+				Period: 3,
+				Amount: "350",
+			},
+			redirect: models.RedirectUrl{},
+			err:      errors.New(""),
+		},
+	}
+
+	type MockResultCase struct {
+		errCreatePayment      error
+		errCreateSubscription error
+	}
+	MockResultCases := []MockResultCase{
+		// Test OK
+		{
+			errCreatePayment:      nil,
+			errCreateSubscription: nil,
+		},
+		// Test ErrContextNilError
+		{
+			errCreatePayment:      nil,
+			errCreateSubscription: nil,
+		},
+		// Test CreatePaymentErr
+		{
+			errCreatePayment:      errors.New(""),
+			errCreateSubscription: nil,
+		},
+		// Test CreateSubscriptionErr
+		{
+			errCreatePayment:      nil,
+			errCreateSubscription: errors.New(""),
+		},
+	}
+
+	for i, testCase := range testCases {
+		message := fmt.Sprintf("test case number: %d", i)
+
+		r, err := http.NewRequest(http.MethodGet, "test", nil)
+		assert.NoError(t, err)
+		if testCase.user.ID != 2 {
+			r = r.WithContext(context.WithValue(r.Context(), configs.ContextUser, testCase.user))
+		}
+
+		mockUserRepository := new(userMocks.UserRepository)
+		mockUserRepository.On("CreatePayment",
+			mock.AnythingOfType("*context.timerCtx"),
+			mock.AnythingOfType("string"),
+			mock.AnythingOfType("string"),
+			mock.AnythingOfType("string"),
+			mock.AnythingOfType("uint64")).Return(MockResultCases[i].errCreatePayment)
+		mockUserRepository.On("CreateSubscription",
+			mock.AnythingOfType("*context.timerCtx"),
+			mock.AnythingOfType("time.Time"),
+			mock.AnythingOfType("time.Time"),
+			mock.AnythingOfType("uint64"),
+			mock.AnythingOfType("string")).Return(MockResultCases[i].errCreateSubscription)
+
+		mockFileRepository := new(fileMocks.FileRepository)
+
+		testUserUsecase := usecase.NewUserUsecase(mockUserRepository, mockFileRepository, time.Second*2)
+		viper.SetConfigFile("../../../../config.json")
+		err = viper.ReadInConfig()
+		if err != nil {
+			log.Fatal(err)
+		}
+		Payment = PaymentConfig{
+			Currency:    viper.GetString(`payment.currency`),
+			ReturnUrl:   viper.GetString(`payment.return_url`),
+			YooKassaUrl: viper.GetString(`payment.yoo_kassa_url`),
+			AuthToken:   viper.GetString(`payment.auth_token`),
+		}
+		configs.Payment = configs.PaymentConfig(Payment)
+		redirect, err := testUserUsecase.CreatePayment(r.Context(), testCase.payment)
+
+		assert.Equal(t, testCase.err, err, message)
+		reflect.DeepEqual(redirect, testCase.redirect)
+	}
+}
+
+func TestUserUsecase_UpdatePayment(t *testing.T) {
+	type TestCase struct {
+		user                models.User
+		paymentNotification models.PaymentNotification
+		err                 error
+	}
+	object := models.ObjectType{
+		Id:     "123",
+		Status: "succeeded",
+	}
+	testCases := []TestCase{
+		// Test OK
+		{
+			user: models.User{},
+			paymentNotification: models.PaymentNotification{
+				Object: object,
+			},
+			err: nil,
+		},
+		// Test UpdatePaymentErr
+		{
+			user: models.User{},
+			paymentNotification: models.PaymentNotification{
+				Object: object,
+			},
+			err: errors.New(""),
+		},
+		// Test UpdateSubscriptionErr
+		{
+			user: models.User{},
+			paymentNotification: models.PaymentNotification{
+				Object: object,
+			},
+			err: errors.New(""),
+		},
+	}
+
+	type MockResultCase struct {
+		errUpdatePayment      error
+		errUpdateSubscription error
+	}
+	MockResultCases := []MockResultCase{
+		// Test OK
+		{
+			errUpdatePayment:      nil,
+			errUpdateSubscription: nil,
+		},
+		// Test UpdatePaymentErr
+		{
+			errUpdatePayment:      errors.New(""),
+			errUpdateSubscription: nil,
+		},
+		// Test UpdateSubscriptionErr
+		{
+			errUpdatePayment:      nil,
+			errUpdateSubscription: errors.New(""),
+		},
+	}
+
+	for i, testCase := range testCases {
+		message := fmt.Sprintf("test case number: %d", i)
+
+		r, err := http.NewRequest(http.MethodGet, "test", nil)
+		assert.NoError(t, err)
+		if testCase.user.ID != 2 {
+			r = r.WithContext(context.WithValue(r.Context(), configs.ContextUser, testCase.user))
+		}
+
+		mockUserRepository := new(userMocks.UserRepository)
+		mockUserRepository.On("UpdatePayment",
+			mock.AnythingOfType("*context.timerCtx"),
+			mock.AnythingOfType("string"),
+			mock.AnythingOfType("string")).Return(MockResultCases[i].errUpdatePayment)
+		mockUserRepository.On("UpdateSubscription",
+			mock.AnythingOfType("*context.timerCtx"),
+			mock.AnythingOfType("string"),
+			mock.AnythingOfType("bool")).Return(MockResultCases[i].errUpdateSubscription)
+
+		mockFileRepository := new(fileMocks.FileRepository)
+
+		testUserUsecase := usecase.NewUserUsecase(mockUserRepository, mockFileRepository, time.Second*2)
+
+		err = testUserUsecase.UpdatePayment(r.Context(), testCase.paymentNotification)
+
+		assert.Equal(t, testCase.err, err, message)
+	}
+}
+
+func TestUserUsecase_CheckSubscription(t *testing.T) {
+	type TestCase struct {
+		user         models.User
+		subscription models.Subscription
+		err          error
+	}
+	testCases := []TestCase{
+		// Test OK
+		{
+			user: models.User{
+				ID: 1,
+			},
+			subscription: models.Subscription{
+				SubscriptionActive: true,
+			},
+			err: nil,
+		},
+		// Test ErrContextNilError
+		{
+			user: models.User{
+				ID: 2,
+			},
+			subscription: models.Subscription{},
+			err:          models.ErrContextNilError,
+		},
+		// Test CreatePaymentErr
+		{
+			user: models.User{
+				ID: 1,
+			},
+			subscription: models.Subscription{},
+			err:          errors.New(""),
+		},
+	}
+
+	type MockResultCase struct {
+		isActive             bool
+		errCheckSubscription error
+	}
+	MockResultCases := []MockResultCase{
+		// Test OK
+		{
+			isActive:             true,
+			errCheckSubscription: nil,
+		},
+		// Test ContextNilError
+		{
+			isActive:             false,
+			errCheckSubscription: nil,
+		},
+		// Test CHeckSubscriptionErr
+		{
+			isActive:             false,
+			errCheckSubscription: errors.New(""),
+		},
+	}
+
+	for i, testCase := range testCases {
+		message := fmt.Sprintf("test case number: %d", i)
+
+		r, err := http.NewRequest(http.MethodGet, "test", nil)
+		assert.NoError(t, err)
+		if testCase.user.ID != 2 {
+			r = r.WithContext(context.WithValue(r.Context(), configs.ContextUser, testCase.user))
+		}
+
+		mockUserRepository := new(userMocks.UserRepository)
+		mockUserRepository.On("CheckSubscription",
+			mock.AnythingOfType("*context.timerCtx"),
+			mock.AnythingOfType("uint64")).Return(MockResultCases[i].isActive, MockResultCases[i].errCheckSubscription)
+
+		mockFileRepository := new(fileMocks.FileRepository)
+
+		testUserUsecase := usecase.NewUserUsecase(mockUserRepository, mockFileRepository, time.Second*2)
+
+		isActive, err := testUserUsecase.CheckSubscription(r.Context())
+
+		assert.Equal(t, testCase.err, err, message)
+		reflect.DeepEqual(isActive, testCase.subscription)
 	}
 }
