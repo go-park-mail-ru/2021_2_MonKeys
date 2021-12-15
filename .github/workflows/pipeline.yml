@@ -197,10 +197,18 @@ jobs:
             git pull origin dev &&
             echo "${{ secrets.SSL_KEY }}" > star.monkeys.team.key &&
             echo "${{ secrets.SSL_CRT }}" > star.monkeys.team.crt &&
-            sudo su &&
+            
+      - name: Executing remote ssh commands
+        uses: appleboy/ssh-action@master
+        with:
+          host: drip.monkeys.team
+          username: root
+          key: ${{ secrets.ROOT_SSH }}
+          script: cd ~/../home/back &&
             sudo docker rm -vf $(sudo docker ps -a -q) || true &&
-            sudo docker system prune -f -a --volumes &&
-            sudo make redeploy 
+            sudo docker system prune -f -a --volumes  && 
+            sudo docker volume prune -f &&
+            sudo make redeploy
       
       # - name: send telegram message on push
       #   uses: appleboy/telegram-action@master
