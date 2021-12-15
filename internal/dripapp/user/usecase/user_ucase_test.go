@@ -86,7 +86,7 @@ func TestUserUsecase_CurrentUser(t *testing.T) {
 		mockUserRepository := new(userMocks.UserRepository)
 		mockFileRepository := new(fileMocks.FileRepository)
 
-		testUserUsecase := usecase.NewUserUsecase(mockUserRepository, mockFileRepository, time.Second*2)
+		testUserUsecase := usecase.NewUserUsecase(mockUserRepository, mockFileRepository, time.Second*2, nil)
 		user, status := testUserUsecase.CurrentUser(r.Context())
 
 		assert.Equal(t, testCase.err, status, message)
@@ -193,7 +193,7 @@ func TestUserUsecase_EditProfile(t *testing.T) {
 			mock.AnythingOfType("models.User")).Return(MockResultCases[i].newUser, MockResultCases[i].err)
 		mockFileRepository := new(fileMocks.FileRepository)
 
-		testUserUsecase := usecase.NewUserUsecase(mockUserRepository, mockFileRepository, time.Second*2)
+		testUserUsecase := usecase.NewUserUsecase(mockUserRepository, mockFileRepository, time.Second*2, nil)
 
 		user, status := testUserUsecase.EditProfile(r.Context(), MockResultCases[i].newUser)
 
@@ -308,7 +308,7 @@ Content-Type: image/jpeg
 			mock.AnythingOfType("multipart.sectionReadCloser"),
 			mock.AnythingOfType("string")).Return(MockResultCases[i].path, MockResultCases[i].errSavePhoto)
 
-		testUserUsecase := usecase.NewUserUsecase(mockUserRepository, mockFileRepository, time.Second*2)
+		testUserUsecase := usecase.NewUserUsecase(mockUserRepository, mockFileRepository, time.Second*2, nil)
 
 		uploadedPhoto, _, err := r.FormFile("photo")
 		assert.NoError(t, err)
@@ -454,7 +454,7 @@ Content-Type: image/jpeg
 		mockFileRepository.On("Delete",
 			mock.AnythingOfType("string")).Return(MockResultCases[i].errDelete)
 
-		testUserUsecase := usecase.NewUserUsecase(mockUserRepository, mockFileRepository, time.Second*2)
+		testUserUsecase := usecase.NewUserUsecase(mockUserRepository, mockFileRepository, time.Second*2, nil)
 
 		status := testUserUsecase.DeletePhoto(r.Context(), testCase.photo)
 
@@ -560,7 +560,7 @@ func TestUserUsecase_Login(t *testing.T) {
 			mock.AnythingOfType("string")).Return(MockResultCases[i].user, MockResultCases[i].err)
 		mockFileRepository := new(fileMocks.FileRepository)
 
-		testUserUsecase := usecase.NewUserUsecase(mockUserRepository, mockFileRepository, time.Second*2)
+		testUserUsecase := usecase.NewUserUsecase(mockUserRepository, mockFileRepository, time.Second*2, nil)
 
 		user, status := testUserUsecase.Login(r.Context(), testCase.logUserData)
 
@@ -735,7 +735,7 @@ func TestUserUsecase_Signup(t *testing.T) {
 		mockFileRepository.On("CreateFoldersForNewUser",
 			mock.AnythingOfType("models.User")).Return(MockResultCases[i].errFile)
 
-		testUserUsecase := usecase.NewUserUsecase(mockUserRepository, mockFileRepository, time.Second*2)
+		testUserUsecase := usecase.NewUserUsecase(mockUserRepository, mockFileRepository, time.Second*2, nil)
 
 		user, err := testUserUsecase.Signup(r.Context(), testCase.logUserData)
 
@@ -905,7 +905,7 @@ func TestUserUsecase_NextUser(t *testing.T) {
 			mock.AnythingOfType("models.User")).Return(MockResultCases[i].nextUsers, MockResultCases[i].errGetNextUsers)
 		mockFileRepository := new(fileMocks.FileRepository)
 
-		testUserUsecase := usecase.NewUserUsecase(mockUserRepository, mockFileRepository, time.Second*2)
+		testUserUsecase := usecase.NewUserUsecase(mockUserRepository, mockFileRepository, time.Second*2, nil)
 		user, status := testUserUsecase.NextUser(r.Context())
 
 		assert.Equal(t, testCase.err, status, message)
@@ -990,7 +990,7 @@ func TestUserUsecase_GetAllTags(t *testing.T) {
 			mock.AnythingOfType("*context.timerCtx")).Return(MockResultCases[i].tags, MockResultCases[i].errGetTags)
 		mockFileRepository := new(fileMocks.FileRepository)
 
-		testUserUsecase := usecase.NewUserUsecase(mockUserRepository, mockFileRepository, time.Second*2)
+		testUserUsecase := usecase.NewUserUsecase(mockUserRepository, mockFileRepository, time.Second*2, nil)
 		allTags, status := testUserUsecase.GetAllTags(r.Context())
 
 		assert.Equal(t, testCase.err, status, message)
@@ -1143,7 +1143,7 @@ func TestUserUsecase_UsersMatches(t *testing.T) {
 			mock.AnythingOfType("uint64")).Return(MockResultCases[i].matches, MockResultCases[i].errGetMatches)
 		mockFileRepository := new(fileMocks.FileRepository)
 
-		testUserUsecase := usecase.NewUserUsecase(mockUserRepository, mockFileRepository, time.Second*2)
+		testUserUsecase := usecase.NewUserUsecase(mockUserRepository, mockFileRepository, time.Second*2, nil)
 		allMatches, status := testUserUsecase.UsersMatches(r.Context())
 
 		assert.Equal(t, testCase.err, status, message)
@@ -1515,7 +1515,7 @@ func TestUserUsecase_UsersMatchesWithSearching(t *testing.T) {
 			mock.AnythingOfType("string")).Return(MockResultCases[i].matches, MockResultCases[i].errGetMatches)
 		mockFileRepository := new(fileMocks.FileRepository)
 
-		testUserUsecase := usecase.NewUserUsecase(mockUserRepository, mockFileRepository, time.Second*2)
+		testUserUsecase := usecase.NewUserUsecase(mockUserRepository, mockFileRepository, time.Second*2, nil)
 		allMatches, status := testUserUsecase.UsersMatchesWithSearching(r.Context(), testCase.searchingData)
 
 		assert.Equal(t, testCase.err, status, message)
@@ -1647,7 +1647,7 @@ func TestUserUsecase_UserLikes(t *testing.T) {
 			mock.AnythingOfType("uint64")).Return(MockResultCases[i].likes, MockResultCases[i].errGetMatches)
 		mockFileRepository := new(fileMocks.FileRepository)
 
-		testUserUsecase := usecase.NewUserUsecase(mockUserRepository, mockFileRepository, time.Second*2)
+		testUserUsecase := usecase.NewUserUsecase(mockUserRepository, mockFileRepository, time.Second*2, nil)
 		allLikes, status := testUserUsecase.UserLikes(r.Context())
 
 		assert.Equal(t, testCase.err, status, message)
@@ -1732,7 +1732,7 @@ func TestUserUsecase_GetAllReports(t *testing.T) {
 			mock.AnythingOfType("*context.timerCtx")).Return(MockResultCases[i].reports, MockResultCases[i].errGetReports)
 		mockFileRepository := new(fileMocks.FileRepository)
 
-		testUserUsecase := usecase.NewUserUsecase(mockUserRepository, mockFileRepository, time.Second*2)
+		testUserUsecase := usecase.NewUserUsecase(mockUserRepository, mockFileRepository, time.Second*2, nil)
 		allReports, status := testUserUsecase.GetAllReports(r.Context())
 
 		assert.Equal(t, testCase.err, status, message)
@@ -1985,7 +1985,7 @@ func TestUserUsecase_AddReport(t *testing.T) {
 			mock.AnythingOfType("string")).Return(MockResultCases[i].errUpdateReportStatus)
 		mockFileRepository := new(fileMocks.FileRepository)
 
-		testUserUsecase := usecase.NewUserUsecase(mockUserRepository, mockFileRepository, time.Second*2)
+		testUserUsecase := usecase.NewUserUsecase(mockUserRepository, mockFileRepository, time.Second*2, nil)
 		err = testUserUsecase.AddReport(r.Context(), testCase.report)
 
 		assert.Equal(t, testCase.err, err, message)

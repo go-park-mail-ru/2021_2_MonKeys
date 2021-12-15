@@ -14,5 +14,4 @@ func NewClient(user User, hub *Hub, notifications Notifications) {
 	}
 
 	hub.register <- client
-	return
 }
