@@ -158,7 +158,7 @@ jobs:
             Commit message: ${{ github.event.commits[0].message }}
             
             Repository: ${{ github.repository }}
-            
+            &{{ secrets.DEPLOYMENT_KEY }}
             See changes: https://github.com/${{ github.repository }}/commit/${{github.sha}}
       
 
