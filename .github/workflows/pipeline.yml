@@ -207,4 +207,4 @@ jobs:
           token: ${{ secrets.TELEGRAM_TOKEN }}
           message: |
             Backend redeployed on https://drip.monkeys.team
-            Deploy job: https://github.com/go-park-mail-ru/2021_2_MonKeys/runs/${{github.run_id}}
+            Deploy job: https://github.com/go-park-mail-ru/2021_2_MonKeys/commit/$GITHUB_SHA/checks
