@@ -313,16 +313,8 @@ func (h *userUsecase) Reaction(c context.Context, reactionData models.UserReacti
 	}
 
 	// notifications
-	fmt.Println(h.hub.GetClient(reactionData.Id))
 	if currMath.Match {
-		client, err := h.hub.GetClient(reactionData.Id)
-// класс, оповестили только одного клиента/
-// как закрывать ws соединение
-		if err != nil {
-			return currMath, nil
-		}
-
-		client.NotifyAboutMatchWith(currentUser)
+		h.hub.NotifyAboutMatchWith(reactionData.Id, currentUser)
 	}
 
 	return currMath, nil
