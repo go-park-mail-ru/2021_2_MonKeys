@@ -2205,7 +2205,7 @@ func TestUserUsecase_CreatePayment(t *testing.T) {
 		mockFileRepository := new(fileMocks.FileRepository)
 
 		testUserUsecase := usecase.NewUserUsecase(mockUserRepository, mockFileRepository, time.Second*2, nil)
-		viper.SetConfigFile("../../../../config.json")
+		viper.SetConfigFile("../../../../prod.json")
 		err = viper.ReadInConfig()
 		if err != nil {
 			log.Fatal(err)
