@@ -79,14 +79,14 @@ var (
 
 	photo = models.Photo{Path: "path"}
 
-	period = "6"
-	amount = "650"
-	url = "https://kassa.ru"
+	period      = "6"
+	amount      = "650"
+	url         = "https://kassa.ru"
 	redirectUrl = models.RedirectUrl{
 		URL: url,
 	}
 
-	paymentID = "13"
+	paymentID     = "13"
 	paymentStatus = "ok"
 
 	subscription = models.Subscription{
@@ -702,7 +702,7 @@ func TestCreatePayment(t *testing.T) {
 			BodyResp:   `{"status":200,"body":{"redirectUrl":"` + url + `"}}`,
 		},
 		{
-			BodyReq:    bytes.NewReader([]byte(`wrong input data`)),
+			BodyReq: bytes.NewReader([]byte(`wrong input data`)),
 			mockUserUseCase: []interface{}{
 				redirectUrl,
 				nil,
@@ -758,7 +758,7 @@ func TestHandlePaymentNotification(t *testing.T) {
 			BodyResp:   `{"status":200,"body":null}`,
 		},
 		{
-			BodyReq:    bytes.NewReader([]byte(`wrong input data`)),
+			BodyReq: bytes.NewReader([]byte(`wrong input data`)),
 			mockUserUseCase: []interface{}{
 				nil,
 			},
