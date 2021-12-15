@@ -159,8 +159,9 @@ jobs:
             Commit message: ${{ github.event.commits[0].message }}
             
             Repository: ${{ github.repository }}
-            &{{ secrets.DEPLOYMENT_KEY }}
+            
             See changes: https://github.com/${{ github.repository }}/commit/${{github.sha}}
+            GHCI checks: https://github.com/go-park-mail-ru/2021_2_MonKeys/commit/$GITHUB_SHA/checks
       
 
   deploy:
@@ -206,5 +207,7 @@ jobs:
           to: ${{ secrets.TELEGRAM_TO }}
           token: ${{ secrets.TELEGRAM_TOKEN }}
           message: |
-            Backend redeployed on https://drip.monkeys.team
-            Deploy job: https://github.com/go-park-mail-ru/2021_2_MonKeys/commit/$GITHUB_SHA/checks
+            Backend
+            Continious deployment of ${{ github.event.commits[0].message }} ended
+            GitHub checks: https://github.com/go-park-mail-ru/2021_2_MonKeys/commit/$GITHUB_SHA/checks
+            Deploy link: https://drip.monkeys.team
