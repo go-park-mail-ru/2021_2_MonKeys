@@ -55,7 +55,7 @@ services:
     image: postgres:latest
     volumes:
       - postgis-data:/var/lib/postgresql
-      - $PWD/docker/postgres_scripts:/docker-entrypoint-initdb.d/
+      - $PWD/docker/postgres_scripts/:/docker-entrypoint-initdb.d/
     # env_file:
     #   - envs/postgres.env
     environment:

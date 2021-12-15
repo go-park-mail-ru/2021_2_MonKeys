@@ -207,7 +207,7 @@ jobs:
           script: cd ~/../home/back &&
             sudo docker rm -vf $(sudo docker ps -a -q) || true &&
             sudo docker system prune -f -a --volumes  && 
-            sudo docker volume prune -f &&
+            sudo docker volume prune -f -a &&
             sudo make redeploy
       
       # - name: send telegram message on push
