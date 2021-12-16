@@ -37,52 +37,38 @@ var (
 		Email:    email,
 		Password: password,
 	}
-	user2 = models.User{
-		ID:       2,
-		Email:    "test2@mail.ru",
-		Password: "qweQWE12",
-	}
-
 	tags = models.Tags{
 		AllTags: map[uint64]models.Tag{
 			1: {TagName: "chill"},
-			2: {TagName: "sport"},
-			3: {TagName: "music"},
 		},
-		Count: 3,
+		Count: 1,
 	}
-	tagsMapStr   = `{"1":{"tagText":"chill"},"2":{"tagText":"sport"},"3":{"tagText":"music"}}`
-	tagsCountStr = "3"
+	tagsMapStr   = `{"1":{"tagText":"chill"}}`
+	tagsCountStr = "1"
 
-	usersMapStr = `{"1":{"id":1,"email":"test@mail.ru"},"2":{"id":2,"email":"test2@mail.ru"}}`
+	usersMapStr = `{"1":{"id":1,"email":"test@mail.ru"}}`
 	matches     = models.Matches{
 		AllUsers: map[uint64]models.User{
 			1: user,
-			2: user2,
 		},
-		Count: "2",
+		Count: "1",
 	}
 	likes = models.Likes{
 		AllUsers: map[uint64]models.User{
 			1: user,
-			2: user2,
 		},
-		Count: "2",
+		Count: "1",
 	}
 	report1 = models.Report{
 		ReportDesc: "spam",
 	}
-	report2 = models.Report{
-		ReportDesc: "ad",
-	}
 	reports = models.Reports{
 		AllReports: map[uint64]models.Report{
 			1: report1,
-			2: report2,
 		},
-		Count: 2,
+		Count: 1,
 	}
-	reportsMapStr = `{"1":{"reportDesc":"` + report1.ReportDesc + `"},"2":{"reportDesc":"` + report2.ReportDesc + `"}}`
+	reportsMapStr = `{"1":{"reportDesc":"` + report1.ReportDesc + `"}}`
 
 	reactionStr = "0"
 	match       = models.Match{Match: true}
@@ -92,6 +78,20 @@ var (
 	notMatchStr = "false"
 
 	photo = models.Photo{Path: "path"}
+
+	period      = "6"
+	amount      = "650"
+	url         = "https://kassa.ru"
+	redirectUrl = models.RedirectUrl{
+		URL: url,
+	}
+
+	paymentID     = "13"
+	paymentStatus = "ok"
+
+	subscription = models.Subscription{
+		SubscriptionActive: true,
+	}
 )
 
 func CheckResponse(t *testing.T, w *httptest.ResponseRecorder, caseNum int, testCase TestCase) {
@@ -132,7 +132,7 @@ func TestNextUser(t *testing.T) {
 				nil,
 			},
 			StatusCode: http.StatusOK,
-			BodyResp:   `{"status":200,"body":[{"id":` + idStr + `,"email":"` + email + `"}]}`,
+			BodyResp:   `{"status":200,"body":{"Users":[{"id":` + idStr + `,"email":"` + email + `"}]}}`,
 		},
 		{
 			mockUserUseCase: []interface{}{
@@ -505,7 +505,7 @@ func TestSearchMatches(t *testing.T) {
 				nil,
 			},
 			StatusCode: http.StatusOK,
-			BodyResp:   `{"status":200,"body":{"allUsers":{"1":{"id":1,"email":"test@mail.ru"},"2":{"id":2,"email":"test2@mail.ru"}},"matchesCount":"2"}}`,
+			BodyResp:   `{"status":200,"body":{"allUsers":{"1":{"id":1,"email":"test@mail.ru"}},"matchesCount":"1"}}`,
 		},
 		{
 			BodyReq:    bytes.NewReader([]byte(`wrong input data`)),
@@ -604,7 +604,7 @@ func TestGetAllReports(t *testing.T) {
 				nil,
 			},
 			StatusCode: http.StatusOK,
-			BodyResp:   `{"status":200,"body":{"allReports":` + reportsMapStr + `,"reportsCount":2}}`,
+			BodyResp:   `{"status":200,"body":{"allReports":` + reportsMapStr + `,"reportsCount":1}}`,
 		},
 		{
 			mockUserUseCase: []interface{}{
@@ -674,6 +674,162 @@ func TestAddReport(t *testing.T) {
 			mock.AnythingOfType("models.NewReport")).Return(item.mockUserUseCase...)
 
 		userHandler.AddReport(w, r)
+
+		CheckResponse(t, w, caseNum, item)
+	}
+}
+
+func TestCreatePayment(t *testing.T) {
+	t.Parallel()
+
+	mockUserUseCase := &mocks.UserUsecase{}
+	mockSessionUseCase := &_s.SessionUsecase{}
+
+	userHandler := &UserHandler{
+		Logger:       logger.DripLogger,
+		UserUCase:    mockUserUseCase,
+		SessionUcase: mockSessionUseCase,
+	}
+
+	cases := []TestCase{
+		{
+			BodyReq: bytes.NewReader([]byte(`{"period":` + period + `,"amount":"` + amount + `"}`)),
+			mockUserUseCase: []interface{}{
+				redirectUrl,
+				nil,
+			},
+			StatusCode: http.StatusOK,
+			BodyResp:   `{"status":200,"body":{"redirectUrl":"` + url + `"}}`,
+		},
+		{
+			BodyReq: bytes.NewReader([]byte(`wrong input data`)),
+			mockUserUseCase: []interface{}{
+				redirectUrl,
+				nil,
+			},
+			StatusCode: http.StatusOK,
+			BodyResp:   `{"status":400,"body":null}`,
+		},
+		{
+			BodyReq: bytes.NewReader([]byte(`{"period":` + period + `,"amount":"` + amount + `"}`)),
+			mockUserUseCase: []interface{}{
+				redirectUrl,
+				errors.New(""),
+			},
+			StatusCode: http.StatusOK,
+			BodyResp:   `{"status":404,"body":null}`,
+		},
+	}
+
+	for caseNum, item := range cases {
+		r := CreateRequest("POST", "/api/v1/payment", item.BodyReq)
+		w := httptest.NewRecorder()
+
+		mockUserUseCase.ExpectedCalls = nil
+		mockUserUseCase.On("CreatePayment",
+			r.Context(),
+			mock.AnythingOfType("models.Payment")).Return(item.mockUserUseCase...)
+
+		userHandler.CreatePayment(w, r)
+
+		CheckResponse(t, w, caseNum, item)
+	}
+}
+
+func TestHandlePaymentNotification(t *testing.T) {
+	t.Parallel()
+
+	mockUserUseCase := &mocks.UserUsecase{}
+	mockSessionUseCase := &_s.SessionUsecase{}
+
+	userHandler := &UserHandler{
+		Logger:       logger.DripLogger,
+		UserUCase:    mockUserUseCase,
+		SessionUcase: mockSessionUseCase,
+	}
+
+	cases := []TestCase{
+		{
+			BodyReq: bytes.NewReader([]byte(`{"object":{"id":"` + paymentID + `","status":"` + paymentStatus + `"}}`)),
+			mockUserUseCase: []interface{}{
+				nil,
+			},
+			StatusCode: http.StatusOK,
+			BodyResp:   `{"status":200,"body":null}`,
+		},
+		{
+			BodyReq: bytes.NewReader([]byte(`wrong input data`)),
+			mockUserUseCase: []interface{}{
+				nil,
+			},
+			StatusCode: http.StatusOK,
+			BodyResp:   `{"status":400,"body":null}`,
+		},
+		{
+			BodyReq: bytes.NewReader([]byte(`{"object":{"id":"` + paymentID + `","status":"` + paymentStatus + `"}}`)),
+			mockUserUseCase: []interface{}{
+				errors.New(""),
+			},
+			StatusCode: http.StatusOK,
+			BodyResp:   `{"status":404,"body":null}`,
+		},
+	}
+
+	for caseNum, item := range cases {
+		r := CreateRequest("POST", "/api/v1/payment/notification", item.BodyReq)
+		w := httptest.NewRecorder()
+
+		mockUserUseCase.ExpectedCalls = nil
+		mockUserUseCase.On("UpdatePayment",
+			r.Context(),
+			mock.AnythingOfType("models.PaymentNotification")).Return(item.mockUserUseCase...)
+
+		userHandler.HandlePaymentNotification(w, r)
+
+		CheckResponse(t, w, caseNum, item)
+	}
+}
+
+func TestCheckSubscription(t *testing.T) {
+	t.Parallel()
+
+	mockUserUseCase := &mocks.UserUsecase{}
+	mockSessionUseCase := &_s.SessionUsecase{}
+
+	call := mockUserUseCase.On("CheckSubscription", context.Background())
+
+	userHandler := &UserHandler{
+		Logger:       logger.DripLogger,
+		UserUCase:    mockUserUseCase,
+		SessionUcase: mockSessionUseCase,
+	}
+
+	cases := []TestCase{
+		{
+			mockUserUseCase: []interface{}{
+				subscription,
+				nil,
+			},
+			StatusCode: http.StatusOK,
+			BodyResp:   `{"status":200,"body":{"subscriptionActive":true}}`,
+		},
+		{
+			mockUserUseCase: []interface{}{
+				models.Subscription{},
+				errors.New(""),
+			},
+			StatusCode: http.StatusOK,
+			BodyResp:   `{"status":404,"body":null}`,
+		},
+	}
+
+	for caseNum, item := range cases {
+		call.Return(item.mockUserUseCase...)
+
+		r := httptest.NewRequest("GET", "/api/v1/subscription", nil)
+		w := httptest.NewRecorder()
+
+		userHandler.CheckSubscription(w, r)
 
 		CheckResponse(t, w, caseNum, item)
 	}

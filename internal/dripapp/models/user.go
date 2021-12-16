@@ -3,8 +3,10 @@ package models
 import (
 	"context"
 	"io"
+	"time"
 )
 
+//easyjson:json
 type User struct {
 	ID           uint64   `json:"id,omitempty"`
 	Email        string   `json:"email,omitempty"`
@@ -20,6 +22,11 @@ type User struct {
 	Imgs         []string `json:"imgs,omitempty"`
 	Tags         []string `json:"tags,omitempty"`
 	ReportStatus string   `json:"reportStatus,omitempty"`
+	Payment      bool     `json:"payment,omitempty"`
+}
+
+type Users struct {
+	Users []User
 }
 
 const (
@@ -91,6 +98,14 @@ type UserReportsCount struct {
 	Count uint64 `json:"userReportsCount"`
 }
 
+type Subscription struct {
+	SubscriptionActive bool `json:"subscriptionActive"`
+}
+
+type Notifications interface {
+	Send(user User) error
+}
+
 // ArticleUsecase represent the article's usecases
 type UserUsecase interface {
 	CurrentUser(c context.Context) (User, error)
@@ -103,10 +118,14 @@ type UserUsecase interface {
 	GetAllTags(c context.Context) (Tags, error)
 	UsersMatches(c context.Context) (Matches, error)
 	Reaction(c context.Context, reactionData UserReaction) (Match, error)
+	ClientHandler(c context.Context, notifications Notifications) error
 	UserLikes(c context.Context) (Likes, error)
 	UsersMatchesWithSearching(c context.Context, searchData Search) (Matches, error)
 	GetAllReports(c context.Context) (Reports, error)
 	AddReport(c context.Context, report NewReport) error
+	UpdatePayment(c context.Context, PaymentNotificationData PaymentNotification) error
+	CreatePayment(c context.Context, newPayment Payment) (RedirectUrl, error)
+	CheckSubscription(c context.Context) (Subscription, error)
 }
 
 // ArticleRepository represent the article's repository contract
@@ -132,4 +151,9 @@ type UserRepository interface {
 	GetReportsWithMaxCount(ctx context.Context, userId uint64) (uint64, error)
 	GetReportDesc(ctx context.Context, reportId uint64) (string, error)
 	UpdateReportStatus(ctx context.Context, userId uint64, reportStatus string) error
+	CreatePayment(ctx context.Context, paymentId string, status string, amount string, userId uint64) error
+	CreateSubscription(ctx context.Context, periodStart time.Time, periodEnd time.Time, userId uint64, paymentId string) error
+	UpdatePayment(ctx context.Context, paymentId string, status string) error
+	UpdateSubscription(ctx context.Context, paymentId string, activeState bool) error
+	CheckSubscription(ctx context.Context, userId uint64) (bool, error)
 }

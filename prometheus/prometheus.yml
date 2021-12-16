@@ -1,17 +1,25 @@
-global:
-  scrape_interval:     1s
-  evaluation_interval: 1s
-
 scrape_configs:
   - job_name: 'main'
+    scheme: https
+    tls_config:
+        insecure_skip_verify: true
     static_configs:
-      - targets: ['2021_2_monkeys_backend-main_service-1:8000']
-
+      - targets: ['api.monkeys.team:8000']
 
   - job_name: 'chat'
+    scheme: https
+    tls_config:
+        insecure_skip_verify: true
     static_configs:
-      - targets: ['2021_2_monkeys_backend-main_service-1:8001']
+      - targets: ['api.monkeys.team:8001']
+
+  - job_name: 'auth'
+    scheme: https
+    tls_config:
+        insecure_skip_verify: true
+    static_configs:
+      - targets: ['api.monkeys.team:8002']
 
   - job_name: 'system'
     static_configs:
-      - targets: ['2021_2_monkeys_backend-node-exporter-1:9100']
+      - targets: ['api.monkeys.team:9100']

@@ -14,6 +14,20 @@ type ChatRepository struct {
 	mock.Mock
 }
 
+// DeleteChat provides a mock function with given fields: ctx, userId, fromId
+func (_m *ChatRepository) DeleteChat(ctx context.Context, userId uint64, fromId uint64) error {
+	ret := _m.Called(ctx, userId, fromId)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, uint64, uint64) error); ok {
+		r0 = rf(ctx, userId, fromId)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // GetChat provides a mock function with given fields: ctx, userId, fromId, lastId
 func (_m *ChatRepository) GetChat(ctx context.Context, userId uint64, fromId uint64, lastId uint64) ([]models.Message, error) {
 	ret := _m.Called(ctx, userId, fromId, lastId)

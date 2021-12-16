@@ -1,5 +1,6 @@
 package models
 
+//easyjson:json
 type Hub struct {
 	clients    map[*ChatClient]bool
 	broadcast  chan Message

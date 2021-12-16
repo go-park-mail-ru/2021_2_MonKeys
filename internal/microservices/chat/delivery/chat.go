@@ -5,6 +5,7 @@ import (
 	"dripapp/internal/microservices/chat/models"
 	"dripapp/internal/pkg/logger"
 	"dripapp/internal/pkg/responses"
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -43,7 +44,11 @@ func (h *ChatHandler) GetChat(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	responses.SendData(w, mses)
+	msesJSON := models.Messages{
+		Messages: mses,
+	}
+
+	responses.SendData(w, msesJSON)
 }
 
 func (h *ChatHandler) GetChats(w http.ResponseWriter, r *http.Request) {
@@ -56,5 +61,32 @@ func (h *ChatHandler) GetChats(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	responses.SendData(w, chats)
+	chatsJSON := models.Chats{
+		Chats: chats,
+	}
+
+	responses.SendData(w, chatsJSON)
+}
+
+func (h *ChatHandler) DeleteChat(w http.ResponseWriter, r *http.Request) {
+	fromId, err := strconv.Atoi(mux.Vars(r)["id"])
+	if err != nil {
+		responses.SendError(w, _userModels.HTTPError{
+			Code:    http.StatusNotFound,
+			Message: err,
+		}, h.Logger.ErrorLogging)
+		return
+	}
+	fmt.Println(fromId)
+
+	err = h.Chat.DeleteChat(r.Context(), uint64(fromId))
+	if err != nil {
+		responses.SendError(w, _userModels.HTTPError{
+			Code:    http.StatusNotFound,
+			Message: err,
+		}, h.Logger.ErrorLogging)
+		return
+	}
+
+	responses.SendOK(w)
 }

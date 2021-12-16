@@ -51,6 +51,62 @@ func (_m *UserUsecase) AddReport(c context.Context, report models.NewReport) err
 	return r0
 }
 
+// CheckSubscription provides a mock function with given fields: c
+func (_m *UserUsecase) CheckSubscription(c context.Context) (models.Subscription, error) {
+	ret := _m.Called(c)
+
+	var r0 models.Subscription
+	if rf, ok := ret.Get(0).(func(context.Context) models.Subscription); ok {
+		r0 = rf(c)
+	} else {
+		r0 = ret.Get(0).(models.Subscription)
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context) error); ok {
+		r1 = rf(c)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ClientHandler provides a mock function with given fields: c, notifications
+func (_m *UserUsecase) ClientHandler(c context.Context, notifications models.Notifications) error {
+	ret := _m.Called(c, notifications)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, models.Notifications) error); ok {
+		r0 = rf(c, notifications)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// CreatePayment provides a mock function with given fields: c, newPayment
+func (_m *UserUsecase) CreatePayment(c context.Context, newPayment models.Payment) (models.RedirectUrl, error) {
+	ret := _m.Called(c, newPayment)
+
+	var r0 models.RedirectUrl
+	if rf, ok := ret.Get(0).(func(context.Context, models.Payment) models.RedirectUrl); ok {
+		r0 = rf(c, newPayment)
+	} else {
+		r0 = ret.Get(0).(models.RedirectUrl)
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, models.Payment) error); ok {
+		r1 = rf(c, newPayment)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // CurrentUser provides a mock function with given fields: c
 func (_m *UserUsecase) CurrentUser(c context.Context) (models.User, error) {
 	ret := _m.Called(c)
@@ -233,6 +289,20 @@ func (_m *UserUsecase) Signup(c context.Context, logUserData models.LoginUser) (
 	}
 
 	return r0, r1
+}
+
+// UpdatePayment provides a mock function with given fields: c, PaymentNotificationData
+func (_m *UserUsecase) UpdatePayment(c context.Context, PaymentNotificationData models.PaymentNotification) error {
+	ret := _m.Called(c, PaymentNotificationData)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, models.PaymentNotification) error); ok {
+		r0 = rf(c, PaymentNotificationData)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
 }
 
 // UserLikes provides a mock function with given fields: c

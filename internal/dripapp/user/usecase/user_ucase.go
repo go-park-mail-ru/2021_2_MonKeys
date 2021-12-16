@@ -1,15 +1,28 @@
 package usecase
 
 import (
+	"bytes"
 	"context"
 	"dripapp/configs"
 	"dripapp/internal/dripapp/models"
 	_sessionModels "dripapp/internal/microservices/auth/models"
 	"dripapp/internal/pkg/hasher"
+	"encoding/json"
 	"fmt"
 	"io"
+	"io/ioutil"
+	"net/http"
 	"strconv"
 	"time"
+
+	"github.com/google/uuid"
+)
+
+const (
+	FAKE       = "ФЭЙК"
+	AGGRESSION = "АГРЕССИЯ"
+	SCAM       = "СКАМ"
+	UNDERAGE   = "НЕСОВЕРШЕННОЛЕТНИЙ"
 )
 
 type userUsecase struct {
@@ -17,16 +30,19 @@ type userUsecase struct {
 	Session        _sessionModels.SessionRepository
 	File           models.FileRepository
 	contextTimeout time.Duration
+	hub            *models.Hub
 }
 
 func NewUserUsecase(
 	ur models.UserRepository,
 	fileManager models.FileRepository,
-	timeout time.Duration) models.UserUsecase {
+	timeout time.Duration,
+	hub *models.Hub) models.UserUsecase {
 	return &userUsecase{
 		UserRepo:       ur,
 		File:           fileManager,
 		contextTimeout: timeout,
+		hub:            hub,
 	}
 }
 
@@ -296,7 +312,26 @@ func (h *userUsecase) Reaction(c context.Context, reactionData models.UserReacti
 		}
 	}
 
+	// notifications
+	if currMath.Match {
+		h.hub.NotifyAboutMatchWith(reactionData.Id, currentUser)
+	}
+
 	return currMath, nil
+}
+
+func (h *userUsecase) ClientHandler(c context.Context, notifications models.Notifications) error {
+	ctx, cancel := context.WithTimeout(c, h.contextTimeout)
+	defer cancel()
+
+	currentUser, ok := ctx.Value(configs.ContextUser).(models.User)
+	if !ok {
+		return models.ErrContextNilError
+	}
+
+	models.NewClient(currentUser, h.hub, notifications)
+
+	return nil
 }
 
 func (h *userUsecase) UserLikes(c context.Context) (models.Likes, error) {
@@ -406,13 +441,13 @@ func (h *userUsecase) AddReport(c context.Context, report models.NewReport) erro
 		var reportStatus string
 		switch banDesc {
 		case models.FakeReport:
-			reportStatus = "FAKE"
+			reportStatus = FAKE
 		case models.AggressionReport:
-			reportStatus = "AGGRESSION"
+			reportStatus = AGGRESSION
 		case models.SkamReport:
-			reportStatus = "SKAM"
+			reportStatus = SCAM
 		case models.UnderageReport:
-			reportStatus = "UNDERAGE"
+			reportStatus = UNDERAGE
 		}
 
 		err = h.UserRepo.UpdateReportStatus(ctx, report.ToId, reportStatus)
@@ -422,4 +457,111 @@ func (h *userUsecase) AddReport(c context.Context, report models.NewReport) erro
 	}
 
 	return nil
+}
+
+func (h *userUsecase) CreatePayment(c context.Context, newPayment models.Payment) (models.RedirectUrl, error) {
+	ctx, cancel := context.WithTimeout(c, h.contextTimeout)
+	defer cancel()
+
+	currentUser, ok := ctx.Value(configs.ContextUser).(models.User)
+	if !ok {
+		return models.RedirectUrl{}, models.ErrContextNilError
+	}
+
+	var amount = make(map[string]string)
+	amount["value"] = newPayment.Amount
+	amount["currency"] = configs.Payment.Currency
+	var confirmation = make(map[string]string)
+	confirmation["type"] = "redirect"
+	confirmation["return_url"] = configs.Payment.ReturnUrl
+	var paymentInfo models.PaymentInfo
+	paymentInfo.Amount = amount
+	paymentInfo.Capture = true
+	paymentInfo.Confirmation = confirmation
+
+	paymentInfoJSON, err := json.Marshal(paymentInfo)
+	if err != nil {
+		return models.RedirectUrl{}, err
+	}
+
+	paymentRequest, err := http.NewRequest("POST", configs.Payment.YooKassaUrl, bytes.NewBuffer(paymentInfoJSON))
+	if err != nil {
+		return models.RedirectUrl{}, err
+	}
+	paymentRequest.Header.Set("Authorization", "Basic "+configs.Payment.AuthToken)
+	paymentRequest.Header.Set("Idempotence-Key", uuid.NewString())
+	paymentRequest.Header.Set("Content-Type", "application/json")
+
+	client := http.DefaultClient
+
+	resp, err := client.Do(paymentRequest)
+	if err != nil {
+		return models.RedirectUrl{}, err
+	}
+	buf, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return models.RedirectUrl{}, err
+	}
+	var yooKassaResponse models.YooKassaResponse
+	err = json.Unmarshal(buf, &yooKassaResponse)
+	if err != nil {
+		return models.RedirectUrl{}, err
+	}
+
+	var curRedirect models.RedirectUrl
+	curRedirect.URL = yooKassaResponse.Confirmation.ConfirmationUrl
+
+	err = h.UserRepo.CreatePayment(ctx, yooKassaResponse.Id, yooKassaResponse.Status, yooKassaResponse.Amount.Value+yooKassaResponse.Amount.Currency, currentUser.ID)
+	if err != nil {
+		return models.RedirectUrl{}, err
+	}
+
+	periodStart, err := time.Parse(models.DateLayout, yooKassaResponse.CreatedAt)
+	if err != nil {
+		return models.RedirectUrl{}, err
+	}
+	periodEnd := periodStart.AddDate(0, int(newPayment.Period), 0)
+
+	err = h.UserRepo.CreateSubscription(ctx, periodStart, periodEnd, currentUser.ID, yooKassaResponse.Id)
+	if err != nil {
+		return models.RedirectUrl{}, err
+	}
+
+	return curRedirect, nil
+}
+
+func (h *userUsecase) UpdatePayment(c context.Context, paymentNotificationData models.PaymentNotification) error {
+	ctx, cancel := context.WithTimeout(c, h.contextTimeout)
+	defer cancel()
+
+	err := h.UserRepo.UpdatePayment(ctx, paymentNotificationData.Object.Id, paymentNotificationData.Object.Status)
+	if err != nil {
+		return err
+	}
+
+	if paymentNotificationData.Object.Status == models.PaymentStatusSuccessString {
+		err = h.UserRepo.UpdateSubscription(ctx, paymentNotificationData.Object.Id, models.PaymentStatusSuccess)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (h *userUsecase) CheckSubscription(c context.Context) (models.Subscription, error) {
+	ctx, cancel := context.WithTimeout(c, h.contextTimeout)
+	defer cancel()
+
+	currentUser, ok := ctx.Value(configs.ContextUser).(models.User)
+	if !ok {
+		return models.Subscription{}, models.ErrContextNilError
+	}
+
+	isActive, err := h.UserRepo.CheckSubscription(ctx, currentUser.ID)
+	if err != nil {
+		return models.Subscription{}, err
+	}
+
+	return models.Subscription{SubscriptionActive: isActive}, nil
 }

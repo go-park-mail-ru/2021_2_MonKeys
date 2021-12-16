@@ -12,6 +12,7 @@ import (
 	_sessionRepo "dripapp/internal/microservices/auth/repository"
 	_sessionUCase "dripapp/internal/microservices/auth/usecase"
 	"dripapp/internal/pkg/logger"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -58,7 +59,7 @@ func main() {
 
 	// usecase
 	sessionUCase := _sessionUCase.NewSessionUsecase(sm, timeoutContext)
-	userUCase := _userUCase.NewUserUsecase(userRepo, fileManager, timeoutContext)
+	userUCase := _userUCase.NewUserUsecase(userRepo, fileManager, timeoutContext, nil)
 
 	// new auth server
 	go grpcServer.StartAuthGrpcServer(sm, userRepo, configs.AuthServer.GrpcUrl)
@@ -80,10 +81,20 @@ func main() {
 		ReadTimeout:  http.DefaultClient.Timeout,
 	}
 
-	log.Printf("STD starting server at %s\n", srv.Addr)
+	mode := os.Getenv("DRIPAPP")
+
+	if mode == "LOCAL" {
+		log.Fatal(srv.ListenAndServe())
+	} else if mode == "DEPLOY" {
+		log.Fatal(srv.ListenAndServeTLS("star.monkeys.team.crt", "star.monkeys.team.key"))
+	} else {
+		log.Printf("NO MODE SPECIFIED.SET ENV VAR DRIPAPP TO \"LOCAL\" or \"DEPLOY\"")
+	}
+
+	fmt.Printf("STD starting server(%s) at %s\n", mode, srv.Addr)
 
 	// for local
-	log.Fatal(srv.ListenAndServe())
+
 	// for deploy
 	// log.Fatal(srv.ListenAndServeTLS(certFile, keyFile))
 }

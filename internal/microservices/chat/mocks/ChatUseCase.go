@@ -28,6 +28,20 @@ func (_m *ChatUseCase) ClientHandler(c context.Context, io models.IOMessage) err
 	return r0
 }
 
+// DeleteChat provides a mock function with given fields: c, fromId
+func (_m *ChatUseCase) DeleteChat(c context.Context, fromId uint64) error {
+	ret := _m.Called(c, fromId)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, uint64) error); ok {
+		r0 = rf(c, fromId)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // GetChat provides a mock function with given fields: c, fromId, lastId
 func (_m *ChatUseCase) GetChat(c context.Context, fromId uint64, lastId uint64) ([]models.Message, error) {
 	ret := _m.Called(c, fromId, lastId)

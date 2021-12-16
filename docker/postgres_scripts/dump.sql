@@ -52,7 +52,6 @@ create table message(
   constraint fk_ms_profile1 foreign key (from_id) REFERENCES profile (id),
   constraint fk_ms_profile2 foreign key (to_id) REFERENCES profile (id)
 );
-
 -- message date index
   create index idx_ms_date on message(date) include (from_id, to_id, text);
 
@@ -67,9 +66,29 @@ create table if not exists profile_report(
   constraint fk_pr_profile foreign key (profile_id) REFERENCES profile (id),
   constraint fk_pr_report foreign key (report_id) REFERENCES reports (id)
 );
+create table if not exists payment(
+  -- id serial not null primary key,
+  id varchar(40) not null primary key,
+  status varchar(20),
+  amount varchar(10),
+  profile_id integer,
+  constraint fk_pm_profile foreign key (profile_id) REFERENCES profile (id)
+);
+create table if not exists subscription(
+  id serial not null primary key,
+  period_start timestamptz default now(),
+  period_end timestamptz default now(),
+  paid boolean default false,
+  profile_id integer,
+  payment_id varchar(40),
+  constraint fk_sub_profile foreign key (profile_id) REFERENCES profile (id),
+  constraint fk_sub_payment foreign key (payment_id) REFERENCES payment (id)
+);
+
+
 insert into
   tag(tagname)
-values('anime'),('music'),('gaming'),('sport'),('science');
+values('аниме'),('рок'),('игры'),('спорт'),('наука'),('рэп'),('джаз'),('западная музыка'),('комедии'),('футбол');
 insert into
   reports(reportdesc)
 values('Фалишивый профиль/спам'),('Непристойное общение'),('Скам'),('Несовершеннолетний пользователь');
@@ -89,7 +108,7 @@ create index idx_pt_tag_id on profile_tag(tag_id);
   create index idx_profile_imgs_gin on profile using gin (imgs);
 create or replace function moddatetime()
 returns trigger
-as $$ 
+as $$
   begin
     NEW.update_time = NOW();
 return NEW;

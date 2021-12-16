@@ -5,6 +5,7 @@ import (
 	"dripapp/internal/dripapp/file"
 	_fileDelivery "dripapp/internal/dripapp/file/delivery"
 	"dripapp/internal/dripapp/middleware"
+	"dripapp/internal/dripapp/models"
 	_userDelivery "dripapp/internal/dripapp/user/delivery"
 	_userRepo "dripapp/internal/dripapp/user/repository"
 	_userUsecase "dripapp/internal/dripapp/user/usecase"
@@ -41,6 +42,8 @@ func main() {
 	// router
 	router := mux.NewRouter()
 
+	hub := models.NewHub()
+	go hub.Run()
 	// repository
 	userRepo, err := _userRepo.NewPostgresUserRepository(configs.Postgres)
 	if err != nil {
@@ -65,6 +68,7 @@ func main() {
 		userRepo,
 		fileManager,
 		timeoutContext,
+		hub,
 	)
 
 	// auth client
@@ -85,10 +89,15 @@ func main() {
 		ReadTimeout:  http.DefaultClient.Timeout,
 	}
 
-	log.Printf("STD starting server at %s\n", srv.Addr)
+	mode := os.Getenv("DRIPAPP")
 
-	// for local
-	log.Fatal(srv.ListenAndServe())
-	// for deploy
-	// log.Fatal(srv.ListenAndServeTLS(certFile, keyFile))
+	if mode == "LOCAL" {
+		log.Fatal(srv.ListenAndServe())
+	} else if mode == "DEPLOY" {
+		log.Fatal(srv.ListenAndServeTLS("star.monkeys.team.crt", "star.monkeys.team.key"))
+	} else {
+		log.Printf("NO MODE SPECIFIED.SET ENV VAR DRIPAPP TO \"LOCAL\" or \"DEPLOY\"")
+	}
+
+	log.Printf("STD starting server(%s) at %s\n", mode, srv.Addr)
 }

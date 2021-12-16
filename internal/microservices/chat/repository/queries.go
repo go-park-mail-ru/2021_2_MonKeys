@@ -37,4 +37,6 @@ const (
 	where m.to_id=$1
 	group by op.id, op.name, op.imgs[1], p.id, p.id, p.name, p.imgs[1];
 	`
+
+	DeleteMessagesQuery = "delete from message m where ((m.from_id = $1 and m.to_id = $2) or (m.from_id = $2 and m.to_id = $1)) returning message_id;"
 )
