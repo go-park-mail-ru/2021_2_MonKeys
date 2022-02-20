@@ -7,7 +7,7 @@ volumes:
 
 services:
   main_service:
-    image: main_service
+    image: ilyagunagdimaev/main_service
     ports:
       - "8000:8000"
     volumes:
@@ -19,7 +19,7 @@ services:
         DRIPAPP: "DEPLOY"
 
   chat_service:
-    image: chat_service
+    image: ilyagunagdimaev/chat_service
     ports:
       - "8001:8001"
     volumes:
@@ -31,7 +31,7 @@ services:
         DRIPAPP: "DEPLOY"
 
   auth_service:
-    image: auth_service
+    image: ilyagunagdimaev/auth_service
     ports:
       - "8002:8002"
       - "8003:8003"
@@ -44,7 +44,7 @@ services:
         DRIPAPP: "DEPLOY"
 
   tarantool:
-    image: "drip_tarantool"
+    image: "ilyagunagdimaev/drip_tarantool"
     ports:
       - "3301:3301"
     volumes:
