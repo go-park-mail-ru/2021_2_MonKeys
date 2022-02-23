@@ -58,11 +58,11 @@ clean-deploy:
 ## deploy-build: Deply build and start docker with new changes
 build:
 	cat prod.json > config.json
-	docker build -t dependencies -f ${DOCKER_DIR}/builder.Dockerfile .
-	docker build -t drip_tarantool -f ${DOCKER_DIR}/drip_tarantool.Dockerfile .
-	docker build -t main_service -f ${DOCKER_DIR}/main_service.Dockerfile .
-	docker build -t chat_service -f ${DOCKER_DIR}/chat_service.Dockerfile .
-	docker build -t auth_service -f ${DOCKER_DIR}/auth_service.Dockerfile .
+	docker build -t ilyagunagdimaev/dependencies -f ${DOCKER_DIR}/builder.Dockerfile .
+	docker build -t ilyagunagdimaev/drip_tarantool -f ${DOCKER_DIR}/drip_tarantool.Dockerfile .
+	docker build -t ilyagunagdimaev/main_service -f ${DOCKER_DIR}/main_service.Dockerfile .
+	docker build -t ilyagunagdimaev/chat_service -f ${DOCKER_DIR}/chat_service.Dockerfile .
+	docker build -t ilyagunagdimaev/auth_service -f ${DOCKER_DIR}/auth_service.Dockerfile .
 
 
 ## deploy-run: Deploy run app on background
@@ -79,11 +79,11 @@ redeploy: clean-deploy build deploy-run
 
 local-build:
 	cat local.json > config.json
-	docker build -t dependencies -f ${DOCKER_DIR}/builder.Dockerfile .
-	docker build -t drip_tarantool -f ${DOCKER_DIR}/drip_tarantool.Dockerfile .
-	docker build -t main_service -f ${DOCKER_DIR}/main_service.Dockerfile .
-	docker build -t chat_service -f ${DOCKER_DIR}/chat_service.Dockerfile .
-	docker build -t auth_service -f ${DOCKER_DIR}/auth_service.Dockerfile .
+	docker build -t ilyagunagdimaev/dependencies -f ${DOCKER_DIR}/builder.Dockerfile .
+	docker build -t ilyagunagdimaev/drip_tarantool -f ${DOCKER_DIR}/drip_tarantool.Dockerfile .
+	docker build -t ilyagunagdimaev/main_service -f ${DOCKER_DIR}/main_service.Dockerfile .
+	docker build -t ilyagunagdimaev/chat_service -f ${DOCKER_DIR}/chat_service.Dockerfile .
+	docker build -t ilyagunagdimaev/auth_service -f ${DOCKER_DIR}/auth_service.Dockerfile .
 
 ## deploy-run: Deploy run app on background
 local-run:

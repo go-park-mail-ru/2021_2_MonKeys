@@ -1,4 +1,4 @@
-FROM dependencies AS builder
+FROM ilyagunagdimaev/dependencies:latest AS builder
 
 WORKDIR /dripapp
 
