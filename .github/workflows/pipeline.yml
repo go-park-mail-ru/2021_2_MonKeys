@@ -148,79 +148,65 @@ jobs:
       - name: Run tests w/ coverage
         run: make test-coverage
         
-  # alert: 
-  #   runs-on: ubuntu-latest
-  #   if:
-  #     contains('
-  #       refs/heads/dev
-  #     ', github.ref)
-  #   steps:
-  #     - name: send telegram message on push
-  #       uses: appleboy/telegram-action@master
-  #       with:
-  #         to: ${{ secrets.TELEGRAM_TO }}
-  #         token: ${{ secrets.TELEGRAM_TOKEN }}
-  #         message: |
-  #           ${{ github.actor }} created commit:
-  #           Commit message: ${{ github.event.commits[0].message }}
+  alert: 
+     runs-on: ubuntu-latest
+     if:
+       contains('
+         refs/heads/dev
+       ', github.ref)
+     steps:
+       - name: send telegram message on push
+         uses: appleboy/telegram-action@master
+         with:
+           to: ${{ secrets.TELEGRAM_TO }}
+           token: ${{ secrets.TELEGRAM_TOKEN }}
+           message: |
+             ${{ github.actor }} created commit:
+             Commit message: ${{ github.event.commits[0].message }}
             
-  #           Repository: ${{ github.repository }}
-            
-  #           GitHub checks: https://github.com/go-park-mail-ru/2021_2_MonKeys/commit/${{github.sha}}/checks
+             Repository: ${{ github.repository }}
+           
+             GitHub checks: https://github.com/go-park-mail-ru/2021_2_MonKeys/commit/${{github.sha}}/checks
       
 
   deploy:
-    # needs: [test, build-docker]
+      needs: [test, build-docker]
 
-    runs-on: ubuntu-latest
-    if:
-      contains('
-        refs/heads/dev
-      ', github.ref)
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+      runs-on: ubuntu-latest
+      if:
+        contains('
+          refs/heads/dev
+        ', github.ref)
+      steps:
+        - name: Checkout code
+          uses: actions/checkout@v2
 
-      - name: Setup deployment ssh key
-        run: set -eu &&
-              mkdir "$HOME/.ssh" &&
-              echo "${{ secrets.DEPLOYMENT_KEY }}" > "$HOME/.ssh/key" &&
-              chmod 600 "$HOME/.ssh/key"
-      
-      - name: Executing remote ssh commands
-        uses: appleboy/ssh-action@master
-        with:
-          host: drip.monkeys.team
-          username: clown
-          key: ${{ secrets.DEPLOYMENT_KEY }}
-          script: cd ~/../back &&
-            git pull origin dev &&
-            echo "${{ secrets.SSL_KEY }}" > star.monkeys.team.key &&
-            echo "${{ secrets.SSL_CRT }}" > star.monkeys.team.crt &&
-            
-      - name: Executing remote ssh commands
-        uses: appleboy/ssh-action@master
-        with:
-          host: drip.monkeys.team
-          username: root
-          key: ${{ secrets.ROOT_SSH }}
-          script: cd ~/../home/back &&
-            sudo docker rm -vf $(sudo docker ps -a -q) || true &&
-            sudo docker system prune -f -a --volumes  && 
-            sudo docker volume prune -f -a &&
-            sudo make redeploy
-      
-      # - name: send telegram message on push
-      #   uses: appleboy/telegram-action@master
-      #   with:
-      #     to: ${{ secrets.TELEGRAM_TO }}
-      #     token: ${{ secrets.TELEGRAM_TOKEN }}
-      #     message: |
-      #       Commit message: ${{ github.event.commits[0].message }}
-            
-      #       Repository: ${{ github.repository }}
-      #       Continious deployment of ${{ github.event.commits[0].message }} ended
-      #       GitHub checks: https://github.com/go-park-mail-ru/2021_2_MonKeys/commit/${{github.sha}}/checks
-      #       Deploy link: https://drip.monkeys.team
-      #     disable_web_page_preview: true
+        - name: Setup deployment ssh key
+          run: set -eu &&
+                mkdir "$HOME/.ssh" &&
+                echo "${{ secrets.DEPLOYMENT_KEY }}" > "$HOME/.ssh/key" &&
+                chmod 600 "$HOME/.ssh/key"
+        
+        - name: Executing remote ssh commands
+          uses: appleboy/ssh-action@master
+          with:
+            host: drip.monkeys.team
+            username: root
+            key: ${{ secrets.ROOT_SSH }}
+            script: cd ~/../home/back &&
+              sudo make deploy
+        
+        - name: send telegram message on push
+          uses: appleboy/telegram-action@master
+          with:
+            to: ${{ secrets.TELEGRAM_TO }}
+            token: ${{ secrets.TELEGRAM_TOKEN }}
+            message: |
+              Commit message: ${{ github.event.commits[0].message }}
+              
+              Repository: ${{ github.repository }}
+              Continious deployment of ${{ github.event.commits[0].message }} ended
+              GitHub checks: https://github.com/go-park-mail-ru/2021_2_MonKeys/commit/${{github.sha}}/checks
+              Deploy link: https://drip.monkeys.team
+            disable_web_page_preview: true
 
