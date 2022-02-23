@@ -6,6 +6,8 @@ PROJECT_DIR := ${CURDIR}
 
 DOCKER_DIR := ${CURDIR}/docker
 
+
+
 ## install-dependencies: Install docker
 install-dependencies:
 	sudo apt install docker.io
@@ -24,6 +26,7 @@ test-coverage:
 	cat coverage.out.tmp | grep -v mock | grep -v cmd | grep -v easyjson > coverage2.out.tmp
 	go tool cover -func=coverage2.out.tmp
 	go tool cover -html=coverage2.out.tmp -o cover.html
+
 
 ## test: test code
 test:
